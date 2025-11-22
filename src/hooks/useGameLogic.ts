@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect } from 'react';
-import { GameState, Player, Card, BoardMinion, GameAction } from '../types';
+import { GameState, Player, BoardMinion, GameAction } from '../types';
 import { generateDeck } from '../data/cards';
 import { multiplayer } from '../network/MultiplayerManager';
 

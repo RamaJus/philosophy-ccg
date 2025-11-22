@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { multiplayer } from '../network/MultiplayerManager';
-import { Copy, Users, Globe, Cpu } from 'lucide-react';
+import { Copy, Globe, Cpu } from 'lucide-react';
 
 interface LobbyProps {
     onStartGame: (mode: 'single' | 'multiplayer_host' | 'multiplayer_client') => void;

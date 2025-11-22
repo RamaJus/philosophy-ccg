@@ -32,7 +32,7 @@ export const GameArea: React.FC<GameAreaProps> = ({ mode }) => {
         }
     }, [gameOver, winner]);
 
-    const isPlayerTurn = activePlayer === 'player';
+
     // In multiplayer client mode, we are the 'opponent' from the host's perspective, but we want to see ourselves as 'player'
     // This is tricky. The simplest way for P2P is:
     // Host: Player = Host, Opponent = Client
