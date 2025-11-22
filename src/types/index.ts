@@ -12,6 +12,9 @@ export interface Card {
     image?: string;
     rarity: 'common' | 'rare' | 'epic' | 'legendary';
     faction: 'western' | 'eastern' | 'universal';
+    school?: string[]; // e.g. 'rationalism', 'empiricism', 'religion'
+    strongAgainst?: string[]; // list of schools this card is strong against
+    weakAgainst?: string[]; // list of schools this card is weak against
 }
 
 export interface BoardMinion extends Card {

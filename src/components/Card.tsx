@@ -61,7 +61,7 @@ export const Card: React.FC<CardProps> = ({
 
     return (
         <div
-            className={cardClasses}
+            className={`${cardClasses} group relative`}
             onClick={isPlayable ? onClick : undefined}
             style={{ width: '180px', height: '260px' }}
         >
@@ -133,6 +133,30 @@ export const Card: React.FC<CardProps> = ({
                         <span className="text-xs font-semibold">ZAUBER</span>
                         <BookOpen size={16} />
                     </div>
+                </div>
+            )}
+
+            {/* Tooltip Overlay */}
+            {isMinion && (card.school || card.strongAgainst || card.weakAgainst) && (
+                <div className="absolute inset-0 bg-black/90 p-4 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex flex-col justify-center items-start text-xs z-20 pointer-events-none">
+                    {card.school && (
+                        <div className="mb-2">
+                            <span className="text-blue-400 font-bold block">Schule:</span>
+                            <span className="text-gray-300">{card.school.join(', ')}</span>
+                        </div>
+                    )}
+                    {card.strongAgainst && card.strongAgainst.length > 0 && (
+                        <div className="mb-2">
+                            <span className="text-green-400 font-bold block">Stark gegen:</span>
+                            <span className="text-gray-300">{card.strongAgainst.join(', ')}</span>
+                        </div>
+                    )}
+                    {card.weakAgainst && card.weakAgainst.length > 0 && (
+                        <div>
+                            <span className="text-red-400 font-bold block">Schwach gegen:</span>
+                            <span className="text-gray-300">{card.weakAgainst.join(', ')}</span>
+                        </div>
+                    )}
                 </div>
             )}
         </div>
