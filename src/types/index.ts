@@ -1,4 +1,4 @@
-export type CardType = 'minion' | 'spell';
+export type CardType = 'minion' | 'spell' | 'work';
 
 export interface Card {
     id: string;
@@ -15,6 +15,7 @@ export interface Card {
     school?: string[]; // e.g. 'rationalism', 'empiricism', 'religion'
     strongAgainst?: string[]; // list of schools this card is strong against
     weakAgainst?: string[]; // list of schools this card is weak against
+    workBonus?: { school: string; damage: number }; // For 'work' cards
 }
 
 export interface BoardMinion extends Card {
@@ -38,6 +39,7 @@ export interface Player {
     board: BoardMinion[];
     graveyard: Card[];
     lockedMana: number; // Mana locked for the next turn
+    activeWork?: Card; // Currently active philosophical work
 }
 
 export interface GameState {
@@ -49,7 +51,7 @@ export interface GameState {
     winner?: 'player' | 'opponent';
     selectedCard?: string; // Card ID in hand
     selectedMinion?: string; // Minion ID on board for attacking
-    targetMode?: 'attack' | 'spell'; // What we're targeting for
+    targetMode?: 'attack' | 'spell' | 'search'; // What we're targeting for
     log: string[]; // Game log messages
 }
 
@@ -59,4 +61,5 @@ export type GameAction =
     | { type: 'PLAY_CARD'; cardId: string }
     | { type: 'ATTACK'; attackerId: string; targetId?: string } // No targetId = attack player
     | { type: 'SELECT_CARD'; cardId?: string }
-    | { type: 'SELECT_MINION'; minionId?: string };
+    | { type: 'SELECT_MINION'; minionId?: string }
+    | { type: 'SEARCH_DECK'; cardId: string };

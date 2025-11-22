@@ -560,6 +560,69 @@ export const cardDatabase: Card[] = [
         strongAgainst: ['institutions', 'humanism'],
         weakAgainst: []
     },
+
+    // Permanent Works
+    {
+        id: 'tractatus',
+        name: 'Tractatus Logico-Philosophicus',
+        type: 'work',
+        cost: 4,
+        description: 'Die Welt ist alles, was der Fall ist. +2 Schaden für Analytische Philosophie/Logik.',
+        rarity: 'legendary',
+        faction: 'western',
+        workBonus: { school: 'logic', damage: 2 }
+    },
+    {
+        id: 'zarathustra',
+        name: 'Also sprach Zarathustra',
+        type: 'work',
+        cost: 5,
+        description: 'Ich lehre euch den Übermenschen. +2 Schaden für Existentialismus/Nihilismus.',
+        rarity: 'legendary',
+        faction: 'western',
+        workBonus: { school: 'existentialism', damage: 2 }
+    },
+    {
+        id: 'kritik',
+        name: 'Kritik der reinen Vernunft',
+        type: 'work',
+        cost: 5,
+        description: 'Gedanken ohne Inhalt sind leer. +2 Schaden für Idealismus/Rationalismus.',
+        rarity: 'legendary',
+        faction: 'western',
+        workBonus: { school: 'idealism', damage: 2 }
+    },
+    {
+        id: 'wille',
+        name: 'Die Welt als Wille und Vorstellung',
+        type: 'work',
+        cost: 4,
+        description: 'Die Welt ist meine Vorstellung. +2 Schaden für Pessimismus.',
+        rarity: 'legendary',
+        faction: 'western',
+        workBonus: { school: 'pessimism', damage: 2 }
+    },
+    {
+        id: 'politeia',
+        name: 'Politeia',
+        type: 'work',
+        cost: 5,
+        description: 'Der Staat und die Gerechtigkeit. +2 Schaden für Politische Philosophie.',
+        rarity: 'legendary',
+        faction: 'western',
+        workBonus: { school: 'political', damage: 2 }
+    },
+
+    // New Spells
+    {
+        id: 'hermeneutics',
+        name: 'Hermeneutics',
+        type: 'spell',
+        cost: 2,
+        description: 'Suche eine Karte aus deinem Deck und nimm sie auf die Hand.',
+        rarity: 'epic',
+        faction: 'western',
+    },
 ];
 
 

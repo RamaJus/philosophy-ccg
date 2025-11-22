@@ -5,7 +5,9 @@ import { Hand } from './Hand';
 import { Board } from './Board';
 import { GameLog } from './GameLog';
 import { Graveyard } from './Graveyard';
-import { Swords, SkipForward, RotateCcw, Trophy } from 'lucide-react';
+import { DeckView } from './DeckView';
+import { WorkSlot } from './WorkSlot';
+import { Swords, SkipForward, RotateCcw, Trophy, Library } from 'lucide-react';
 import { getRandomQuote } from '../data/quotes';
 
 const MAX_BOARD_SIZE = 7;
@@ -16,7 +18,7 @@ interface GameAreaProps {
 
 export const GameArea: React.FC<GameAreaProps> = ({ mode }) => {
     const { gameState, dispatch } = useGameLogic(mode);
-    const { player, opponent, activePlayer, selectedCard, selectedMinion, gameOver, winner, log } = gameState;
+    const { player, opponent, activePlayer, selectedCard, selectedMinion, gameOver, winner, log, targetMode } = gameState;
 
     // Use ref to always have the latest state in AI callbacks
     const gameStateRef = useRef(gameState);
@@ -26,6 +28,7 @@ export const GameArea: React.FC<GameAreaProps> = ({ mode }) => {
 
     // Store the philosophical quote when game ends
     const [philosophicalQuote, setPhilosophicalQuote] = useState<string>('');
+    const [isDeckViewOpen, setIsDeckViewOpen] = useState(false);
 
     useEffect(() => {
         if (gameOver && winner) {
@@ -33,6 +36,12 @@ export const GameArea: React.FC<GameAreaProps> = ({ mode }) => {
         }
     }, [gameOver, winner]);
 
+    // Auto-open deck view when in search mode
+    useEffect(() => {
+        if (targetMode === 'search') {
+            setIsDeckViewOpen(true);
+        }
+    }, [targetMode]);
 
     // In multiplayer client mode, we are the 'opponent' from the host's perspective, but we want to see ourselves as 'player'
     // This is tricky. The simplest way for P2P is:
@@ -95,6 +104,13 @@ export const GameArea: React.FC<GameAreaProps> = ({ mode }) => {
             setTimeout(() => {
                 aiTurn();
             }, 1500);
+        }
+    };
+
+    const handleSearchSelect = (cardId: string) => {
+        if (targetMode === 'search') {
+            dispatch({ type: 'SEARCH_DECK', cardId });
+            setIsDeckViewOpen(false);
         }
     };
 
@@ -178,9 +194,18 @@ export const GameArea: React.FC<GameAreaProps> = ({ mode }) => {
                 </div>
             )}
 
+            <DeckView
+                deck={viewPlayer.deck}
+                isOpen={isDeckViewOpen}
+                onClose={() => setIsDeckViewOpen(false)}
+                onSelectCard={handleSearchSelect}
+                mode={targetMode === 'search' ? 'search' : 'view'}
+            />
+
             <div className="grid grid-cols-4 gap-4">
-                <div className="space-y-4">
+                <div className="space-y-4 flex flex-col items-center">
                     <PlayerStats player={viewOpponent} isOpponent={true} />
+                    <WorkSlot card={viewOpponent.activeWork} isPlayer={false} />
                     <Graveyard cards={viewOpponent.graveyard} title="Gegnerischer Friedhof" />
                     <GameLog messages={log} />
                 </div>
@@ -229,8 +254,18 @@ export const GameArea: React.FC<GameAreaProps> = ({ mode }) => {
                     />
                 </div>
 
-                <div className="space-y-4">
+                <div className="space-y-4 flex flex-col items-center">
                     <PlayerStats player={viewPlayer} />
+                    <WorkSlot card={viewPlayer.activeWork} isPlayer={true} />
+                    <div className="w-full flex justify-center">
+                        <button
+                            onClick={() => setIsDeckViewOpen(true)}
+                            className="flex items-center gap-2 px-4 py-2 bg-amber-900/40 hover:bg-amber-900/60 border border-amber-600/30 rounded-lg text-amber-200 transition-colors"
+                        >
+                            <Library size={16} />
+                            Deck ansehen ({viewPlayer.deck.length})
+                        </button>
+                    </div>
                     <Graveyard cards={viewPlayer.graveyard} title="Dein Friedhof" />
                 </div>
             </div>

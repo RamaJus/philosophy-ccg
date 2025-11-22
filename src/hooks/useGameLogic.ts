@@ -157,7 +157,16 @@ export function useGameLogic(mode: 'single' | 'multiplayer_host' | 'multiplayer_
 
             let updatedEnemy = activePlayerKey === 'player' ? opponent : player;
 
-            if (card.type === 'minion') {
+            if (card.type === 'work') {
+                // Handle Work cards
+                if (updatedPlayer.activeWork) {
+                    updatedPlayer.graveyard = [...updatedPlayer.graveyard, updatedPlayer.activeWork];
+                    addLog(`${activePlayer.name} ersetzte "${updatedPlayer.activeWork.name}" durch "${card.name}".`);
+                } else {
+                    addLog(`${activePlayer.name} veröffentlichte "${card.name}".`);
+                }
+                updatedPlayer.activeWork = card;
+            } else if (card.type === 'minion') {
                 // Wittgenstein's special ability: Clear the entire board
                 if (card.id.includes('wittgenstein')) {
                     // Move all minions to graveyard
@@ -236,6 +245,16 @@ export function useGameLogic(mode: 'single' | 'multiplayer_host' | 'multiplayer_
                     // Lock 2 Mana next turn
                     updatedEnemy.lockedMana += 2;
                     addLog(`${activePlayer.name} wirkte ${card.name} und sperrte 2 Dialektik des Gegners!`);
+                } else if (card.id.includes('hermeneutics')) {
+                    // Trigger search mode
+                    return {
+                        ...prev,
+                        player: activePlayerKey === 'player' ? updatedPlayer : updatedEnemy,
+                        opponent: activePlayerKey === 'player' ? updatedEnemy : updatedPlayer,
+                        selectedCard: undefined,
+                        targetMode: 'search',
+                        log: [...prev.log, `${activePlayer.name} nutzt Hermeneutik, um im Deck zu suchen...`],
+                    };
                 }
             }
 
@@ -296,6 +315,15 @@ export function useGameLogic(mode: 'single' | 'multiplayer_host' | 'multiplayer_
                         logMessage += ` Kritischer Treffer gegen ${strongMatch}! (+2 Schaden)`;
                     }
                 }
+
+                // Work Bonuses
+                if (activePlayer.activeWork && activePlayer.activeWork.workBonus && attacker.school) {
+                    if (attacker.school.includes(activePlayer.activeWork.workBonus.school)) {
+                        attackerDamage += activePlayer.activeWork.workBonus.damage;
+                        logMessage += ` Bonus durch "${activePlayer.activeWork.name}"! (+${activePlayer.activeWork.workBonus.damage})`;
+                    }
+                }
+
                 if (target.weakAgainst && attacker.school) {
                     const weakMatch = target.weakAgainst.find(s => attacker.school?.includes(s));
                     if (weakMatch) {
@@ -442,6 +470,34 @@ export function useGameLogic(mode: 'single' | 'multiplayer_host' | 'multiplayer_
                 break;
             case 'SELECT_MINION':
                 selectMinion(action.minionId);
+                break;
+            case 'SEARCH_DECK':
+                // Handle deck search result (card selected from deck)
+                setGameState(prev => {
+                    const { player, opponent, activePlayer: activePlayerKey } = prev;
+                    const activePlayer = activePlayerKey === 'player' ? player : opponent;
+
+                    // Find card in deck
+                    const cardIndex = activePlayer.deck.findIndex(c => c.id === action.cardId);
+                    if (cardIndex === -1) return prev;
+
+                    const card = activePlayer.deck[cardIndex];
+
+                    // Move to hand
+                    const updatedPlayer = {
+                        ...activePlayer,
+                        deck: activePlayer.deck.filter((_, i) => i !== cardIndex),
+                        hand: [...activePlayer.hand, card],
+                    };
+
+                    return {
+                        ...prev,
+                        player: activePlayerKey === 'player' ? updatedPlayer : player,
+                        opponent: activePlayerKey === 'player' ? opponent : updatedPlayer,
+                        targetMode: undefined, // Exit search mode
+                        log: [...prev.log, `${activePlayer.name} suchte "${card.name}" aus dem Deck.`],
+                    };
+                });
                 break;
         }
     }, [endTurn, playCard, attack, selectCard, selectMinion, startTurn, addLog, mode]);
