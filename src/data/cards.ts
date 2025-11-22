@@ -12,8 +12,8 @@ export const cardDatabase: Card[] = [
         description: 'Die Bremse Athens. "I weiß, dass ich nichts weiß."',
         rarity: 'rare',
         faction: 'western',
-        school: ['skepticism', 'ethics'],
-        strongAgainst: ['sophism', 'materialism'],
+        school: ['Skeptizismus', 'Ethik'],
+        strongAgainst: ['sophism', 'Materialismus'],
         weakAgainst: ['politics']
     },
     {
@@ -26,9 +26,9 @@ export const cardDatabase: Card[] = [
         description: 'Meister der Formen. Idealismus in Person.',
         rarity: 'epic',
         faction: 'western',
-        school: ['idealism', 'rationalism'],
-        strongAgainst: ['materialism', 'sophism', 'empiricism'],
-        weakAgainst: ['existentialism']
+        school: ['Idealismus', 'Rationalismus'],
+        strongAgainst: ['Materialismus', 'sophism', 'Empirismus'],
+        weakAgainst: ['Existentialismus']
     },
     {
         id: 'aristotle',
@@ -40,9 +40,9 @@ export const cardDatabase: Card[] = [
         description: 'Der Philosoph. Logik und Vernunft definiert.',
         rarity: 'epic',
         faction: 'western',
-        school: ['empiricism', 'logic', 'ethics'],
-        strongAgainst: ['idealism'],
-        weakAgainst: ['religion']
+        school: ['Empirismus', 'Logik', 'Ethik'],
+        strongAgainst: ['Idealismus'],
+        weakAgainst: ['Religion']
     },
     {
         id: 'kant',
@@ -54,9 +54,9 @@ export const cardDatabase: Card[] = [
         description: 'Kategorischer Imperativ. Handle nur nach allgemeingültigem Gesetz.',
         rarity: 'legendary',
         faction: 'western',
-        school: ['idealism', 'deontology', 'enlightenment'],
-        strongAgainst: ['empiricism', 'rationalism'],
-        weakAgainst: ['utilitarianism', 'materialism']
+        school: ['Idealismus', 'deontology', 'enlightenment'],
+        strongAgainst: ['Empirismus', 'Rationalismus'],
+        weakAgainst: ['utilitarianism', 'Materialismus']
     },
     {
         id: 'nietzsche',
@@ -68,8 +68,8 @@ export const cardDatabase: Card[] = [
         description: 'Gott ist tot. Der Übermensch erhebt sich.',
         rarity: 'legendary',
         faction: 'western',
-        school: ['existentialism', 'nihilism'],
-        strongAgainst: ['religion', 'idealism', 'ethics'],
+        school: ['Existentialismus', 'Nihilismus'],
+        strongAgainst: ['Religion', 'Idealismus', 'Ethik'],
         weakAgainst: []
     },
     {
@@ -82,9 +82,9 @@ export const cardDatabase: Card[] = [
         description: 'Cogito ergo sum. Ich denke, also bin ich.',
         rarity: 'rare',
         faction: 'western',
-        school: ['rationalism'],
-        strongAgainst: ['skepticism'],
-        weakAgainst: ['empiricism']
+        school: ['Rationalismus'],
+        strongAgainst: ['Skeptizismus'],
+        weakAgainst: ['Empirismus']
     },
 
     // Eastern Philosophers
@@ -98,7 +98,7 @@ export const cardDatabase: Card[] = [
         description: 'Meister Kong. Tugend und soziale Harmonie.',
         rarity: 'epic',
         faction: 'eastern',
-        school: ['ethics', 'social'],
+        school: ['Ethik', 'social'],
         strongAgainst: ['anarchy', 'individualism'],
         weakAgainst: ['legalism', 'daoism']
     },
@@ -127,7 +127,7 @@ export const cardDatabase: Card[] = [
         rarity: 'epic',
         faction: 'eastern',
         school: ['strategy'],
-        strongAgainst: ['idealism'],
+        strongAgainst: ['Idealismus'],
         weakAgainst: []
     },
     {
@@ -140,8 +140,8 @@ export const cardDatabase: Card[] = [
         description: 'Der Erleuchtete. Der mittlere Weg zum Nirvana.',
         rarity: 'legendary',
         faction: 'eastern',
-        school: ['religion', 'metaphysics'],
-        strongAgainst: ['materialism', 'desire', 'hedonism'],
+        school: ['Religion', 'Metaphysik'],
+        strongAgainst: ['Materialismus', 'desire', 'hedonism'],
         weakAgainst: []
     },
     {
@@ -154,8 +154,8 @@ export const cardDatabase: Card[] = [
         description: 'Bin ich ein Mensch, der träumt ein Schmetterling zu sein?',
         rarity: 'rare',
         faction: 'eastern',
-        school: ['daoism', 'skepticism'],
-        strongAgainst: ['logic', 'confucianism'],
+        school: ['daoism', 'Skeptizismus'],
+        strongAgainst: ['Logik', 'confucianism'],
         weakAgainst: []
     },
     {
@@ -168,7 +168,7 @@ export const cardDatabase: Card[] = [
         description: 'Die menschliche Natur ist inhärent gut.',
         rarity: 'rare',
         faction: 'eastern',
-        school: ['confucianism', 'idealism'],
+        school: ['confucianism', 'Idealismus'],
         strongAgainst: ['legalism'],
         weakAgainst: ['realism']
     },
@@ -258,8 +258,8 @@ export const cardDatabase: Card[] = [
         description: 'SPEZIAL: Leert das GESAMTE Spielfeld. "Wovon man nicht sprechen kann..."',
         rarity: 'epic',
         faction: 'western',
-        school: ['analytic', 'logic'],
-        strongAgainst: ['metaphysics', 'idealism'],
+        school: ['Analytische Philosophie', 'Logik'],
+        strongAgainst: ['Metaphysik', 'Idealismus'],
         weakAgainst: []
     },
     {
@@ -272,7 +272,7 @@ export const cardDatabase: Card[] = [
         description: 'Die Banalität des Bösen. Größte Kritikerin des Totalitarismus.',
         rarity: 'epic',
         faction: 'western',
-        school: ['political', 'existentialism'],
+        school: ['Politische Philosophie', 'Existentialismus'],
         strongAgainst: ['totalitarianism', 'ideology'],
         weakAgainst: []
     },
@@ -286,9 +286,9 @@ export const cardDatabase: Card[] = [
         description: 'Der Meister der Dialektik. These, Antithese, Synthese.',
         rarity: 'legendary',
         faction: 'western',
-        school: ['idealism', 'dialectics'],
-        strongAgainst: ['empiricism'],
-        weakAgainst: ['materialism', 'existentialism']
+        school: ['Idealismus', 'dialectics'],
+        strongAgainst: ['Empirismus'],
+        weakAgainst: ['Materialismus', 'Existentialismus']
     },
     {
         id: 'locke',
@@ -300,9 +300,9 @@ export const cardDatabase: Card[] = [
         description: 'Der Geist ist eine leere Tafel. Empirismus definiert.',
         rarity: 'rare',
         faction: 'western',
-        school: ['empiricism', 'liberalism'],
-        strongAgainst: ['rationalism', 'monarchy'],
-        weakAgainst: ['idealism']
+        school: ['Empirismus', 'Liberalismus'],
+        strongAgainst: ['Rationalismus', 'monarchy'],
+        weakAgainst: ['Idealismus']
     },
     {
         id: 'rousseau',
@@ -314,8 +314,8 @@ export const cardDatabase: Card[] = [
         description: 'Der Mensch wird frei geboren, liegt aber überall in Ketten.',
         rarity: 'rare',
         faction: 'western',
-        school: ['romanticism', 'political'],
-        strongAgainst: ['enlightenment', 'rationalism'],
+        school: ['Romantik', 'Politische Philosophie'],
+        strongAgainst: ['enlightenment', 'Rationalismus'],
         weakAgainst: []
     },
     {
@@ -328,8 +328,8 @@ export const cardDatabase: Card[] = [
         description: 'Die Existenz geht der Essenz voraus. Zur Freiheit verurteilt.',
         rarity: 'epic',
         faction: 'western',
-        school: ['existentialism', 'phenomenology'],
-        strongAgainst: ['essentialism', 'religion'],
+        school: ['Existentialismus', 'Phänomenologie'],
+        strongAgainst: ['essentialism', 'Religion'],
         weakAgainst: ['structuralism']
     },
     {
@@ -342,8 +342,8 @@ export const cardDatabase: Card[] = [
         description: 'Sein und Zeit. Das Dasein in der Welt.',
         rarity: 'legendary',
         faction: 'western',
-        school: ['phenomenology', 'existentialism'],
-        strongAgainst: ['technology', 'metaphysics'],
+        school: ['Phänomenologie', 'Existentialismus'],
+        strongAgainst: ['technology', 'Metaphysik'],
         weakAgainst: []
     },
     {
@@ -356,7 +356,7 @@ export const cardDatabase: Card[] = [
         description: 'Die Welt als Wille und Vorstellung. Leben ist Leiden.',
         rarity: 'epic',
         faction: 'western',
-        school: ['pessimism', 'idealism'],
+        school: ['Pessimismus', 'Idealismus'],
         strongAgainst: ['optimism', 'hegelianism'],
         weakAgainst: []
     },
@@ -373,7 +373,7 @@ export const cardDatabase: Card[] = [
         rarity: 'epic',
         faction: 'eastern',
         school: ['madhyamaka', 'buddhism'],
-        strongAgainst: ['essentialism', 'logic'],
+        strongAgainst: ['essentialism', 'Logik'],
         weakAgainst: []
     },
     {
@@ -387,7 +387,7 @@ export const cardDatabase: Card[] = [
         rarity: 'rare',
         faction: 'eastern',
         school: ['mysticism', 'sufism'],
-        strongAgainst: ['dogmatism', 'rationalism'],
+        strongAgainst: ['dogmatism', 'Rationalismus'],
         weakAgainst: []
     },
     {
@@ -401,8 +401,8 @@ export const cardDatabase: Card[] = [
         rarity: 'epic',
         faction: 'eastern',
         school: ['theology', 'mysticism'],
-        strongAgainst: ['rationalism', 'philosophy'],
-        weakAgainst: ['empiricism']
+        strongAgainst: ['Rationalismus', 'philosophy'],
+        weakAgainst: ['Empirismus']
     },
     {
         id: 'mozi',
@@ -430,9 +430,9 @@ export const cardDatabase: Card[] = [
         description: 'Glaube und Vernunft in Harmonie. Die fünf Wege.',
         rarity: 'rare',
         faction: 'western',
-        school: ['scholasticism', 'religion'],
+        school: ['scholasticism', 'Religion'],
         strongAgainst: ['averroism'],
-        weakAgainst: ['empiricism', 'existentialism', 'nihilism']
+        weakAgainst: ['Empirismus', 'Existentialismus', 'Nihilismus']
     },
     {
         id: 'hume',
@@ -444,8 +444,8 @@ export const cardDatabase: Card[] = [
         description: 'Die Vernunft ist nur die Sklavin der Leidenschaften.',
         rarity: 'rare',
         faction: 'western',
-        school: ['empiricism', 'skepticism'],
-        strongAgainst: ['rationalism', 'religion', 'metaphysics'],
+        school: ['Empirismus', 'Skeptizismus'],
+        strongAgainst: ['Rationalismus', 'Religion', 'Metaphysik'],
         weakAgainst: []
     },
     {
@@ -458,9 +458,9 @@ export const cardDatabase: Card[] = [
         description: 'Gott oder die Natur. Alles geschieht aus Notwendigkeit.',
         rarity: 'epic',
         faction: 'western',
-        school: ['rationalism', 'pantheism'],
-        strongAgainst: ['religion', 'dualism'],
-        weakAgainst: ['empiricism']
+        school: ['Rationalismus', 'pantheism'],
+        strongAgainst: ['Religion', 'dualism'],
+        weakAgainst: ['Empirismus']
     },
     {
         id: 'marx',
@@ -472,8 +472,8 @@ export const cardDatabase: Card[] = [
         description: 'Proletarier aller Länder, vereinigt euch!',
         rarity: 'legendary',
         faction: 'western',
-        school: ['materialism', 'socialism'],
-        strongAgainst: ['capitalism', 'idealism', 'religion'],
+        school: ['Materialismus', 'Sozialismus'],
+        strongAgainst: ['capitalism', 'Idealismus', 'Religion'],
         weakAgainst: []
     },
     {
@@ -486,9 +486,9 @@ export const cardDatabase: Card[] = [
         description: 'Der Sprung in den Glauben. Vater des Existentialismus.',
         rarity: 'rare',
         faction: 'western',
-        school: ['existentialism', 'religion'],
+        school: ['Existentialismus', 'Religion'],
         strongAgainst: ['hegelianism', 'institutional_religion'],
-        weakAgainst: ['rationalism']
+        weakAgainst: ['Rationalismus']
     },
     {
         id: 'epicurus',
@@ -500,9 +500,9 @@ export const cardDatabase: Card[] = [
         description: 'Lust ist das höchste Gut, aber durch Mäßigung.',
         rarity: 'common',
         faction: 'western',
-        school: ['epicureanism', 'materialism'],
-        strongAgainst: ['religion', 'platonism'],
-        weakAgainst: ['stoicism']
+        school: ['Epikureismus', 'Materialismus'],
+        strongAgainst: ['Religion', 'platonism'],
+        weakAgainst: ['Stoizismus']
     },
     {
         id: 'seneca',
@@ -514,7 +514,7 @@ export const cardDatabase: Card[] = [
         description: 'Wir leiden öfter in der Vorstellung als in der Wirklichkeit.',
         rarity: 'rare',
         faction: 'western',
-        school: ['stoicism'],
+        school: ['Stoizismus'],
         strongAgainst: ['hedonism', 'emotion'],
         weakAgainst: []
     },
@@ -530,7 +530,7 @@ export const cardDatabase: Card[] = [
         faction: 'western',
         school: ['neoplatonism', 'mathematics'],
         strongAgainst: ['dogmatism'],
-        weakAgainst: ['religion']
+        weakAgainst: ['Religion']
     },
     {
         id: 'beauvoir',
@@ -542,7 +542,7 @@ export const cardDatabase: Card[] = [
         description: 'Man kommt nicht als Frau zur Welt, man wird es.',
         rarity: 'epic',
         faction: 'western',
-        school: ['existentialism', 'feminism'],
+        school: ['Existentialismus', 'feminism'],
         strongAgainst: ['patriarchy', 'essentialism'],
         weakAgainst: []
     },
@@ -570,7 +570,7 @@ export const cardDatabase: Card[] = [
         description: 'Die Welt ist alles, was der Fall ist. +2 Schaden für Analytische Philosophie/Logik.',
         rarity: 'legendary',
         faction: 'western',
-        workBonus: { school: 'logic', damage: 2 }
+        workBonus: { school: 'Logik', damage: 2 }
     },
     {
         id: 'zarathustra',
@@ -580,7 +580,7 @@ export const cardDatabase: Card[] = [
         description: 'Ich lehre euch den Übermenschen. +2 Schaden für Existentialismus/Nihilismus.',
         rarity: 'legendary',
         faction: 'western',
-        workBonus: { school: 'existentialism', damage: 2 }
+        workBonus: { school: 'Existentialismus', damage: 2 }
     },
     {
         id: 'kritik',
@@ -590,7 +590,7 @@ export const cardDatabase: Card[] = [
         description: 'Gedanken ohne Inhalt sind leer. +2 Schaden für Idealismus/Rationalismus.',
         rarity: 'legendary',
         faction: 'western',
-        workBonus: { school: 'idealism', damage: 2 }
+        workBonus: { school: 'Idealismus', damage: 2 }
     },
     {
         id: 'wille',
@@ -600,7 +600,7 @@ export const cardDatabase: Card[] = [
         description: 'Die Welt ist meine Vorstellung. +2 Schaden für Pessimismus.',
         rarity: 'legendary',
         faction: 'western',
-        workBonus: { school: 'pessimism', damage: 2 }
+        workBonus: { school: 'Pessimismus', damage: 2 }
     },
     {
         id: 'politeia',
@@ -610,7 +610,7 @@ export const cardDatabase: Card[] = [
         description: 'Der Staat und die Gerechtigkeit. +2 Schaden für Politische Philosophie.',
         rarity: 'legendary',
         faction: 'western',
-        workBonus: { school: 'political', damage: 2 }
+        workBonus: { school: 'Politische Philosophie', damage: 2 }
     },
 
     // New Spells
@@ -618,7 +618,7 @@ export const cardDatabase: Card[] = [
         id: 'hermeneutics',
         name: 'Hermeneutics',
         type: 'spell',
-        cost: 2,
+        cost: 3,
         description: 'Suche eine Karte aus deinem Deck und nimm sie auf die Hand.',
         rarity: 'epic',
         faction: 'western',

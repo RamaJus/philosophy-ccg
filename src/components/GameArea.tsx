@@ -256,7 +256,6 @@ export const GameArea: React.FC<GameAreaProps> = ({ mode }) => {
 
                 <div className="space-y-4 flex flex-col items-center">
                     <PlayerStats player={viewPlayer} />
-                    <WorkSlot card={viewPlayer.activeWork} />
                     <div className="w-full flex justify-center">
                         <button
                             onClick={() => setIsDeckViewOpen(true)}
@@ -266,6 +265,7 @@ export const GameArea: React.FC<GameAreaProps> = ({ mode }) => {
                             Deck ansehen ({viewPlayer.deck.length})
                         </button>
                     </div>
+                    <WorkSlot card={viewPlayer.activeWork} />
                     <Graveyard cards={viewPlayer.graveyard} title="Dein Friedhof" />
                 </div>
             </div>
