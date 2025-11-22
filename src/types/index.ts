@@ -37,6 +37,7 @@ export interface Player {
     hand: Card[];
     board: BoardMinion[];
     graveyard: Card[];
+    lockedMana: number; // Mana locked for the next turn
 }
 
 export interface GameState {

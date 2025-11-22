@@ -210,6 +210,42 @@ export const cardDatabase: Card[] = [
         rarity: 'rare',
         faction: 'eastern',
     },
+    {
+        id: 'cogito',
+        name: 'Cogito',
+        type: 'spell',
+        cost: 2,
+        description: 'Ziehe 1 Karte. Ich denke, also ziehe ich.',
+        rarity: 'common',
+        faction: 'western',
+    },
+    {
+        id: 'enlightenment',
+        name: 'Enlightenment',
+        type: 'spell',
+        cost: 3,
+        description: 'Stelle 5 Glaubwürdigkeit wieder her. Der Pfad zum Verständnis.',
+        rarity: 'rare',
+        faction: 'universal',
+    },
+    {
+        id: 'sophistry',
+        name: 'Sophistry',
+        type: 'spell',
+        cost: 3,
+        description: 'Stiehl 2 Dialektik (Mana) vom Gegner.',
+        rarity: 'rare',
+        faction: 'western',
+    },
+    {
+        id: 'dogmatism',
+        name: 'Dogmatism',
+        type: 'spell',
+        cost: 2,
+        description: 'Sperre 2 Dialektik (Mana) des Gegners im nächsten Zug.',
+        rarity: 'common',
+        faction: 'western',
+    },
 
     // Additional Western Philosophers
     {
@@ -524,76 +560,19 @@ export const cardDatabase: Card[] = [
         strongAgainst: ['institutions', 'humanism'],
         weakAgainst: []
     },
-
-    // Spell Cards
-    {
-        id: 'dialectic',
-        name: 'Dialectic',
-        type: 'spell',
-        cost: 2,
-        description: 'Ziehe 2 Karten. Die Synthese von These und Antithese.',
-        rarity: 'common',
-        faction: 'universal',
-    },
-    {
-        id: 'aporia',
-        name: 'Aporia',
-        type: 'spell',
-        cost: 3,
-        description: 'Verursache 3 Schaden. Zustand der Ratlosigkeit.',
-        rarity: 'common',
-        faction: 'western',
-    },
-    {
-        id: 'meditation',
-        name: 'Meditation',
-        type: 'spell',
-        cost: 1,
-        description: 'Stelle 3 Glaubwürdigkeit wieder her. Innerer Frieden.',
-        rarity: 'common',
-        faction: 'eastern',
-    },
-    {
-        id: 'wu-wei',
-        name: 'Wu Wei',
-        type: 'spell',
-        cost: 4,
-        description: 'Verursache 5 Schaden. Handeln durch Nicht-Handeln.',
-        rarity: 'rare',
-        faction: 'eastern',
-    },
-    {
-        id: 'cogito',
-        name: 'Cogito',
-        type: 'spell',
-        cost: 2,
-        description: 'Ziehe 1 Karte. Ich denke, also ziehe ich.',
-        rarity: 'common',
-        faction: 'western',
-    },
-    {
-        id: 'enlightenment',
-        name: 'Enlightenment',
-        type: 'spell',
-        cost: 3,
-        description: 'Stelle 5 Glaubwürdigkeit wieder her. Der Pfad zum Verständnis.',
-        rarity: 'rare',
-        faction: 'universal',
-    },
 ];
+
 
 
 // Helper function to get a random subset of cards for deck building
 // Each card appears only once in the deck
-export function generateDeck(size: number = 20): Card[] {
+export function generateDeck(_size: number = 20): Card[] {
     // Shuffle the entire card database
+    // We ignore size now to ensure every card appears exactly once
     const shuffled = shuffleDeck([...cardDatabase]);
 
-    // Take the first 'size' cards
-    const selectedCards = shuffled.slice(0, Math.min(size, cardDatabase.length));
-
     // Create deck with unique instance IDs for each card
-    const deck = selectedCards.map((card, i) => ({
+    const deck = shuffled.map((card, i) => ({
         ...card,
         id: `${card.id}-instance-${Date.now()}-${i}`,
     }));

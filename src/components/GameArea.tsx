@@ -4,6 +4,7 @@ import { PlayerStats } from './PlayerStats';
 import { Hand } from './Hand';
 import { Board } from './Board';
 import { GameLog } from './GameLog';
+import { Graveyard } from './Graveyard';
 import { Swords, SkipForward, RotateCcw, Trophy } from 'lucide-react';
 import { getRandomQuote } from '../data/quotes';
 
@@ -180,6 +181,7 @@ export const GameArea: React.FC<GameAreaProps> = ({ mode }) => {
             <div className="grid grid-cols-4 gap-4">
                 <div className="space-y-4">
                     <PlayerStats player={viewOpponent} isOpponent={true} />
+                    <Graveyard cards={viewOpponent.graveyard} title="Gegnerischer Friedhof" />
                     <GameLog messages={log} />
                 </div>
 
@@ -227,8 +229,9 @@ export const GameArea: React.FC<GameAreaProps> = ({ mode }) => {
                     />
                 </div>
 
-                <div>
+                <div className="space-y-4">
                     <PlayerStats player={viewPlayer} />
+                    <Graveyard cards={viewPlayer.graveyard} title="Dein Friedhof" />
                 </div>
             </div>
 

@@ -22,6 +22,7 @@ function createPlayer(name: string, isPlayer: boolean): Player {
         hand,
         board: [],
         graveyard: [],
+        lockedMana: 0,
     };
 }
 
@@ -105,10 +106,14 @@ export function useGameLogic(mode: 'single' | 'multiplayer_host' | 'multiplayer_
 
     const startTurn = useCallback((player: Player): Player => {
         const newMaxMana = Math.min(player.maxMana + 1, 10);
+        // Apply locked mana and reset it
+        const availableMana = Math.max(0, newMaxMana - player.lockedMana);
+
         let updatedPlayer = {
             ...player,
             maxMana: newMaxMana,
-            mana: newMaxMana,
+            mana: availableMana,
+            lockedMana: 0, // Reset lock
             board: player.board.map(minion => ({
                 ...minion,
                 canAttack: true,
@@ -221,6 +226,16 @@ export function useGameLogic(mode: 'single' | 'multiplayer_host' | 'multiplayer_
                             winner: activePlayerKey,
                         };
                     }
+                } else if (card.id.includes('sophistry')) {
+                    // Steal 2 Mana
+                    const manaToSteal = Math.min(updatedEnemy.mana, 2);
+                    updatedEnemy.mana -= manaToSteal;
+                    updatedPlayer.mana = Math.min(updatedPlayer.mana + manaToSteal, 10);
+                    addLog(`${activePlayer.name} wirkte ${card.name} und stahl ${manaToSteal} Dialektik!`);
+                } else if (card.id.includes('dogmatism')) {
+                    // Lock 2 Mana next turn
+                    updatedEnemy.lockedMana += 2;
+                    addLog(`${activePlayer.name} wirkte ${card.name} und sperrte 2 Dialektik des Gegners!`);
                 }
             }
 
