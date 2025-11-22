@@ -205,7 +205,7 @@ export const GameArea: React.FC<GameAreaProps> = ({ mode }) => {
             <div className="grid grid-cols-4 gap-4">
                 <div className="space-y-4 flex flex-col items-center">
                     <PlayerStats player={viewOpponent} isOpponent={true} />
-                    <WorkSlot card={viewOpponent.activeWork} isPlayer={false} />
+                    <WorkSlot card={viewOpponent.activeWork} />
                     <Graveyard cards={viewOpponent.graveyard} title="Gegnerischer Friedhof" />
                     <GameLog messages={log} />
                 </div>
@@ -256,7 +256,7 @@ export const GameArea: React.FC<GameAreaProps> = ({ mode }) => {
 
                 <div className="space-y-4 flex flex-col items-center">
                     <PlayerStats player={viewPlayer} />
-                    <WorkSlot card={viewPlayer.activeWork} isPlayer={true} />
+                    <WorkSlot card={viewPlayer.activeWork} />
                     <div className="w-full flex justify-center">
                         <button
                             onClick={() => setIsDeckViewOpen(true)}
