@@ -1,0 +1,67 @@
+import React from 'react';
+import { BoardMinion } from '../types';
+import { Card } from './Card';
+import { Target } from 'lucide-react';
+
+interface BoardProps {
+    minions: BoardMinion[];
+    onMinionClick?: (minionId: string) => void;
+    selectedMinionId?: string;
+    isPlayerBoard?: boolean;
+    canTarget?: boolean;
+}
+
+export const Board: React.FC<BoardProps> = ({
+    minions,
+    onMinionClick,
+    selectedMinionId,
+    isPlayerBoard = false,
+    canTarget = false
+}) => {
+    return (
+        <div className={`glass-panel p-4 min-h-[300px] ${isPlayerBoard ? 'bg-blue-500/5' : 'bg-red-500/5'}`}>
+            <h3 className="text-sm font-semibold mb-2 text-center text-gray-300">
+                {isPlayerBoard ? 'Deine Philosophen' : 'Gegnerische Philosophen'}
+            </h3>
+            <div className="flex gap-3 justify-center flex-wrap">
+                {minions.length === 0 ? (
+                    <div className="flex items-center justify-center h-48 text-gray-500 italic">
+                        Keine Philosophen auf dem Schlachtfeld
+                    </div>
+                ) : (
+                    minions.map((minion) => {
+                        const canAttack = isPlayerBoard && minion.canAttack && !minion.hasAttacked;
+                        const isTargetable = !isPlayerBoard && canTarget;
+
+                        return (
+                            <div key={minion.id} className="relative">
+                                <Card
+                                    card={minion}
+                                    onClick={onMinionClick ? () => onMinionClick(minion.id) : undefined}
+                                    isSelected={selectedMinionId === minion.id}
+                                    isPlayable={canAttack || isTargetable}
+                                    showHealth={true}
+                                    className={`
+                                        ${canAttack ? 'ring-2 ring-green-400' : ''}
+                                        ${isTargetable ? 'ring-2 ring-red-400 cursor-crosshair' : ''}
+                                        ${minion.hasAttacked ? 'opacity-50' : ''}
+                                    `}
+                                />
+                                {canAttack && (
+                                    <div className="absolute -top-2 -right-2 bg-green-500 rounded-full p-1 animate-bounce">
+                                        <Target size={16} className="text-white" />
+                                    </div>
+                                )}
+                                {!minion.canAttack && isPlayerBoard && !minion.hasAttacked && (
+                                    <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-black/70 text-yellow-400 px-2 py-1 rounded text-xs font-bold">
+                                        💤 Beschwörungskrankheit
+                                    </div>
+                                )}
+                            </div>
+                        );
+                    })
+                )}
+            </div>
+        </div>
+    );
+};
