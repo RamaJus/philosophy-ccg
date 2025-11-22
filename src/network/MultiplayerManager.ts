@@ -24,9 +24,11 @@ export class MultiplayerManager {
         // In production, you might want your own PeerServer
     }
 
-    public async initialize(): Promise<string> {
+    public async initialize(customId?: string): Promise<string> {
         return new Promise((resolve, reject) => {
-            this.peer = new Peer();
+            // If customId is provided, try to use it. Otherwise, PeerJS generates one.
+            // Note: PeerJS IDs must be unique on the server.
+            this.peer = customId ? new Peer(customId) : new Peer();
 
             this.peer.on('open', (id) => {
                 this.myId = id;
@@ -40,9 +42,19 @@ export class MultiplayerManager {
 
             this.peer.on('error', (err) => {
                 console.error('PeerJS error:', err);
-                reject(err);
+                // If ID is taken, we might want to retry with a new random ID or reject
+                if (err.type === 'unavailable-id') {
+                    reject(new Error('ID_TAKEN'));
+                } else {
+                    reject(err);
+                }
             });
         });
+    }
+
+    public generateRandomId(): string {
+        // Generate a 6-digit random number string
+        return Math.floor(100000 + Math.random() * 900000).toString();
     }
 
     public connectToPeer(peerId: string) {
