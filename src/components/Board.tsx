@@ -53,17 +53,13 @@ export const Board: React.FC<BoardProps> = ({
                                     className={`
                                         ${canAttack ? 'ring-2 ring-green-400' : ''}
                                         ${isTargetable ? 'ring-2 ring-red-400 cursor-crosshair' : ''}
+                                        ${!minion.canAttack && isPlayerBoard && !minion.hasAttacked ? 'ring-4 ring-red-600' : ''}
                                         ${minion.hasAttacked ? 'opacity-50' : ''}
                                     `}
                                 />
                                 {canAttack && (
                                     <div className="absolute -top-2 -right-2 bg-green-500 rounded-full p-1 animate-bounce">
                                         <Target size={16} className="text-white" />
-                                    </div>
-                                )}
-                                {!minion.canAttack && isPlayerBoard && !minion.hasAttacked && (
-                                    <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-black/70 text-yellow-400 px-2 py-1 rounded text-xs font-bold">
-                                        💤 Beschwörungskrankheit
                                     </div>
                                 )}
                             </div>
