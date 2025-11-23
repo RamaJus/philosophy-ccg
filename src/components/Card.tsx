@@ -184,32 +184,6 @@ export const Card: React.FC<CardProps> = ({
                                         </div>
                                     </div>
                                 )}
-
-                                {card.strongAgainst && card.strongAgainst.length > 0 && (
-                                    <div>
-                                        <span className="text-green-400 font-bold text-sm block mb-1">Stark gegen:</span>
-                                        <div className="flex flex-wrap gap-2">
-                                            {card.strongAgainst.map(s => (
-                                                <span key={s} className="px-2 py-1 bg-green-900/40 border border-green-700/50 rounded text-xs text-green-200">
-                                                    {s}
-                                                </span>
-                                            ))}
-                                        </div>
-                                    </div>
-                                )}
-
-                                {card.weakAgainst && card.weakAgainst.length > 0 && (
-                                    <div>
-                                        <span className="text-red-400 font-bold text-sm block mb-1">Schwach gegen:</span>
-                                        <div className="flex flex-wrap gap-2">
-                                            {card.weakAgainst.map(s => (
-                                                <span key={s} className="px-2 py-1 bg-red-900/40 border border-red-700/50 rounded text-xs text-red-200">
-                                                    {s}
-                                                </span>
-                                            ))}
-                                        </div>
-                                    </div>
-                                )}
                             </div>
                         </div>
                     </div>
@@ -296,26 +270,12 @@ export const Card: React.FC<CardProps> = ({
                 )}
 
                 {/* Tooltip Overlay */}
-                {isMinion && (card.school || card.strongAgainst || card.weakAgainst) && (
+                {isMinion && card.school && (
                     <div className="absolute inset-0 bg-black/90 p-4 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex flex-col justify-center items-start text-xs z-20 pointer-events-none">
-                        {card.school && (
-                            <div className="mb-2">
-                                <span className="text-blue-400 font-bold block">Schule:</span>
-                                <span className="text-gray-300">{card.school.join(', ')}</span>
-                            </div>
-                        )}
-                        {card.strongAgainst && card.strongAgainst.length > 0 && (
-                            <div className="mb-2">
-                                <span className="text-green-400 font-bold block">Stark gegen:</span>
-                                <span className="text-gray-300">{card.strongAgainst.join(', ')}</span>
-                            </div>
-                        )}
-                        {card.weakAgainst && card.weakAgainst.length > 0 && (
-                            <div>
-                                <span className="text-red-400 font-bold block">Schwach gegen:</span>
-                                <span className="text-gray-300">{card.weakAgainst.join(', ')}</span>
-                            </div>
-                        )}
+                        <div className="mb-2">
+                            <span className="text-blue-400 font-bold block">Schule:</span>
+                            <span className="text-gray-300">{card.school.join(', ')}</span>
+                        </div>
                     </div>
                 )}
             </div>

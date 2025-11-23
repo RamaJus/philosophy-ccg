@@ -306,44 +306,11 @@ export function useGameLogic(mode: 'single' | 'multiplayer_host' | 'multiplayer_
                 let targetDamage = target.attack;
                 let logMessage = `${attacker.name} griff ${target.name} an!`;
 
-                // Attacker bonuses
-                if (attacker.strongAgainst && target.school) {
-                    const strongMatch = attacker.strongAgainst.find(s => target.school?.includes(s));
-                    if (strongMatch) {
-                        attackerDamage += 2;
-                        logMessage += ` Kritischer Treffer gegen ${strongMatch}! (+2 Schaden)`;
-                    }
-                }
-
                 // Work Bonuses
                 if (activePlayer.activeWork && activePlayer.activeWork.workBonus && attacker.school) {
                     if (attacker.school.includes(activePlayer.activeWork.workBonus.school)) {
                         attackerDamage += activePlayer.activeWork.workBonus.damage;
                         logMessage += ` Bonus durch "${activePlayer.activeWork.name}"! (+${activePlayer.activeWork.workBonus.damage})`;
-                    }
-                }
-
-                if (target.weakAgainst && attacker.school) {
-                    const weakMatch = target.weakAgainst.find(s => attacker.school?.includes(s));
-                    if (weakMatch) {
-                        attackerDamage += 1;
-                        logMessage += ` ${target.name} ist anfällig gegen ${weakMatch}! (+1 Schaden)`;
-                    }
-                }
-
-                // Target bonuses (counter-attack)
-                if (target.strongAgainst && attacker.school) {
-                    const strongMatch = target.strongAgainst.find(s => attacker.school?.includes(s));
-                    if (strongMatch) {
-                        targetDamage += 2;
-                        // Counter-attack bonus doesn't need a log message unless it's significant, 
-                        // or we can append it. Let's keep it simple for now.
-                    }
-                }
-                if (attacker.weakAgainst && target.school) {
-                    const weakMatch = attacker.weakAgainst.find(s => target.school?.includes(s));
-                    if (weakMatch) {
-                        targetDamage += 1;
                     }
                 }
 

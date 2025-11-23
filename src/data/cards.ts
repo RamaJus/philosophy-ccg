@@ -13,8 +13,6 @@ export const cardDatabase: Card[] = [
         rarity: 'Selten',
         faction: 'Westlich',
         school: ['Skeptizismus', 'Ethik'],
-        strongAgainst: ['Sophismus', 'Materialismus'],
-        weakAgainst: ['Politik']
     },
     {
         id: 'plato',
@@ -27,8 +25,6 @@ export const cardDatabase: Card[] = [
         rarity: 'Episch',
         faction: 'Westlich',
         school: ['Idealismus', 'Rationalismus'],
-        strongAgainst: ['Materialismus', 'Sophismus', 'Empirismus'],
-        weakAgainst: ['Existentialismus']
     },
     {
         id: 'aristotle',
@@ -41,8 +37,6 @@ export const cardDatabase: Card[] = [
         rarity: 'Episch',
         faction: 'Westlich',
         school: ['Empirismus', 'Logik', 'Ethik'],
-        strongAgainst: ['Idealismus'],
-        weakAgainst: ['Religion']
     },
     {
         id: 'kant',
@@ -55,8 +49,6 @@ export const cardDatabase: Card[] = [
         rarity: 'Legendär',
         faction: 'Westlich',
         school: ['Idealismus', 'Deontologie', 'Aufklärung'],
-        strongAgainst: ['Empirismus', 'Rationalismus'],
-        weakAgainst: ['Utilitarismus', 'Materialismus']
     },
     {
         id: 'nietzsche',
@@ -69,8 +61,6 @@ export const cardDatabase: Card[] = [
         rarity: 'Legendär',
         faction: 'Westlich',
         school: ['Existentialismus', 'Nihilismus'],
-        strongAgainst: ['Religion', 'Idealismus', 'Ethik'],
-        weakAgainst: []
     },
     {
         id: 'descartes',
@@ -83,8 +73,6 @@ export const cardDatabase: Card[] = [
         rarity: 'Selten',
         faction: 'Westlich',
         school: ['Rationalismus'],
-        strongAgainst: ['Skeptizismus'],
-        weakAgainst: ['Empirismus']
     },
 
     // Eastern Philosophers
@@ -99,8 +87,6 @@ export const cardDatabase: Card[] = [
         rarity: 'Episch',
         faction: 'Östlich',
         school: ['Ethik', 'Sozialphilosophie'],
-        strongAgainst: ['Anarchie', 'Individualismus'],
-        weakAgainst: ['Legalismus', 'Daoismus']
     },
     {
         id: 'laozi',
@@ -113,8 +99,6 @@ export const cardDatabase: Card[] = [
         rarity: 'Legendär',
         faction: 'Östlich',
         school: ['Daoismus'],
-        strongAgainst: ['Legalismus', 'Konfuzianismus'],
-        weakAgainst: []
     },
     {
         id: 'sun-tzu',
@@ -127,8 +111,6 @@ export const cardDatabase: Card[] = [
         rarity: 'Episch',
         faction: 'Östlich',
         school: ['Strategie'],
-        strongAgainst: ['Idealismus'],
-        weakAgainst: []
     },
     {
         id: 'buddha',
@@ -141,8 +123,6 @@ export const cardDatabase: Card[] = [
         rarity: 'Legendär',
         faction: 'Östlich',
         school: ['Religion', 'Metaphysik'],
-        strongAgainst: ['Materialismus', 'Begierde', 'Hedonismus'],
-        weakAgainst: []
     },
     {
         id: 'zhuangzi',
@@ -155,8 +135,6 @@ export const cardDatabase: Card[] = [
         rarity: 'Selten',
         faction: 'Östlich',
         school: ['Daoismus', 'Skeptizismus'],
-        strongAgainst: ['Logik', 'Konfuzianismus'],
-        weakAgainst: []
     },
     {
         id: 'mencius',
@@ -169,8 +147,6 @@ export const cardDatabase: Card[] = [
         rarity: 'Selten',
         faction: 'Östlich',
         school: ['Konfuzianismus', 'Idealismus'],
-        strongAgainst: ['Legalismus'],
-        weakAgainst: ['Realismus']
     },
 
     // Spell Cards
@@ -259,8 +235,6 @@ export const cardDatabase: Card[] = [
         rarity: 'Episch',
         faction: 'Westlich',
         school: ['Analytische Philosophie', 'Logik'],
-        strongAgainst: ['Metaphysik', 'Idealismus'],
-        weakAgainst: []
     },
     {
         id: 'arendt',
@@ -273,8 +247,6 @@ export const cardDatabase: Card[] = [
         rarity: 'Episch',
         faction: 'Westlich',
         school: ['Politische Philosophie', 'Existentialismus'],
-        strongAgainst: ['Totalitarismus', 'Ideologie'],
-        weakAgainst: []
     },
     {
         id: 'hegel',
@@ -287,8 +259,6 @@ export const cardDatabase: Card[] = [
         rarity: 'Legendär',
         faction: 'Westlich',
         school: ['Idealismus', 'Dialektik'],
-        strongAgainst: ['Empirismus'],
-        weakAgainst: ['Materialismus', 'Existentialismus']
     },
     {
         id: 'locke',
@@ -301,8 +271,6 @@ export const cardDatabase: Card[] = [
         rarity: 'Selten',
         faction: 'Westlich',
         school: ['Empirismus', 'Liberalismus'],
-        strongAgainst: ['Rationalismus', 'Monarchie'],
-        weakAgainst: ['Idealismus']
     },
     {
         id: 'rousseau',
@@ -315,8 +283,6 @@ export const cardDatabase: Card[] = [
         rarity: 'Selten',
         faction: 'Westlich',
         school: ['Romantik', 'Politische Philosophie'],
-        strongAgainst: ['Aufklärung', 'Rationalismus'],
-        weakAgainst: []
     },
     {
         id: 'sartre',
@@ -329,8 +295,6 @@ export const cardDatabase: Card[] = [
         rarity: 'Episch',
         faction: 'Westlich',
         school: ['Existentialismus', 'Phänomenologie'],
-        strongAgainst: ['Essentialismus', 'Religion'],
-        weakAgainst: ['Strukturalismus']
     },
     {
         id: 'heidegger',
@@ -343,8 +307,6 @@ export const cardDatabase: Card[] = [
         rarity: 'Legendär',
         faction: 'Westlich',
         school: ['Phänomenologie', 'Existentialismus'],
-        strongAgainst: ['Technologie', 'Metaphysik'],
-        weakAgainst: []
     },
     {
         id: 'schopenhauer',
@@ -357,8 +319,6 @@ export const cardDatabase: Card[] = [
         rarity: 'Episch',
         faction: 'Westlich',
         school: ['Pessimismus', 'Idealismus'],
-        strongAgainst: ['Optimismus', 'Hegelianismus'],
-        weakAgainst: []
     },
 
     // Additional Eastern Philosophers
@@ -373,8 +333,6 @@ export const cardDatabase: Card[] = [
         rarity: 'Episch',
         faction: 'Östlich',
         school: ['Madhyamaka', 'Buddhismus'],
-        strongAgainst: ['Essentialismus', 'Logik'],
-        weakAgainst: []
     },
     {
         id: 'rumi',
@@ -387,8 +345,6 @@ export const cardDatabase: Card[] = [
         rarity: 'Selten',
         faction: 'Östlich',
         school: ['Mystizismus', 'Sufismus'],
-        strongAgainst: ['Dogmatismus', 'Rationalismus'],
-        weakAgainst: []
     },
     {
         id: 'al-ghazali',
@@ -401,8 +357,6 @@ export const cardDatabase: Card[] = [
         rarity: 'Episch',
         faction: 'Östlich',
         school: ['Theologie', 'Mystizismus'],
-        strongAgainst: ['Rationalismus', 'Philosophie'],
-        weakAgainst: ['Empirismus']
     },
     {
         id: 'mozi',
@@ -415,8 +369,6 @@ export const cardDatabase: Card[] = [
         rarity: 'Gewöhnlich',
         faction: 'Östlich',
         school: ['Mohismus', 'Utilitarismus'],
-        strongAgainst: ['Konfuzianismus', 'Fatalismus'],
-        weakAgainst: []
     },
 
     // NEW PHILOSOPHERS
@@ -431,8 +383,6 @@ export const cardDatabase: Card[] = [
         rarity: 'Selten',
         faction: 'Westlich',
         school: ['Scholastik', 'Religion'],
-        strongAgainst: ['Averroismus'],
-        weakAgainst: ['Empirismus', 'Existentialismus', 'Nihilismus']
     },
     {
         id: 'hume',
@@ -445,8 +395,6 @@ export const cardDatabase: Card[] = [
         rarity: 'Selten',
         faction: 'Westlich',
         school: ['Empirismus', 'Skeptizismus'],
-        strongAgainst: ['Rationalismus', 'Religion', 'Metaphysik'],
-        weakAgainst: []
     },
     {
         id: 'spinoza',
@@ -459,8 +407,6 @@ export const cardDatabase: Card[] = [
         rarity: 'Episch',
         faction: 'Westlich',
         school: ['Rationalismus', 'Pantheismus'],
-        strongAgainst: ['Religion', 'Dualismus'],
-        weakAgainst: ['Empirismus']
     },
     {
         id: 'marx',
@@ -473,8 +419,6 @@ export const cardDatabase: Card[] = [
         rarity: 'Legendär',
         faction: 'Westlich',
         school: ['Materialismus', 'Sozialismus'],
-        strongAgainst: ['Kapitalismus', 'Idealismus', 'Religion'],
-        weakAgainst: []
     },
     {
         id: 'kierkegaard',
@@ -487,8 +431,6 @@ export const cardDatabase: Card[] = [
         rarity: 'Selten',
         faction: 'Westlich',
         school: ['Existentialismus', 'Religion'],
-        strongAgainst: ['Hegelianismus', 'Institutionelle Religion'],
-        weakAgainst: ['Rationalismus']
     },
     {
         id: 'epicurus',
@@ -501,8 +443,6 @@ export const cardDatabase: Card[] = [
         rarity: 'Gewöhnlich',
         faction: 'Westlich',
         school: ['Epikureismus', 'Materialismus'],
-        strongAgainst: ['Religion', 'Platonismus'],
-        weakAgainst: ['Stoizismus']
     },
     {
         id: 'seneca',
@@ -515,8 +455,6 @@ export const cardDatabase: Card[] = [
         rarity: 'Selten',
         faction: 'Westlich',
         school: ['Stoizismus'],
-        strongAgainst: ['Hedonismus', 'Emotion'],
-        weakAgainst: []
     },
     {
         id: 'hypatia',
@@ -529,8 +467,6 @@ export const cardDatabase: Card[] = [
         rarity: 'Episch',
         faction: 'Westlich',
         school: ['Neoplatonismus', 'Mathematik'],
-        strongAgainst: ['Dogmatismus'],
-        weakAgainst: ['Religion']
     },
     {
         id: 'beauvoir',
@@ -543,8 +479,6 @@ export const cardDatabase: Card[] = [
         rarity: 'Episch',
         faction: 'Westlich',
         school: ['Existentialismus', 'Feminismus'],
-        strongAgainst: ['Patriarchat', 'Essentialismus'],
-        weakAgainst: []
     },
     {
         id: 'foucault',
@@ -557,8 +491,6 @@ export const cardDatabase: Card[] = [
         rarity: 'Legendär',
         faction: 'Westlich',
         school: ['Poststrukturalismus'],
-        strongAgainst: ['Institutionen', 'Humanismus'],
-        weakAgainst: []
     },
 
     // Permanent Works

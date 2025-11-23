@@ -13,8 +13,6 @@ export interface Card {
     rarity: 'Gewöhnlich' | 'Selten' | 'Episch' | 'Legendär';
     faction: 'Westlich' | 'Östlich' | 'Universell';
     school?: string[]; // e.g. 'rationalism', 'empiricism', 'religion'
-    strongAgainst?: string[]; // list of schools this card is strong against
-    weakAgainst?: string[]; // list of schools this card is weak against
     workBonus?: { school: string; damage: number }; // For 'work' cards
 }
 
