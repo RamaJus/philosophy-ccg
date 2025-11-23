@@ -9,16 +9,17 @@ interface CardProps {
     isPlayable?: boolean;
     showHealth?: boolean;
     className?: string;
+    bonusDamage?: number;
 }
 
-const rarityColors = {
+const rarityColors: Record<string, string> = {
     'Gewöhnlich': 'from-gray-400 to-gray-600',
     'Selten': 'from-blue-400 to-blue-600',
     'Episch': 'from-purple-400 to-purple-600',
     'Legendär': 'from-orange-400 to-orange-600',
 };
 
-const factionIcons = {
+const factionIcons: Record<string, string> = {
     'Westlich': '🏛️',
     'Östlich': '☯️',
     'Universell': '🌍',
@@ -30,7 +31,8 @@ export const Card: React.FC<CardProps> = ({
     isSelected,
     isPlayable,
     showHealth = false,
-    className = ''
+    className = '',
+    bonusDamage = 0
 }) => {
     const isMinion = card.type === 'Philosoph';
     const boardMinion = showHealth ? (card as BoardMinion) : null;
@@ -40,6 +42,10 @@ export const Card: React.FC<CardProps> = ({
     const [isDamaged, setIsDamaged] = useState(false);
     const currentHealth = boardMinion ? boardMinion.health : (card as any).health;
     const prevHealth = useRef(currentHealth);
+
+    // Calculate total attack with bonus
+    const baseAttack = card.attack || 0;
+    const totalAttack = baseAttack + bonusDamage;
 
     // Right-click preview state
     const [showPreview, setShowPreview] = useState(false);
@@ -125,22 +131,14 @@ export const Card: React.FC<CardProps> = ({
 
                                 {/* Stats */}
                                 {isMinion && (
-                                    <div className="flex justify-between items-center px-3 py-2 bg-slate-900/90">
-                                        <div className="flex items-center gap-1 stat-badge from-red-500 to-red-600">
+                                    <div className="absolute bottom-0 left-0 right-0 flex justify-between items-center px-3 py-2 bg-slate-900/90 border-t border-slate-700/50">
+                                        <div className={`flex items-center gap-1 stat-badge ${bonusDamage > 0 ? 'from-green-500 to-green-600' : 'from-red-500 to-red-600'}`}>
                                             <Swords size={14} />
-                                            <span>{card.attack}</span>
+                                            <span>{totalAttack}</span>
                                         </div>
                                         <div className="flex items-center gap-1 stat-badge from-green-500 to-green-600">
                                             <Heart size={14} />
                                             <span>{card.health}</span>
-                                        </div>
-                                    </div>
-                                )}
-                                {!isMinion && (
-                                    <div className="flex justify-center items-center py-2 bg-slate-900/90">
-                                        <div className="flex items-center gap-2 text-purple-400">
-                                            <Zap size={16} />
-                                            <span className="text-xs font-semibold">ZAUBER</span>
                                         </div>
                                     </div>
                                 )}
@@ -167,6 +165,13 @@ export const Card: React.FC<CardProps> = ({
                             </div>
 
                             <div className="space-y-3">
+                                {card.workBonus && (
+                                    <div className="bg-amber-900/20 p-3 rounded border border-amber-500/30">
+                                        <span className="text-amber-400 font-bold text-sm block mb-1">Bonus Effekt:</span>
+                                        <span className="text-amber-100 text-sm">+{card.workBonus.damage} Schaden für {card.workBonus.school}</span>
+                                    </div>
+                                )}
+
                                 {card.school && (
                                     <div>
                                         <span className="text-blue-400 font-bold text-sm block mb-1">Schule(n):</span>
@@ -247,19 +252,19 @@ export const Card: React.FC<CardProps> = ({
                     </h3>
                 </div>
 
-                {/* Description */}
-                <div className={`px-3 py-2 flex-1 ${isWittgenstein ? 'bg-yellow-900/70' : 'bg-slate-800/90'}`}>
-                    <p className={`text-xs ${isWittgenstein ? 'text-yellow-50 font-semibold' : 'text-gray-300'} italic leading-tight line-clamp-3`}>
+                {/* Description - Full Text with padding for absolute stats */}
+                <div className={`px-3 py-2 flex-1 ${isWittgenstein ? 'bg-yellow-900/70' : 'bg-slate-800/90'} pb-10`}>
+                    <p className={`text-xs ${isWittgenstein ? 'text-yellow-50 font-semibold' : 'text-gray-300'} italic leading-tight line-clamp-4`}>
                         {card.description}
                     </p>
                 </div>
 
-                {/* Stats for Minions */}
+                {/* Stats for Minions - Absolute Positioned */}
                 {isMinion && (
-                    <div className="flex justify-between items-center px-3 py-2 bg-slate-900/90">
-                        <div className="flex items-center gap-1 stat-badge from-red-500 to-red-600">
+                    <div className="absolute bottom-0 left-0 right-0 flex justify-between items-center px-3 py-2 bg-slate-900/90 border-t border-slate-700/50 rounded-b-xl">
+                        <div className={`flex items-center gap-1 stat-badge ${bonusDamage > 0 ? 'from-green-500 to-green-600' : 'from-red-500 to-red-600'}`}>
                             <Swords size={14} />
-                            <span>{card.attack}</span>
+                            <span>{totalAttack}</span>
                         </div>
 
                         {boardMinion ? (
@@ -279,9 +284,9 @@ export const Card: React.FC<CardProps> = ({
                     </div>
                 )}
 
-                {/* Spell Icon */}
+                {/* Spell Icon - Absolute Positioned */}
                 {!isMinion && (
-                    <div className="flex justify-center items-center py-2 bg-slate-900/90">
+                    <div className="absolute bottom-0 left-0 right-0 flex justify-center items-center py-2 bg-slate-900/90 border-t border-slate-700/50 rounded-b-xl">
                         <div className="flex items-center gap-2 text-purple-400">
                             <Zap size={16} />
                             <span className="text-xs font-semibold">ZAUBER</span>

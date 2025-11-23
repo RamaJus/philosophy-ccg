@@ -55,7 +55,6 @@ export function useGameLogic(mode: 'single' | 'multiplayer_host' | 'multiplayer_
                 () => { }, // Host ignores state updates
                 (action) => {
                     // Execute client action locally
-                    console.log('Host received action:', action);
                     dispatch(action, true); // true = fromNetwork
                 },
                 () => { }

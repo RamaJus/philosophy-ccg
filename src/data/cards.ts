@@ -230,7 +230,7 @@ export const cardDatabase: Card[] = [
     },
     {
         id: 'sophistry',
-        name: 'Sophistry',
+        name: 'Sophistik',
         type: 'Zauber',
         cost: 3,
         description: 'Stiehl 2 Dialektik (Mana) vom Gegner.',
@@ -616,7 +616,7 @@ export const cardDatabase: Card[] = [
     // New Spells
     {
         id: 'hermeneutics',
-        name: 'Hermeneutics',
+        name: 'Hermeneutik',
         type: 'Zauber',
         cost: 3,
         description: 'Suche eine Karte aus deinem Deck und nimm sie auf die Hand.',
@@ -627,22 +627,6 @@ export const cardDatabase: Card[] = [
 
 
 
-// Helper function to get a random subset of cards for deck building
-// Each card appears only once in the deck
-export function generateDeck(_size: number = 20): Card[] {
-    // Shuffle the entire card database
-    // We ignore size now to ensure every card appears exactly once
-    const shuffled = shuffleDeck([...cardDatabase]);
-
-    // Create deck with unique instance IDs for each card
-    const deck = shuffled.map((card, i) => ({
-        ...card,
-        id: `${card.id}-instance-${Date.now()}-${i}`,
-    }));
-
-    return deck;
-}
-
 
 export function shuffleDeck(deck: Card[]): Card[] {
     const shuffled = [...deck];
@@ -651,4 +635,9 @@ export function shuffleDeck(deck: Card[]): Card[] {
         [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
     }
     return shuffled;
+}
+
+export function generateDeck(size: number = 30): Card[] {
+    const shuffled = shuffleDeck(cardDatabase);
+    return shuffled.slice(0, size);
 }

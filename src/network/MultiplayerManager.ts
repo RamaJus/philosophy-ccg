@@ -67,7 +67,6 @@ export class MultiplayerManager {
         this.conn = conn;
 
         this.conn.on('open', () => {
-            console.log('Connected to: ' + conn.peer);
             if (this.onConnect) this.onConnect();
         });
 

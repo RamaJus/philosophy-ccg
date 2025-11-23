@@ -215,6 +215,7 @@ export const GameArea: React.FC<GameAreaProps> = ({ mode }) => {
                         minions={viewOpponent.board}
                         onMinionClick={viewIsPlayerTurn && selectedMinion ? handleOpponentMinionClick : undefined}
                         canTarget={viewIsPlayerTurn && !!selectedMinion}
+                        activeWork={viewOpponent.activeWork}
                     />
 
                     <div className="glass-panel p-3 text-center">
@@ -251,6 +252,7 @@ export const GameArea: React.FC<GameAreaProps> = ({ mode }) => {
                         onMinionClick={handlePlayerMinionClick}
                         selectedMinionId={selectedMinion}
                         isPlayerBoard={true}
+                        activeWork={viewPlayer.activeWork}
                     />
                 </div>
 

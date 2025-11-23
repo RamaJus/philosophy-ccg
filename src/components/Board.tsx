@@ -1,5 +1,5 @@
 import React from 'react';
-import { BoardMinion } from '../types';
+import { BoardMinion, Card as CardType } from '../types';
 import { Card } from './Card';
 import { Target } from 'lucide-react';
 
@@ -9,6 +9,7 @@ interface BoardProps {
     selectedMinionId?: string;
     isPlayerBoard?: boolean;
     canTarget?: boolean;
+    activeWork?: CardType;
 }
 
 export const Board: React.FC<BoardProps> = ({
@@ -16,7 +17,8 @@ export const Board: React.FC<BoardProps> = ({
     onMinionClick,
     selectedMinionId,
     isPlayerBoard = false,
-    canTarget = false
+    canTarget = false,
+    activeWork
 }) => {
     return (
         <div className={`glass-panel p-4 min-h-[300px] ${isPlayerBoard ? 'bg-blue-500/5' : 'bg-red-500/5'}`}>
@@ -33,6 +35,12 @@ export const Board: React.FC<BoardProps> = ({
                         const canAttack = isPlayerBoard && minion.canAttack && !minion.hasAttacked;
                         const isTargetable = !isPlayerBoard && canTarget;
 
+                        // Calculate Work Bonus
+                        let bonusDamage = 0;
+                        if (activeWork?.workBonus && minion.school?.includes(activeWork.workBonus.school)) {
+                            bonusDamage = activeWork.workBonus.damage;
+                        }
+
                         return (
                             <div key={minion.id} className="relative">
                                 <Card
@@ -41,6 +49,7 @@ export const Board: React.FC<BoardProps> = ({
                                     isSelected={selectedMinionId === minion.id}
                                     isPlayable={canAttack || isTargetable}
                                     showHealth={true}
+                                    bonusDamage={bonusDamage}
                                     className={`
                                         ${canAttack ? 'ring-2 ring-green-400' : ''}
                                         ${isTargetable ? 'ring-2 ring-red-400 cursor-crosshair' : ''}
