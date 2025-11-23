@@ -144,7 +144,7 @@ export function useGameLogic(mode: 'single' | 'multiplayer_host' | 'multiplayer_
             }
 
             // Check board space for minions (unless it's Wittgenstein who clears the board)
-            if (card.type === 'minion' && activePlayer.board.length >= MAX_BOARD_SIZE && !card.id.includes('wittgenstein')) {
+            if (card.type === 'Philosoph' && activePlayer.board.length >= MAX_BOARD_SIZE && !card.id.includes('wittgenstein')) {
                 addLog('Das Spielfeld ist voll!');
                 return prev;
             }
@@ -157,7 +157,7 @@ export function useGameLogic(mode: 'single' | 'multiplayer_host' | 'multiplayer_
 
             let updatedEnemy = activePlayerKey === 'player' ? opponent : player;
 
-            if (card.type === 'work') {
+            if (card.type === 'Werk') {
                 // Handle Work cards
                 if (updatedPlayer.activeWork) {
                     updatedPlayer.graveyard = [...updatedPlayer.graveyard, updatedPlayer.activeWork];
@@ -166,7 +166,7 @@ export function useGameLogic(mode: 'single' | 'multiplayer_host' | 'multiplayer_
                     addLog(`${activePlayer.name} veröffentlichte "${card.name}".`);
                 }
                 updatedPlayer.activeWork = card;
-            } else if (card.type === 'minion') {
+            } else if (card.type === 'Philosoph') {
                 // Wittgenstein's special ability: Clear the entire board
                 if (card.id.includes('wittgenstein')) {
                     // Move all minions to graveyard
@@ -186,7 +186,7 @@ export function useGameLogic(mode: 'single' | 'multiplayer_host' | 'multiplayer_
 
                 const minion: BoardMinion = {
                     ...card,
-                    type: 'minion',
+                    type: 'Philosoph',
                     attack: card.attack!,
                     health: card.health!,
                     maxHealth: card.health!,

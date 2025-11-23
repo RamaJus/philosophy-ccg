@@ -1,4 +1,4 @@
-export type CardType = 'minion' | 'spell' | 'work';
+export type CardType = 'Philosoph' | 'Zauber' | 'Werk';
 
 export interface Card {
     id: string;
@@ -10,8 +10,8 @@ export interface Card {
     health?: number;  // Only for minions
     maxHealth?: number; // Only for minions (to track damage)
     image?: string;
-    rarity: 'common' | 'rare' | 'epic' | 'legendary';
-    faction: 'western' | 'eastern' | 'universal';
+    rarity: 'Gewöhnlich' | 'Selten' | 'Episch' | 'Legendär';
+    faction: 'Westlich' | 'Östlich' | 'Universell';
     school?: string[]; // e.g. 'rationalism', 'empiricism', 'religion'
     strongAgainst?: string[]; // list of schools this card is strong against
     weakAgainst?: string[]; // list of schools this card is weak against
@@ -19,7 +19,7 @@ export interface Card {
 }
 
 export interface BoardMinion extends Card {
-    type: 'minion';
+    type: 'Philosoph';
     attack: number;
     health: number;
     maxHealth: number;

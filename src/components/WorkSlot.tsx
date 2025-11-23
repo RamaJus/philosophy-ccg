@@ -23,9 +23,10 @@ export const WorkSlot: React.FC<WorkSlotProps> = ({ card }) => {
                     <CardComponent card={card} isPlayable={false} />
 
                     {/* Active Bonus Indicator */}
-                    <div className="absolute -bottom-12 left-1/2 -translate-x-1/2 w-max max-w-[200px] z-10">
-                        <div className="bg-amber-900/90 text-amber-100 text-xs px-3 py-1.5 rounded-full border border-amber-500/50 shadow-lg text-center backdrop-blur-sm">
-                            <span className="font-bold text-amber-400">Bonus:</span> +{card.workBonus?.damage} Schaden für {card.workBonus?.school}
+                    <div className="absolute -top-16 left-1/2 -translate-x-1/2 w-max max-w-[200px] z-50 pointer-events-none">
+                        <div className="bg-amber-900/95 text-amber-100 text-xs px-3 py-2 rounded-lg border border-amber-500/50 shadow-xl text-center backdrop-blur-md">
+                            <span className="font-bold text-amber-400 block mb-0.5">Bonus Effekt</span>
+                            <span>+{card.workBonus?.damage} Schaden für {card.workBonus?.school}</span>
                         </div>
                     </div>
                 </div>
