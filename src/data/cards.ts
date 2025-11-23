@@ -4,7 +4,7 @@ export const cardDatabase: Card[] = [
     // Western Philosophers
     {
         id: 'socrates',
-        name: 'Socrates',
+        name: 'Sokrates',
         type: 'Philosoph',
         cost: 3,
         attack: 2,
@@ -16,7 +16,7 @@ export const cardDatabase: Card[] = [
     },
     {
         id: 'plato',
-        name: 'Plato',
+        name: 'Platon',
         type: 'Philosoph',
         cost: 5,
         attack: 4,
@@ -28,7 +28,7 @@ export const cardDatabase: Card[] = [
     },
     {
         id: 'aristotle',
-        name: 'Aristotle',
+        name: 'Aristoteles',
         type: 'Philosoph',
         cost: 4,
         attack: 3,
@@ -78,7 +78,7 @@ export const cardDatabase: Card[] = [
     // Eastern Philosophers
     {
         id: 'confucius',
-        name: 'Confucius',
+        name: 'Konfuzius',
         type: 'Philosoph',
         cost: 4,
         attack: 3,
@@ -152,7 +152,7 @@ export const cardDatabase: Card[] = [
     // Spell Cards
     {
         id: 'dialectic',
-        name: 'Dialectic',
+        name: 'Dialektik',
         type: 'Zauber',
         cost: 2,
         description: 'Ziehe 2 Karten. Die Synthese von These und Antithese.',
@@ -197,7 +197,7 @@ export const cardDatabase: Card[] = [
     },
     {
         id: 'Aufklärung',
-        name: 'Enlightenment',
+        name: 'Aufklärung',
         type: 'Zauber',
         cost: 3,
         description: 'Stelle 5 Glaubwürdigkeit wieder her. Der Pfad zum Verständnis.',
@@ -215,7 +215,7 @@ export const cardDatabase: Card[] = [
     },
     {
         id: 'Dogmatismus',
-        name: 'Dogmatism',
+        name: 'Dogmatismus',
         type: 'Zauber',
         cost: 2,
         description: 'Sperre 2 Dialektik (Mana) des Gegners im nächsten Zug.',
@@ -434,7 +434,7 @@ export const cardDatabase: Card[] = [
     },
     {
         id: 'epicurus',
-        name: 'Epicurus',
+        name: 'Epikur',
         type: 'Philosoph',
         cost: 3,
         attack: 3,
@@ -569,7 +569,8 @@ export function shuffleDeck(deck: Card[]): Card[] {
     return shuffled;
 }
 
-export function generateDeck(size: number = 30): Card[] {
-    const shuffled = shuffleDeck(cardDatabase);
-    return shuffled.slice(0, size);
+export function generateDeck(): Card[] {
+    // Return the entire card database, shuffled
+    // Each player gets all cards exactly once
+    return shuffleDeck(cardDatabase);
 }

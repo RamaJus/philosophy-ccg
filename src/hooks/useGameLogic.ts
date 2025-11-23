@@ -8,7 +8,7 @@ const MAX_HAND_SIZE = 10;
 const MAX_BOARD_SIZE = 7;
 
 function createPlayer(name: string, isPlayer: boolean): Player {
-    const deck = generateDeck(20);
+    const deck = generateDeck();
     const hand = deck.slice(0, STARTING_HAND_SIZE);
 
     return {
