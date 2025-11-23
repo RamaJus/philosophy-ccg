@@ -109,7 +109,15 @@ export const Card: React.FC<CardProps> = ({
 
                                 {/* Card Image Area */}
                                 <div className={`h-32 ${isWittgenstein ? 'bg-gradient-to-br from-yellow-600 via-yellow-500 to-yellow-700' : 'bg-gradient-to-br from-slate-700 to-slate-800'} relative overflow-hidden flex items-center justify-center`}>
-                                    <div className="text-6xl">{factionIcons[card.faction]}</div>
+                                    {card.image ? (
+                                        <img
+                                            src={card.image}
+                                            alt={card.name}
+                                            className="w-full h-full object-cover"
+                                        />
+                                    ) : (
+                                        <div className="text-6xl">{factionIcons[card.faction]}</div>
+                                    )}
                                     {isMinion && (
                                         <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
                                     )}
@@ -210,7 +218,15 @@ export const Card: React.FC<CardProps> = ({
 
                 {/* Card Image Area */}
                 <div className={`h-32 ${isWittgenstein ? 'bg-gradient-to-br from-yellow-600 via-yellow-500 to-yellow-700' : 'bg-gradient-to-br from-slate-700 to-slate-800'} relative overflow-hidden flex items-center justify-center`}>
-                    <div className="text-6xl">{factionIcons[card.faction]}</div>
+                    {card.image ? (
+                        <img
+                            src={card.image}
+                            alt={card.name}
+                            className="w-full h-full object-cover"
+                        />
+                    ) : (
+                        <div className="text-6xl">{factionIcons[card.faction]}</div>
+                    )}
                     {isMinion && (
                         <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
                     )}

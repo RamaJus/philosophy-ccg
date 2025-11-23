@@ -13,6 +13,7 @@ export const cardDatabase: Card[] = [
         rarity: 'Selten',
         faction: 'Westlich',
         school: ['Skeptizismus', 'Ethik'],
+        image: '/images/cards/sokrates.png',
     },
     {
         id: 'plato',
@@ -25,6 +26,7 @@ export const cardDatabase: Card[] = [
         rarity: 'Episch',
         faction: 'Westlich',
         school: ['Idealismus', 'Rationalismus'],
+        image: '/images/cards/platon.png',
     },
     {
         id: 'aristotle',
@@ -37,6 +39,7 @@ export const cardDatabase: Card[] = [
         rarity: 'Episch',
         faction: 'Westlich',
         school: ['Empirismus', 'Logik', 'Ethik'],
+        image: '/images/cards/aristoteles.png',
     },
     {
         id: 'kant',
@@ -49,6 +52,7 @@ export const cardDatabase: Card[] = [
         rarity: 'Legendär',
         faction: 'Westlich',
         school: ['Idealismus', 'Deontologie', 'Aufklärung'],
+        image: '/images/cards/kant.png',
     },
     {
         id: 'nietzsche',
@@ -61,6 +65,7 @@ export const cardDatabase: Card[] = [
         rarity: 'Legendär',
         faction: 'Westlich',
         school: ['Existentialismus', 'Nihilismus'],
+        image: '/images/cards/nietzsche.png',
     },
     {
         id: 'descartes',
@@ -73,6 +78,7 @@ export const cardDatabase: Card[] = [
         rarity: 'Selten',
         faction: 'Westlich',
         school: ['Rationalismus'],
+        image: '/images/cards/descartes.png',
     },
 
     // Eastern Philosophers
@@ -87,6 +93,7 @@ export const cardDatabase: Card[] = [
         rarity: 'Episch',
         faction: 'Östlich',
         school: ['Ethik', 'Sozialphilosophie'],
+        image: '/images/cards/konfuzius.png',
     },
     {
         id: 'laozi',
