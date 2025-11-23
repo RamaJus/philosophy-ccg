@@ -40,13 +40,16 @@ export const DeckView: React.FC<DeckViewProps> = ({ deck, isOpen, onClose, onSel
                         {deck.map((card) => (
                             <div
                                 key={card.id}
-                                onClick={() => mode === 'search' && onSelectCard && onSelectCard(card.id)}
                                 className={`transform transition-all duration-300 ${mode === 'search'
-                                        ? 'cursor-pointer hover:scale-105 hover:shadow-xl hover:shadow-amber-500/20'
-                                        : ''
+                                    ? 'hover:scale-105 hover:shadow-xl hover:shadow-amber-500/20'
+                                    : ''
                                     }`}
                             >
-                                <CardComponent card={card} isPlayable={false} />
+                                <CardComponent
+                                    card={card}
+                                    isPlayable={mode === 'search'}
+                                    onClick={mode === 'search' && onSelectCard ? () => onSelectCard(card.id) : undefined}
+                                />
                             </div>
                         ))}
                     </div>
