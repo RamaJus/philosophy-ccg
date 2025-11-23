@@ -44,7 +44,8 @@ export const Card: React.FC<CardProps> = ({
     const prevHealth = useRef(currentHealth);
 
     // Calculate total attack with bonus
-    const baseAttack = card.attack || 0;
+    // Use boardMinion.attack if it's a board minion, otherwise use card.attack
+    const baseAttack = boardMinion ? boardMinion.attack : (card.attack || 0);
     const totalAttack = baseAttack + bonusDamage;
 
     // Right-click preview state
