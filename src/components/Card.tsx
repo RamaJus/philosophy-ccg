@@ -154,15 +154,12 @@ export const Card: React.FC<CardProps> = ({
                     <Sparkles size={14} className="text-white" />
                 </div>
 
-                <div className={`h-24 ${isWittgenstein ? 'bg-gradient-to-br from-yellow-600 via-yellow-500 to-yellow-700' : isMinion ? 'bg-gradient-to-br from-amber-100 via-amber-50 to-yellow-100' : 'bg-gradient-to-br from-sky-100 via-blue-50 to-indigo-100'} relative overflow-hidden flex items-center justify-center`}
-                    style={{
-                        backgroundImage: `
-                            radial-gradient(ellipse at 20% 50%, rgba(139, 115, 85, 0.03) 0%, transparent 50%),
-                            radial-gradient(ellipse at 80% 20%, rgba(139, 115, 85, 0.02) 0%, transparent 40%),
-                            radial-gradient(ellipse at 50% 80%, rgba(139, 115, 85, 0.02) 0%, transparent 40%),
-                            linear-gradient(90deg, transparent 0%, rgba(139, 115, 85, 0.015) 50%, transparent 100%)
-                        `
-                    }}>
+                <div className={`h-24 ${isWittgenstein ? 'bg-gradient-to-br from-yellow-600 via-yellow-500 to-yellow-700' : 'bg-cover bg-center'} relative overflow-hidden flex items-center justify-center`}
+                    style={!isWittgenstein ? {
+                        backgroundImage: 'url(/card-background.jpg)',
+                        backgroundSize: 'cover',
+                        backgroundPosition: 'center'
+                    } : undefined}>
                     {card.image ? (
                         <img
                             src={card.image}
@@ -180,15 +177,13 @@ export const Card: React.FC<CardProps> = ({
                     )}
                 </div>
 
-                <div className={`px-2 py-1 flex-1 rounded-b-xl ${isWittgenstein ? 'bg-yellow-900/70' : isMinion ? 'bg-amber-50/95' : 'bg-sky-50/95'} pb-8`}
-                    style={{
-                        backgroundImage: `
-                            radial-gradient(ellipse at 20% 50%, rgba(139, 115, 85, 0.03) 0%, transparent 50%),
-                            radial-gradient(ellipse at 80% 20%, rgba(139, 115, 85, 0.02) 0%, transparent 40%),
-                            linear-gradient(90deg, transparent 0%, rgba(139, 115, 85, 0.015) 50%, transparent 100%)
-                        `
-                    }}>
-                    <p className={`text-[10px] ${isWittgenstein ? 'text-yellow-50 font-semibold' : isMinion ? 'text-amber-900' : 'text-indigo-900'} italic leading-tight line-clamp-4`}>
+                <div className={`px-2 py-1 flex-1 rounded-b-xl ${isWittgenstein ? 'bg-yellow-900/70' : 'bg-cover bg-center'} pb-8`}
+                    style={!isWittgenstein ? {
+                        backgroundImage: 'url(/card-background.jpg)',
+                        backgroundSize: 'cover',
+                        backgroundPosition: 'center'
+                    } : undefined}>
+                    <p className={`text-[10px] ${isWittgenstein ? 'text-yellow-50 font-semibold' : 'text-amber-900'} italic leading-tight line-clamp-4 font-semibold`}>
                         {card.description}
                     </p>
                 </div>
