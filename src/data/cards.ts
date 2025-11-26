@@ -221,7 +221,7 @@ export const cardDatabase: Card[] = [
         faction: 'Westlich',
     },
     {
-        id: 'Dogmatismus',
+        id: 'dogmatism',
         name: 'Dogmatismus',
         type: 'Zauber',
         cost: 2,

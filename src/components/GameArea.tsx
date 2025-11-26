@@ -161,13 +161,8 @@ export const GameArea: React.FC<GameAreaProps> = ({ mode }) => {
     };
 
     return (
-        <div className="min-h-screen p-4 space-y-4">
-            <div className="text-center space-y-2">
-                <h1 className="text-5xl font-bold bg-gradient-to-r from-amber-400 via-orange-500 to-amber-400 bg-clip-text text-transparent">
-                    Philosophie Kartenspiel
-                </h1>
-                <p className="text-gray-400 italic">Dialektische Debatte - Wo Ideen aufeinandertreffen</p>
-            </div>
+        <div className="min-h-screen p-2 space-y-2">
+            {/* Header removed for laptop optimization */}
 
             {gameOver && (
                 <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 backdrop-blur-sm">
