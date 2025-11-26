@@ -327,6 +327,18 @@ export const cardDatabase: Card[] = [
         faction: 'Westlich',
         school: ['Pessimismus', 'Idealismus'],
     },
+    {
+        id: 'van_inwagen',
+        name: 'Peter Van Inwagen',
+        type: 'Philosoph',
+        cost: 6,
+        attack: 4,
+        health: 5,
+        description: 'SPEZIAL: Verwandle einen gegnerischen Philosophen in stuhlartig angeordnete Materie (1/1) für eine volle Runde.',
+        rarity: 'Legendär',
+        faction: 'Westlich',
+        school: ['Metaphysik', 'Freier Wille'],
+    },
 
     // Additional Eastern Philosophers
     {

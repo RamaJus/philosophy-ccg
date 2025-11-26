@@ -23,6 +23,8 @@ export interface BoardMinion extends Card {
     maxHealth: number;
     canAttack: boolean; // Summoning sickness
     hasAttacked: boolean; // This turn
+    transformedFrom?: BoardMinion; // Original minion before transformation
+    transformationEndsTurn?: number; // Turn number when transformation should revert
 }
 
 export interface Player {
@@ -49,7 +51,7 @@ export interface GameState {
     winner?: 'player' | 'opponent';
     selectedCard?: string; // Card ID in hand
     selectedMinion?: string; // Minion ID on board for attacking
-    targetMode?: 'attack' | 'spell' | 'search'; // What we're targeting for
+    targetMode?: 'attack' | 'spell' | 'search' | 'transform'; // What we're targeting for
     log: string[]; // Game log messages
 }
 
