@@ -229,10 +229,18 @@ export function useGameLogic(mode: 'single' | 'multiplayer_host' | 'multiplayer_
                     }
                 } else if (card.id.includes('sophistry')) {
                     // Steal 2 Mana
-                    const manaToSteal = Math.min(updatedEnemy.mana, 2);
-                    updatedEnemy.mana -= manaToSteal;
+                    // Ensure we don't steal more than they have, or more than we can hold
+                    const enemyMana = updatedEnemy.mana;
+                    const manaToSteal = Math.min(enemyMana, 2);
+
+                    updatedEnemy.mana = Math.max(0, updatedEnemy.mana - manaToSteal);
                     updatedPlayer.mana = Math.min(updatedPlayer.mana + manaToSteal, 10);
-                    addLog(`${activePlayer.name} wirkte ${card.name} und stahl ${manaToSteal} Dialektik!`);
+
+                    if (manaToSteal > 0) {
+                        addLog(`${activePlayer.name} nutzte Sophistik und stahl ${manaToSteal} Dialektik!`);
+                    } else {
+                        addLog(`${activePlayer.name} nutzte Sophistik, aber der Gegner hatte keine Dialektik!`);
+                    }
                 } else if (card.id.includes('dogmatism')) {
                     // Lock 2 Mana next turn
                     updatedEnemy.lockedMana += 2;

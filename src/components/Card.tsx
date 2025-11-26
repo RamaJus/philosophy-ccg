@@ -88,12 +88,19 @@ export const Card: React.FC<CardProps> = ({
         ${className}
     `;
 
+    // Determine stat badge color
+    const attackBadgeColor = bonusDamage > 0
+        ? 'from-green-500 to-green-600'
+        : bonusDamage < 0
+            ? 'from-red-500 to-red-600'
+            : 'from-slate-600 to-slate-700';
+
     return (
         <>
             {/* Portal for Large Preview */}
             {showPreview && createPortal(
-                <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/60 backdrop-blur-sm pointer-events-none">
-                    <div className="relative transform scale-150 pointer-events-auto shadow-2xl">
+                <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/80 backdrop-blur-sm" onClick={handleContextMenuRelease}>
+                    <div className="relative transform scale-150 pointer-events-auto shadow-2xl" onClick={(e) => e.stopPropagation()}>
                         <Card
                             card={card}
                             isPlayable={false}
@@ -109,20 +116,20 @@ export const Card: React.FC<CardProps> = ({
                 className={cardClasses}
                 onClick={isPlayable ? onClick : undefined}
                 onContextMenu={handleContextMenu}
-                style={{ width: '180px', height: '260px' }}
+                style={{ width: '140px', height: '200px' }} // Reduced size by ~20%
             >
                 {/* Cost Badge */}
-                <div className={`absolute top-2 left-2 w-10 h-10 rounded-full ${isWittgenstein ? 'bg-gradient-to-br from-yellow-300 via-yellow-500 to-yellow-600' : 'bg-gradient-to-br from-blue-400 to-blue-600'} flex items-center justify-center font-bold text-xl shadow-lg z-10 border-2 ${isWittgenstein ? 'border-yellow-200' : 'border-white'}`}>
+                <div className={`absolute top-1 left-1 w-8 h-8 rounded-full ${isWittgenstein ? 'bg-gradient-to-br from-yellow-300 via-yellow-500 to-yellow-600' : 'bg-gradient-to-br from-blue-400 to-blue-600'} flex items-center justify-center font-bold text-lg shadow-lg z-10 border-2 ${isWittgenstein ? 'border-yellow-200' : 'border-white'}`}>
                     {card.cost}
                 </div>
 
                 {/* Rarity Gem */}
-                <div className={`absolute top-2 right-2 w-8 h-8 rounded-full bg-gradient-to-br ${rarityColors[card.rarity]} flex items-center justify-center shadow-lg z-10`}>
-                    <Sparkles size={16} className="text-white" />
+                <div className={`absolute top-1 right-1 w-6 h-6 rounded-full bg-gradient-to-br ${rarityColors[card.rarity]} flex items-center justify-center shadow-lg z-10`}>
+                    <Sparkles size={14} className="text-white" />
                 </div>
 
                 {/* Card Image Area */}
-                <div className={`h-32 ${isWittgenstein ? 'bg-gradient-to-br from-yellow-600 via-yellow-500 to-yellow-700' : 'bg-gradient-to-br from-slate-700 to-slate-800'} relative overflow-hidden flex items-center justify-center`}>
+                <div className={`h-24 ${isWittgenstein ? 'bg-gradient-to-br from-yellow-600 via-yellow-500 to-yellow-700' : 'bg-gradient-to-br from-slate-700 to-slate-800'} relative overflow-hidden flex items-center justify-center`}>
                     {card.image ? (
                         <img
                             src={card.image}
@@ -130,7 +137,7 @@ export const Card: React.FC<CardProps> = ({
                             className="w-full h-full object-cover"
                         />
                     ) : (
-                        <div className="text-6xl">{factionIcons[card.faction]}</div>
+                        <div className="text-4xl">{factionIcons[card.faction]}</div>
                     )}
                     {isMinion && (
                         <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
@@ -141,38 +148,38 @@ export const Card: React.FC<CardProps> = ({
                 </div>
 
                 {/* Card Name */}
-                <div className={`px-3 py-2 ${isWittgenstein ? 'bg-gradient-to-r from-yellow-800 to-yellow-700' : 'bg-gradient-to-r from-slate-800 to-slate-700'}`}>
-                    <h3 className={`font-bold text-sm text-center ${isWittgenstein ? 'text-yellow-100' : 'text-white'} truncate`}>
+                <div className={`px-2 py-1 ${isWittgenstein ? 'bg-gradient-to-r from-yellow-800 to-yellow-700' : 'bg-gradient-to-r from-slate-800 to-slate-700'}`}>
+                    <h3 className={`font-bold text-xs text-center ${isWittgenstein ? 'text-yellow-100' : 'text-white'} truncate`}>
                         {card.name}
                     </h3>
                 </div>
 
                 {/* Description - Full Text with padding for absolute stats */}
-                <div className={`px-3 py-2 flex-1 ${isWittgenstein ? 'bg-yellow-900/70' : 'bg-slate-800/90'} pb-10`}>
-                    <p className={`text-xs ${isWittgenstein ? 'text-yellow-50 font-semibold' : 'text-gray-300'} italic leading-tight line-clamp-4`}>
+                <div className={`px-2 py-1 flex-1 ${isWittgenstein ? 'bg-yellow-900/70' : 'bg-slate-800/90'} pb-8`}>
+                    <p className={`text-[10px] ${isWittgenstein ? 'text-yellow-50 font-semibold' : 'text-gray-300'} italic leading-tight line-clamp-4`}>
                         {card.description}
                     </p>
                 </div>
 
                 {/* Stats for Minions - Absolute Positioned */}
                 {isMinion && (
-                    <div className="absolute bottom-0 left-0 right-0 flex justify-between items-center px-3 py-2 bg-slate-900/90 border-t border-slate-700/50 rounded-b-xl">
-                        <div className={`flex items-center gap-1 stat-badge ${bonusDamage > 0 ? 'from-green-500 to-green-600' : 'from-red-500 to-red-600'}`}>
-                            <Swords size={14} />
+                    <div className="absolute bottom-0 left-0 right-0 flex justify-between items-center px-2 py-1 bg-slate-900/90 border-t border-slate-700/50 rounded-b-xl">
+                        <div className={`flex items-center gap-1 stat-badge ${attackBadgeColor}`}>
+                            <Swords size={12} />
                             <span>{totalAttack}</span>
                         </div>
 
                         {boardMinion ? (
                             <div className={`flex items-center gap-1 stat-badge ${boardMinion.health < boardMinion.maxHealth
-                                    ? 'from-orange-500 to-red-600'
-                                    : 'from-green-500 to-green-600'
+                                ? 'from-orange-500 to-red-600'
+                                : 'from-green-500 to-green-600'
                                 }`}>
-                                <Heart size={14} />
+                                <Heart size={12} />
                                 <span>{boardMinion.health}</span>
                             </div>
                         ) : (
                             <div className="flex items-center gap-1 stat-badge from-green-500 to-green-600">
-                                <Heart size={14} />
+                                <Heart size={12} />
                                 <span>{card.health}</span>
                             </div>
                         )}

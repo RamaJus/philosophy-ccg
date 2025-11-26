@@ -161,7 +161,7 @@ export const GameArea: React.FC<GameAreaProps> = ({ mode }) => {
     };
 
     return (
-        <div className="min-h-screen p-2 space-y-2">
+        <div className="h-screen w-full overflow-hidden bg-gradient-to-br from-slate-900 to-slate-800 text-white relative">
             {/* Header removed for laptop optimization */}
 
             {gameOver && (
@@ -197,25 +197,32 @@ export const GameArea: React.FC<GameAreaProps> = ({ mode }) => {
                 mode={targetMode === 'search' ? 'search' : 'view'}
             />
 
-            <div className="grid grid-cols-4 gap-4">
-                <div className="space-y-4 flex flex-col items-center">
+            {/* Main Game Grid - Adjusted for full height */}
+            <div className="grid grid-cols-12 gap-2 h-full p-2 pb-24">
+                {/* Left Side: Stats & Graveyard (2 cols) */}
+                <div className="col-span-2 flex flex-col gap-2 h-full overflow-y-auto">
                     <PlayerStats player={viewOpponent} isOpponent={true} />
                     <WorkSlot card={viewOpponent.activeWork} />
-                    <Graveyard cards={viewOpponent.graveyard} title="Gegnerischer Friedhof" />
+                    <Graveyard cards={viewOpponent.graveyard} title="Gegner" />
                     <GameLog messages={log} />
                 </div>
 
-                <div className="col-span-2 space-y-4">
-                    <Board
-                        minions={viewOpponent.board}
-                        onMinionClick={viewIsPlayerTurn && selectedMinion ? handleOpponentMinionClick : undefined}
-                        canTarget={viewIsPlayerTurn && !!selectedMinion}
-                        activeWork={viewOpponent.activeWork}
-                    />
+                {/* Center: Board (8 cols) */}
+                <div className="col-span-8 flex flex-col h-full gap-2">
+                    {/* Opponent Board */}
+                    <div className="flex-1">
+                        <Board
+                            minions={viewOpponent.board}
+                            onMinionClick={viewIsPlayerTurn && selectedMinion ? handleOpponentMinionClick : undefined}
+                            canTarget={viewIsPlayerTurn && !!selectedMinion}
+                            activeWork={viewOpponent.activeWork}
+                        />
+                    </div>
 
-                    <div className="glass-panel p-3 text-center">
+                    {/* Turn Controls */}
+                    <div className="glass-panel p-2 text-center shrink-0">
                         <div className="flex items-center justify-center gap-4">
-                            <div className={`px-4 py-2 rounded-lg ${viewIsPlayerTurn ? 'bg-green-500/20 text-green-400' : 'bg-gray-500/20 text-gray-400'}`}>
+                            <div className={`px-4 py-1 rounded-lg ${viewIsPlayerTurn ? 'bg-green-500/20 text-green-400' : 'bg-gray-500/20 text-gray-400'}`}>
                                 <p className="text-sm font-semibold">Runde {gameState.turn}</p>
                                 <p className="text-xs">{viewIsPlayerTurn ? 'Dein Zug' : 'Gegner-Zug'}</p>
                             </div>
@@ -223,9 +230,9 @@ export const GameArea: React.FC<GameAreaProps> = ({ mode }) => {
                             {viewIsPlayerTurn && selectedMinion && (
                                 <button
                                     onClick={handleAttackPlayer}
-                                    className="px-4 py-2 bg-red-500/80 hover:bg-red-500 rounded-lg transition-colors flex items-center gap-2"
+                                    className="px-4 py-1 bg-red-500/80 hover:bg-red-500 rounded-lg transition-colors flex items-center gap-2 text-sm"
                                 >
-                                    <Swords size={16} />
+                                    <Swords size={14} />
                                     Gegner angreifen
                                 </button>
                             )}
@@ -233,33 +240,37 @@ export const GameArea: React.FC<GameAreaProps> = ({ mode }) => {
                             {viewIsPlayerTurn && (
                                 <button
                                     onClick={handleEndTurn}
-                                    className="btn-primary flex items-center gap-2"
+                                    className="btn-primary flex items-center gap-2 py-1 text-sm"
                                 >
-                                    <SkipForward size={20} />
+                                    <SkipForward size={16} />
                                     Zug beenden
                                 </button>
                             )}
                         </div>
                     </div>
 
-                    <Board
-                        minions={viewPlayer.board}
-                        onMinionClick={handlePlayerMinionClick}
-                        selectedMinionId={selectedMinion}
-                        isPlayerBoard={true}
-                        activeWork={viewPlayer.activeWork}
-                    />
+                    {/* Player Board */}
+                    <div className="flex-1">
+                        <Board
+                            minions={viewPlayer.board}
+                            onMinionClick={handlePlayerMinionClick}
+                            selectedMinionId={selectedMinion}
+                            isPlayerBoard={true}
+                            activeWork={viewPlayer.activeWork}
+                        />
+                    </div>
                 </div>
 
-                <div className="space-y-4 flex flex-col items-center">
+                {/* Right Side: Player Stats & Deck (2 cols) */}
+                <div className="col-span-2 flex flex-col gap-2 h-full overflow-y-auto">
                     <PlayerStats player={viewPlayer} />
                     <div className="w-full flex justify-center">
                         <button
                             onClick={() => setIsDeckViewOpen(true)}
-                            className="flex items-center gap-2 px-4 py-2 bg-amber-900/40 hover:bg-amber-900/60 border border-amber-600/30 rounded-lg text-amber-200 transition-colors"
+                            className="flex items-center gap-2 px-4 py-2 bg-amber-900/40 hover:bg-amber-900/60 border border-amber-600/30 rounded-lg text-amber-200 transition-colors text-sm"
                         >
-                            <Library size={16} />
-                            Deck ansehen ({viewPlayer.deck.length})
+                            <Library size={14} />
+                            Deck ({viewPlayer.deck.length})
                         </button>
                     </div>
                     <WorkSlot card={viewPlayer.activeWork} />
@@ -267,12 +278,17 @@ export const GameArea: React.FC<GameAreaProps> = ({ mode }) => {
                 </div>
             </div>
 
-            <Hand
-                cards={viewPlayer.hand}
-                onCardClick={handleCardClick}
-                selectedCardId={selectedCard}
-                currentMana={viewPlayer.mana}
-            />
+            {/* Hand Overlay */}
+            <div className="absolute bottom-0 left-0 right-0 z-40 flex justify-center pointer-events-none">
+                <div className="pointer-events-auto">
+                    <Hand
+                        cards={viewPlayer.hand}
+                        onCardClick={handleCardClick}
+                        selectedCardId={selectedCard}
+                        currentMana={viewPlayer.mana}
+                    />
+                </div>
+            </div>
         </div>
     );
 };
