@@ -77,7 +77,6 @@ export const Card: React.FC<CardProps> = ({
         ${isMinion ? 'card-minion' : 'card-spell'}
         ${isSelected ? 'ring-4 ring-yellow-400 scale-110' : ''}
         ${isPlayable ? 'cursor-pointer' : 'opacity-60 cursor-not-allowed'}
-        ${isWittgenstein ? 'ring-4 ring-yellow-500 shadow-2xl shadow-yellow-500/50' : ''}
         ${isDamaged ? 'animate-shake ring-4 ring-red-500' : ''}
         relative group transition-all duration-300 transform hover:scale-105 hover:z-10
         ${className}
@@ -105,11 +104,6 @@ export const Card: React.FC<CardProps> = ({
 
                         <div className="w-[200px] h-[300px] bg-slate-900/95 border border-slate-600 rounded-xl p-4 text-white shadow-2xl flex flex-col gap-3 overflow-y-auto">
                             <h3 className="text-lg font-bold text-amber-400 border-b border-slate-700 pb-2">{card.name}</h3>
-
-                            <div className="space-y-1">
-                                <span className="text-xs text-gray-400 uppercase tracking-wider">Fraktion</span>
-                                <p className="text-sm font-medium">{card.faction} {factionIcons[card.faction]}</p>
-                            </div>
 
                             {card.school && (
                                 <div className="space-y-1">
@@ -140,13 +134,13 @@ export const Card: React.FC<CardProps> = ({
                 onContextMenu={handleContextMenu}
                 style={{ width: '140px', height: '200px' }}
             >
-                <div className={`px-2 py-1 rounded-t-xl ${isWittgenstein ? 'bg-gradient-to-r from-yellow-800 to-yellow-700' : 'bg-gradient-to-r from-slate-800 to-slate-700'}`}>
-                    <h3 className={`font-bold text-xs text-center ${isWittgenstein ? 'text-yellow-100' : 'text-white'} truncate`}>
+                <div className="px-2 py-1 rounded-t-xl bg-gradient-to-r from-slate-800 to-slate-700">
+                    <h3 className="font-bold text-xs text-center text-white truncate">
                         {card.name}
                     </h3>
                 </div>
 
-                <div className={`absolute top-8 left-1 w-8 h-8 rounded-full ${isWittgenstein ? 'bg-gradient-to-br from-yellow-300 via-yellow-500 to-yellow-600' : 'bg-gradient-to-br from-blue-400 to-blue-600'} flex items-center justify-center font-bold text-lg shadow-lg z-10 border-2 ${isWittgenstein ? 'border-yellow-200' : 'border-white'}`}>
+                <div className={`absolute top-8 left-1 w-8 h-8 rounded-full ${isWittgenstein ? 'bg-gradient-to-br from-yellow-300 via-yellow-500 to-yellow-600 border-yellow-200' : 'bg-gradient-to-br from-blue-400 to-blue-600 border-white'} flex items-center justify-center font-bold text-lg shadow-lg z-10 border-2`}>
                     {card.cost}
                 </div>
 
@@ -154,12 +148,14 @@ export const Card: React.FC<CardProps> = ({
                     <Sparkles size={14} className="text-white" />
                 </div>
 
-                <div className={`h-24 ${isWittgenstein ? 'bg-gradient-to-br from-yellow-600 via-yellow-500 to-yellow-700' : 'bg-cover bg-center'} relative overflow-hidden flex items-center justify-center`}
-                    style={!isWittgenstein ? {
+                <div
+                    className="h-24 relative overflow-hidden flex items-center justify-center bg-amber-50"
+                    style={{
                         backgroundImage: 'url(/card-background.jpg)',
                         backgroundSize: 'cover',
-                        backgroundPosition: 'center'
-                    } : undefined}>
+                        backgroundPosition: 'center',
+                        backgroundColor: '#fef3c7'
+                    }}>
                     {card.image ? (
                         <img
                             src={card.image}
@@ -172,18 +168,17 @@ export const Card: React.FC<CardProps> = ({
                     {isMinion && (
                         <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
                     )}
-                    {isWittgenstein && (
-                        <div className="absolute inset-0 bg-gradient-to-t from-yellow-900/40 to-transparent animate-pulse" />
-                    )}
                 </div>
 
-                <div className={`px-2 py-1 flex-1 rounded-b-xl ${isWittgenstein ? 'bg-yellow-900/70' : 'bg-cover bg-center'} pb-8`}
-                    style={!isWittgenstein ? {
+                <div
+                    className="px-2 py-1 flex-1 rounded-b-xl bg-amber-50 pb-8"
+                    style={{
                         backgroundImage: 'url(/card-background.jpg)',
                         backgroundSize: 'cover',
-                        backgroundPosition: 'center'
-                    } : undefined}>
-                    <p className={`text-[10px] ${isWittgenstein ? 'text-yellow-50 font-semibold' : 'text-amber-900'} italic leading-tight line-clamp-4 font-semibold`}>
+                        backgroundPosition: 'center',
+                        backgroundColor: '#fef3c7'
+                    }}>
+                    <p className="text-[10px] text-amber-900 italic leading-tight line-clamp-4 font-semibold">
                         {card.description}
                     </p>
                 </div>

@@ -192,6 +192,13 @@ export function useGameLogic(mode: 'single' | 'multiplayer_host' | 'multiplayer_
                     canAttack: false, // Summoning sickness
                     hasAttacked: false,
                 };
+
+                // Schopenhauer: Deal 5 damage to player when played
+                if (card.id.includes('schopenhauer')) {
+                    updatedPlayer.health = Math.max(0, updatedPlayer.health - 5);
+                    addLog(`${card.name} fügt dir 5 Schaden zu! Leben ist Leiden.`);
+                }
+
                 updatedPlayer = {
                     ...updatedPlayer,
                     board: [...updatedPlayer.board, minion],
