@@ -296,10 +296,21 @@ export function useGameLogic(mode: 'single' | 'multiplayer_host' | 'multiplayer_
             let updatedActivePlayer = { ...activePlayer };
             let updatedEnemyPlayer = { ...enemyPlayer };
 
+            // Calculate damage modifiers (Work Bonus)
+            let damageToDeal = attacker.attack;
+            let bonusLog = '';
+
+            if (activePlayer.activeWork && activePlayer.activeWork.workBonus && attacker.school) {
+                if (attacker.school.includes(activePlayer.activeWork.workBonus.school)) {
+                    damageToDeal += activePlayer.activeWork.workBonus.damage;
+                    bonusLog = ` (Bonus durch "${activePlayer.activeWork.name}"! +${activePlayer.activeWork.workBonus.damage})`;
+                }
+            }
+
             if (!targetId) {
                 // Attack player directly
-                updatedEnemyPlayer.health -= attacker.attack;
-                addLog(`${attacker.name} griff ${enemyPlayer.name} an und verursachte ${attacker.attack} Schaden!`);
+                updatedEnemyPlayer.health -= damageToDeal;
+                addLog(`${attacker.name} griff ${enemyPlayer.name} an und verursachte ${damageToDeal} Schaden!${bonusLog}`);
 
                 // Mark attacker as having attacked
                 updatedActivePlayer.board = activePlayer.board.map((m, i) =>
@@ -313,23 +324,46 @@ export function useGameLogic(mode: 'single' | 'multiplayer_host' | 'multiplayer_
                 const target = enemyPlayer.board[targetIndex];
 
                 // Calculate damage modifiers
-                let attackerDamage = attacker.attack;
                 let targetDamage = target.attack;
-                let logMessage = `${attacker.name} griff ${target.name} an!`;
+                let logMessage = `${attacker.name} griff ${target.name} an!${bonusLog}`;
+
+                // Deal damage to both
+                const updatedAttacker = { ...attacker, health: attacker.health - targetDamage, hasAttacked: true };
+                const updatedTarget = { ...target, health: target.health - damageToDeal };
+
+                addLog(logMessage);
 
                 // Work Bonuses
                 if (activePlayer.activeWork && activePlayer.activeWork.workBonus && attacker.school) {
                     if (attacker.school.includes(activePlayer.activeWork.workBonus.school)) {
-                        attackerDamage += activePlayer.activeWork.workBonus.damage;
-                        logMessage += ` Bonus durch "${activePlayer.activeWork.name}"! (+${activePlayer.activeWork.workBonus.damage})`;
+                        // Bonus already applied to damageToDeal, just logging here if needed or applying extra effects
+                        // Since we calculated damageToDeal upfront, we don't need to add it again here.
+                        // However, the original code seemed to want to add it specifically for minion combat?
+                        // But we already added it to damageToDeal which was used for updatedTarget.
+                        // So we just need to make sure the log reflects it.
+                        // The bonusLog variable already handles the log text.
                     }
                 }
 
-                // Deal damage to both
-                const updatedAttacker = { ...attacker, health: attacker.health - targetDamage, hasAttacked: true };
-                const updatedTarget = { ...target, health: target.health - attackerDamage };
+                // Update boards
+                updatedActivePlayer.board = [...activePlayer.board];
+                updatedEnemyPlayer.board = [...enemyPlayer.board];
 
-                addLog(logMessage);
+                if (updatedAttacker.health <= 0) {
+                    updatedActivePlayer.board.splice(attackerIndex, 1);
+                    updatedActivePlayer.graveyard = [...updatedActivePlayer.graveyard, attacker];
+                    addLog(`${attacker.name} wurde besiegt!`);
+                } else {
+                    updatedActivePlayer.board[attackerIndex] = updatedAttacker;
+                }
+
+                if (updatedTarget.health <= 0) {
+                    updatedEnemyPlayer.board.splice(targetIndex, 1);
+                    updatedEnemyPlayer.graveyard = [...updatedEnemyPlayer.graveyard, target];
+                    addLog(`${target.name} wurde besiegt!`);
+                } else {
+                    updatedEnemyPlayer.board[targetIndex] = updatedTarget;
+                }
 
                 // Update boards
                 updatedActivePlayer.board = [...activePlayer.board];
