@@ -225,219 +225,251 @@ export function useGameLogic(mode: 'single' | 'multiplayer_host' | 'multiplayer_
 
                     // Check win conditions immediately after spell damage
                     if (updatedEnemy.health <= 0) {
-                        const manaToSteal = Math.min(updatedEnemy.mana, 2);
-                        updatedEnemy.mana -= manaToSteal;
-                        updatedPlayer.mana = Math.min(updatedPlayer.mana + manaToSteal, 10);
-                        addLog(`${activePlayer.name} wirkte ${card.name} und stahl ${manaToSteal} Dialektik!`);
-                ...prev,
-            player: activePlayerKey === 'player' ? updatedPlayer : updatedEnemy,
-            opponent: activePlayerKey === 'player' ? updatedEnemy : updatedPlayer,
-            selectedCard: undefined,
-            };
-});
-    }, [addLog, drawCard]);
-
-const attack = useCallback((attackerId: string, targetId?: string) => {
-    setGameState(prev => {
-        const { activePlayer: activePlayerKey, player, opponent } = prev;
-        const activePlayer = activePlayerKey === 'player' ? player : opponent;
-        const enemyPlayer = activePlayerKey === 'player' ? opponent : player;
-
-        const attackerIndex = activePlayer.board.findIndex(m => m.id === attackerId);
-        if (attackerIndex === -1) return prev;
-
-        const attacker = activePlayer.board[attackerIndex];
-
-        if (!attacker.canAttack || attacker.hasAttacked) {
-            addLog('Dieser Philosoph kann noch nicht angreifen!');
-            return prev;
-        }
-
-        let updatedActivePlayer = { ...activePlayer };
-        let updatedEnemyPlayer = { ...enemyPlayer };
-
-        if (!targetId) {
-            // Attack player directly
-            updatedEnemyPlayer.health -= attacker.attack;
-            addLog(`${attacker.name} griff ${enemyPlayer.name} an und verursachte ${attacker.attack} Schaden!`);
-
-            // Mark attacker as having attacked
-            updatedActivePlayer.board = activePlayer.board.map((m, i) =>
-                i === attackerIndex ? { ...m, hasAttacked: true } : m
-            );
-        } else {
-            // Attack minion
-            const targetIndex = enemyPlayer.board.findIndex(m => m.id === targetId);
-            if (targetIndex === -1) return prev;
-
-            const target = enemyPlayer.board[targetIndex];
-
-            // Calculate damage modifiers
-            let attackerDamage = attacker.attack;
-            let targetDamage = target.attack;
-            let logMessage = `${attacker.name} griff ${target.name} an!`;
-
-            // Work Bonuses
-            if (activePlayer.activeWork && activePlayer.activeWork.workBonus && attacker.school) {
-                if (attacker.school.includes(activePlayer.activeWork.workBonus.school)) {
-                    attackerDamage += activePlayer.activeWork.workBonus.damage;
-                    logMessage += ` Bonus durch "${activePlayer.activeWork.name}"! (+${activePlayer.activeWork.workBonus.damage})`;
+                        // Win condition handled by useEffect
+                    }
+                } else if (card.id.includes('sophistry')) {
+                    // Steal 2 Mana
+                    const manaToSteal = Math.min(updatedEnemy.mana, 2);
+                    updatedEnemy.mana -= manaToSteal;
+                    updatedPlayer.mana = Math.min(updatedPlayer.mana + manaToSteal, 10);
+                    addLog(`${activePlayer.name} wirkte ${card.name} und stahl ${manaToSteal} Dialektik!`);
+                } else if (card.id.includes('dogmatism')) {
+                    // Lock 2 Mana next turn
+                    updatedEnemy.lockedMana += 2;
+                    addLog(`${activePlayer.name} wirkte ${card.name} und sperrte 2 Dialektik des Gegners!`);
+                } else if (card.id.includes('hermeneutics')) {
+                    // Trigger search mode only for player
+                    if (activePlayerKey === 'player') {
+                        return {
+                            ...prev,
+                            player: updatedPlayer,
+                            opponent: updatedEnemy,
+                            selectedCard: undefined,
+                            targetMode: 'search',
+                        };
+                    } else {
+                        // AI Logic: Pick a random card from deck
+                        if (updatedPlayer.deck.length > 0) {
+                            const randomIndex = Math.floor(Math.random() * updatedPlayer.deck.length);
+                            const searchedCard = updatedPlayer.deck[randomIndex];
+                            updatedPlayer.deck.splice(randomIndex, 1);
+                            updatedPlayer.hand.push(searchedCard);
+                            addLog(`${activePlayer.name} wirkte ${card.name} und suchte eine Karte aus dem Deck.`);
+                        }
+                    }
                 }
             }
 
-            // Deal damage to both
-            const updatedAttacker = { ...attacker, health: attacker.health - targetDamage, hasAttacked: true };
-            const updatedTarget = { ...target, health: target.health - attackerDamage };
+            return {
+                ...prev,
+                player: activePlayerKey === 'player' ? updatedPlayer : updatedEnemy,
+                opponent: activePlayerKey === 'player' ? updatedEnemy : updatedPlayer,
+                selectedCard: undefined,
+            };
+        });
+    }, [addLog, drawCard]);
 
-            addLog(logMessage);
+    const attack = useCallback((attackerId: string, targetId?: string) => {
+        setGameState(prev => {
+            const { activePlayer: activePlayerKey, player, opponent } = prev;
+            const activePlayer = activePlayerKey === 'player' ? player : opponent;
+            const enemyPlayer = activePlayerKey === 'player' ? opponent : player;
 
-            // Update boards
-            updatedActivePlayer.board = [...activePlayer.board];
-            updatedEnemyPlayer.board = [...enemyPlayer.board];
+            const attackerIndex = activePlayer.board.findIndex(m => m.id === attackerId);
+            if (attackerIndex === -1) return prev;
 
-            if (updatedAttacker.health <= 0) {
-                updatedActivePlayer.board.splice(attackerIndex, 1);
-                updatedActivePlayer.graveyard = [...updatedActivePlayer.graveyard, attacker];
-                addLog(`${attacker.name} wurde besiegt!`);
-            } else {
-                updatedActivePlayer.board[attackerIndex] = updatedAttacker;
+            const attacker = activePlayer.board[attackerIndex];
+
+            if (!attacker.canAttack || attacker.hasAttacked) {
+                addLog('Dieser Philosoph kann noch nicht angreifen!');
+                return prev;
             }
 
-            if (updatedTarget.health <= 0) {
-                updatedEnemyPlayer.board.splice(targetIndex, 1);
-                updatedEnemyPlayer.graveyard = [...updatedEnemyPlayer.graveyard, target];
-                addLog(`${target.name} wurde besiegt!`);
+            let updatedActivePlayer = { ...activePlayer };
+            let updatedEnemyPlayer = { ...enemyPlayer };
+
+            if (!targetId) {
+                // Attack player directly
+                updatedEnemyPlayer.health -= attacker.attack;
+                addLog(`${attacker.name} griff ${enemyPlayer.name} an und verursachte ${attacker.attack} Schaden!`);
+
+                // Mark attacker as having attacked
+                updatedActivePlayer.board = activePlayer.board.map((m, i) =>
+                    i === attackerIndex ? { ...m, hasAttacked: true } : m
+                );
             } else {
-                updatedEnemyPlayer.board[targetIndex] = updatedTarget;
+                // Attack minion
+                const targetIndex = enemyPlayer.board.findIndex(m => m.id === targetId);
+                if (targetIndex === -1) return prev;
+
+                const target = enemyPlayer.board[targetIndex];
+
+                // Calculate damage modifiers
+                let attackerDamage = attacker.attack;
+                let targetDamage = target.attack;
+                let logMessage = `${attacker.name} griff ${target.name} an!`;
+
+                // Work Bonuses
+                if (activePlayer.activeWork && activePlayer.activeWork.workBonus && attacker.school) {
+                    if (attacker.school.includes(activePlayer.activeWork.workBonus.school)) {
+                        attackerDamage += activePlayer.activeWork.workBonus.damage;
+                        logMessage += ` Bonus durch "${activePlayer.activeWork.name}"! (+${activePlayer.activeWork.workBonus.damage})`;
+                    }
+                }
+
+                // Deal damage to both
+                const updatedAttacker = { ...attacker, health: attacker.health - targetDamage, hasAttacked: true };
+                const updatedTarget = { ...target, health: target.health - attackerDamage };
+
+                addLog(logMessage);
+
+                // Update boards
+                updatedActivePlayer.board = [...activePlayer.board];
+                updatedEnemyPlayer.board = [...enemyPlayer.board];
+
+                if (updatedAttacker.health <= 0) {
+                    updatedActivePlayer.board.splice(attackerIndex, 1);
+                    updatedActivePlayer.graveyard = [...updatedActivePlayer.graveyard, attacker];
+                    addLog(`${attacker.name} wurde besiegt!`);
+                } else {
+                    updatedActivePlayer.board[attackerIndex] = updatedAttacker;
+                }
+
+                if (updatedTarget.health <= 0) {
+                    updatedEnemyPlayer.board.splice(targetIndex, 1);
+                    updatedEnemyPlayer.graveyard = [...updatedEnemyPlayer.graveyard, target];
+                    addLog(`${target.name} wurde besiegt!`);
+                } else {
+                    updatedEnemyPlayer.board[targetIndex] = updatedTarget;
+                }
+            }
+
+            // Check win conditions immediately after attack
+            const gameOver = updatedEnemyPlayer.health <= 0 || updatedActivePlayer.health <= 0;
+            let winner: 'player' | 'opponent' | undefined = undefined;
+
+            if (updatedEnemyPlayer.health <= 0) {
+                winner = activePlayerKey;
+            } else if (updatedActivePlayer.health <= 0) {
+                winner = activePlayerKey === 'player' ? 'opponent' : 'player';
+            }
+
+            return {
+                ...prev,
+                player: activePlayerKey === 'player' ? updatedActivePlayer : updatedEnemyPlayer,
+                opponent: activePlayerKey === 'player' ? updatedEnemyPlayer : updatedActivePlayer,
+                selectedMinion: undefined,
+                gameOver,
+                winner,
+            };
+        });
+    }, [addLog]);
+
+    const endTurn = useCallback(() => {
+        setGameState(prev => {
+            const { activePlayer: currentPlayer, player, opponent, turn } = prev;
+
+            addLog(`${currentPlayer === 'player' ? player.name : opponent.name} beendete den Zug.`);
+
+            const nextPlayer = currentPlayer === 'player' ? 'opponent' : 'player';
+            const playerToActivate = nextPlayer === 'player' ? player : opponent;
+
+            const updatedPlayer = startTurn(playerToActivate);
+
+            addLog(`Runde ${turn + 1}: ${updatedPlayer.name} ist am Zug.`);
+
+            const newState: GameState = {
+                ...prev,
+                turn: nextPlayer === 'player' ? turn + 1 : turn,
+                activePlayer: nextPlayer,
+                player: nextPlayer === 'player' ? updatedPlayer : player,
+                opponent: nextPlayer === 'opponent' ? updatedPlayer : opponent,
+                selectedCard: undefined,
+                selectedMinion: undefined,
+            };
+
+            return newState;
+        });
+    }, [addLog, startTurn]);
+
+    const selectCard = useCallback((cardId?: string) => {
+        setGameState(prev => ({ ...prev, selectedCard: cardId }));
+    }, []);
+
+    const selectMinion = useCallback((minionId?: string) => {
+        setGameState(prev => ({ ...prev, selectedMinion: minionId }));
+    }, []);
+
+    const dispatch = useCallback((action: GameAction, fromNetwork: boolean = false) => {
+        // If client, send action to host instead of executing locally
+        if (mode === 'multiplayer_client' && !fromNetwork) {
+            // Only allow selecting cards/minions locally for UI feedback, but not game logic
+            if (action.type === 'SELECT_CARD' || action.type === 'SELECT_MINION') {
+                // Allow local selection
+            } else {
+                console.log('Client sending action:', action);
+                multiplayer.sendAction(action);
+                return; // Don't execute locally yet, wait for state update
             }
         }
 
-        // Check win conditions immediately after attack
-        const gameOver = updatedEnemyPlayer.health <= 0 || updatedActivePlayer.health <= 0;
-        let winner: 'player' | 'opponent' | undefined = undefined;
-
-        if (updatedEnemyPlayer.health <= 0) {
-            winner = activePlayerKey;
-        } else if (updatedActivePlayer.health <= 0) {
-            winner = activePlayerKey === 'player' ? 'opponent' : 'player';
-        }
-
-        return {
-            ...prev,
-            player: activePlayerKey === 'player' ? updatedActivePlayer : updatedEnemyPlayer,
-            opponent: activePlayerKey === 'player' ? updatedEnemyPlayer : updatedActivePlayer,
-            selectedMinion: undefined,
-            gameOver,
-            winner,
-        };
-    });
-}, [addLog]);
-
-const endTurn = useCallback(() => {
-    setGameState(prev => {
-        const { activePlayer: currentPlayer, player, opponent, turn } = prev;
-
-        addLog(`${currentPlayer === 'player' ? player.name : opponent.name} beendete den Zug.`);
-
-        const nextPlayer = currentPlayer === 'player' ? 'opponent' : 'player';
-        const playerToActivate = nextPlayer === 'player' ? player : opponent;
-
-        const updatedPlayer = startTurn(playerToActivate);
-
-        addLog(`Runde ${turn + 1}: ${updatedPlayer.name} ist am Zug.`);
-
-        const newState: GameState = {
-            ...prev,
-            turn: nextPlayer === 'player' ? turn + 1 : turn,
-            activePlayer: nextPlayer,
-            player: nextPlayer === 'player' ? updatedPlayer : player,
-            opponent: nextPlayer === 'opponent' ? updatedPlayer : opponent,
-            selectedCard: undefined,
-            selectedMinion: undefined,
-        };
-
-        return newState;
-    });
-}, [addLog, startTurn]);
-
-const selectCard = useCallback((cardId?: string) => {
-    setGameState(prev => ({ ...prev, selectedCard: cardId }));
-}, []);
-
-const selectMinion = useCallback((minionId?: string) => {
-    setGameState(prev => ({ ...prev, selectedMinion: minionId }));
-}, []);
-
-const dispatch = useCallback((action: GameAction, fromNetwork: boolean = false) => {
-    // If client, send action to host instead of executing locally
-    if (mode === 'multiplayer_client' && !fromNetwork) {
-        // Only allow selecting cards/minions locally for UI feedback, but not game logic
-        if (action.type === 'SELECT_CARD' || action.type === 'SELECT_MINION') {
-            // Allow local selection
-        } else {
-            console.log('Client sending action:', action);
-            multiplayer.sendAction(action);
-            return; // Don't execute locally yet, wait for state update
-        }
-    }
-
-    switch (action.type) {
-        case 'START_GAME':
-            setGameState(createInitialState());
-            // Start first turn
-            setTimeout(() => {
+        switch (action.type) {
+            case 'START_GAME':
+                setGameState(createInitialState());
+                // Start first turn
+                setTimeout(() => {
+                    setGameState(prev => {
+                        const updatedPlayer = startTurn(prev.player);
+                        addLog('Runde 1: Player beginnt.');
+                        return { ...prev, player: updatedPlayer, turn: 1 };
+                    });
+                }, 100);
+                break;
+            case 'END_TURN':
+                endTurn();
+                break;
+            case 'PLAY_CARD':
+                playCard(action.cardId);
+                break;
+            case 'ATTACK':
+                attack(action.attackerId, action.targetId);
+                break;
+            case 'SELECT_CARD':
+                selectCard(action.cardId);
+                break;
+            case 'SELECT_MINION':
+                selectMinion(action.minionId);
+                break;
+            case 'SEARCH_DECK':
+                // Handle deck search result (card selected from deck)
                 setGameState(prev => {
-                    const updatedPlayer = startTurn(prev.player);
-                    addLog('Runde 1: Player beginnt.');
-                    return { ...prev, player: updatedPlayer, turn: 1 };
+                    const { player, opponent, activePlayer: activePlayerKey } = prev;
+                    const activePlayer = activePlayerKey === 'player' ? player : opponent;
+
+                    // Find card in deck
+                    const cardIndex = activePlayer.deck.findIndex(c => c.id === action.cardId);
+                    if (cardIndex === -1) return prev;
+
+                    const card = activePlayer.deck[cardIndex];
+
+                    // Move to hand
+                    const updatedPlayer = {
+                        ...activePlayer,
+                        deck: activePlayer.deck.filter((_, i) => i !== cardIndex),
+                        hand: [...activePlayer.hand, card],
+                    };
+
+                    return {
+                        ...prev,
+                        player: activePlayerKey === 'player' ? updatedPlayer : player,
+                        opponent: activePlayerKey === 'player' ? opponent : updatedPlayer,
+                        targetMode: undefined, // Exit search mode
+                        log: [...prev.log, `${activePlayer.name} suchte "${card.name}" aus dem Deck.`],
+                    };
                 });
-            }, 100);
-            break;
-        case 'END_TURN':
-            endTurn();
-            break;
-        case 'PLAY_CARD':
-            playCard(action.cardId);
-            break;
-        case 'ATTACK':
-            attack(action.attackerId, action.targetId);
-            break;
-        case 'SELECT_CARD':
-            selectCard(action.cardId);
-            break;
-        case 'SELECT_MINION':
-            selectMinion(action.minionId);
-            break;
-        case 'SEARCH_DECK':
-            // Handle deck search result (card selected from deck)
-            setGameState(prev => {
-                const { player, opponent, activePlayer: activePlayerKey } = prev;
-                const activePlayer = activePlayerKey === 'player' ? player : opponent;
+                break;
+        }
+    }, [endTurn, playCard, attack, selectCard, selectMinion, startTurn, addLog, mode]);
 
-                // Find card in deck
-                const cardIndex = activePlayer.deck.findIndex(c => c.id === action.cardId);
-                if (cardIndex === -1) return prev;
-
-                const card = activePlayer.deck[cardIndex];
-
-                // Move to hand
-                const updatedPlayer = {
-                    ...activePlayer,
-                    deck: activePlayer.deck.filter((_, i) => i !== cardIndex),
-                    hand: [...activePlayer.hand, card],
-                };
-
-                return {
-                    ...prev,
-                    player: activePlayerKey === 'player' ? updatedPlayer : player,
-                    opponent: activePlayerKey === 'player' ? opponent : updatedPlayer,
-                    targetMode: undefined, // Exit search mode
-                    log: [...prev.log, `${activePlayer.name} suchte "${card.name}" aus dem Deck.`],
-                };
-            });
-            break;
-    }
-}, [endTurn, playCard, attack, selectCard, selectMinion, startTurn, addLog, mode]);
-
-return { gameState, dispatch };
+    return { gameState, dispatch };
 }
