@@ -11,7 +11,7 @@ interface HandProps {
 
 export const Hand: React.FC<HandProps> = ({ cards, onCardClick, selectedCardId, currentMana }) => {
     return (
-        <div className="group flex flex-col items-center transition-all duration-300 transform translate-y-[40%] hover:translate-y-0">
+        <div className="group flex flex-col items-center transition-all duration-300 transform translate-y-[66%] hover:translate-y-0">
             <div className="glass-panel px-8 py-4 bg-slate-900/90 backdrop-blur-md rounded-t-2xl border-t border-slate-700 shadow-2xl">
                 <h3 className="text-xs font-semibold mb-2 text-center text-gray-400 uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-opacity">Deine Hand</h3>
                 <div className="flex gap-[-40px] justify-center items-end h-[160px] group-hover:h-[220px] transition-all duration-300">
