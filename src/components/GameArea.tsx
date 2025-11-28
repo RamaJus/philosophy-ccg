@@ -7,7 +7,7 @@ import { GameLog } from './GameLog';
 import { Graveyard } from './Graveyard';
 import { DeckView } from './DeckView';
 import { WorkSlot } from './WorkSlot';
-import { Swords, SkipForward, RotateCcw, Trophy, Library } from 'lucide-react';
+import { Swords, SkipForward, RotateCcw, Trophy } from 'lucide-react';
 import { getRandomQuote } from '../data/quotes';
 
 const MAX_BOARD_SIZE = 7;
@@ -287,10 +287,16 @@ export const GameArea: React.FC<GameAreaProps> = ({ mode }) => {
                         />
                     ))}
                     {/* Top Card */}
-                    <div className="absolute inset-0 bg-gradient-to-br from-slate-700 to-slate-800 border-2 border-amber-900/50 rounded-xl shadow-2xl flex items-center justify-center group-hover:-translate-y-2 transition-transform duration-300">
-                        <div className="text-center">
-                            <Library className="w-8 h-8 text-amber-500/50 mx-auto mb-1" />
-                            <span className="text-amber-100 font-bold text-lg">{viewPlayer.deck.length}</span>
+                    <div className="absolute inset-0 rounded-xl shadow-2xl group-hover:-translate-y-2 transition-transform duration-300 overflow-hidden border-2 border-amber-900/50">
+                        <img
+                            src="/images/card_back.jpg"
+                            alt="Deck"
+                            className="w-full h-full object-cover"
+                        />
+                        <div className="absolute inset-0 flex items-center justify-center bg-black/30">
+                            <div className="text-center">
+                                <span className="text-amber-100 font-bold text-lg drop-shadow-md">{viewPlayer.deck.length}</span>
+                            </div>
                         </div>
                     </div>
                 </div>

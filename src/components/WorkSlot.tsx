@@ -13,10 +13,7 @@ export const WorkSlot: React.FC<WorkSlotProps> = ({ card }) => {
             : 'border-slate-700/30 bg-slate-900/20'
             } w-32 h-44 md:w-40 md:h-56`}>
 
-            {/* Label */}
-            <div className="absolute -top-3 bg-slate-900 px-2 text-xs font-serif text-amber-500/70 uppercase tracking-widest border border-amber-900/30 rounded">
-                Hauptwerk
-            </div>
+
 
             {card ? (
                 <div className="transform scale-90 hover:scale-100 transition-transform duration-300">

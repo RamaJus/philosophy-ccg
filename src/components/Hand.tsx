@@ -21,7 +21,7 @@ export const Hand: React.FC<HandProps> = ({ cards, onCardClick, selectedCardId, 
                         cards.map((card, index) => (
                             <div
                                 key={card.id}
-                                className="transition-all duration-300 transform hover:-translate-y-12 hover:z-50 hover:scale-110 -ml-8 first:ml-0"
+                                className="transition-all duration-300 transform hover:-translate-y-12 hover:!z-50 hover:scale-110 -ml-8 first:ml-0"
                                 style={{ zIndex: index }}
                             >
                                 <Card
