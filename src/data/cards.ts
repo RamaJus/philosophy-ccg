@@ -93,7 +93,6 @@ export const cardDatabase: Card[] = [
         rarity: 'Episch',
         faction: 'Östlich',
         school: ['Ethik', 'Sozialphilosophie'],
-        image: '/images/cards/konfuzius.png',
     },
     {
         id: 'laozi',
