@@ -45,21 +45,11 @@ export const DeckView: React.FC<DeckViewProps> = ({ deck, isOpen, onClose, onSel
                                     : ''
                                     }`}
                             >
-                                {mode === 'search' ? (
-                                    <CardComponent
-                                        card={card}
-                                        isPlayable={true}
-                                        onClick={onSelectCard ? () => onSelectCard(card.id) : undefined}
-                                    />
-                                ) : (
-                                    <div className="w-[140px] h-[200px] rounded-xl overflow-hidden border-2 border-amber-900/50 shadow-xl">
-                                        <img
-                                            src="/images/card_back.jpg"
-                                            alt="Kartenrücken"
-                                            className="w-full h-full object-cover"
-                                        />
-                                    </div>
-                                )}
+                                <CardComponent
+                                    card={card}
+                                    isPlayable={mode === 'search'}
+                                    onClick={mode === 'search' && onSelectCard ? () => onSelectCard(card.id) : undefined}
+                                />
                             </div>
                         ))}
                     </div>

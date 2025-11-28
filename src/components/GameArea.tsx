@@ -289,7 +289,7 @@ export const GameArea: React.FC<GameAreaProps> = ({ mode }) => {
                     {/* Top Card */}
                     <div className="absolute inset-0 rounded-xl shadow-2xl group-hover:-translate-y-2 transition-transform duration-300 overflow-hidden border-2 border-amber-900/50">
                         <img
-                            src="/images/card_back.jpg"
+                            src="/images/deck_icon.jpg"
                             alt="Deck"
                             className="w-full h-full object-cover"
                         />
