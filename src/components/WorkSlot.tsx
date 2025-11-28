@@ -22,7 +22,7 @@ export const WorkSlot: React.FC<WorkSlotProps> = ({ card }) => {
             ) : (
                 <div className="text-center p-4 opacity-30">
                     <div className="text-4xl mb-2">📜</div>
-                    <p className="text-xs font-serif text-slate-400">Kein aktives Werk</p>
+
                 </div>
             )}
         </div>

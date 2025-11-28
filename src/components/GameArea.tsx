@@ -300,9 +300,7 @@ export const GameArea: React.FC<GameAreaProps> = ({ mode }) => {
                         </div>
                     </div>
                 </div>
-                <div className="absolute -bottom-6 left-0 right-0 text-center opacity-0 group-hover:opacity-100 transition-opacity text-xs text-amber-200 font-medium whitespace-nowrap">
-                    Deck ansehen
-                </div>
+
             </div>
 
             {/* Hand Overlay */}

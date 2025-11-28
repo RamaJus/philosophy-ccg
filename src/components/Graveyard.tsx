@@ -15,7 +15,7 @@ export const Graveyard: React.FC<GraveyardProps> = ({ cards, title }) => {
         return (
             <div className="w-24 h-32 border-2 border-dashed border-gray-700 rounded-lg flex flex-col items-center justify-center opacity-50">
                 <Skull size={24} className="text-gray-500 mb-2" />
-                <span className="text-xs text-gray-500">Friedhof leer</span>
+
             </div>
         );
     }
