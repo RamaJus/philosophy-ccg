@@ -264,17 +264,38 @@ export const GameArea: React.FC<GameAreaProps> = ({ mode }) => {
                 {/* Right Side: Player Stats & Deck (2 cols) */}
                 <div className="col-span-2 flex flex-col gap-2 h-full overflow-y-auto">
                     <PlayerStats player={viewPlayer} />
-                    <div className="w-full flex justify-center">
-                        <button
-                            onClick={() => setIsDeckViewOpen(true)}
-                            className="flex items-center gap-2 px-4 py-2 bg-amber-900/40 hover:bg-amber-900/60 border border-amber-600/30 rounded-lg text-amber-200 transition-colors text-sm"
-                        >
-                            <Library size={14} />
-                            Deck ({viewPlayer.deck.length})
-                        </button>
-                    </div>
                     <WorkSlot card={viewPlayer.activeWork} />
                     <Graveyard cards={viewPlayer.graveyard} title="Dein Friedhof" />
+                </div>
+            </div>
+
+            {/* Visual Deck Pile (Bottom Right) */}
+            <div
+                className="absolute bottom-6 right-6 z-50 cursor-pointer group"
+                onClick={() => setIsDeckViewOpen(true)}
+            >
+                <div className="relative w-24 h-32">
+                    {/* Card Stack Effect */}
+                    {[...Array(Math.min(5, Math.ceil(viewPlayer.deck.length / 5)))].map((_, i) => (
+                        <div
+                            key={i}
+                            className="absolute inset-0 bg-slate-800 border-2 border-slate-600 rounded-xl shadow-xl"
+                            style={{
+                                transform: `translate(${-i * 2}px, ${-i * 2}px)`,
+                                zIndex: 5 - i
+                            }}
+                        />
+                    ))}
+                    {/* Top Card */}
+                    <div className="absolute inset-0 bg-gradient-to-br from-slate-700 to-slate-800 border-2 border-amber-900/50 rounded-xl shadow-2xl flex items-center justify-center group-hover:-translate-y-2 transition-transform duration-300">
+                        <div className="text-center">
+                            <Library className="w-8 h-8 text-amber-500/50 mx-auto mb-1" />
+                            <span className="text-amber-100 font-bold text-lg">{viewPlayer.deck.length}</span>
+                        </div>
+                    </div>
+                </div>
+                <div className="absolute -bottom-6 left-0 right-0 text-center opacity-0 group-hover:opacity-100 transition-opacity text-xs text-amber-200 font-medium whitespace-nowrap">
+                    Deck ansehen
                 </div>
             </div>
 
