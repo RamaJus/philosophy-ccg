@@ -65,7 +65,7 @@ export const cardDatabase: Card[] = [
         rarity: 'Legendär',
         faction: 'Westlich',
         school: ['Existentialismus', 'Nihilismus'],
-        image: '/images/cards/nietzsche.png',
+        image: '/images/cards/nietzsche.jpg',
     },
     {
         id: 'descartes',
