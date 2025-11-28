@@ -6,6 +6,7 @@ import { Target } from 'lucide-react';
 interface BoardProps {
     minions: BoardMinion[];
     onMinionClick?: (minionId: string) => void;
+    onSpecialClick?: (minionId: string) => void;
     selectedMinionId?: string;
     isPlayerBoard?: boolean;
     canTarget?: boolean;
@@ -15,6 +16,7 @@ interface BoardProps {
 export const Board: React.FC<BoardProps> = ({
     minions,
     onMinionClick,
+    onSpecialClick,
     selectedMinionId,
     isPlayerBoard = false,
     canTarget = false,
@@ -33,6 +35,7 @@ export const Board: React.FC<BoardProps> = ({
                 ) : (
                     minions.map((minion) => {
                         const canAttack = isPlayerBoard && minion.canAttack && !minion.hasAttacked;
+                        const canUseSpecial = isPlayerBoard && minion.specialAbility && minion.canAttack && !minion.hasAttacked && !minion.hasUsedSpecial;
                         const isTargetable = !isPlayerBoard && canTarget;
 
                         // Calculate Work Bonus
@@ -42,7 +45,7 @@ export const Board: React.FC<BoardProps> = ({
                         }
 
                         return (
-                            <div key={minion.id} className="relative">
+                            <div key={minion.id} className="relative flex flex-col items-center gap-2">
                                 <Card
                                     card={minion}
                                     onClick={onMinionClick ? () => onMinionClick(minion.id) : undefined}
@@ -54,13 +57,24 @@ export const Board: React.FC<BoardProps> = ({
                                         ${canAttack ? 'ring-2 ring-green-400' : ''}
                                         ${isTargetable ? 'ring-2 ring-red-400 cursor-crosshair' : ''}
                                         ${!minion.canAttack && isPlayerBoard && !minion.hasAttacked ? 'ring-4 ring-red-600' : ''}
-                                        ${minion.hasAttacked ? 'opacity-50' : ''}
+                                        ${minion.hasAttacked || minion.hasUsedSpecial ? 'opacity-50' : ''}
                                     `}
                                 />
                                 {canAttack && (
                                     <div className="absolute -top-2 -right-2 bg-green-500 rounded-full p-1 animate-bounce">
                                         <Target size={16} className="text-white" />
                                     </div>
+                                )}
+                                {canUseSpecial && onSpecialClick && (
+                                    <button
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            onSpecialClick(minion.id);
+                                        }}
+                                        className="px-3 py-1 bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold rounded-lg shadow-lg transition-colors border-2 border-purple-400"
+                                    >
+                                        ⚡ SPEZIAL
+                                    </button>
                                 )}
                             </div>
                         );

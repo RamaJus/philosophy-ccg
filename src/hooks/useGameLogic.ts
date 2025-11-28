@@ -191,6 +191,7 @@ export function useGameLogic(mode: 'single' | 'multiplayer_host' | 'multiplayer_
                     maxHealth: card.health!,
                     canAttack: false, // Summoning sickness
                     hasAttacked: false,
+                    hasUsedSpecial: false,
                 };
 
                 // Schopenhauer: Deal 5 damage to player when played
@@ -482,6 +483,67 @@ export function useGameLogic(mode: 'single' | 'multiplayer_host' | 'multiplayer_
                 break;
             case 'ATTACK':
                 attack(action.attackerId, action.targetId);
+                break;
+            case 'USE_SPECIAL':
+                // Handle special abilities (currently only Van Inwagen transformation)
+                setGameState(prev => {
+                    const { player, opponent, activePlayer: activePlayerKey } = prev;
+                    const activePlayer = activePlayerKey === 'player' ? player : opponent;
+                    const enemyPlayer = activePlayerKey === 'player' ? prev.opponent : prev.player;
+
+                    const minion = activePlayer.board.find(m => m.id === action.minionId);
+                    if (!minion || !minion.specialAbility || !minion.canAttack || minion.hasAttacked || minion.hasUsedSpecial) {
+                        return prev; // Invalid special use
+                    }
+
+                    if (minion.specialAbility === 'transform' && action.targetId) {
+                        const targetMinion = enemyPlayer.board.find(m => m.id === action.targetId);
+                        if (!targetMinion) return prev;
+
+                        // Create "Chair Matter" minion (0/1)
+                        const chairMatter: BoardMinion = {
+                            id: `chair_matter_${Date.now()}`,
+                            name: 'Stuhlartige Materie',
+                            type: 'Philosoph',
+                            cost: 0,
+                            attack: 0,
+                            health: 1,
+                            maxHealth: 1,
+                            canAttack: false,
+                            hasAttacked: true,
+                            hasUsedSpecial: false,
+                            description: 'Verwandelte Materie ohne Bewusstsein.',
+                            rarity: 'Gewöhnlich',
+                            faction: 'Universell',
+                        };
+
+                        // Update boards
+                        const updatedEnemyBoard = enemyPlayer.board.map(m =>
+                            m.id === action.targetId ? chairMatter : m
+                        );
+                        const updatedActiveBoard = activePlayer.board.map(m =>
+                            m.id === action.minionId ? { ...m, hasUsedSpecial: true, hasAttacked: true } : m
+                        );
+
+                        const updatedPlayer = activePlayerKey === 'player'
+                            ? { ...player, board: updatedActiveBoard }
+                            : { ...player, board: updatedEnemyBoard };
+                        const updatedOpponent = activePlayerKey === 'player'
+                            ? { ...opponent, board: updatedEnemyBoard }
+                            : { ...opponent, board: updatedActiveBoard };
+
+                        return {
+                            ...prev,
+                            player: updatedPlayer,
+                            opponent: updatedOpponent,
+                            selectedMinion: undefined,
+                            targetMode: undefined,
+                            log: [...prev.log, `${minion.name} verwandelte ${targetMinion.name} in stuhlartige Materie!`],
+                        };
+                    }
+
+                    return prev;
+                });
                 break;
             case 'SELECT_CARD':
                 selectCard(action.cardId);

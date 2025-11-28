@@ -333,10 +333,11 @@ export const cardDatabase: Card[] = [
         cost: 6,
         attack: 4,
         health: 5,
-        description: 'SPEZIAL: Verwandle einen gegnerischen Philosophen in stuhlartig angeordnete Materie (1/1) für eine volle Runde.',
+        description: 'SPEZIAL: Verwandle einen gegnerischen Philosophen in stuhlartig angeordnete Materie (0/1).',
         rarity: 'Legendär',
         faction: 'Westlich',
         school: ['Metaphysik', 'Freier Wille'],
+        specialAbility: 'transform',
     },
 
     // Additional Eastern Philosophers

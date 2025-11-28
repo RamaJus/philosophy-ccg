@@ -88,7 +88,22 @@ export const GameArea: React.FC<GameAreaProps> = ({ mode }) => {
 
     const handleOpponentMinionClick = (minionId: string) => {
         if (!viewIsPlayerTurn || !selectedMinion) return;
-        dispatch({ type: 'ATTACK', attackerId: selectedMinion, targetId: minionId });
+
+        // Check if the selected minion has a special ability
+        const selectedMinionData = viewPlayer.board.find(m => m.id === selectedMinion);
+        if (selectedMinionData?.specialAbility && !selectedMinionData.hasUsedSpecial && !selectedMinionData.hasAttacked) {
+            // Use special ability on target
+            dispatch({ type: 'USE_SPECIAL', minionId: selectedMinion, targetId: minionId });
+        } else {
+            // Normal attack
+            dispatch({ type: 'ATTACK', attackerId: selectedMinion, targetId: minionId });
+        }
+    };
+
+    const handleSpecialClick = (minionId: string) => {
+        if (!viewIsPlayerTurn) return;
+        // Select the minion for special ability use
+        dispatch({ type: 'SELECT_MINION', minionId });
     };
 
     const handleAttackPlayer = () => {
@@ -254,6 +269,7 @@ export const GameArea: React.FC<GameAreaProps> = ({ mode }) => {
                         <Board
                             minions={viewPlayer.board}
                             onMinionClick={handlePlayerMinionClick}
+                            onSpecialClick={handleSpecialClick}
                             selectedMinionId={selectedMinion}
                             isPlayerBoard={true}
                             activeWork={viewPlayer.activeWork}

@@ -14,6 +14,7 @@ export interface Card {
     faction: 'Westlich' | 'Östlich' | 'Universell';
     school?: string[]; // e.g. 'rationalism', 'empiricism', 'religion'
     workBonus?: { school: string; damage: number }; // For 'work' cards
+    specialAbility?: 'transform'; // Special abilities for certain cards
 }
 
 export interface BoardMinion extends Card {
@@ -23,6 +24,7 @@ export interface BoardMinion extends Card {
     maxHealth: number;
     canAttack: boolean; // Summoning sickness
     hasAttacked: boolean; // This turn
+    hasUsedSpecial: boolean; // Used special ability this turn
     transformedFrom?: BoardMinion; // Original minion before transformation
     transformationEndsTurn?: number; // Turn number when transformation should revert
 }
@@ -60,6 +62,7 @@ export type GameAction =
     | { type: 'END_TURN' }
     | { type: 'PLAY_CARD'; cardId: string }
     | { type: 'ATTACK'; attackerId: string; targetId?: string } // No targetId = attack player
+    | { type: 'USE_SPECIAL'; minionId: string; targetId?: string } // Special ability (e.g. Van Inwagen)
     | { type: 'SELECT_CARD'; cardId?: string }
     | { type: 'SELECT_MINION'; minionId?: string }
     | { type: 'SEARCH_DECK'; cardId: string };

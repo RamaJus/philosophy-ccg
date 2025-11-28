@@ -140,11 +140,12 @@ export const Card: React.FC<CardProps> = ({
                     </h3>
                 </div>
 
-                <div className={`absolute top-8 left-1 w-8 h-8 rounded-full ${isWittgenstein ? 'bg-gradient-to-br from-yellow-300 via-yellow-500 to-yellow-600 border-yellow-200' : 'bg-gradient-to-br from-blue-400 to-blue-600 border-white'} flex items-center justify-center font-bold text-lg shadow-lg z-10 border-2`}>
+
+                <div className={`absolute top-8 left-1 w-8 h-8 rounded-full ${isWittgenstein ? 'bg-gradient-to-br from-yellow-300 via-yellow-500 to-yellow-600 border-yellow-200' : 'bg-gradient-to-br from-blue-400 to-blue-600 border-white'} flex items-center justify-center font-bold text-lg shadow-lg z-10 border-2 pointer-events-none`}>
                     {card.cost}
                 </div>
 
-                <div className={`absolute top-8 right-1 w-6 h-6 rounded-full bg-gradient-to-br ${rarityColors[card.rarity]} flex items-center justify-center shadow-lg z-10`}>
+                <div className={`absolute top-8 right-1 w-6 h-6 rounded-full bg-gradient-to-br ${rarityColors[card.rarity]} flex items-center justify-center shadow-lg z-10 pointer-events-none`}>
                     <Sparkles size={14} className="text-white" />
                 </div>
 
