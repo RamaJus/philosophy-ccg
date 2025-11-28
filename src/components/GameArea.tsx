@@ -274,33 +274,18 @@ export const GameArea: React.FC<GameAreaProps> = ({ mode }) => {
                 className="absolute bottom-6 right-6 z-50 cursor-pointer group"
                 onClick={() => setIsDeckViewOpen(true)}
             >
-                <div className="relative w-24 h-32">
-                    {/* Card Stack Effect */}
-                    {[...Array(Math.min(5, Math.ceil(viewPlayer.deck.length / 5)))].map((_, i) => (
-                        <div
-                            key={i}
-                            className="absolute inset-0 bg-slate-800 border-2 border-slate-600 rounded-xl shadow-xl"
-                            style={{
-                                transform: `translate(${-i * 2}px, ${-i * 2}px)`,
-                                zIndex: 5 - i
-                            }}
-                        />
-                    ))}
-                    {/* Top Card */}
-                    <div className="absolute inset-0 rounded-xl shadow-2xl group-hover:-translate-y-2 transition-transform duration-300 overflow-hidden border-2 border-amber-900/50">
-                        <img
-                            src="/images/deck_icon.jpg"
-                            alt="Deck"
-                            className="w-full h-full object-cover"
-                        />
-                        <div className="absolute inset-0 flex items-center justify-center bg-black/30">
-                            <div className="text-center">
-                                <span className="text-amber-100 font-bold text-lg drop-shadow-md">{viewPlayer.deck.length}</span>
-                            </div>
+                <div className="relative w-24 h-32 rounded-xl shadow-2xl group-hover:-translate-y-2 transition-transform duration-300 overflow-hidden border-2 border-amber-900/50">
+                    <img
+                        src="/images/deck_icon.jpg"
+                        alt="Deck"
+                        className="w-full h-full object-cover"
+                    />
+                    <div className="absolute inset-0 flex items-center justify-center bg-black/30">
+                        <div className="text-center">
+                            <span className="text-amber-100 font-bold text-lg drop-shadow-md">{viewPlayer.deck.length}</span>
                         </div>
                     </div>
                 </div>
-
             </div>
 
             {/* Hand Overlay */}
