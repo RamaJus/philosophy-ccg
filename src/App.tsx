@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { GameArea } from './components/GameArea';
 import { Lobby } from './components/Lobby';
+import { BackgroundMusic } from './components/BackgroundMusic';
 
 export const App: React.FC = () => {
     const [gameMode, setGameMode] = useState<'single' | 'multiplayer_host' | 'multiplayer_client' | null>(null);
@@ -10,8 +11,18 @@ export const App: React.FC = () => {
     };
 
     if (!gameMode) {
-        return <Lobby onStartGame={handleStartGame} />;
+        return (
+            <>
+                <BackgroundMusic volume={0.5} />
+                <Lobby onStartGame={handleStartGame} />
+            </>
+        );
     }
 
-    return <GameArea mode={gameMode} />;
+    return (
+        <>
+            <BackgroundMusic volume={0.5} />
+            <GameArea mode={gameMode} />
+        </>
+    );
 };
