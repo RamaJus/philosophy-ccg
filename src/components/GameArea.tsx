@@ -7,7 +7,7 @@ import { GameLog } from './GameLog';
 import { Graveyard } from './Graveyard';
 import { DeckView } from './DeckView';
 import { WorkSlot } from './WorkSlot';
-import { Swords, SkipForward, RotateCcw, Trophy } from 'lucide-react';
+import { Swords, SkipForward, RotateCcw, Trophy, Zap } from 'lucide-react';
 import { getRandomQuote } from '../data/quotes';
 
 const MAX_BOARD_SIZE = 7;
@@ -243,13 +243,31 @@ export const GameArea: React.FC<GameAreaProps> = ({ mode }) => {
                             </div>
 
                             {viewIsPlayerTurn && selectedMinion && (
-                                <button
-                                    onClick={handleAttackPlayer}
-                                    className="px-4 py-1 bg-red-500/80 hover:bg-red-500 rounded-lg transition-colors flex items-center gap-2 text-sm"
-                                >
-                                    <Swords size={14} />
-                                    Gegner angreifen
-                                </button>
+                                <>
+                                    <button
+                                        onClick={handleAttackPlayer}
+                                        className="px-4 py-1 bg-red-500/80 hover:bg-red-500 rounded-lg transition-colors flex items-center gap-2 text-sm"
+                                    >
+                                        <Swords size={14} />
+                                        Gegner angreifen
+                                    </button>
+
+                                    {(() => {
+                                        const minion = viewPlayer.board.find(m => m.id === selectedMinion);
+                                        if (minion?.specialAbility && !minion.hasUsedSpecial && !minion.hasAttacked) {
+                                            return (
+                                                <button
+                                                    onClick={() => handleSpecialClick(selectedMinion)}
+                                                    className="px-4 py-1 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors flex items-center gap-2 text-sm border border-purple-400"
+                                                >
+                                                    <Zap size={14} />
+                                                    SPEZIAL
+                                                </button>
+                                            );
+                                        }
+                                        return null;
+                                    })()}
+                                </>
                             )}
 
                             {viewIsPlayerTurn && (
@@ -269,7 +287,6 @@ export const GameArea: React.FC<GameAreaProps> = ({ mode }) => {
                         <Board
                             minions={viewPlayer.board}
                             onMinionClick={handlePlayerMinionClick}
-                            onSpecialClick={handleSpecialClick}
                             selectedMinionId={selectedMinion}
                             isPlayerBoard={true}
                             activeWork={viewPlayer.activeWork}

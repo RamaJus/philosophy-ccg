@@ -1,12 +1,11 @@
 import React from 'react';
 import { BoardMinion, Card as CardType } from '../types';
 import { Card } from './Card';
-import { Target } from 'lucide-react';
+import { Target, Link } from 'lucide-react';
 
 interface BoardProps {
     minions: BoardMinion[];
     onMinionClick?: (minionId: string) => void;
-    onSpecialClick?: (minionId: string) => void;
     selectedMinionId?: string;
     isPlayerBoard?: boolean;
     canTarget?: boolean;
@@ -16,7 +15,6 @@ interface BoardProps {
 export const Board: React.FC<BoardProps> = ({
     minions,
     onMinionClick,
-    onSpecialClick,
     selectedMinionId,
     isPlayerBoard = false,
     canTarget = false,
@@ -33,9 +31,8 @@ export const Board: React.FC<BoardProps> = ({
                         Keine Philosophen auf dem Schlachtfeld
                     </div>
                 ) : (
-                    minions.map((minion) => {
+                    minions.map((minion, index) => {
                         const canAttack = isPlayerBoard && minion.canAttack && !minion.hasAttacked;
-                        const canUseSpecial = isPlayerBoard && minion.specialAbility && minion.canAttack && !minion.hasAttacked && !minion.hasUsedSpecial;
                         const isTargetable = !isPlayerBoard && canTarget;
 
                         // Calculate Work Bonus
@@ -65,16 +62,12 @@ export const Board: React.FC<BoardProps> = ({
                                         <Target size={16} className="text-white" />
                                     </div>
                                 )}
-                                {canUseSpecial && onSpecialClick && (
-                                    <button
-                                        onClick={(e) => {
-                                            e.stopPropagation();
-                                            onSpecialClick(minion.id);
-                                        }}
-                                        className="px-3 py-1 bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold rounded-lg shadow-lg transition-colors border-2 border-purple-400"
-                                    >
-                                        ⚡ SPEZIAL
-                                    </button>
+
+                                {minions[index + 1] && minion.linkedWith?.includes(minions[index + 1].id) && (
+                                    <div className="absolute top-1/2 -right-5 transform -translate-y-1/2 z-20 flex flex-col items-center bg-slate-900/80 rounded-full p-1 border border-blue-500/50 backdrop-blur-sm">
+                                        <Link size={14} className="text-blue-400" />
+                                        <span className="text-[10px] font-bold text-blue-300 leading-none">+{minion.synergyBonus}</span>
+                                    </div>
                                 )}
                             </div>
                         );

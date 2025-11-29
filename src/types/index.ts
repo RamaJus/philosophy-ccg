@@ -27,6 +27,8 @@ export interface BoardMinion extends Card {
     hasUsedSpecial: boolean; // Used special ability this turn
     transformedFrom?: BoardMinion; // Original minion before transformation
     transformationEndsTurn?: number; // Turn number when transformation should revert
+    synergyBonus?: number; // Current synergy bonus (+X/+X)
+    linkedWith?: string[]; // IDs of minions this is linked with (for visual effect)
 }
 
 export interface Player {

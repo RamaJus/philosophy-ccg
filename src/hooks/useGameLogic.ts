@@ -37,8 +37,121 @@ function createInitialState(): GameState {
     };
 }
 
+
+
+// Synergy Logic
+const calculateSynergies = (board: BoardMinion[]): BoardMinion[] => {
+    // 1. Reset synergy bonuses first
+    let updatedBoard = board.map(minion => {
+        const bonus = minion.synergyBonus || 0;
+        return {
+            ...minion,
+            attack: minion.attack - bonus,
+            maxHealth: minion.maxHealth - bonus,
+            health: minion.health - bonus, // Reduce current health too? Usually yes for aura removal.
+            synergyBonus: 0,
+            linkedWith: [] as string[]
+        };
+    });
+
+    // 2. Identify clusters and calculate bonuses
+    // We need to group minions that share AT LEAST ONE school.
+    // This is a graph problem (connected components).
+    const adjacency: Record<string, string[]> = {};
+    updatedBoard.forEach(m => adjacency[m.id] = []);
+
+    for (let i = 0; i < updatedBoard.length; i++) {
+        for (let j = i + 1; j < updatedBoard.length; j++) {
+            const m1 = updatedBoard[i];
+            const m2 = updatedBoard[j];
+            const hasSharedSchool = m1.school?.some(s => m2.school?.includes(s));
+
+            if (hasSharedSchool) {
+                adjacency[m1.id].push(m2.id);
+                adjacency[m2.id].push(m1.id);
+            }
+        }
+    }
+
+    // Find connected components
+    const visited = new Set<string>();
+    const clusters: BoardMinion[][] = [];
+
+    for (const minion of updatedBoard) {
+        if (visited.has(minion.id)) continue;
+
+        const cluster: BoardMinion[] = [];
+        const queue = [minion];
+        visited.add(minion.id);
+
+        while (queue.length > 0) {
+            const current = queue.shift()!;
+            cluster.push(current);
+
+            for (const neighborId of adjacency[current.id]) {
+                if (!visited.has(neighborId)) {
+                    visited.add(neighborId);
+                    const neighbor = updatedBoard.find(m => m.id === neighborId)!;
+                    queue.push(neighbor);
+                }
+            }
+        }
+        clusters.push(cluster);
+    }
+
+    // 3. Apply bonuses and reorder
+    let finalBoard: BoardMinion[] = [];
+
+    for (const cluster of clusters) {
+        // Calculate bonus: +1 for 2, +2 for 3+, etc. (Size - 1)
+        // User said: "Wenn sie mehr als eine Schule gemeinsam haben, bleibt es trotzdem bei +1. Die Zahl erhöht sich erst, wenn ein dritter Philosoph auf das Feld kommt und wird dann zu +2"
+        // This implies: 2 minions -> +1. 3 minions -> +2. 4 minions -> +3?
+        // Let's assume linear scaling: size - 1.
+        const bonus = Math.max(0, cluster.length - 1);
+
+        const updatedCluster = cluster.map(minion => {
+            // Fix health: if health dropped below 1 during reset, keep it at 1? 
+            // Or let it die? Usually aura removal can kill.
+            // But here we just re-add the bonus immediately if it still applies.
+            // To avoid "healing" by re-applying, we should be careful.
+            // Current implementation: reset subtracts, new adds.
+            // If bonus stays same, net change is 0.
+
+            return {
+                ...minion,
+                attack: minion.attack + bonus,
+                maxHealth: minion.maxHealth + bonus,
+                health: minion.health + bonus,
+                synergyBonus: bonus,
+                linkedWith: cluster.filter(m => m.id !== minion.id).map(m => m.id)
+            };
+        });
+
+        finalBoard = [...finalBoard, ...updatedCluster];
+    }
+
+    return finalBoard;
+};
+
 export function useGameLogic(mode: 'single' | 'multiplayer_host' | 'multiplayer_client' = 'single') {
     const [gameState, setGameState] = useState<GameState>(createInitialState());
+
+    // Helper to update state with synergies
+    const setGameStateWithSynergies = useCallback((updateFn: (prev: GameState) => GameState) => {
+        setGameState(prev => {
+            const newState = updateFn(prev);
+
+            // Only recalculate if board changed
+            if (newState.player.board !== prev.player.board || newState.opponent.board !== prev.opponent.board) {
+                return {
+                    ...newState,
+                    player: { ...newState.player, board: calculateSynergies(newState.player.board) },
+                    opponent: { ...newState.opponent, board: calculateSynergies(newState.opponent.board) }
+                };
+            }
+            return newState;
+        });
+    }, []);
 
     // Multiplayer synchronization
     useEffect(() => {
@@ -73,11 +186,11 @@ export function useGameLogic(mode: 'single' | 'multiplayer_host' | 'multiplayer_
     }, [mode]);
 
     const addLog = useCallback((message: string) => {
-        setGameState(prev => ({
+        setGameStateWithSynergies(prev => ({
             ...prev,
             log: [...prev.log.slice(-9), message], // Keep last 10 messages
         }));
-    }, []);
+    }, [setGameStateWithSynergies]);
 
     const drawCard = useCallback((player: Player): Player => {
         if (player.deck.length === 0) {
@@ -127,7 +240,7 @@ export function useGameLogic(mode: 'single' | 'multiplayer_host' | 'multiplayer_
     }, [drawCard]);
 
     const playCard = useCallback((cardId: string) => {
-        setGameState(prev => {
+        setGameStateWithSynergies(prev => {
             const { activePlayer: activePlayerKey, player, opponent } = prev;
             const activePlayer = activePlayerKey === 'player' ? player : opponent;
 
@@ -286,7 +399,7 @@ export function useGameLogic(mode: 'single' | 'multiplayer_host' | 'multiplayer_
     }, [addLog, drawCard]);
 
     const attack = useCallback((attackerId: string, targetId?: string) => {
-        setGameState(prev => {
+        setGameStateWithSynergies(prev => {
             const { activePlayer: activePlayerKey, player, opponent } = prev;
             const activePlayer = activePlayerKey === 'player' ? player : opponent;
             const enemyPlayer = activePlayerKey === 'player' ? opponent : player;
@@ -416,7 +529,7 @@ export function useGameLogic(mode: 'single' | 'multiplayer_host' | 'multiplayer_
     }, [addLog]);
 
     const endTurn = useCallback(() => {
-        setGameState(prev => {
+        setGameStateWithSynergies(prev => {
             const { activePlayer: currentPlayer, player, opponent, turn } = prev;
 
             addLog(`${currentPlayer === 'player' ? player.name : opponent.name} beendete den Zug.`);
@@ -443,12 +556,12 @@ export function useGameLogic(mode: 'single' | 'multiplayer_host' | 'multiplayer_
     }, [addLog, startTurn]);
 
     const selectCard = useCallback((cardId?: string) => {
-        setGameState(prev => ({ ...prev, selectedCard: cardId }));
-    }, []);
+        setGameStateWithSynergies(prev => ({ ...prev, selectedCard: cardId }));
+    }, [setGameStateWithSynergies]);
 
     const selectMinion = useCallback((minionId?: string) => {
-        setGameState(prev => ({ ...prev, selectedMinion: minionId }));
-    }, []);
+        setGameStateWithSynergies(prev => ({ ...prev, selectedMinion: minionId }));
+    }, [setGameStateWithSynergies]);
 
     const dispatch = useCallback((action: GameAction, fromNetwork: boolean = false) => {
         // If client, send action to host instead of executing locally
@@ -465,10 +578,10 @@ export function useGameLogic(mode: 'single' | 'multiplayer_host' | 'multiplayer_
 
         switch (action.type) {
             case 'START_GAME':
-                setGameState(createInitialState());
+                setGameStateWithSynergies(() => createInitialState());
                 // Start first turn
                 setTimeout(() => {
-                    setGameState(prev => {
+                    setGameStateWithSynergies(prev => {
                         const updatedPlayer = startTurn(prev.player);
                         addLog('Runde 1: Player beginnt.');
                         return { ...prev, player: updatedPlayer, turn: 1 };
@@ -486,7 +599,7 @@ export function useGameLogic(mode: 'single' | 'multiplayer_host' | 'multiplayer_
                 break;
             case 'USE_SPECIAL':
                 // Handle special abilities (currently only Van Inwagen transformation)
-                setGameState(prev => {
+                setGameStateWithSynergies(prev => {
                     const { player, opponent, activePlayer: activePlayerKey } = prev;
                     const activePlayer = activePlayerKey === 'player' ? player : opponent;
                     const enemyPlayer = activePlayerKey === 'player' ? prev.opponent : prev.player;
@@ -553,7 +666,7 @@ export function useGameLogic(mode: 'single' | 'multiplayer_host' | 'multiplayer_
                 break;
             case 'SEARCH_DECK':
                 // Handle deck search result (card selected from deck)
-                setGameState(prev => {
+                setGameStateWithSynergies(prev => {
                     const { player, opponent, activePlayer: activePlayerKey } = prev;
                     const activePlayer = activePlayerKey === 'player' ? player : opponent;
 
