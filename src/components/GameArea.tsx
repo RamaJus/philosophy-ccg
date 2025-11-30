@@ -10,7 +10,7 @@ import { WorkSlot } from './WorkSlot';
 import { Swords, SkipForward, RotateCcw, Trophy, Zap } from 'lucide-react';
 import { getRandomQuote } from '../data/quotes';
 
-// const MAX_BOARD_SIZE = 7; // Removed per user request
+const MAX_BOARD_SIZE = 7;
 
 interface GameAreaProps {
     mode: 'single' | 'multiplayer_host' | 'multiplayer_client';
@@ -142,7 +142,7 @@ export const GameArea: React.FC<GameAreaProps> = ({ mode }) => {
             }
 
             const playableCards = aiPlayer.hand.filter(c => c.cost <= aiPlayer.mana);
-            if (playableCards.length > 0) {
+            if (playableCards.length > 0 && aiPlayer.board.length < MAX_BOARD_SIZE) {
                 const randomCard = playableCards[Math.floor(Math.random() * playableCards.length)];
                 dispatch({ type: 'PLAY_CARD', cardId: randomCard.id });
 

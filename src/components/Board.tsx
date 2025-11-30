@@ -82,7 +82,8 @@ export const Board: React.FC<BoardProps> = ({
                                         bonusDamage={bonusDamage}
                                         className={`
                                             ${canAttack ? 'ring-2 ring-green-400' : ''}
-                                            ${isTargetable ? 'ring-2 ring-red-400 cursor-crosshair' : ''}
+                                            ${isTargetable && !isSpecialTargeting ? 'ring-2 ring-red-400 cursor-crosshair' : ''}
+                                            ${isTargetable && isSpecialTargeting ? 'ring-2 ring-purple-400 !cursor-crosshair' : ''}
                                             ${!minion.canAttack && isPlayerBoard && !minion.hasAttacked ? 'ring-4 ring-red-600' : ''}
                                             ${minion.hasAttacked || minion.hasUsedSpecial ? 'opacity-50' : ''}
                                         `}

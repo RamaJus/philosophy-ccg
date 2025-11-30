@@ -76,7 +76,7 @@ export const Card: React.FC<CardProps> = ({
     const cardClasses = `
         ${isMinion ? 'card-minion' : 'card-spell'}
         ${isSelected ? 'ring-4 ring-yellow-400 scale-110' : ''}
-        ${isPlayable && !className.includes('cursor-crosshair') ? 'cursor-pointer' : ''}
+        ${isPlayable ? 'cursor-pointer' : 'cursor-not-allowed'}
         ${isDamaged ? 'animate-shake ring-4 ring-red-500' : ''}
         relative group transition-all duration-300 transform hover:scale-105 hover:z-10
         ${className}
@@ -174,7 +174,7 @@ export const Card: React.FC<CardProps> = ({
                 </div>
 
                 {/* Hover Overlay - Description Text */}
-                <div className="absolute top-8 left-0 right-0 bottom-0 bg-black/90 backdrop-blur-sm opacity-0 hover:opacity-100 transition-opacity duration-300 flex items-center justify-center p-3 pointer-events-none">
+                <div className="absolute top-8 left-0 right-0 bottom-0 bg-black/90 backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center p-3 pointer-events-none">
                     <p className="text-[11px] text-amber-100 italic leading-tight font-semibold text-center">
                         {card.description}
                     </p>
