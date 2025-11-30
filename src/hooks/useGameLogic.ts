@@ -5,7 +5,7 @@ import { multiplayer } from '../network/MultiplayerManager';
 
 const STARTING_HAND_SIZE = 4;
 const MAX_HAND_SIZE = 10;
-const MAX_BOARD_SIZE = 7;
+// const MAX_BOARD_SIZE = 7; // Removed per user request
 
 function createPlayer(name: string, isPlayer: boolean): Player {
     const deck = generateDeck();
@@ -256,10 +256,11 @@ export function useGameLogic(mode: 'single' | 'multiplayer_host' | 'multiplayer_
             }
 
             // Check board space for minions (unless it's Wittgenstein who clears the board)
-            if (card.type === 'Philosoph' && activePlayer.board.length >= MAX_BOARD_SIZE && !card.id.includes('wittgenstein')) {
-                addLog('Das Spielfeld ist voll!');
-                return prev;
-            }
+            // MAX_BOARD_SIZE restriction removed per user request
+            // if (card.type === 'Philosoph' && activePlayer.board.length >= MAX_BOARD_SIZE && !card.id.includes('wittgenstein')) {
+            //    addLog('Das Spielfeld ist voll!');
+            //    return prev;
+            // }
 
             let updatedPlayer = {
                 ...activePlayer,
@@ -445,8 +446,9 @@ export function useGameLogic(mode: 'single' | 'multiplayer_host' | 'multiplayer_
                 const target = enemyPlayer.board[targetIndex];
 
                 // Calculate damage modifiers
+                // Calculate damage modifiers
                 let targetDamage = target.attack;
-                let logMessage = `${attacker.name} griff ${target.name} an!${bonusLog}`;
+                let logMessage = `${attacker.name} griff ${target.name} an! (${damageToDeal} Schaden vs ${targetDamage} Schaden)${bonusLog}`;
 
                 // Deal damage to both
                 const updatedAttacker = { ...attacker, health: attacker.health - targetDamage, hasAttacked: true };
@@ -454,22 +456,11 @@ export function useGameLogic(mode: 'single' | 'multiplayer_host' | 'multiplayer_
 
                 addLog(logMessage);
 
-                // Work Bonuses
-                if (activePlayer.activeWork && activePlayer.activeWork.workBonus && attacker.school) {
-                    if (attacker.school.includes(activePlayer.activeWork.workBonus.school)) {
-                        // Bonus already applied to damageToDeal, just logging here if needed or applying extra effects
-                        // Since we calculated damageToDeal upfront, we don't need to add it again here.
-                        // However, the original code seemed to want to add it specifically for minion combat?
-                        // But we already added it to damageToDeal which was used for updatedTarget.
-                        // So we just need to make sure the log reflects it.
-                        // The bonusLog variable already handles the log text.
-                    }
-                }
-
-                // Update boards
+                // Update boards with new health values
                 updatedActivePlayer.board = [...activePlayer.board];
                 updatedEnemyPlayer.board = [...enemyPlayer.board];
 
+                // Handle Attacker Death
                 if (updatedAttacker.health <= 0) {
                     updatedActivePlayer.board.splice(attackerIndex, 1);
                     updatedActivePlayer.graveyard = [...updatedActivePlayer.graveyard, attacker];
@@ -478,26 +469,7 @@ export function useGameLogic(mode: 'single' | 'multiplayer_host' | 'multiplayer_
                     updatedActivePlayer.board[attackerIndex] = updatedAttacker;
                 }
 
-                if (updatedTarget.health <= 0) {
-                    updatedEnemyPlayer.board.splice(targetIndex, 1);
-                    updatedEnemyPlayer.graveyard = [...updatedEnemyPlayer.graveyard, target];
-                    addLog(`${target.name} wurde besiegt!`);
-                } else {
-                    updatedEnemyPlayer.board[targetIndex] = updatedTarget;
-                }
-
-                // Update boards
-                updatedActivePlayer.board = [...activePlayer.board];
-                updatedEnemyPlayer.board = [...enemyPlayer.board];
-
-                if (updatedAttacker.health <= 0) {
-                    updatedActivePlayer.board.splice(attackerIndex, 1);
-                    updatedActivePlayer.graveyard = [...updatedActivePlayer.graveyard, attacker];
-                    addLog(`${attacker.name} wurde besiegt!`);
-                } else {
-                    updatedActivePlayer.board[attackerIndex] = updatedAttacker;
-                }
-
+                // Handle Target Death
                 if (updatedTarget.health <= 0) {
                     updatedEnemyPlayer.board.splice(targetIndex, 1);
                     updatedEnemyPlayer.graveyard = [...updatedEnemyPlayer.graveyard, target];

@@ -172,14 +172,14 @@ export const Card: React.FC<CardProps> = ({
                 </div>
 
                 <div
-                    className="px-2 py-1 flex-1 rounded-b-xl bg-amber-50 pb-8"
+                    className={`px-2 py-1 flex-1 rounded-b-xl bg-amber-50 pb-8 ${isPlayable ? 'cursor-pointer' : ''}`}
                     style={{
                         backgroundImage: 'url(/card-background.jpg)',
                         backgroundSize: 'cover',
                         backgroundPosition: 'center',
                         backgroundColor: '#fef3c7'
                     }}>
-                    <p className="text-[10px] text-amber-900 italic leading-tight line-clamp-4 font-semibold">
+                    <p className="text-[10px] text-amber-900 italic leading-tight line-clamp-4 font-semibold pointer-events-none">
                         {card.description}
                     </p>
                 </div>
