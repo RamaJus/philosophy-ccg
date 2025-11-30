@@ -176,165 +176,180 @@ export const GameArea: React.FC<GameAreaProps> = ({ mode }) => {
     };
 
     return (
-        <div className="h-screen w-full overflow-hidden bg-gradient-to-br from-slate-900 to-slate-800 text-white relative">
-            {/* Header removed for laptop optimization */}
-
-            {gameOver && (
-                <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 backdrop-blur-sm">
-                    <div className="glass-panel p-8 max-w-lg text-center space-y-4">
-                        <Trophy size={64} className="mx-auto text-amber-400 animate-bounce" />
-                        <h2 className="text-3xl font-bold">
-                            {winner === 'player' ? '🎉 Sieg!' : '💀 Niederlage'}
-                        </h2>
-                        <p className="text-gray-300 text-lg">
-                            {winner === 'player'
-                                ? 'Deine philosophischen Argumente haben gesiegt!'
-                                : 'Die Logik des Gegners war zu stark.'}
-                        </p>
-                        <div className="border-t border-b border-amber-500/30 py-4 my-4">
-                            <p className="text-amber-200 italic text-sm leading-relaxed">
-                                {philosophicalQuote}
-                            </p>
-                        </div>
-                        <button onClick={handleNewGame} className="btn-primary">
-                            <RotateCcw size={20} className="inline mr-2" />
-                            Neues Spiel
-                        </button>
-                    </div>
-                </div>
-            )}
-
-            <DeckView
-                deck={viewPlayer.deck}
-                isOpen={isDeckViewOpen}
-                onClose={() => setIsDeckViewOpen(false)}
-                onSelectCard={handleSearchSelect}
-                mode={targetMode === 'search' ? 'search' : 'view'}
-            />
-
-            {/* Main Game Grid - Adjusted for full height */}
-            <div className="grid grid-cols-12 gap-2 h-full p-2 pb-24">
-                {/* Left Side: Stats & Graveyard (2 cols) */}
-                <div className="col-span-2 flex flex-col gap-2 h-full overflow-y-auto">
-                    <PlayerStats player={viewOpponent} isOpponent={true} />
-                    <WorkSlot card={viewOpponent.activeWork} />
-                    <Graveyard cards={viewOpponent.graveyard} title="Gegner" />
-                    <GameLog messages={log} />
-                </div>
-
-                {/* Center: Board (8 cols) */}
-                <div className="col-span-8 flex flex-col h-full gap-2">
-                    {/* Opponent Board */}
-                    <div className="flex-1">
-                        <Board
-                            minions={viewOpponent.board}
-                            onMinionClick={viewIsPlayerTurn && selectedMinion ? handleOpponentMinionClick : undefined}
-                            canTarget={viewIsPlayerTurn && !!selectedMinion}
-                            activeWork={viewOpponent.activeWork}
-                            isSpecialTargeting={(() => {
-                                if (!selectedMinion) return false;
-                                const m = viewPlayer.board.find(min => min.id === selectedMinion);
-                                return !!(m?.specialAbility && !m.hasUsedSpecial && !m.hasAttacked);
-                            })()}
-                        />
-                    </div>
-
-                    {/* Turn Controls */}
-                    <div className="glass-panel p-2 text-center shrink-0">
-                        <div className="flex items-center justify-center gap-4">
-                            <div className={`px-4 py-1 rounded-lg ${viewIsPlayerTurn ? 'bg-green-500/20 text-green-400' : 'bg-gray-500/20 text-gray-400'}`}>
-                                <p className="text-sm font-semibold">Runde {gameState.turn}</p>
-                                <p className="text-xs">{viewIsPlayerTurn ? 'Dein Zug' : 'Gegner-Zug'}</p>
-                            </div>
-
-                            {viewIsPlayerTurn && selectedMinion && (
-                                <>
-                                    <button
-                                        onClick={handleAttackPlayer}
-                                        className="px-4 py-1 bg-red-500/80 hover:bg-red-500 rounded-lg transition-colors flex items-center gap-2 text-sm"
-                                    >
-                                        <Swords size={14} />
-                                        Gegner angreifen
-                                    </button>
-
-                                    {(() => {
-                                        const minion = viewPlayer.board.find(m => m.id === selectedMinion);
-                                        if (minion?.specialAbility && !minion.hasUsedSpecial && !minion.hasAttacked) {
-                                            return (
-                                                <button
-                                                    onClick={() => handleSpecialClick(selectedMinion)}
-                                                    className="px-4 py-1 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors flex items-center gap-2 text-sm border border-purple-400"
-                                                >
-                                                    <Zap size={14} />
-                                                    SPEZIAL
-                                                </button>
-                                            );
-                                        }
-                                        return null;
-                                    })()}
-                                </>
-                            )}
-
-                            {viewIsPlayerTurn && (
-                                <button
-                                    onClick={handleEndTurn}
-                                    className="btn-primary flex items-center gap-2 py-1 text-sm"
-                                >
-                                    <SkipForward size={16} />
-                                    Zug beenden
-                                </button>
-                            )}
-                        </div>
-                    </div>
-
-                    {/* Player Board */}
-                    <div className="flex-1">
-                        <Board
-                            minions={viewPlayer.board}
-                            onMinionClick={handlePlayerMinionClick}
-                            selectedMinionId={selectedMinion}
-                            isPlayerBoard={true}
-                            activeWork={viewPlayer.activeWork}
-                        />
-                    </div>
-                </div>
-
-                {/* Right Side: Player Stats & Deck (2 cols) */}
-                <div className="col-span-2 flex flex-col gap-2 h-full overflow-y-auto">
-                    <PlayerStats player={viewPlayer} />
-                    <WorkSlot card={viewPlayer.activeWork} />
-                    <Graveyard cards={viewPlayer.graveyard} title="Dein Friedhof" />
-                </div>
-            </div>
-
-            {/* Visual Deck Pile (Bottom Right) */}
+        <div className="h-screen w-full overflow-hidden relative">
+            {/* Background */}
             <div
-                className="absolute bottom-6 right-6 z-50 cursor-pointer group"
-                onClick={() => setIsDeckViewOpen(true)}
-            >
-                <div className="relative w-24 h-32 rounded-xl shadow-2xl group-hover:-translate-y-2 transition-transform duration-300 overflow-hidden border-2 border-amber-900/50">
-                    <img
-                        src="/images/deck_icon.jpg"
-                        alt="Deck"
-                        className="w-full h-full object-cover"
-                    />
-                    <div className="absolute inset-0 flex items-center justify-center bg-black/30">
-                        <div className="text-center">
-                            <span className="text-amber-100 font-bold text-lg drop-shadow-md">{viewPlayer.deck.length}</span>
+                className="absolute inset-0"
+                style={{
+                    backgroundImage: 'url(/images/menu-background.jpg)',
+                    backgroundSize: 'cover',
+                    backgroundPosition: 'center',
+                }}
+            />
+            {/* Overlay for better readability */}
+            <div className="absolute inset-0 bg-gradient-to-br from-slate-900/95 via-slate-800/90 to-amber-900/85" />
+
+            {/* Content */}
+            <div className="relative z-10 h-full w-full text-white"  >
+                {/* Header removed for laptop optimization */}
+
+                {gameOver && (
+                    <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 backdrop-blur-sm">
+                        <div className="glass-panel p-8 max-w-lg text-center space-y-4">
+                            <Trophy size={64} className="mx-auto text-amber-400 animate-bounce" />
+                            <h2 className="text-3xl font-bold">
+                                {winner === 'player' ? '🎉 Sieg!' : '💀 Niederlage'}
+                            </h2>
+                            <p className="text-gray-300 text-lg">
+                                {winner === 'player'
+                                    ? 'Deine philosophischen Argumente haben gesiegt!'
+                                    : 'Die Logik des Gegners war zu stark.'}
+                            </p>
+                            <div className="border-t border-b border-amber-500/30 py-4 my-4">
+                                <p className="text-amber-200 italic text-sm leading-relaxed">
+                                    {philosophicalQuote}
+                                </p>
+                            </div>
+                            <button onClick={handleNewGame} className="btn-primary">
+                                <RotateCcw size={20} className="inline mr-2" />
+                                Neues Spiel
+                            </button>
+                        </div>
+                    </div>
+                )}
+
+                <DeckView
+                    deck={viewPlayer.deck}
+                    isOpen={isDeckViewOpen}
+                    onClose={() => setIsDeckViewOpen(false)}
+                    onSelectCard={handleSearchSelect}
+                    mode={targetMode === 'search' ? 'search' : 'view'}
+                />
+
+                {/* Main Game Grid - Adjusted for full height */}
+                <div className="grid grid-cols-12 gap-2 h-full p-2 pb-24">
+                    {/* Left Side: Stats & Graveyard (2 cols) */}
+                    <div className="col-span-2 flex flex-col gap-2 h-full overflow-y-auto">
+                        <PlayerStats player={viewOpponent} isOpponent={true} />
+                        <WorkSlot card={viewOpponent.activeWork} />
+                        <Graveyard cards={viewOpponent.graveyard} title="Gegner" />
+                        <GameLog messages={log} />
+                    </div>
+
+                    {/* Center: Board (8 cols) */}
+                    <div className="col-span-8 flex flex-col h-full gap-2">
+                        {/* Opponent Board */}
+                        <div className="flex-1">
+                            <Board
+                                minions={viewOpponent.board}
+                                onMinionClick={viewIsPlayerTurn && selectedMinion ? handleOpponentMinionClick : undefined}
+                                canTarget={viewIsPlayerTurn && !!selectedMinion}
+                                activeWork={viewOpponent.activeWork}
+                                isSpecialTargeting={(() => {
+                                    if (!selectedMinion) return false;
+                                    const m = viewPlayer.board.find(min => min.id === selectedMinion);
+                                    return !!(m?.specialAbility && !m.hasUsedSpecial && !m.hasAttacked);
+                                })()}
+                            />
+                        </div>
+
+                        {/* Turn Controls */}
+                        <div className="glass-panel p-2 text-center shrink-0">
+                            <div className="flex items-center justify-center gap-4">
+                                <div className={`px-4 py-1 rounded-lg ${viewIsPlayerTurn ? 'bg-green-500/20 text-green-400' : 'bg-gray-500/20 text-gray-400'}`}>
+                                    <p className="text-sm font-semibold">Runde {gameState.turn}</p>
+                                    <p className="text-xs">{viewIsPlayerTurn ? 'Dein Zug' : 'Gegner-Zug'}</p>
+                                </div>
+
+                                {viewIsPlayerTurn && selectedMinion && (
+                                    <>
+                                        <button
+                                            onClick={handleAttackPlayer}
+                                            className="px-4 py-1 bg-red-500/80 hover:bg-red-500 rounded-lg transition-colors flex items-center gap-2 text-sm"
+                                        >
+                                            <Swords size={14} />
+                                            Gegner angreifen
+                                        </button>
+
+                                        {(() => {
+                                            const minion = viewPlayer.board.find(m => m.id === selectedMinion);
+                                            if (minion?.specialAbility && !minion.hasUsedSpecial && !minion.hasAttacked) {
+                                                return (
+                                                    <button
+                                                        onClick={() => handleSpecialClick(selectedMinion)}
+                                                        className="px-4 py-1 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors flex items-center gap-2 text-sm border border-purple-400"
+                                                    >
+                                                        <Zap size={14} />
+                                                        SPEZIAL
+                                                    </button>
+                                                );
+                                            }
+                                            return null;
+                                        })()}
+                                    </>
+                                )}
+
+                                {viewIsPlayerTurn && (
+                                    <button
+                                        onClick={handleEndTurn}
+                                        className="btn-primary flex items-center gap-2 py-1 text-sm"
+                                    >
+                                        <SkipForward size={16} />
+                                        Zug beenden
+                                    </button>
+                                )}
+                            </div>
+                        </div>
+
+                        {/* Player Board */}
+                        <div className="flex-1">
+                            <Board
+                                minions={viewPlayer.board}
+                                onMinionClick={handlePlayerMinionClick}
+                                selectedMinionId={selectedMinion}
+                                isPlayerBoard={true}
+                                activeWork={viewPlayer.activeWork}
+                            />
+                        </div>
+                    </div>
+
+                    {/* Right Side: Player Stats & Deck (2 cols) */}
+                    <div className="col-span-2 flex flex-col gap-2 h-full overflow-y-auto">
+                        <PlayerStats player={viewPlayer} />
+                        <WorkSlot card={viewPlayer.activeWork} />
+                        <Graveyard cards={viewPlayer.graveyard} title="Dein Friedhof" />
+                    </div>
+                </div>
+
+                {/* Visual Deck Pile (Bottom Right) */}
+                <div
+                    className="absolute bottom-6 right-6 z-50 cursor-pointer group"
+                    onClick={() => setIsDeckViewOpen(true)}
+                >
+                    <div className="relative w-24 h-32 rounded-xl shadow-2xl group-hover:-translate-y-2 transition-transform duration-300 overflow-hidden border-2 border-amber-900/50">
+                        <img
+                            src="/images/deck_icon.jpg"
+                            alt="Deck"
+                            className="w-full h-full object-cover"
+                        />
+                        <div className="absolute inset-0 flex items-center justify-center bg-black/30">
+                            <div className="text-center">
+                                <span className="text-amber-100 font-bold text-lg drop-shadow-md">{viewPlayer.deck.length}</span>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
 
-            {/* Hand Overlay */}
-            <div className="absolute bottom-0 left-0 right-0 z-40 flex justify-center pointer-events-none">
-                <div className="pointer-events-auto">
-                    <Hand
-                        cards={viewPlayer.hand}
-                        onCardClick={handleCardClick}
-                        selectedCardId={selectedCard}
-                        currentMana={viewPlayer.mana}
-                    />
+                {/* Hand Overlay */}
+                <div className="absolute bottom-0 left-0 right-0 z-40 flex justify-center pointer-events-none">
+                    <div className="pointer-events-auto">
+                        <Hand
+                            cards={viewPlayer.hand}
+                            onCardClick={handleCardClick}
+                            selectedCardId={selectedCard}
+                            currentMana={viewPlayer.mana}
+                        />
+                    </div>
                 </div>
             </div>
         </div>
