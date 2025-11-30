@@ -93,30 +93,25 @@ export const Lobby: React.FC<LobbyProps> = ({ onStartGame }) => {
     };
 
     return (
-        <div
-            className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden"
-            style={{
-                backgroundImage: 'url(/images/menu-background.jpg)',
-                backgroundSize: 'cover',
-                backgroundPosition: 'center',
-                transform: 'rotate(90deg) scale(1.5)',
-                transformOrigin: 'center',
-                position: 'fixed',
-                top: 0,
-                left: 0,
-                width: '100vw',
-                height: '100vh',
-            }}
-        >
+        <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden">
+            {/* Background */}
+            <div
+                className="absolute inset-0"
+                style={{
+                    backgroundImage: 'url(/images/menu-background.jpg)',
+                    backgroundSize: 'cover',
+                    backgroundPosition: 'center',
+                }}
+            />
             {/* Overlay for better readability */}
-            <div className="absolute inset-0 bg-gradient-to-br from-slate-900/95 via-slate-800/90 to-amber-900/85" style={{ transform: 'rotate(-90deg) scale(0.67)' }} />
+            <div className="absolute inset-0 bg-gradient-to-br from-slate-900/95 via-slate-800/90 to-amber-900/85" />
 
-            {/* Content Container - Counter-rotate */}
-            <div className="relative z-10" style={{ transform: 'rotate(-90deg)' }}>
+            {/* Content Container */}
+            <div className="relative z-10 w-full max-w-4xl">
                 <div className="glass-panel p-12 max-w-4xl w-full space-y-10 border-2 border-amber-700/30 shadow-2xl backdrop-blur-xl bg-gradient-to-br from-slate-900/80 to-slate-800/70">
                     {/* Title */}
-                    <div className="text-center space-y-4">
-                        <h1 className="text-7xl font-bold mb-2" style={{
+                    <div className="text-center">
+                        <h1 className="text-6xl font-bold" style={{
                             background: 'linear-gradient(135deg, #fbbf24 0%, #f59e0b 25%, #d97706 50%, #b45309 75%, #92400e 100%)',
                             WebkitBackgroundClip: 'text',
                             WebkitTextFillColor: 'transparent',
@@ -126,14 +121,9 @@ export const Lobby: React.FC<LobbyProps> = ({ onStartGame }) => {
                         }}>
                             DIALECTICA
                         </h1>
-                        <div className="flex items-center justify-center gap-3">
-                            <div className="h-px w-20 bg-gradient-to-r from-transparent via-amber-600 to-transparent"></div>
-                            <p className="text-amber-200/80 italic text-lg">Duell der Denker</p>
-                            <div className="h-px w-20 bg-gradient-to-r from-transparent via-amber-600 to-transparent"></div>
-                        </div>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         {/* Single Player */}
                         <button
                             onClick={() => onStartGame('single')}
