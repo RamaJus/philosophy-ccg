@@ -105,6 +105,7 @@ export const cardDatabase: Card[] = [
         rarity: 'Legendär',
         faction: 'Östlich',
         school: ['Daoismus'],
+        image: '/images/cards/laozi.png',
     },
     {
         id: 'sun-tzu',
@@ -117,6 +118,7 @@ export const cardDatabase: Card[] = [
         rarity: 'Episch',
         faction: 'Östlich',
         school: ['Strategie'],
+        image: '/images/cards/sun-tzu.png',
     },
     {
         id: 'buddha',
@@ -129,6 +131,7 @@ export const cardDatabase: Card[] = [
         rarity: 'Legendär',
         faction: 'Östlich',
         school: ['Religion', 'Metaphysik'],
+        image: '/images/cards/buddha.png',
     },
     {
         id: 'zhuangzi',
@@ -141,6 +144,7 @@ export const cardDatabase: Card[] = [
         rarity: 'Selten',
         faction: 'Östlich',
         school: ['Daoismus', 'Skeptizismus'],
+        image: '/images/cards/zhuangzi.png',
     },
     {
         id: 'mencius',
@@ -153,6 +157,7 @@ export const cardDatabase: Card[] = [
         rarity: 'Selten',
         faction: 'Östlich',
         school: ['Konfuzianismus', 'Idealismus'],
+        image: '/images/cards/mencius.png',
     },
 
     // Spell Cards
@@ -352,6 +357,7 @@ export const cardDatabase: Card[] = [
         rarity: 'Episch',
         faction: 'Östlich',
         school: ['Madhyamaka', 'Buddhismus'],
+        image: '/images/cards/nagarjuna.png',
     },
     {
         id: 'rumi',
@@ -388,6 +394,7 @@ export const cardDatabase: Card[] = [
         rarity: 'Gewöhnlich',
         faction: 'Östlich',
         school: ['Mohismus', 'Utilitarismus'],
+        image: '/images/cards/mozi.png',
     },
 
     // NEW PHILOSOPHERS

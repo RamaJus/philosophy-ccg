@@ -172,7 +172,7 @@ export const Card: React.FC<CardProps> = ({
                 </div>
 
                 <div
-                    className="px-2 py-1 flex-1 rounded-b-xl bg-amber-50 pb-8 pointer-events-none"
+                    className="px-2 py-1 flex-1 rounded-b-xl bg-amber-50 pb-8"
                     style={{
                         backgroundImage: 'url(/card-background.jpg)',
                         backgroundSize: 'cover',
@@ -185,7 +185,7 @@ export const Card: React.FC<CardProps> = ({
                 </div>
 
                 {isMinion && (
-                    <div className="absolute bottom-0 left-0 right-0 flex justify-between items-center px-2 py-1 bg-slate-900/90 border-t border-slate-700/50 rounded-b-xl pointer-events-none">
+                    <div className="absolute bottom-0 left-0 right-0 flex justify-between items-center px-2 py-1 bg-slate-900/90 border-t border-slate-700/50 rounded-b-xl">
                         <div className={`flex items-center gap-1 stat-badge ${attackBadgeColor}`}>
                             <Swords size={12} />
                             <span>{totalAttack}</span>
