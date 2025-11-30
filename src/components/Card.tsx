@@ -145,12 +145,14 @@ export const Card: React.FC<CardProps> = ({
                     {card.cost}
                 </div>
 
+
                 <div className={`absolute top-8 right-1 w-6 h-6 rounded-full bg-gradient-to-br ${rarityColors[card.rarity]} flex items-center justify-center shadow-lg z-10 pointer-events-none`}>
                     <Sparkles size={14} className="text-white" />
                 </div>
 
+                {/* Full Image Area */}
                 <div
-                    className="h-24 relative overflow-hidden flex items-center justify-center bg-amber-50"
+                    className="absolute top-8 left-0 right-0 bottom-0 overflow-hidden flex items-center justify-center bg-amber-50"
                     style={{
                         backgroundImage: 'url(/card-background.jpg)',
                         backgroundSize: 'cover',
@@ -167,19 +169,13 @@ export const Card: React.FC<CardProps> = ({
                         <div className="text-4xl">{factionIcons[card.faction]}</div>
                     )}
                     {isMinion && (
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent pointer-events-none" />
                     )}
                 </div>
 
-                <div
-                    className={`px-2 py-1 flex-1 rounded-b-xl bg-amber-50 pb-8 ${isPlayable ? 'cursor-pointer' : ''}`}
-                    style={{
-                        backgroundImage: 'url(/card-background.jpg)',
-                        backgroundSize: 'cover',
-                        backgroundPosition: 'center',
-                        backgroundColor: '#fef3c7'
-                    }}>
-                    <p className="text-[10px] text-amber-900 italic leading-tight line-clamp-4 font-semibold pointer-events-none">
+                {/* Hover Overlay - Description Text */}
+                <div className="absolute top-8 left-0 right-0 bottom-0 bg-black/90 backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center p-3 pointer-events-none">
+                    <p className="text-[11px] text-amber-100 italic leading-tight font-semibold text-center">
                         {card.description}
                     </p>
                 </div>

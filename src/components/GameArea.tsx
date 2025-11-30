@@ -231,6 +231,11 @@ export const GameArea: React.FC<GameAreaProps> = ({ mode }) => {
                             onMinionClick={viewIsPlayerTurn && selectedMinion ? handleOpponentMinionClick : undefined}
                             canTarget={viewIsPlayerTurn && !!selectedMinion}
                             activeWork={viewOpponent.activeWork}
+                            isSpecialTargeting={(() => {
+                                if (!selectedMinion) return false;
+                                const m = viewPlayer.board.find(min => min.id === selectedMinion);
+                                return !!(m?.specialAbility && !m.hasUsedSpecial && !m.hasAttacked);
+                            })()}
                         />
                     </div>
 
