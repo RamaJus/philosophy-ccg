@@ -11,6 +11,16 @@ function createPlayer(name: string, isPlayer: boolean): Player {
     const deck = generateDeck();
     const hand = deck.slice(0, STARTING_HAND_SIZE);
 
+    // Add DEBUG cards to player's starting hand for testing
+    if (isPlayer) {
+        const debugDeck = generateDeck();
+        const debug1 = debugDeck.find(c => c.id === 'debug_1');
+        const debug2 = debugDeck.find(c => c.id === 'debug_2');
+
+        if (debug1) hand.push(debug1);
+        if (debug2) hand.push(debug2);
+    }
+
     return {
         id: isPlayer ? 'player' : 'opponent',
         name,

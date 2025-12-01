@@ -581,6 +581,27 @@ export const cardDatabase: Card[] = [
         rarity: 'Episch',
         faction: 'Westlich',
     },
+    // DEBUG Cards for testing
+    {
+        id: 'debug_1',
+        name: 'DEBUG',
+        type: 'Zauber',
+        cost: 0,
+        description: 'Ziehe 2 Karten aus deinem Deck.',
+        rarity: 'Gewöhnlich',
+        faction: 'Universell',
+        school: ['Hermeneutik'],
+    },
+    {
+        id: 'debug_2',
+        name: 'DEBUG',
+        type: 'Zauber',
+        cost: 0,
+        description: 'Ziehe 2 Karten aus deinem Deck.',
+        rarity: 'Gewöhnlich',
+        faction: 'Universell',
+        school: ['Hermeneutik'],
+    },
 ];
 
 
