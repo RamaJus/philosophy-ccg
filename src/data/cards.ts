@@ -93,6 +93,7 @@ export const cardDatabase: Card[] = [
         rarity: 'Episch',
         faction: 'Östlich',
         school: ['Ethik', 'Sozialphilosophie'],
+        image: '/images/cards/confucius.png',
     },
     {
         id: 'laozi',
@@ -370,6 +371,7 @@ export const cardDatabase: Card[] = [
         rarity: 'Selten',
         faction: 'Östlich',
         school: ['Mystizismus', 'Sufismus'],
+        image: '/images/cards/rumi.png',
     },
     {
         id: 'al-ghazali',
@@ -382,6 +384,7 @@ export const cardDatabase: Card[] = [
         rarity: 'Episch',
         faction: 'Östlich',
         school: ['Theologie', 'Mystizismus'],
+        image: '/images/cards/al-ghazali.png',
     },
     {
         id: 'mozi',
@@ -409,6 +412,7 @@ export const cardDatabase: Card[] = [
         rarity: 'Selten',
         faction: 'Westlich',
         school: ['Scholastik', 'Religion'],
+        image: '/images/cards/aquinas.png',
     },
     {
         id: 'hume',
@@ -421,6 +425,7 @@ export const cardDatabase: Card[] = [
         rarity: 'Selten',
         faction: 'Westlich',
         school: ['Empirismus', 'Skeptizismus'],
+        image: '/images/cards/hume.png',
     },
     {
         id: 'spinoza',
@@ -433,6 +438,7 @@ export const cardDatabase: Card[] = [
         rarity: 'Episch',
         faction: 'Westlich',
         school: ['Rationalismus', 'Pantheismus'],
+        image: '/images/cards/spinoza.png',
     },
     {
         id: 'marx',
@@ -445,6 +451,7 @@ export const cardDatabase: Card[] = [
         rarity: 'Legendär',
         faction: 'Westlich',
         school: ['Materialismus', 'Sozialismus'],
+        image: '/images/cards/marx.png',
     },
     {
         id: 'kierkegaard',
