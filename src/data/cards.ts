@@ -464,6 +464,7 @@ export const cardDatabase: Card[] = [
         rarity: 'Selten',
         faction: 'Westlich',
         school: ['Existentialismus', 'Religion'],
+        image: '/images/cards/kierkegaard.png',
     },
     {
         id: 'epicurus',
@@ -476,6 +477,7 @@ export const cardDatabase: Card[] = [
         rarity: 'Gewöhnlich',
         faction: 'Westlich',
         school: ['Epikureismus', 'Materialismus'],
+        image: '/images/cards/epicurus.png',
     },
     {
         id: 'seneca',
@@ -488,6 +490,7 @@ export const cardDatabase: Card[] = [
         rarity: 'Selten',
         faction: 'Westlich',
         school: ['Stoizismus'],
+        image: '/images/cards/seneca.png',
     },
     {
         id: 'hypatia',
@@ -500,6 +503,7 @@ export const cardDatabase: Card[] = [
         rarity: 'Episch',
         faction: 'Westlich',
         school: ['Neoplatonismus', 'Mathematik'],
+        image: '/images/cards/hypatia.png',
     },
     {
         id: 'beauvoir',

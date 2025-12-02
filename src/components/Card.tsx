@@ -152,7 +152,7 @@ export const Card: React.FC<CardProps> = ({
 
                 {/* Full Image Area */}
                 <div
-                    className="absolute top-8 left-0 right-0 bottom-0 overflow-hidden flex items-center justify-center bg-amber-50"
+                    className="absolute top-8 left-0 right-0 bottom-0 overflow-hidden flex items-center justify-center bg-amber-50 pointer-events-none"
                     style={{
                         backgroundImage: 'url(/card-background.jpg)',
                         backgroundSize: 'cover',
@@ -181,7 +181,7 @@ export const Card: React.FC<CardProps> = ({
                 </div>
 
                 {isMinion && (
-                    <div className="absolute bottom-0 left-0 right-0 flex justify-between items-center px-2 py-1 bg-slate-900/90 border-t border-slate-700/50 rounded-b-xl">
+                    <div className="absolute bottom-0 left-0 right-0 flex justify-between items-center px-2 py-1 bg-slate-900/90 border-t border-slate-700/50 rounded-b-xl pointer-events-none">
                         <div className={`flex items-center gap-1 stat-badge ${attackBadgeColor}`}>
                             <Swords size={12} />
                             <span>{totalAttack}</span>
@@ -205,7 +205,7 @@ export const Card: React.FC<CardProps> = ({
                 )}
 
                 {!isMinion && (
-                    <div className="absolute bottom-0 left-0 right-0 flex justify-center items-center py-2 bg-slate-900/90 border-t border-slate-700/50 rounded-b-xl">
+                    <div className="absolute bottom-0 left-0 right-0 flex justify-center items-center py-2 bg-slate-900/90 border-t border-slate-700/50 rounded-b-xl pointer-events-none">
                         <div className="flex items-center gap-2 text-purple-400">
                             <Zap size={16} />
                             <span className="text-xs font-semibold">ZAUBER</span>
