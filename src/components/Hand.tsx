@@ -12,27 +12,25 @@ interface HandProps {
 export const Hand: React.FC<HandProps> = ({ cards, onCardClick, selectedCardId, currentMana }) => {
     return (
         <div className="group flex flex-col items-center transition-all duration-300 transform translate-y-[60%] hover:translate-y-0">
-            <div className="glass-panel px-8 py-2 bg-slate-900/90 backdrop-blur-md rounded-t-2xl border-t border-slate-700 shadow-2xl pointer-events-none">
-                <div className="flex gap-[-40px] justify-center items-end h-[220px] transition-all duration-300">
-                    {cards.length === 0 ? (
-                        <p className="text-gray-500 italic py-4">Keine Karten</p>
-                    ) : (
-                        cards.map((card, index) => (
-                            <div
-                                key={card.id}
-                                className="transition-all duration-300 transform hover:-translate-y-12 hover:!z-50 hover:scale-110 -ml-8 first:ml-0 pointer-events-none group-hover:pointer-events-auto"
-                                style={{ zIndex: index }}
-                            >
-                                <Card
-                                    card={card}
-                                    onClick={() => onCardClick(card.id)}
-                                    isSelected={selectedCardId === card.id}
-                                    isPlayable={card.cost <= currentMana}
-                                />
-                            </div>
-                        ))
-                    )}
-                </div>
+            <div className="flex gap-[-40px] justify-center items-end h-[220px] transition-all duration-300">
+                {cards.length === 0 ? (
+                    <p className="text-gray-500 italic py-4">Keine Karten</p>
+                ) : (
+                    cards.map((card, index) => (
+                        <div
+                            key={card.id}
+                            className="transition-all duration-300 transform hover:-translate-y-12 hover:!z-50 hover:scale-110 -ml-8 first:ml-0 pointer-events-none group-hover:pointer-events-auto"
+                            style={{ zIndex: index }}
+                        >
+                            <Card
+                                card={card}
+                                onClick={() => onCardClick(card.id)}
+                                isSelected={selectedCardId === card.id}
+                                isPlayable={card.cost <= currentMana}
+                            />
+                        </div>
+                    ))
+                )}
             </div>
         </div>
     );
