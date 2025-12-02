@@ -130,11 +130,22 @@ export const Card: React.FC<CardProps> = ({
 
             <div
                 className={cardClasses}
-                onClick={isPlayable ? onClick : undefined}
                 onContextMenu={handleContextMenu}
                 style={{ width: '140px', height: '200px', backgroundColor: '#fef3c7' }}
             >
-                <div className={`px-2 py-1 rounded-t-xl ${card.rarity === 'Legendär' ? 'bg-gradient-to-r from-yellow-700 via-yellow-600 to-yellow-700' : 'bg-gradient-to-r from-slate-800 to-slate-700'}`}>
+                {/* Transparent clickable overlay - captures ALL clicks */}
+                {onClick && isPlayable && (
+                    <div
+                        onClick={onClick}
+                        className="absolute inset-0"
+                        style={{
+                            zIndex: 50,
+                            cursor: 'pointer',
+                        }}
+                    />
+                )}
+
+                <div className={`px-2 py-1 rounded-t-xl ${card.rarity === 'Legendär' ? 'bg-gradient-to-r from-yellow-700 via-yellow-600 to-yellow-700' : 'bg-gradient-to-r from-slate-800 to-slate-700'}`} style={{ pointerEvents: 'none' }}>
                     <h3 className="font-bold text-xs text-center text-white truncate">
                         {card.name}
                     </h3>
