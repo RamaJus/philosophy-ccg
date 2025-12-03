@@ -332,6 +332,31 @@ export function useGameLogic(mode: 'single' | 'multiplayer_host' | 'multiplayer_
                 if (!card.id.includes('wittgenstein')) {
                     addLog(`${activePlayer.name} beschwor ${card.name}!`);
                 }
+
+                // Marx Special: Auto-trigger steal on play
+                if (card.id.includes('marx')) {
+                    if (updatedEnemy.board.length > 0) {
+                        // Find lowest-cost enemy minion
+                        const lowestCostMinion = updatedEnemy.board.reduce((lowest, current) =>
+                            current.cost < lowest.cost ? current : lowest
+                        );
+
+                        // Steal the minion
+                        const stolenMinion: BoardMinion = {
+                            ...lowestCostMinion,
+                            canAttack: false, // Summoning sickness applies
+                            hasAttacked: false,
+                        };
+
+                        // Remove from enemy board, add to Marx's side
+                        updatedEnemy.board = updatedEnemy.board.filter(m => m.id !== lowestCostMinion.id);
+                        updatedPlayer.board = [...updatedPlayer.board, stolenMinion];
+
+                        addLog(`${card.name}: "Proletarier aller Länder, vereinigt euch!" ${stolenMinion.name} wechselt die Seiten!`);
+                    } else {
+                        addLog(`${card.name} wurde beschworen, aber es gibt keine Philosophen zum vereinigen!`);
+                    }
+                }
             } else {
                 // Spell logic
                 updatedPlayer.graveyard = [...updatedPlayer.graveyard, card];
