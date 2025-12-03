@@ -452,6 +452,10 @@ export const cardDatabase: Card[] = [
         faction: 'Westlich',
         school: ['Materialismus', 'Sozialismus'],
         image: '/images/cards/marx.png',
+        special: {
+            name: 'Proletarier aller Länder',
+            description: 'Stehle den gegnerischen Philosoph mit den niedrigsten Dialektikkosten für einen Angriff.'
+        }
     },
     {
         id: 'kierkegaard',
@@ -598,7 +602,7 @@ export const cardDatabase: Card[] = [
         name: 'DEBUG',
         type: 'Zauber',
         cost: 0,
-        description: 'Ziehe 2 Karten aus deinem Deck.',
+        description: 'Wähle eine Karte aus deinem Deck.',
         rarity: 'Gewöhnlich',
         faction: 'Universell',
         school: ['Hermeneutik'],
@@ -608,7 +612,7 @@ export const cardDatabase: Card[] = [
         name: 'DEBUG',
         type: 'Zauber',
         cost: 0,
-        description: 'Ziehe 2 Karten aus deinem Deck.',
+        description: 'Wähle eine Karte aus deinem Deck.',
         rarity: 'Gewöhnlich',
         faction: 'Universell',
         school: ['Hermeneutik'],

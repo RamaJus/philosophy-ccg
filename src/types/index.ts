@@ -15,6 +15,7 @@ export interface Card {
     school?: string[]; // e.g. 'rationalism', 'empiricism', 'religion'
     workBonus?: { school: string; damage: number }; // For 'work' cards
     specialAbility?: 'transform'; // Special abilities for certain cards
+    special?: { name: string; description: string }; // Named special abilities like Marx
 }
 
 export interface BoardMinion extends Card {

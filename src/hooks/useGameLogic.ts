@@ -377,7 +377,7 @@ export function useGameLogic(mode: 'single' | 'multiplayer_host' | 'multiplayer_
                     // Lock 2 Mana next turn
                     updatedEnemy.lockedMana += 2;
                     addLog(`${activePlayer.name} wirkte ${card.name} und sperrte 2 Dialektik des Gegners!`);
-                } else if (card.id.includes('hermeneutics')) {
+                } else if (card.id.includes('hermeneutics') || card.id.includes('debug')) {
                     // Trigger search mode only for player
                     if (activePlayerKey === 'player') {
                         return {
@@ -589,6 +589,52 @@ export function useGameLogic(mode: 'single' | 'multiplayer_host' | 'multiplayer_
                     const minion = activePlayer.board.find(m => m.id === action.minionId);
                     if (!minion || !minion.specialAbility || !minion.canAttack || minion.hasAttacked || minion.hasUsedSpecial) {
                         return prev; // Invalid special use
+                    }
+
+                    // Marx Special: Steal opponent's lowest-cost minion
+                    if (minion.id.includes('marx')) {
+                        if (enemyPlayer.board.length === 0) {
+                            addLog('Keine gegnerischen Philosophen zum vereinigen!');
+                            return prev;
+                        }
+
+                        // Find lowest-cost enemy minion
+                        const lowestCostMinion = enemyPlayer.board.reduce((lowest, current) =>
+                            current.cost < lowest.cost ? current : lowest
+                        );
+
+                        // Move minion to Marx's side
+                        const stolenMinion: BoardMinion = {
+                            ...lowestCostMinion,
+                            canAttack: true, // Can attack immediately
+                            hasAttacked: false,
+                        };
+
+                        // Remove from enemy board, add to active board
+                        const updatedEnemyBoard = enemyPlayer.board.filter(m => m.id !== lowestCostMinion.id);
+                        const updatedActiveBoard = [
+                            ...activePlayer.board.map(m =>
+                                m.id === action.minionId ? { ...m, hasUsedSpecial: true } : m
+                            ),
+                            stolenMinion
+                        ];
+
+                        const updatedPlayer = activePlayerKey === 'player'
+                            ? { ...player, board: updatedActiveBoard }
+                            : { ...player, board: updatedEnemyBoard };
+                        const updatedOpponent = activePlayerKey === 'player'
+                            ? { ...opponent, board: updatedEnemyBoard }
+                            : { ...opponent, board: updatedActiveBoard };
+
+                        addLog(`${minion.name}: "Proletarier aller Länder, vereinigt euch!" ${stolenMinion.name} wechselt die Seiten!`);
+
+                        return {
+                            ...prev,
+                            player: updatedPlayer,
+                            opponent: updatedOpponent,
+                            selectedMinion: undefined,
+                            targetMode: undefined,
+                        };
                     }
 
                     if (minion.specialAbility === 'transform' && action.targetId) {
