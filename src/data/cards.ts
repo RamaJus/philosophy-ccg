@@ -596,6 +596,16 @@ export const cardDatabase: Card[] = [
         rarity: 'Episch',
         faction: 'Westlich',
     },
+    {
+        id: 'trolley_problem',
+        name: 'Weichensteller',
+        type: 'Zauber',
+        cost: 6,
+        description: 'Opfere einen eigenen Philosophen. Alle gegnerischen Philosophen erleiden 4 Schaden.',
+        rarity: 'Episch',
+        faction: 'Universell',
+        school: ['Ethik'],
+    },
     // DEBUG Cards for testing
     {
         id: 'debug_1',

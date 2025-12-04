@@ -56,7 +56,7 @@ export interface GameState {
     winner?: 'player' | 'opponent';
     selectedCard?: string; // Card ID in hand
     selectedMinion?: string; // Minion ID on board for attacking
-    targetMode?: 'attack' | 'spell' | 'search' | 'transform'; // What we're targeting for
+    targetMode?: 'attack' | 'spell' | 'search' | 'transform' | 'trolley_sacrifice' | 'special'; // What we're targeting for
     log: string[]; // Game log messages
 }
 
@@ -68,4 +68,5 @@ export type GameAction =
     | { type: 'USE_SPECIAL'; minionId: string; targetId?: string } // Special ability (e.g. Van Inwagen)
     | { type: 'SELECT_CARD'; cardId?: string }
     | { type: 'SELECT_MINION'; minionId?: string }
-    | { type: 'SEARCH_DECK'; cardId: string };
+    | { type: 'SEARCH_DECK'; cardId: string }
+    | { type: 'TROLLEY_SACRIFICE'; minionId: string };

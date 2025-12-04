@@ -402,6 +402,50 @@ export function useGameLogic(mode: 'single' | 'multiplayer_host' | 'multiplayer_
                     // Lock 2 Mana next turn
                     updatedEnemy.lockedMana += 2;
                     addLog(`${activePlayer.name} wirkte ${card.name} und sperrte 2 Dialektik des Gegners!`);
+                } else if (card.id.includes('trolley')) {
+                    // Trolley Problem: Sacrifice own minion to damage all enemies
+                    if (activePlayerKey === 'player') {
+                        // Player needs to select a minion to sacrifice
+                        if (updatedPlayer.board.length === 0) {
+                            addLog('Du hast keine Philosophen zum Opfern!');
+                            // Refund mana since spell can't be cast
+                            updatedPlayer.mana += card.cost;
+                            updatedPlayer.hand.push(card);
+                            updatedPlayer.graveyard = updatedPlayer.graveyard.filter(c => c.id !== card.id);
+                        } else {
+                            return {
+                                ...prev,
+                                player: updatedPlayer,
+                                opponent: updatedEnemy,
+                                selectedCard: undefined,
+                                targetMode: 'trolley_sacrifice',
+                            };
+                        }
+                    } else {
+                        // AI Logic: Sacrifice weakest minion
+                        if (updatedPlayer.board.length > 0) {
+                            const weakestMinion = updatedPlayer.board.reduce((weakest, current) =>
+                                current.health < weakest.health ? current : weakest
+                            );
+
+                            // Remove sacrificed minion
+                            updatedPlayer.board = updatedPlayer.board.filter(m => m.id !== weakestMinion.id);
+                            updatedPlayer.graveyard.push(weakestMinion);
+
+                            // Damage all enemy minions
+                            updatedEnemy.board = updatedEnemy.board.map(m => ({
+                                ...m,
+                                health: m.health - 4
+                            })).filter(m => m.health > 0);
+
+                            // Move dead minions to graveyard
+                            const deadMinions = updatedEnemy.board.filter(m => m.health <= 0);
+                            updatedEnemy.graveyard = [...updatedEnemy.graveyard, ...deadMinions];
+                            updatedEnemy.board = updatedEnemy.board.filter(m => m.health > 0);
+
+                            addLog(`${activePlayer.name} opferte ${weakestMinion.name} und fügte allen gegnerischen Philosophen 4 Schaden zu!`);
+                        }
+                    }
                 } else if (card.id.includes('hermeneutics') || card.id.includes('debug')) {
                     // Trigger search mode only for player
                     if (activePlayerKey === 'player') {
@@ -742,6 +786,51 @@ export function useGameLogic(mode: 'single' | 'multiplayer_host' | 'multiplayer_
                         opponent: activePlayerKey === 'player' ? opponent : updatedPlayer,
                         targetMode: undefined, // Exit search mode
                         log: [...prev.log, `${activePlayer.name} suchte "${card.name}" aus dem Deck.`],
+                    };
+                });
+                break;
+            case 'TROLLEY_SACRIFICE':
+                // Handle trolley problem sacrifice selection
+                setGameStateWithSynergies(prev => {
+                    const { player, opponent } = prev;
+
+                    // Find the minion to sacrifice
+                    const sacrificeIndex = player.board.findIndex(m => m.id === action.minionId);
+                    if (sacrificeIndex === -1) return prev;
+
+                    const sacrificedMinion = player.board[sacrificeIndex];
+
+                    // Remove sacrificed minion and add to graveyard
+                    const updatedPlayerBoard = player.board.filter((_, i) => i !== sacrificeIndex);
+                    const updatedPlayerGraveyard = [...player.graveyard, sacrificedMinion];
+
+                    // Damage all enemy minions
+                    const damagedEnemyBoard = opponent.board.map(m => ({
+                        ...m,
+                        health: m.health - 4
+                    }));
+
+                    // Remove dead minions
+                    const deadMinions = damagedEnemyBoard.filter(m => m.health <= 0);
+                    const aliveEnemyBoard = damagedEnemyBoard.filter(m => m.health > 0);
+                    const updatedEnemyGraveyard = [...opponent.graveyard, ...deadMinions];
+
+                    addLog(`${player.name} opferte ${sacrificedMinion.name} und fügte allen gegnerischen Philosophen 4 Schaden zu!`);
+
+                    return {
+                        ...prev,
+                        player: {
+                            ...player,
+                            board: updatedPlayerBoard,
+                            graveyard: updatedPlayerGraveyard,
+                        },
+                        opponent: {
+                            ...opponent,
+                            board: aliveEnemyBoard,
+                            graveyard: updatedEnemyGraveyard,
+                        },
+                        targetMode: undefined,
+                        selectedMinion: undefined,
                     };
                 });
                 break;
