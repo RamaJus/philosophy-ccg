@@ -261,15 +261,14 @@ export const GameArea: React.FC<GameAreaProps> = ({ mode }) => {
                         {/* Turn Controls */}
                         <div className="glass-panel p-2 text-center shrink-0">
                             <div className="flex items-center justify-center gap-4">
-                                {targetMode === 'trolley_sacrifice' ? (
-                                    <div className="px-4 py-1 bg-amber-500/20 text-amber-400 rounded-lg border border-amber-500/50 animate-pulse">
-                                        <p className="text-sm font-bold">WEICHENSTELLER AKTIV</p>
-                                        <p className="text-xs">Wähle einen eigenen Philosophen zum Opfern</p>
-                                    </div>
-                                ) : (
-                                    <div className={`px-4 py-1 rounded-lg ${viewIsPlayerTurn ? 'bg-green-500/20 text-green-400' : 'bg-gray-500/20 text-gray-400'}`}>
-                                        <p className="text-sm font-semibold">Runde {gameState.turn}</p>
-                                        <p className="text-xs">{viewIsPlayerTurn ? 'Dein Zug' : 'Gegner-Zug'}</p>
+                                <div className={`px-4 py-1 rounded-lg ${viewIsPlayerTurn ? 'bg-green-500/20 text-green-400' : 'bg-gray-500/20 text-gray-400'}`}>
+                                    <p className="text-sm font-semibold">Runde {gameState.turn}</p>
+                                    <p className="text-xs">{viewIsPlayerTurn ? 'Dein Zug' : 'Gegner-Zug'}</p>
+                                </div>
+
+                                {targetMode === 'trolley_sacrifice' && (
+                                    <div className="px-4 py-2 bg-red-500/20 text-red-400 rounded-lg border border-red-500/50 animate-pulse">
+                                        <p className="text-sm font-bold">Wähle einen Philosophen zum Opfern</p>
                                     </div>
                                 )}
 
