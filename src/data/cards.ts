@@ -247,6 +247,7 @@ export const cardDatabase: Card[] = [
         rarity: 'Legendär',
         faction: 'Westlich',
         school: ['Analytische Philosophie', 'Logik'],
+        image: '/images/cards/wittgenstein.png',
     },
     {
         id: 'arendt',
@@ -259,6 +260,7 @@ export const cardDatabase: Card[] = [
         rarity: 'Episch',
         faction: 'Westlich',
         school: ['Politische Philosophie', 'Existentialismus'],
+        image: '/images/cards/arendt.png',
     },
     {
         id: 'hegel',
@@ -271,6 +273,7 @@ export const cardDatabase: Card[] = [
         rarity: 'Legendär',
         faction: 'Westlich',
         school: ['Idealismus', 'Dialektik'],
+        image: '/images/cards/hegel.png',
     },
     {
         id: 'locke',
