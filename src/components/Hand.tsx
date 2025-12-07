@@ -20,7 +20,7 @@ export const Hand: React.FC<HandProps> = ({ cards, onCardClick, selectedCardId, 
                         <div
                             key={card.id}
                             className="transition-all duration-300 transform hover:-translate-y-12 hover:!z-50 hover:scale-110 -ml-8 first:ml-0 pointer-events-auto"
-                            style={{ zIndex: index }}
+                            style={{ zIndex: index + 1 }}
                         >
                             <Card
                                 card={card}
