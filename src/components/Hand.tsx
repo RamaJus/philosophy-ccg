@@ -11,7 +11,7 @@ interface HandProps {
 
 export const Hand: React.FC<HandProps> = ({ cards, onCardClick, selectedCardId, currentMana }) => {
     return (
-        <div className="group/hand flex flex-col items-center transition-all duration-300 transform translate-y-[60%] hover:translate-y-0">
+        <div className="group/hand flex flex-col items-center transition-all duration-300 transform translate-y-[60%] hover:translate-y-0 pointer-events-none hover:pointer-events-auto">
             <div className="flex gap-[-40px] justify-center items-end h-[220px] transition-all duration-300">
                 {cards.length === 0 ? (
                     <p className="text-gray-500 italic py-4">Keine Karten</p>

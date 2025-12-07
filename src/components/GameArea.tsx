@@ -353,14 +353,12 @@ export const GameArea: React.FC<GameAreaProps> = ({ mode }) => {
 
                 {/* Hand Overlay */}
                 <div className="absolute bottom-0 left-0 right-0 z-40 flex justify-center pointer-events-none">
-                    <div className="pointer-events-auto">
-                        <Hand
-                            cards={viewPlayer.hand}
-                            onCardClick={handleCardClick}
-                            selectedCardId={selectedCard}
-                            currentMana={viewPlayer.mana}
-                        />
-                    </div>
+                    <Hand
+                        cards={viewPlayer.hand}
+                        onCardClick={handleCardClick}
+                        selectedCardId={selectedCard}
+                        currentMana={viewPlayer.mana}
+                    />
                 </div>
             </div>
         </div>
