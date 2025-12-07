@@ -351,8 +351,8 @@ export const GameArea: React.FC<GameAreaProps> = ({ mode }) => {
                     </div>
                 </div>
 
-                {/* Hand Overlay */}
-                <div className="absolute bottom-0 left-0 right-0 z-40 flex justify-center pointer-events-none">
+                {/* Hand Overlay - limited height to only cover visible collapsed portion */}
+                <div className="absolute bottom-0 left-0 right-0 h-[100px] z-40 flex justify-center items-end overflow-visible">
                     <Hand
                         cards={viewPlayer.hand}
                         onCardClick={handleCardClick}

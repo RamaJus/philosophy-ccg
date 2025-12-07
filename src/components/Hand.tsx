@@ -11,7 +11,7 @@ interface HandProps {
 
 export const Hand: React.FC<HandProps> = ({ cards, onCardClick, selectedCardId, currentMana }) => {
     return (
-        <div className="group/hand flex flex-col items-center transition-all duration-300 transform translate-y-[60%] hover:translate-y-0 pointer-events-none hover:pointer-events-auto">
+        <div className="group/hand flex flex-col items-center transition-all duration-300 transform translate-y-[60%] hover:translate-y-0">
             <div className="flex gap-[-40px] justify-center items-end h-[220px] transition-all duration-300">
                 {cards.length === 0 ? (
                     <p className="text-gray-500 italic py-4">Keine Karten</p>
@@ -19,7 +19,7 @@ export const Hand: React.FC<HandProps> = ({ cards, onCardClick, selectedCardId, 
                     cards.map((card, index) => (
                         <div
                             key={card.id}
-                            className="transition-all duration-300 transform hover:-translate-y-12 hover:!z-50 hover:scale-110 -ml-8 first:ml-0 pointer-events-none group-hover/hand:pointer-events-auto"
+                            className="transition-all duration-300 transform hover:-translate-y-12 hover:!z-50 hover:scale-110 -ml-8 first:ml-0 pointer-events-auto"
                             style={{ zIndex: index }}
                         >
                             <Card
