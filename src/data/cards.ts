@@ -13,7 +13,7 @@ export const cardDatabase: Card[] = [
         rarity: 'Selten',
         faction: 'Westlich',
         school: ['Skeptizismus', 'Ethik'],
-        image: '/images/cards/sokrates_v2.png',
+        image: '/images/cards/sokrates.png',
     },
     {
         id: 'plato',
@@ -247,7 +247,7 @@ export const cardDatabase: Card[] = [
         rarity: 'Legendär',
         faction: 'Westlich',
         school: ['Analytische Philosophie', 'Logik'],
-        image: '/images/cards/wittgenstein_v2.png',
+        image: '/images/cards/wittgenstein.png',
     },
     {
         id: 'arendt',
@@ -273,7 +273,7 @@ export const cardDatabase: Card[] = [
         rarity: 'Legendär',
         faction: 'Westlich',
         school: ['Idealismus', 'Dialektik'],
-        image: '/images/cards/hegel_v2.png',
+        image: '/images/cards/hegel.png',
     },
     {
         id: 'locke',
@@ -400,7 +400,7 @@ export const cardDatabase: Card[] = [
         rarity: 'Gewöhnlich',
         faction: 'Östlich',
         school: ['Mohismus', 'Utilitarismus'],
-        image: '/images/cards/mozi_v2.png',
+        image: '/images/cards/mozi.png',
     },
 
     // NEW PHILOSOPHERS
@@ -428,7 +428,7 @@ export const cardDatabase: Card[] = [
         rarity: 'Selten',
         faction: 'Westlich',
         school: ['Empirismus', 'Skeptizismus'],
-        image: '/images/cards/hume_v2.png',
+        image: '/images/cards/hume.png',
     },
     {
         id: 'spinoza',
@@ -441,7 +441,7 @@ export const cardDatabase: Card[] = [
         rarity: 'Episch',
         faction: 'Westlich',
         school: ['Rationalismus', 'Pantheismus'],
-        image: '/images/cards/spinoza_v2.png',
+        image: '/images/cards/spinoza.png',
     },
     {
         id: 'marx',
@@ -454,7 +454,7 @@ export const cardDatabase: Card[] = [
         rarity: 'Legendär',
         faction: 'Westlich',
         school: ['Materialismus', 'Sozialismus'],
-        image: '/images/cards/marx_v2.png',
+        image: '/images/cards/marx.png',
         special: {
             name: 'Proletarier aller Länder',
             description: 'Stehle den gegnerischen Philosoph mit den niedrigsten Dialektikkosten für einen Angriff.'
@@ -510,7 +510,7 @@ export const cardDatabase: Card[] = [
         rarity: 'Episch',
         faction: 'Westlich',
         school: ['Neoplatonismus', 'Mathematik'],
-        image: '/images/cards/hypatia_v2.png',
+        image: '/images/cards/hypatia.png',
     },
     {
         id: 'beauvoir',
