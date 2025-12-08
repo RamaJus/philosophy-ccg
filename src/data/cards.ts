@@ -170,6 +170,7 @@ export const cardDatabase: Card[] = [
         description: 'Ziehe 2 Karten. Die Synthese von These und Antithese.',
         rarity: 'Gewöhnlich',
         faction: 'Universell',
+        image: '/images/cards/dialectic.png',
     },
     {
         id: 'aporia',
@@ -179,6 +180,7 @@ export const cardDatabase: Card[] = [
         description: 'Verursache 3 Schaden. Zustand der Ratlosigkeit.',
         rarity: 'Gewöhnlich',
         faction: 'Westlich',
+        image: '/images/cards/aporia.png',
     },
     {
         id: 'meditation',
@@ -188,6 +190,7 @@ export const cardDatabase: Card[] = [
         description: 'Stelle 3 Glaubwürdigkeit wieder her. Innerer Frieden.',
         rarity: 'Gewöhnlich',
         faction: 'Östlich',
+        image: '/images/cards/meditation.png',
     },
     {
         id: 'wu-wei',
@@ -197,6 +200,7 @@ export const cardDatabase: Card[] = [
         description: 'Verursache 5 Schaden. Handeln durch Nicht-Handeln.',
         rarity: 'Selten',
         faction: 'Östlich',
+        image: '/images/cards/wu-wei.png',
     },
     {
         id: 'cogito',
@@ -206,6 +210,7 @@ export const cardDatabase: Card[] = [
         description: 'Ziehe 1 Karte. Ich denke, also ziehe ich.',
         rarity: 'Gewöhnlich',
         faction: 'Westlich',
+        image: '/images/cards/cogito.png',
     },
     {
         id: 'Aufklärung',
@@ -215,6 +220,7 @@ export const cardDatabase: Card[] = [
         description: 'Stelle 5 Glaubwürdigkeit wieder her. Der Pfad zum Verständnis.',
         rarity: 'Selten',
         faction: 'Universell',
+        image: '/images/cards/Aufklärung.png',
     },
     {
         id: 'sophistry',
@@ -224,6 +230,7 @@ export const cardDatabase: Card[] = [
         description: 'Stiehl 2 Dialektik (Mana) vom Gegner.',
         rarity: 'Selten',
         faction: 'Westlich',
+        image: '/images/cards/sophistry.png',
     },
     {
         id: 'dogmatism',
@@ -233,6 +240,7 @@ export const cardDatabase: Card[] = [
         description: 'Sperre 2 Dialektik (Mana) des Gegners im nächsten Zug.',
         rarity: 'Gewöhnlich',
         faction: 'Westlich',
+        image: '/images/cards/dogmatism.png',
     },
 
     // Additional Western Philosophers
@@ -607,6 +615,7 @@ export const cardDatabase: Card[] = [
         description: 'Suche eine Karte aus deinem Deck und nimm sie auf die Hand.',
         rarity: 'Episch',
         faction: 'Westlich',
+        image: '/images/cards/hermeneutics.png',
     },
     {
         id: 'trolley_problem',
@@ -617,6 +626,7 @@ export const cardDatabase: Card[] = [
         rarity: 'Episch',
         faction: 'Universell',
         school: ['Ethik'],
+        image: '/images/cards/trolley_problem.png',
     },
     // DEBUG Cards for testing
     {
