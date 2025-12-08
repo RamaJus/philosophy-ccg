@@ -29,6 +29,7 @@ export interface BoardMinion extends Card {
     transformationEndsTurn?: number; // Turn number when transformation should revert
     synergyBonus?: number; // Current synergy bonus (+X/+X)
     linkedWith?: string[]; // IDs of minions this is linked with (for visual effect)
+    turnPlayed?: number; // Turn when this minion was played (for Diogenes)
 }
 
 export interface Player {

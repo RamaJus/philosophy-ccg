@@ -9,7 +9,22 @@ const MAX_HAND_SIZE = 10;
 
 function createPlayer(name: string, isPlayer: boolean): Player {
     const deck = generateDeck();
-    const hand = deck.slice(0, STARTING_HAND_SIZE);
+    let hand = deck.slice(0, STARTING_HAND_SIZE);
+    let remainingDeck = deck.slice(STARTING_HAND_SIZE);
+
+    // Guarantee at least one 1-cost card in starting hand
+    const hasOneCostCard = hand.some(c => c.cost === 1);
+    if (!hasOneCostCard) {
+        // Find a 1-cost card in the remaining deck
+        const oneCostIndex = remainingDeck.findIndex(c => c.cost === 1);
+        if (oneCostIndex !== -1) {
+            // Swap a random card from hand with the 1-cost card
+            const swapIndex = Math.floor(Math.random() * hand.length);
+            const cardToSwap = hand[swapIndex];
+            hand[swapIndex] = remainingDeck[oneCostIndex];
+            remainingDeck[oneCostIndex] = cardToSwap;
+        }
+    }
 
     // Add DEBUG cards to player's starting hand for testing
     if (isPlayer) {
@@ -28,7 +43,7 @@ function createPlayer(name: string, isPlayer: boolean): Player {
         maxHealth: 30,
         mana: 0,
         maxMana: 0,
-        deck: deck.slice(STARTING_HAND_SIZE),
+        deck: remainingDeck,
         hand,
         board: [],
         graveyard: [],
@@ -316,6 +331,7 @@ export function useGameLogic(mode: 'single' | 'multiplayer_host' | 'multiplayer_
                     canAttack: false, // Summoning sickness
                     hasAttacked: false,
                     hasUsedSpecial: false,
+                    turnPlayed: prev.turn, // Track when minion was played (for Diogenes)
                 };
 
                 // Schopenhauer: Deal 5 damage to player when played
@@ -466,6 +482,15 @@ export function useGameLogic(mode: 'single' | 'multiplayer_host' | 'multiplayer_
                             addLog(`${activePlayer.name} wirkte ${card.name} und suchte eine Karte aus dem Deck.`);
                         }
                     }
+                } else if (card.id.includes('kontemplation')) {
+                    // Look at top 3 cards, pick 1 - for now, just draw 1 like Cogito
+                    // TODO: Implement card selection UI for Kontemplation
+                    updatedPlayer = drawCard(updatedPlayer);
+                    addLog(`${activePlayer.name} wirkte ${card.name} und zog 1 Karte.`);
+                } else if (card.id.includes('axiom')) {
+                    // Gain 1 additional mana this turn
+                    updatedPlayer.mana = Math.min(updatedPlayer.mana + 1, 10);
+                    addLog(`${activePlayer.name} wirkte ${card.name} und erhielt 1 zusätzliche Dialektik!`);
                 }
             }
 
@@ -523,6 +548,15 @@ export function useGameLogic(mode: 'single' | 'multiplayer_host' | 'multiplayer_
                 if (targetIndex === -1) return prev;
 
                 const target = enemyPlayer.board[targetIndex];
+
+                // Diogenes protection: Can't be attacked for 3 turns
+                if (target.id.includes('diogenes') && target.turnPlayed !== undefined) {
+                    const turnsOnField = prev.turn - target.turnPlayed;
+                    if (turnsOnField < 3) {
+                        addLog(`${target.name} lebt noch in seiner Tonne und kann erst in ${3 - turnsOnField} Runde(n) angegriffen werden!`);
+                        return prev;
+                    }
+                }
 
                 // Calculate damage modifiers
                 // Calculate damage modifiers
