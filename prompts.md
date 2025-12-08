@@ -27,3 +27,10 @@ The standard format used for all philosopher portraits to ensure visual consiste
 
 ### Spell Cards
 - **Trolley Problem**: `Oil painting of a steam trolley directly approaching on a single track seen from the front, a man standing next to it holding a heavy lever, distinct single railway track, ethical dilemma atmosphere, classical style.`
+
+### Permanent Works
+- **Tractatus Logico-Philosophicus**: `Close-up oil painting of Ludwig Wittgenstein reading a small book with intense focus, holding the Tractatus Logico-Philosophicus, 19th century attire, classical style.`
+- **Also sprach Zarathustra**: `Close-up oil painting of Friedrich Nietzsche reading a small book with intense focus, holding Also sprach Zarathustra, 19th century attire, iconic mustache, classical style.`
+- **Kritik der reinen Vernunft**: `Close-up oil painting of Immanuel Kant reading a small book with intense focus, holding Kritik der reinen Vernunft, 18th century attire, classical style.`
+- **Die Welt als Wille und Vorstellung**: `Close-up oil painting of Arthur Schopenhauer reading a small book with intense focus, holding Die Welt als Wille und Vorstellung, 19th century attire, classical style.`
+- **Politeia**: `Close-up oil painting of Platon reading a scroll with intense focus, holding the Politeia, ancient Greek attire, classical style.`
