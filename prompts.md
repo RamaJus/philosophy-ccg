@@ -5,6 +5,8 @@ The standard format used for all philosopher portraits to ensure visual consiste
 
 `Oil painting portrait of [Philosopher Name], [Role/Description], [Specific Visual Details], classical style.`
 
+For spell cards and scenes, ensure `full screen view, no frame` is added to avoid borders.
+
 ## Specific Prompts Used
 
 ### Eastern Philosophers
@@ -24,6 +26,10 @@ The standard format used for all philosopher portraits to ensure visual consiste
 - **David Hume**: `Oil painting portrait of David Hume, Scottish enlightenment philosopher, skeptical expression, 18th century attire, classical style.`
 - **Baruch Spinoza**: `Oil painting portrait of Baruch Spinoza, Dutch philosopher, lens grinder, thoughtful expression, 17th century attire, classical style.`
 - **Karl Marx**: `Oil painting portrait of Karl Marx, German philosopher, iconic beard, intense gaze, 19th century attire, classical style.`
+
+### Spells
+- **Meditation**: `Oil painting of a serene Buddhist monk meditating in lotus position, surrounded by soft golden light, peaceful temple background, cherry blossoms, tranquil atmosphere, classical style, full screen view, no frame`
+- **Weichensteller (Trolley Problem)**: `Oil painting of the rear side view of a runaway trolley on tracks splitting in two directions, one person on one track and four people on the other track, dramatic lighting, ethical tension, classical style, full screen view, no frame`
 
 ## Future Prompts (Planned)
 - **Søren Kierkegaard**: `Oil painting portrait of Søren Kierkegaard, Danish philosopher, melancholy expression, high collar, 19th century attire, classical style.`
