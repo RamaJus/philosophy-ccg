@@ -724,7 +724,6 @@ export function useGameLogic(mode: 'single' | 'multiplayer_host' | 'multiplayer_
                             hasUsedSpecial: false,
                             description: 'Verwandelte Materie ohne Bewusstsein.',
                             rarity: 'Gewöhnlich',
-                            faction: 'Universell',
                         };
 
                         // Update boards

@@ -20,11 +20,6 @@ const rarityColors: Record<string, string> = {
     'Legendär': 'from-orange-400 to-orange-600',
 };
 
-const factionIcons: Record<string, string> = {
-    'Westlich': '🏛️',
-    'Östlich': '☯️',
-    'Universell': '🌍',
-};
 
 export const Card: React.FC<CardProps> = ({
     card,
@@ -178,7 +173,7 @@ export const Card: React.FC<CardProps> = ({
                             className="w-full h-full object-cover"
                         />
                     ) : (
-                        <div className="text-4xl">{factionIcons[card.faction]}</div>
+                        <div className="text-4xl">📜</div>
                     )}
                     {isMinion && (
                         <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent pointer-events-none" />

@@ -11,7 +11,6 @@ export interface Card {
     maxHealth?: number; // Only for minions (to track damage)
     image?: string;
     rarity: 'Gewöhnlich' | 'Selten' | 'Episch' | 'Legendär';
-    faction: 'Westlich' | 'Östlich' | 'Universell';
     school?: string[]; // e.g. 'rationalism', 'empiricism', 'religion'
     workBonus?: { school: string; damage: number }; // For 'work' cards
     specialAbility?: 'transform'; // Special abilities for certain cards
