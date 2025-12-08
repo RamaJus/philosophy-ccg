@@ -369,7 +369,7 @@ export function useGameLogic(mode: 'single' | 'multiplayer_host' | 'multiplayer_
                         updatedPlayer = drawCard(updatedPlayer);
                     }
                     addLog(`${activePlayer.name} wirkte ${card.name} und zog ${drawCount} Karte(n).`);
-                } else if (card.id.includes('meditation') || card.id.includes('enlightenment')) {
+                } else if (card.id.includes('meditation') || card.id.includes('Aufklärung')) {
                     // Heal
                     const healAmount = card.id.includes('meditation') ? 3 : 5;
                     updatedPlayer.health = Math.min(updatedPlayer.health + healAmount, updatedPlayer.maxHealth);
