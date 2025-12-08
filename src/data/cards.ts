@@ -519,6 +519,7 @@ export const cardDatabase: Card[] = [
         cost: 4,
         description: 'Die Welt ist alles, was der Fall ist. +2 Schaden für Analytische Philosophie/Logik.',
         rarity: 'Legendär',
+        image: '/images/cards/tractatus.png',
         workBonus: { school: 'Logik', damage: 2 }
     },
     {
@@ -528,6 +529,7 @@ export const cardDatabase: Card[] = [
         cost: 5,
         description: 'Ich lehre euch den Übermenschen. +2 Schaden für Existentialismus/Nihilismus.',
         rarity: 'Legendär',
+        image: '/images/cards/zarathustra.png',
         workBonus: { school: 'Existentialismus', damage: 2 }
     },
     {
@@ -537,6 +539,7 @@ export const cardDatabase: Card[] = [
         cost: 5,
         description: 'Gedanken ohne Inhalt sind leer. +2 Schaden für Idealismus/Rationalismus.',
         rarity: 'Legendär',
+        image: '/images/cards/kritik.png',
         workBonus: { school: 'Idealismus', damage: 2 }
     },
     {
@@ -546,6 +549,7 @@ export const cardDatabase: Card[] = [
         cost: 4,
         description: 'Die Welt ist meine Vorstellung. +2 Schaden für Pessimismus.',
         rarity: 'Legendär',
+        image: '/images/cards/wille.png',
         workBonus: { school: 'Pessimismus', damage: 2 }
     },
     {
@@ -555,6 +559,7 @@ export const cardDatabase: Card[] = [
         cost: 5,
         description: 'Der Staat und die Gerechtigkeit. +2 Schaden für Politische Philosophie.',
         rarity: 'Legendär',
+        image: '/images/cards/politeia.png',
         workBonus: { school: 'Politische Philosophie', damage: 2 }
     },
 
