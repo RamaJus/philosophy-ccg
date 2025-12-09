@@ -13,6 +13,9 @@ interface DeckViewProps {
 export const DeckView: React.FC<DeckViewProps> = ({ deck, isOpen, onClose, onSelectCard, mode }) => {
     if (!isOpen) return null;
 
+    // Sort deck alphabetically by name (hides the actual draw order)
+    const sortedDeck = [...deck].sort((a, b) => a.name.localeCompare(b.name, 'de'));
+
     return (
         <div className="fixed inset-0 bg-black/80 z-50 flex flex-col items-center justify-center p-8">
             <div className="bg-slate-900 border-2 border-amber-600 rounded-xl w-full max-w-6xl h-full max-h-[90vh] flex flex-col shadow-2xl shadow-amber-900/20">
@@ -24,7 +27,7 @@ export const DeckView: React.FC<DeckViewProps> = ({ deck, isOpen, onClose, onSel
                         <p className="text-amber-200/60 mt-1 font-serif italic">
                             {mode === 'search'
                                 ? 'Wähle eine Karte, um sie auf die Hand zu nehmen.'
-                                : `${deck.length} Karten verbleibend.`}
+                                : `${deck.length} Karten verbleibend (alphabetisch sortiert).`}
                         </p>
                     </div>
                     <button
@@ -37,7 +40,7 @@ export const DeckView: React.FC<DeckViewProps> = ({ deck, isOpen, onClose, onSel
 
                 <div className="flex-1 overflow-y-auto p-8 custom-scrollbar">
                     <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
-                        {deck.map((card) => (
+                        {sortedDeck.map((card) => (
                             <div
                                 key={card.id}
                                 className={`transform transition-all duration-300 ${mode === 'search'
