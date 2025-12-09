@@ -208,9 +208,12 @@ export const cardDatabase: Card[] = [
         attack: 2,
         health: 1,
         description: 'Der Kyniker. Lebt in einer Tonne.',
-        effect: 'Kann erst angegriffen werden, wenn er 3 Runden auf dem Feld liegt.',
         rarity: 'Selten',
         school: ['Kynismus'],
+        special: {
+            name: 'In der Tonne lebend',
+            description: 'Kann erst angegriffen werden, wenn er 3 Runden auf dem Feld liegt.'
+        }
     },
     {
         id: 'pyrrhon',
@@ -274,7 +277,6 @@ export const cardDatabase: Card[] = [
         image: '/images/cards/dogmatism.png',
     },
 
-    // Additional Western Philosophers
     {
         id: 'wittgenstein',
         name: 'Ludwig Wittgenstein',
@@ -282,11 +284,14 @@ export const cardDatabase: Card[] = [
         cost: 5,
         attack: 4,
         health: 4,
-        description: '"Wovon man nicht sprechen kann, darüber muss man schweigen."',
-        effect: 'SPEZIAL: Leert das GESAMTE Spielfeld.',
+        description: 'Sprachphilosoph und Logiker.',
         rarity: 'Legendär',
         school: ['Analytische Philosophie', 'Logik'],
         image: '/images/cards/wittgenstein.png',
+        special: {
+            name: 'Wovon man nicht sprechen kann, darüber muss man schweigen',
+            description: 'Leert das GESAMTE Spielfeld.'
+        }
     },
     {
         id: 'arendt',
@@ -545,11 +550,14 @@ export const cardDatabase: Card[] = [
         cost: 5,
         attack: 10,
         health: 4,
-        description: 'Leben ist Leiden. Der Wille zum Leben ist die Quelle allen Leids.',
-        effect: 'Fügt dir beim Spielen 5 Schaden zu.',
+        description: 'Der Wille zum Leben ist die Quelle allen Leids.',
         rarity: 'Legendär',
         school: ['Pessimismus', 'Idealismus'],
         image: '/images/cards/schopenhauer.png',
+        special: {
+            name: 'Leben ist Leiden',
+            description: 'Fügt dir beim Spielen 5 Schaden zu.'
+        }
     },
     {
         id: 'van_inwagen',
@@ -559,11 +567,14 @@ export const cardDatabase: Card[] = [
         attack: 6,
         health: 6,
         description: 'Freier Wille ist ein Mysterium.',
-        effect: 'SPEZIAL: Verwandle einen gegnerischen Diener in stuhlartige Materie.',
         rarity: 'Legendär',
         school: ['Metaphysik', 'Analytische Philosophie'],
         image: '/images/cards/van_inwagen.png',
         specialAbility: 'transform',
+        special: {
+            name: 'Stuhl-Paradoxon',
+            description: 'Verwandle einen gegnerischen Philosophen in stuhlartige Materie (0/1 Diener).'
+        }
     },
 
     // Permanent Works
