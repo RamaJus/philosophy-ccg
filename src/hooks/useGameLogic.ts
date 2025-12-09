@@ -740,6 +740,37 @@ export function useGameLogic(mode: 'single' | 'multiplayer_host' | 'multiplayer_
                         };
                     }
 
+                    // Foucault Special: Panoptischer Blick - reveal top 3 cards of opponent's deck
+                    if (minion.id.includes('foucault')) {
+                        const top3Cards = enemyPlayer.deck.slice(0, 3);
+                        if (top3Cards.length === 0) {
+                            addLog('Das Deck des Gegners ist leer!');
+                            return prev;
+                        }
+
+                        const cardNames = top3Cards.map(c => c.name).join(', ');
+                        addLog(`${minion.name}: "Panoptischer Blick!" Du siehst: ${cardNames}`);
+
+                        // Mark special as used
+                        const updatedActiveBoard = activePlayer.board.map(m =>
+                            m.id === action.minionId ? { ...m, hasUsedSpecial: true } : m
+                        );
+
+                        const updatedPlayer = activePlayerKey === 'player'
+                            ? { ...player, board: updatedActiveBoard }
+                            : player;
+                        const updatedOpponent = activePlayerKey === 'player'
+                            ? opponent
+                            : { ...opponent, board: updatedActiveBoard };
+
+                        return {
+                            ...prev,
+                            player: updatedPlayer,
+                            opponent: updatedOpponent,
+                            selectedMinion: undefined,
+                        };
+                    }
+
                     if (minion.specialAbility === 'transform' && action.targetId) {
                         const targetMinion = enemyPlayer.board.find(m => m.id === action.targetId);
                         if (!targetMinion) return prev;
