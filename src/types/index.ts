@@ -55,7 +55,7 @@ export interface GameState {
     gameOver: boolean;
     winner?: 'player' | 'opponent';
     selectedCard?: string; // Card ID in hand
-    selectedMinion?: string; // Minion ID on board for attacking
+    selectedMinions?: string[]; // Minion IDs on board for attacking (multi-select)
     targetMode?: 'attack' | 'spell' | 'search' | 'transform' | 'trolley_sacrifice' | 'special' | 'kontemplation' | 'foucault_reveal'; // What we're targeting for
     kontemplationCards?: Card[]; // Top 3 cards for Kontemplation selection
     foucaultRevealCards?: Card[]; // Top 3 opponent cards for Foucault reveal
@@ -66,10 +66,10 @@ export type GameAction =
     | { type: 'START_GAME' }
     | { type: 'END_TURN' }
     | { type: 'PLAY_CARD'; cardId: string }
-    | { type: 'ATTACK'; attackerId: string; targetId?: string } // No targetId = attack player
+    | { type: 'ATTACK'; attackerIds: string[]; targetId?: string } // Multiple attackers, no targetId = attack player
     | { type: 'USE_SPECIAL'; minionId: string; targetId?: string } // Special ability (e.g. Van Inwagen)
     | { type: 'SELECT_CARD'; cardId?: string }
-    | { type: 'SELECT_MINION'; minionId?: string }
+    | { type: 'SELECT_MINION'; minionId: string; toggle?: boolean } // Toggle adds/removes from selection
     | { type: 'SEARCH_DECK'; cardId: string }
     | { type: 'TROLLEY_SACRIFICE'; minionId: string }
     | { type: 'KONTEMPLATION_SELECT'; cardId: string }

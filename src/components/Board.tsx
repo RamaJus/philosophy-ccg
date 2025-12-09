@@ -6,7 +6,7 @@ import { Target, Link, ChevronLeft, ChevronRight } from 'lucide-react';
 interface BoardProps {
     minions: BoardMinion[];
     onMinionClick?: (minionId: string) => void;
-    selectedMinionId?: string;
+    selectedMinionIds?: string[];
     isPlayerBoard?: boolean;
     canTarget?: boolean;
     activeWork?: CardType;
@@ -16,7 +16,7 @@ interface BoardProps {
 export const Board: React.FC<BoardProps> = ({
     minions,
     onMinionClick,
-    selectedMinionId,
+    selectedMinionIds = [],
     isPlayerBoard = false,
     canTarget = false,
     activeWork,
@@ -76,7 +76,7 @@ export const Board: React.FC<BoardProps> = ({
                                     <Card
                                         card={minion}
                                         onClick={onMinionClick ? () => onMinionClick(minion.id) : undefined}
-                                        isSelected={selectedMinionId === minion.id}
+                                        isSelected={selectedMinionIds.includes(minion.id)}
                                         isPlayable={canAttack || isTargetable}
                                         showHealth={true}
                                         bonusDamage={bonusDamage}

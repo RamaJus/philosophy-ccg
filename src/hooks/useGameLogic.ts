@@ -532,44 +532,50 @@ export function useGameLogic(mode: 'single' | 'multiplayer_host' | 'multiplayer_
         });
     }, [addLog, drawCard]);
 
-    const attack = useCallback((attackerId: string, targetId?: string) => {
+    const attack = useCallback((attackerIds: string[], targetId?: string) => {
         setGameStateWithSynergies(prev => {
             const { activePlayer: activePlayerKey, player, opponent } = prev;
             const activePlayer = activePlayerKey === 'player' ? player : opponent;
             const enemyPlayer = activePlayerKey === 'player' ? opponent : player;
 
-            const attackerIndex = activePlayer.board.findIndex(m => m.id === attackerId);
-            if (attackerIndex === -1) return prev;
+            // Get all attackers
+            const attackers = attackerIds
+                .map(id => activePlayer.board.find(m => m.id === id))
+                .filter((m): m is BoardMinion => m !== undefined && m.canAttack && !m.hasAttacked);
 
-            const attacker = activePlayer.board[attackerIndex];
-
-            if (!attacker.canAttack || attacker.hasAttacked) {
-                addLog('Dieser Philosoph kann noch nicht angreifen!');
+            if (attackers.length === 0) {
+                addLog('Keine gültigen Angreifer ausgewählt!');
                 return prev;
             }
 
             let updatedActivePlayer = { ...activePlayer };
             let updatedEnemyPlayer = { ...enemyPlayer };
 
-            // Calculate damage modifiers (Work Bonus)
-            let damageToDeal = attacker.attack;
-            let bonusLog = '';
+            // Calculate total damage from all attackers (with work bonuses)
+            let totalDamage = 0;
+            const attackerNames: string[] = [];
 
-            if (activePlayer.activeWork && activePlayer.activeWork.workBonus && attacker.school) {
-                if (attacker.school.includes(activePlayer.activeWork.workBonus.school)) {
-                    damageToDeal += activePlayer.activeWork.workBonus.damage;
-                    bonusLog = ` (Bonus durch "${activePlayer.activeWork.name}"! +${activePlayer.activeWork.workBonus.damage})`;
+            for (const attacker of attackers) {
+                let damage = attacker.attack;
+                if (activePlayer.activeWork?.workBonus && attacker.school?.includes(activePlayer.activeWork.workBonus.school)) {
+                    damage += activePlayer.activeWork.workBonus.damage;
                 }
+                totalDamage += damage;
+                attackerNames.push(attacker.name);
             }
+
+            const attackerNamesStr = attackerNames.length === 1
+                ? attackerNames[0]
+                : attackerNames.slice(0, -1).join(', ') + ' und ' + attackerNames[attackerNames.length - 1];
 
             if (!targetId) {
                 // Attack player directly
-                updatedEnemyPlayer.health -= damageToDeal;
-                addLog(`${attacker.name} griff ${enemyPlayer.name} an und verursachte ${damageToDeal} Schaden!${bonusLog}`);
+                updatedEnemyPlayer.health -= totalDamage;
+                addLog(`${attackerNamesStr} griff${attackers.length > 1 ? 'en' : ''} ${enemyPlayer.name} an! (${totalDamage} Schaden)`);
 
-                // Mark attacker as having attacked
-                updatedActivePlayer.board = activePlayer.board.map((m, i) =>
-                    i === attackerIndex ? { ...m, hasAttacked: true } : m
+                // Mark all attackers as having attacked
+                updatedActivePlayer.board = activePlayer.board.map(m =>
+                    attackerIds.includes(m.id) ? { ...m, hasAttacked: true } : m
                 );
             } else {
                 // Attack minion
@@ -578,12 +584,11 @@ export function useGameLogic(mode: 'single' | 'multiplayer_host' | 'multiplayer_
 
                 const target = enemyPlayer.board[targetIndex];
 
-                // Diogenes protection: Can't be attacked for 3 turns
+                // Diogenes protection
                 if (target.id.includes('diogenes') && target.turnPlayed !== undefined) {
                     const turnsOnField = prev.turn - target.turnPlayed;
                     if (turnsOnField < 3) {
                         const diogenesMsg = `${target.name} lebt noch in seiner Tonne und kann erst in ${3 - turnsOnField} Runde(n) angegriffen werden!`;
-                        // Only log if last message wasn't already about this Diogenes
                         if (prev.log.length === 0 || prev.log[prev.log.length - 1] !== diogenesMsg) {
                             addLog(diogenesMsg);
                         }
@@ -591,33 +596,45 @@ export function useGameLogic(mode: 'single' | 'multiplayer_host' | 'multiplayer_
                     }
                 }
 
-                // Calculate damage modifiers
-                // Calculate damage modifiers
-                let targetDamage = target.attack;
-                let logMessage = `${attacker.name} griff ${target.name} an! (${damageToDeal} Schaden vs ${targetDamage} Schaden)${bonusLog}`;
+                const targetDamage = target.attack;
 
-                // Deal damage to both
-                const updatedAttacker = { ...attacker, health: attacker.health - targetDamage, hasAttacked: true };
-                const updatedTarget = { ...target, health: target.health - damageToDeal };
+                // First attacker takes all counter-damage
+                const firstAttacker = attackers[0];
+                const firstAttackerIndex = activePlayer.board.findIndex(m => m.id === firstAttacker.id);
 
-                addLog(logMessage);
+                addLog(`${attackerNamesStr} griff${attackers.length > 1 ? 'en' : ''} ${target.name} an! (${totalDamage} Schaden vs ${targetDamage} Gegenschlag)`);
 
-                // Update boards with new health values
+                // Update boards
                 updatedActivePlayer.board = [...activePlayer.board];
                 updatedEnemyPlayer.board = [...enemyPlayer.board];
 
-                // Handle Attacker Death
-                if (updatedAttacker.health <= 0) {
-                    updatedActivePlayer.board.splice(attackerIndex, 1);
-                    updatedActivePlayer.graveyard = [...updatedActivePlayer.graveyard, attacker];
-                    addLog(`${attacker.name} wurde besiegt!`);
+                // Mark all attackers as having attacked
+                updatedActivePlayer.board = updatedActivePlayer.board.map(m =>
+                    attackerIds.includes(m.id) ? { ...m, hasAttacked: true } : m
+                );
+
+                // First attacker takes counter-damage
+                const updatedFirstAttacker = {
+                    ...firstAttacker,
+                    health: firstAttacker.health - targetDamage,
+                    hasAttacked: true
+                };
+
+                // Target takes summed damage
+                const updatedTarget = { ...target, health: target.health - totalDamage };
+
+                // Handle first attacker death
+                if (updatedFirstAttacker.health <= 0) {
+                    updatedActivePlayer.board = updatedActivePlayer.board.filter(m => m.id !== firstAttacker.id);
+                    updatedActivePlayer.graveyard = [...updatedActivePlayer.graveyard, firstAttacker];
+                    addLog(`${firstAttacker.name} wurde besiegt!`);
                 } else {
-                    updatedActivePlayer.board[attackerIndex] = updatedAttacker;
+                    updatedActivePlayer.board[firstAttackerIndex] = updatedFirstAttacker;
                 }
 
-                // Handle Target Death
+                // Handle target death
                 if (updatedTarget.health <= 0) {
-                    updatedEnemyPlayer.board.splice(targetIndex, 1);
+                    updatedEnemyPlayer.board = updatedEnemyPlayer.board.filter(m => m.id !== target.id);
                     updatedEnemyPlayer.graveyard = [...updatedEnemyPlayer.graveyard, target];
                     addLog(`${target.name} wurde besiegt!`);
                 } else {
@@ -625,7 +642,7 @@ export function useGameLogic(mode: 'single' | 'multiplayer_host' | 'multiplayer_
                 }
             }
 
-            // Check win conditions immediately after attack
+            // Check win conditions
             const gameOver = updatedEnemyPlayer.health <= 0 || updatedActivePlayer.health <= 0;
             let winner: 'player' | 'opponent' | undefined = undefined;
 
@@ -639,7 +656,7 @@ export function useGameLogic(mode: 'single' | 'multiplayer_host' | 'multiplayer_
                 ...prev,
                 player: activePlayerKey === 'player' ? updatedActivePlayer : updatedEnemyPlayer,
                 opponent: activePlayerKey === 'player' ? updatedEnemyPlayer : updatedActivePlayer,
-                selectedMinion: undefined,
+                selectedMinions: undefined,
                 gameOver,
                 winner,
             };
@@ -666,7 +683,7 @@ export function useGameLogic(mode: 'single' | 'multiplayer_host' | 'multiplayer_
                 player: nextPlayer === 'player' ? updatedPlayer : player,
                 opponent: nextPlayer === 'opponent' ? updatedPlayer : opponent,
                 selectedCard: undefined,
-                selectedMinion: undefined,
+                selectedMinions: undefined,
             };
 
             return newState;
@@ -677,8 +694,23 @@ export function useGameLogic(mode: 'single' | 'multiplayer_host' | 'multiplayer_
         setGameStateWithSynergies(prev => ({ ...prev, selectedCard: cardId }));
     }, [setGameStateWithSynergies]);
 
-    const selectMinion = useCallback((minionId?: string) => {
-        setGameStateWithSynergies(prev => ({ ...prev, selectedMinion: minionId }));
+    const selectMinion = useCallback((minionId: string, toggle?: boolean) => {
+        setGameStateWithSynergies(prev => {
+            const current = prev.selectedMinions || [];
+            if (toggle) {
+                // Toggle: add if not present, remove if present
+                const isSelected = current.includes(minionId);
+                return {
+                    ...prev,
+                    selectedMinions: isSelected
+                        ? current.filter(id => id !== minionId)
+                        : [...current, minionId]
+                };
+            } else {
+                // Non-toggle: replace selection
+                return { ...prev, selectedMinions: [minionId] };
+            }
+        });
     }, [setGameStateWithSynergies]);
 
     const dispatch = useCallback((action: GameAction, fromNetwork: boolean = false) => {
@@ -713,7 +745,7 @@ export function useGameLogic(mode: 'single' | 'multiplayer_host' | 'multiplayer_
                 playCard(action.cardId);
                 break;
             case 'ATTACK':
-                attack(action.attackerId, action.targetId);
+                attack(action.attackerIds, action.targetId);
                 break;
             case 'USE_SPECIAL':
                 // Handle special abilities (currently only Van Inwagen transformation)
@@ -856,7 +888,7 @@ export function useGameLogic(mode: 'single' | 'multiplayer_host' | 'multiplayer_
                 selectCard(action.cardId);
                 break;
             case 'SELECT_MINION':
-                selectMinion(action.minionId);
+                selectMinion(action.minionId, action.toggle);
                 break;
             case 'SEARCH_DECK':
                 // Handle deck search result (card selected from deck)
