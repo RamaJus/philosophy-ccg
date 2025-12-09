@@ -43,22 +43,48 @@ export const BackgroundMusic: React.FC<BackgroundMusicProps> = ({
         skipTrack();
     }, [skipTrack]);
 
-    // Play audio when track changes
+    // Try to play on first user interaction (bypass autoplay restrictions)
     useEffect(() => {
-        const playAudio = async () => {
-            if (audioRef.current) {
+        const startPlayback = async () => {
+            if (audioRef.current && !isPlaying) {
                 audioRef.current.volume = volume;
                 audioRef.current.muted = isMuted;
                 try {
                     await audioRef.current.play();
                     setIsPlaying(true);
-                } catch (error) {
-                    console.log('Autoplay prevented. Click to start music.');
+                } catch {
+                    // Still blocked, will try again on next interaction
                 }
             }
         };
-        playAudio();
-    }, [currentTrackIndex, volume, isMuted]);
+
+        // Try autoplay immediately
+        startPlayback();
+
+        // Also listen for first user interaction
+        const handleInteraction = () => {
+            startPlayback();
+            document.removeEventListener('click', handleInteraction);
+            document.removeEventListener('keydown', handleInteraction);
+        };
+
+        document.addEventListener('click', handleInteraction);
+        document.addEventListener('keydown', handleInteraction);
+
+        return () => {
+            document.removeEventListener('click', handleInteraction);
+            document.removeEventListener('keydown', handleInteraction);
+        };
+    }, [volume, isMuted, isPlaying]);
+
+    // Play audio when track changes (for skip functionality)
+    useEffect(() => {
+        if (isPlaying && audioRef.current) {
+            audioRef.current.volume = volume;
+            audioRef.current.muted = isMuted;
+            audioRef.current.play().catch(() => { });
+        }
+    }, [currentTrackIndex, volume, isMuted, isPlaying]);
 
     const toggleMute = () => {
         if (audioRef.current) {

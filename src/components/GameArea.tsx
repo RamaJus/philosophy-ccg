@@ -394,10 +394,10 @@ export const GameArea: React.FC<GameAreaProps> = ({ mode }) => {
                     </div>
 
                     {/* Right Side: Player Stats & Deck (2 cols) */}
-                    <div className="col-span-2 flex flex-col items-end gap-2 h-full overflow-y-auto">
-                        <div className="w-full"><PlayerStats player={viewPlayer} /></div>
-                        <div className="w-full"><WorkSlot card={viewPlayer.activeWork} /></div>
-                        <div className="w-full"><Graveyard cards={viewPlayer.graveyard} title="Dein Friedhof" /></div>
+                    <div className="col-span-2 flex flex-col gap-2 h-full overflow-y-auto">
+                        <div className="ml-auto"><PlayerStats player={viewPlayer} /></div>
+                        <div className="ml-auto"><WorkSlot card={viewPlayer.activeWork} /></div>
+                        <div className="ml-auto"><Graveyard cards={viewPlayer.graveyard} title="Dein Friedhof" /></div>
                     </div>
                 </div>
 

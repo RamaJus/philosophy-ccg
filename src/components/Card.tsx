@@ -97,7 +97,7 @@ export const Card: React.FC<CardProps> = ({
                             />
                         </div>
 
-                        <div className="w-[200px] h-[300px] bg-slate-900/95 border border-slate-600 rounded-xl p-4 text-white shadow-2xl flex flex-col gap-3 overflow-y-auto">
+                        <div className="w-[220px] h-[320px] bg-slate-900/95 border border-slate-600 rounded-xl p-4 text-white shadow-2xl flex flex-col gap-3 overflow-y-auto">
                             <h3 className="text-lg font-bold text-amber-400 border-b border-slate-700 pb-2">{card.name}</h3>
 
                             {card.school && (
@@ -110,6 +110,24 @@ export const Card: React.FC<CardProps> = ({
                                             </span>
                                         ))}
                                     </div>
+                                </div>
+                            )}
+
+                            {(card as BoardMinion).specialAbility && (
+                                <div className="space-y-1 bg-purple-900/30 border border-purple-700/50 rounded-lg p-2">
+                                    <span className="text-xs text-purple-400 uppercase tracking-wider flex items-center gap-1">
+                                        <Zap size={12} /> Spezialfähigkeit
+                                    </span>
+                                    <p className="text-sm font-medium text-purple-200">
+                                        {(card as BoardMinion).specialAbility}
+                                    </p>
+                                </div>
+                            )}
+
+                            {card.description && (
+                                <div className="space-y-1">
+                                    <span className="text-xs text-gray-400 uppercase tracking-wider">Beschreibung</span>
+                                    <p className="text-xs text-gray-300 italic">{card.description}</p>
                                 </div>
                             )}
 
