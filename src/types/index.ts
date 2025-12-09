@@ -5,7 +5,8 @@ export interface Card {
     name: string;
     type: CardType;
     cost: number;
-    description: string;
+    description: string; // Philosophy/flavor text (shown on hover)
+    effect?: string; // Game mechanic description (shown in tooltip)
     attack?: number;  // Only for minions
     health?: number;  // Only for minions
     maxHealth?: number; // Only for minions (to track damage)

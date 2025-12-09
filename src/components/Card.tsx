@@ -113,21 +113,18 @@ export const Card: React.FC<CardProps> = ({
                                 </div>
                             )}
 
-                            {(card as BoardMinion).specialAbility && (
+                            {/* Show effect/special abilities in tooltip */}
+                            {(card.effect || (card as BoardMinion).specialAbility || card.special) && (
                                 <div className="space-y-1 bg-purple-900/30 border border-purple-700/50 rounded-lg p-2">
                                     <span className="text-xs text-purple-400 uppercase tracking-wider flex items-center gap-1">
-                                        <Zap size={12} /> Spezialfähigkeit
+                                        <Zap size={12} /> Effekt / Spezial
                                     </span>
-                                    <p className="text-sm font-medium text-purple-200">
-                                        {(card as BoardMinion).specialAbility}
-                                    </p>
-                                </div>
-                            )}
-
-                            {card.description && (
-                                <div className="space-y-1">
-                                    <span className="text-xs text-gray-400 uppercase tracking-wider">Beschreibung</span>
-                                    <p className="text-xs text-gray-300 italic">{card.description}</p>
+                                    {card.effect && (
+                                        <p className="text-sm font-medium text-purple-200">{card.effect}</p>
+                                    )}
+                                    {card.special && (
+                                        <p className="text-sm font-medium text-purple-200">{card.special.name}: {card.special.description}</p>
+                                    )}
                                 </div>
                             )}
 
