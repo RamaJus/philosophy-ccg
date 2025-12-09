@@ -7,6 +7,13 @@
     @apply bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900;
     @apply text-white min-h-screen;
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+    cursor: url('/images/cursors/normal.png') 0 0, auto;
+  }
+
+  button,
+  a,
+  [role="button"] {
+    cursor: url('/images/cursors/pointer.png') 0 0, pointer;
   }
 }
 
@@ -64,14 +71,14 @@
     filter: drop-shadow(0 0 8px currentColor);
   }
 
-  /* Custom Cursors - using inline SVG data URIs */
+  /* Custom Cursors - using images from pack */
   .cursor-magic,
   .cursor-magic * {
-    cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 32 32'%3E%3Cpath d='M4 4L28 28M24 4L4 24' stroke='%23f59e0b' stroke-width='3' stroke-linecap='round'/%3E%3Ccircle cx='16' cy='16' r='4' fill='%239333ea'/%3E%3Ccircle cx='4' cy='4' r='3' fill='%23fbbf24'/%3E%3C/svg%3E") 4 4, crosshair !important;
+    cursor: url('/images/cursors/magic.png') 0 0, crosshair !important;
   }
 
   .cursor-attack,
   .cursor-attack * {
-    cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 32 32'%3E%3Cpath d='M4 4L24 24M20 4L24 4L24 8M8 24L4 24L4 20' stroke='%23ef4444' stroke-width='3' stroke-linecap='round'/%3E%3Cpath d='M4 4L12 12' stroke='%23fbbf24' stroke-width='2'/%3E%3C/svg%3E") 4 4, crosshair !important;
+    cursor: url('/images/cursors/attack.png') 0 0, crosshair !important;
   }
 }
