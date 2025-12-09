@@ -19,7 +19,7 @@ interface GameAreaProps {
 
 export const GameArea: React.FC<GameAreaProps> = ({ mode }) => {
     const { gameState, dispatch } = useGameLogic(mode);
-    const { player, opponent, activePlayer, selectedCard, selectedMinion, gameOver, winner, log, targetMode, kontemplationCards } = gameState;
+    const { player, opponent, activePlayer, selectedCard, selectedMinion, gameOver, winner, log, targetMode, kontemplationCards, foucaultRevealCards } = gameState;
 
     // Use ref to always have the latest state in AI callbacks
     const gameStateRef = useRef(gameState);
@@ -139,6 +139,10 @@ export const GameArea: React.FC<GameAreaProps> = ({ mode }) => {
         dispatch({ type: 'KONTEMPLATION_SELECT', cardId });
     };
 
+    const handleFoucaultClose = () => {
+        dispatch({ type: 'FOUCAULT_CLOSE' });
+    };
+
     const aiTurn = () => {
         if (mode !== 'single') return; // No AI in multiplayer
 
@@ -254,6 +258,36 @@ export const GameArea: React.FC<GameAreaProps> = ({ mode }) => {
                                         <CardComponent card={card} isPlayable={true} />
                                     </div>
                                 ))}
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                {/* Foucault Reveal Modal (View-only) */}
+                {targetMode === 'foucault_reveal' && foucaultRevealCards && foucaultRevealCards.length > 0 && (
+                    <div className="fixed inset-0 bg-black/80 z-50 flex flex-col items-center justify-center p-8 backdrop-blur-sm">
+                        <div className="bg-slate-900 border-2 border-cyan-600 rounded-xl p-8 shadow-2xl shadow-cyan-900/20">
+                            <h2 className="text-3xl font-serif text-cyan-400 mb-2 text-center">Panoptischer Blick</h2>
+                            <p className="text-cyan-200/60 mb-6 font-serif italic text-center">
+                                Die nächsten Karten des Gegners:
+                            </p>
+                            <div className="flex gap-6 justify-center mb-6">
+                                {foucaultRevealCards.map((card) => (
+                                    <div
+                                        key={card.id}
+                                        className="transform transition-all duration-300"
+                                    >
+                                        <CardComponent card={card} isPlayable={false} />
+                                    </div>
+                                ))}
+                            </div>
+                            <div className="flex justify-center">
+                                <button
+                                    onClick={handleFoucaultClose}
+                                    className="px-6 py-2 bg-cyan-600 hover:bg-cyan-700 text-white rounded-lg transition-colors font-serif"
+                                >
+                                    Schließen
+                                </button>
                             </div>
                         </div>
                     </div>

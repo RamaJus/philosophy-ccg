@@ -378,8 +378,16 @@ export function useGameLogic(mode: 'single' | 'multiplayer_host' | 'multiplayer_
                 if (card.id.includes('foucault')) {
                     const top3Cards = updatedEnemy.deck.slice(0, 3);
                     if (top3Cards.length > 0) {
-                        const cardNames = top3Cards.map(c => c.name).join(', ');
-                        addLog(`${card.name}: "Panoptischer Blick!" Du siehst die nächsten Karten des Gegners: ${cardNames}`);
+                        addLog(`${card.name}: "Panoptischer Blick!" Du siehst die nächsten Karten des Gegners.`);
+                        // Return early to show modal
+                        return {
+                            ...prev,
+                            player: updatedPlayer,
+                            opponent: updatedEnemy,
+                            selectedCard: undefined,
+                            targetMode: 'foucault_reveal',
+                            foucaultRevealCards: top3Cards,
+                        };
                     } else {
                         addLog(`${card.name}: "Panoptischer Blick!" Das Deck des Gegners ist leer.`);
                     }
@@ -962,6 +970,14 @@ export function useGameLogic(mode: 'single' | 'multiplayer_host' | 'multiplayer_
                         kontemplationCards: undefined,
                     };
                 });
+                break;
+            case 'FOUCAULT_CLOSE':
+                // Close Foucault reveal modal
+                setGameStateWithSynergies(prev => ({
+                    ...prev,
+                    targetMode: undefined,
+                    foucaultRevealCards: undefined,
+                }));
                 break;
         }
     }, [endTurn, playCard, attack, selectCard, selectMinion, startTurn, addLog, mode]);
