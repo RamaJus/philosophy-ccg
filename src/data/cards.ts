@@ -249,7 +249,7 @@ export const cardDatabase: Card[] = [
         name: 'Sophistik',
         type: 'Zauber',
         cost: 0,
-        description: 'Stiehl 2 Dialektik (Mana) vom Gegner.',
+        description: 'Erhalte 1 zusätzliche Dialektik. Sperre 1 Dialektik des Gegners im nächsten Zug.',
         rarity: 'Selten',
         image: '/images/cards/sophistry.png',
     },

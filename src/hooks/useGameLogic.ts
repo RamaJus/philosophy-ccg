@@ -420,19 +420,10 @@ export function useGameLogic(mode: 'single' | 'multiplayer_host' | 'multiplayer_
                         // Win condition handled by useEffect
                     }
                 } else if (card.id.includes('sophistry')) {
-                    // Steal 2 Mana
-                    // Ensure we don't steal more than they have, or more than we can hold
-                    const enemyMana = updatedEnemy.mana;
-                    const manaToSteal = Math.min(enemyMana, 2);
-
-                    updatedEnemy.mana = Math.max(0, updatedEnemy.mana - manaToSteal);
-                    updatedPlayer.mana = Math.min(updatedPlayer.mana + manaToSteal, 10);
-
-                    if (manaToSteal > 0) {
-                        addLog(`${activePlayer.name} nutzte Sophistik und stahl ${manaToSteal} Dialektik!`);
-                    } else {
-                        addLog(`${activePlayer.name} nutzte Sophistik, aber der Gegner hatte keine Dialektik!`);
-                    }
+                    // Lock 1 enemy mana next turn + gain 1 temporary mana this turn
+                    updatedEnemy.lockedMana = (updatedEnemy.lockedMana || 0) + 1;
+                    updatedPlayer.mana = Math.min(updatedPlayer.mana + 1, 10);
+                    addLog(`${activePlayer.name} nutzte Sophistik: +1 Dialektik und sperrte 1 Dialektik des Gegners!`);
                 } else if (card.id.includes('dogmatism')) {
                     // Lock 2 Mana next turn
                     updatedEnemy.lockedMana += 2;
@@ -591,7 +582,11 @@ export function useGameLogic(mode: 'single' | 'multiplayer_host' | 'multiplayer_
                 if (target.id.includes('diogenes') && target.turnPlayed !== undefined) {
                     const turnsOnField = prev.turn - target.turnPlayed;
                     if (turnsOnField < 3) {
-                        addLog(`${target.name} lebt noch in seiner Tonne und kann erst in ${3 - turnsOnField} Runde(n) angegriffen werden!`);
+                        const diogenesMsg = `${target.name} lebt noch in seiner Tonne und kann erst in ${3 - turnsOnField} Runde(n) angegriffen werden!`;
+                        // Only log if last message wasn't already about this Diogenes
+                        if (prev.log.length === 0 || prev.log[prev.log.length - 1] !== diogenesMsg) {
+                            addLog(diogenesMsg);
+                        }
                         return prev;
                     }
                 }
