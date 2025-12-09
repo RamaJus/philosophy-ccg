@@ -36,7 +36,7 @@ export const Board: React.FC<BoardProps> = ({
     const visibleMinions = minions.slice(startIndex, startIndex + VISIBLE_COUNT);
 
     return (
-        <div className={`glass-panel p-4 min-h-[300px] ${isPlayerBoard ? 'bg-blue-500/5' : 'bg-red-500/5'} ${isSpecialTargeting ? 'cursor-crosshair ring-2 ring-purple-500/50' : ''}`}>
+        <div className={`glass-panel p-4 min-h-[300px] ${isPlayerBoard ? 'bg-blue-500/5' : 'bg-red-500/5'} ${isSpecialTargeting ? 'cursor-magic ring-2 ring-purple-500/50' : ''}`}>
             <h3 className="text-sm font-semibold mb-2 text-center text-gray-300">
                 {isPlayerBoard ? 'Deine Philosophen' : 'Gegnerische Philosophen'}
             </h3>
@@ -82,8 +82,8 @@ export const Board: React.FC<BoardProps> = ({
                                         bonusDamage={bonusDamage}
                                         className={`
                                             ${canAttack ? 'ring-2 ring-green-400' : ''}
-                                            ${isTargetable && !isSpecialTargeting ? 'ring-2 ring-red-400 cursor-crosshair' : ''}
-                                            ${isTargetable && isSpecialTargeting ? 'ring-2 ring-purple-400 !cursor-crosshair' : ''}
+                                            ${isTargetable && !isSpecialTargeting ? 'ring-2 ring-red-400 cursor-attack' : ''}
+                                            ${isTargetable && isSpecialTargeting ? 'ring-2 ring-purple-400 cursor-magic' : ''}
                                             ${!minion.canAttack && isPlayerBoard && !minion.hasAttacked ? 'ring-4 ring-red-600' : ''}
                                             ${minion.hasAttacked || minion.hasUsedSpecial ? 'opacity-50' : ''}
                                         `}
