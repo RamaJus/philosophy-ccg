@@ -189,6 +189,7 @@ export const cardDatabase: Card[] = [
         effect: 'Betrachte die obersten 3 Karten deines Decks, nimm 1 auf die Hand.',
         rarity: 'Gewöhnlich',
         school: ['Metaphysik'],
+        image: '/images/cards/kontemplation.png',
     },
     {
         id: 'axiom',
@@ -199,6 +200,7 @@ export const cardDatabase: Card[] = [
         effect: 'Erhalte 1 zusätzliche Dialektik in diesem Zug.',
         rarity: 'Gewöhnlich',
         school: ['Logik'],
+        image: '/images/cards/axiom.png',
     },
     {
         id: 'diogenes',
@@ -210,6 +212,7 @@ export const cardDatabase: Card[] = [
         description: 'Der Kyniker. Lebt in einer Tonne.',
         rarity: 'Selten',
         school: ['Kynismus'],
+        image: '/images/cards/diogenes.png',
         special: {
             name: 'In der Tonne lebend',
             description: 'Kann erst angegriffen werden, wenn er 3 Runden auf dem Feld liegt.'
@@ -225,6 +228,7 @@ export const cardDatabase: Card[] = [
         description: 'Nichts kann mit Sicherheit gewusst werden. Begründer des Skeptizismus.',
         rarity: 'Gewöhnlich',
         school: ['Skeptizismus'],
+        image: '/images/cards/pyrrhon.png',
     },
     {
         id: 'wu-wei',
