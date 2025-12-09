@@ -132,10 +132,9 @@ export const Card: React.FC<CardProps> = ({
                 {onClick && isPlayable && (
                     <div
                         onClick={onClick}
-                        className="absolute inset-0"
+                        className="absolute inset-0 cursor-pointer"
                         style={{
                             zIndex: 50,
-                            cursor: 'pointer',
                         }}
                     />
                 )}

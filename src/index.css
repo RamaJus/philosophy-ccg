@@ -71,6 +71,11 @@
     filter: drop-shadow(0 0 8px currentColor);
   }
 
+  /* Override Tailwind's cursor-pointer to use custom pointer */
+  .cursor-pointer {
+    cursor: url('/images/cursors/pointer.png') 0 0, pointer !important;
+  }
+
   /* Custom Cursors - using images from pack */
   .cursor-magic,
   .cursor-magic * {
