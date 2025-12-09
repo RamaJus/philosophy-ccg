@@ -83,8 +83,8 @@ export const BackgroundMusic: React.FC<BackgroundMusicProps> = ({
                 onEnded={handleTrackEnd}
             />
 
-            {/* Music Controls - Fixed top right */}
-            <div className="fixed top-4 right-4 z-50 flex gap-2">
+            {/* Music Controls - Fixed bottom left */}
+            <div className="fixed bottom-4 left-4 z-50 flex gap-2">
                 {/* Skip Button */}
                 <button
                     onClick={handleSkipClick}
