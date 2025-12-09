@@ -6,6 +6,7 @@ import { Board } from './Board';
 import { GameLog } from './GameLog';
 import { Graveyard } from './Graveyard';
 import { DeckView } from './DeckView';
+import { Card as CardComponent } from './Card';
 import { WorkSlot } from './WorkSlot';
 import { Swords, SkipForward, RotateCcw, Trophy, Zap } from 'lucide-react';
 import { getRandomQuote } from '../data/quotes';
@@ -18,7 +19,7 @@ interface GameAreaProps {
 
 export const GameArea: React.FC<GameAreaProps> = ({ mode }) => {
     const { gameState, dispatch } = useGameLogic(mode);
-    const { player, opponent, activePlayer, selectedCard, selectedMinion, gameOver, winner, log, targetMode } = gameState;
+    const { player, opponent, activePlayer, selectedCard, selectedMinion, gameOver, winner, log, targetMode, kontemplationCards } = gameState;
 
     // Use ref to always have the latest state in AI callbacks
     const gameStateRef = useRef(gameState);
@@ -134,6 +135,10 @@ export const GameArea: React.FC<GameAreaProps> = ({ mode }) => {
         }
     };
 
+    const handleKontemplationSelect = (cardId: string) => {
+        dispatch({ type: 'KONTEMPLATION_SELECT', cardId });
+    };
+
     const aiTurn = () => {
         if (mode !== 'single') return; // No AI in multiplayer
 
@@ -231,6 +236,29 @@ export const GameArea: React.FC<GameAreaProps> = ({ mode }) => {
                     mode={targetMode === 'search' ? 'search' : 'view'}
                 />
 
+                {/* Kontemplation Card Selection Modal */}
+                {targetMode === 'kontemplation' && kontemplationCards && kontemplationCards.length > 0 && (
+                    <div className="fixed inset-0 bg-black/80 z-50 flex flex-col items-center justify-center p-8 backdrop-blur-sm">
+                        <div className="bg-slate-900 border-2 border-purple-600 rounded-xl p-8 shadow-2xl shadow-purple-900/20">
+                            <h2 className="text-3xl font-serif text-purple-400 mb-2 text-center">Kontemplation</h2>
+                            <p className="text-purple-200/60 mb-6 font-serif italic text-center">
+                                Wähle eine der obersten 3 Karten deines Decks.
+                            </p>
+                            <div className="flex gap-6 justify-center">
+                                {kontemplationCards.map((card) => (
+                                    <div
+                                        key={card.id}
+                                        className="transform transition-all duration-300 hover:scale-105 hover:shadow-xl hover:shadow-purple-500/20 cursor-pointer"
+                                        onClick={() => handleKontemplationSelect(card.id)}
+                                    >
+                                        <CardComponent card={card} isPlayable={true} />
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    </div>
+                )}
+
                 {/* Main Game Grid - Adjusted for full height */}
                 <div className="grid grid-cols-12 gap-2 h-full p-2 pb-24">
                     {/* Left Side: Stats & Graveyard (2 cols) */}
@@ -269,6 +297,12 @@ export const GameArea: React.FC<GameAreaProps> = ({ mode }) => {
                                 {targetMode === 'trolley_sacrifice' && (
                                     <div className="px-4 py-2 bg-red-500/20 text-red-400 rounded-lg border border-red-500/50 animate-pulse">
                                         <p className="text-sm font-bold">Wähle einen Philosophen zum Opfern</p>
+                                    </div>
+                                )}
+
+                                {targetMode === 'kontemplation' && (
+                                    <div className="px-4 py-2 bg-purple-500/20 text-purple-400 rounded-lg border border-purple-500/50 animate-pulse">
+                                        <p className="text-sm font-bold">Wähle eine der obersten 3 Karten</p>
                                     </div>
                                 )}
 

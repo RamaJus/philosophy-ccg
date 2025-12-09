@@ -56,7 +56,8 @@ export interface GameState {
     winner?: 'player' | 'opponent';
     selectedCard?: string; // Card ID in hand
     selectedMinion?: string; // Minion ID on board for attacking
-    targetMode?: 'attack' | 'spell' | 'search' | 'transform' | 'trolley_sacrifice' | 'special'; // What we're targeting for
+    targetMode?: 'attack' | 'spell' | 'search' | 'transform' | 'trolley_sacrifice' | 'special' | 'kontemplation'; // What we're targeting for
+    kontemplationCards?: Card[]; // Top 3 cards for Kontemplation selection
     log: string[]; // Game log messages
 }
 
@@ -69,4 +70,5 @@ export type GameAction =
     | { type: 'SELECT_CARD'; cardId?: string }
     | { type: 'SELECT_MINION'; minionId?: string }
     | { type: 'SEARCH_DECK'; cardId: string }
-    | { type: 'TROLLEY_SACRIFICE'; minionId: string };
+    | { type: 'TROLLEY_SACRIFICE'; minionId: string }
+    | { type: 'KONTEMPLATION_SELECT'; cardId: string };

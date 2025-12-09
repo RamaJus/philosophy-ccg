@@ -373,6 +373,17 @@ export function useGameLogic(mode: 'single' | 'multiplayer_host' | 'multiplayer_
                         addLog(`${card.name} wurde beschworen, aber es gibt keine Philosophen zum vereinigen!`);
                     }
                 }
+
+                // Foucault Special: Panoptischer Blick - auto-trigger on play
+                if (card.id.includes('foucault')) {
+                    const top3Cards = updatedEnemy.deck.slice(0, 3);
+                    if (top3Cards.length > 0) {
+                        const cardNames = top3Cards.map(c => c.name).join(', ');
+                        addLog(`${card.name}: "Panoptischer Blick!" Du siehst die nächsten Karten des Gegners: ${cardNames}`);
+                    } else {
+                        addLog(`${card.name}: "Panoptischer Blick!" Das Deck des Gegners ist leer.`);
+                    }
+                }
             } else {
                 // Spell logic
                 updatedPlayer.graveyard = [...updatedPlayer.graveyard, card];
@@ -483,10 +494,29 @@ export function useGameLogic(mode: 'single' | 'multiplayer_host' | 'multiplayer_
                         }
                     }
                 } else if (card.id.includes('kontemplation')) {
-                    // Look at top 3 cards, pick 1 - for now, just draw 1 like Cogito
-                    // TODO: Implement card selection UI for Kontemplation
-                    updatedPlayer = drawCard(updatedPlayer);
-                    addLog(`${activePlayer.name} wirkte ${card.name} und zog 1 Karte.`);
+                    // Look at top 3 cards of your deck, pick 1
+                    const top3 = updatedPlayer.deck.slice(0, 3);
+                    if (top3.length === 0) {
+                        addLog(`${activePlayer.name} wirkte ${card.name}, aber das Deck ist leer!`);
+                    } else if (activePlayerKey === 'player') {
+                        // Player: Enter kontemplation mode to select a card
+                        addLog(`${activePlayer.name} wirkte ${card.name}. Wähle eine der obersten 3 Karten.`);
+                        return {
+                            ...prev,
+                            player: updatedPlayer,
+                            opponent: updatedEnemy,
+                            selectedCard: undefined,
+                            targetMode: 'kontemplation',
+                            kontemplationCards: top3,
+                        };
+                    } else {
+                        // AI: Pick first card
+                        const pickedCard = top3[0];
+                        updatedPlayer.deck = updatedPlayer.deck.slice(1);
+                        updatedPlayer.hand = [...updatedPlayer.hand, pickedCard];
+                        // Shuffle remaining top cards back (they're already in deck)
+                        addLog(`${activePlayer.name} wirkte ${card.name} und wählte eine Karte.`);
+                    }
                 } else if (card.id.includes('axiom')) {
                     // Gain 1 additional mana this turn
                     updatedPlayer.mana = Math.min(updatedPlayer.mana + 1, 10);
@@ -895,6 +925,41 @@ export function useGameLogic(mode: 'single' | 'multiplayer_host' | 'multiplayer_
                         },
                         targetMode: undefined,
                         selectedMinion: undefined,
+                    };
+                });
+                break;
+            case 'KONTEMPLATION_SELECT':
+                // Handle Kontemplation card selection (top 3 cards, pick 1)
+                setGameStateWithSynergies(prev => {
+                    const { player, kontemplationCards } = prev;
+                    if (!kontemplationCards || kontemplationCards.length === 0) return prev;
+
+                    // Find the selected card
+                    const selectedCard = kontemplationCards.find(c => c.id === action.cardId);
+                    if (!selectedCard) return prev;
+
+                    // Get the other cards (not selected)
+                    const otherCards = kontemplationCards.filter(c => c.id !== action.cardId);
+
+                    // Remove all top 3 cards from deck, then add back the non-selected ones (shuffled)
+                    let newDeck = player.deck.slice(kontemplationCards.length);
+                    // Shuffle the non-selected cards back into the deck
+                    otherCards.forEach(card => {
+                        const insertIndex = Math.floor(Math.random() * (newDeck.length + 1));
+                        newDeck = [...newDeck.slice(0, insertIndex), card, ...newDeck.slice(insertIndex)];
+                    });
+
+                    addLog(`Du hast "${selectedCard.name}" gewählt. Die anderen Karten wurden zurückgemischt.`);
+
+                    return {
+                        ...prev,
+                        player: {
+                            ...player,
+                            deck: newDeck,
+                            hand: [...player.hand, selectedCard],
+                        },
+                        targetMode: undefined,
+                        kontemplationCards: undefined,
                     };
                 });
                 break;
