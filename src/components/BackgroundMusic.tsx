@@ -1,40 +1,68 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { Volume2, VolumeX } from 'lucide-react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
+import { Volume2, VolumeX, SkipForward } from 'lucide-react';
+
+const TRACKS = [
+    '/music/background1.mp3',
+    '/music/background2.mp3',
+    '/music/background3.mp3',
+    '/music/background4.mp3',
+    '/music/background5.mp3',
+    '/music/background6.mp3',
+];
 
 interface BackgroundMusicProps {
-    audioFile?: string;
     volume?: number;
 }
 
 export const BackgroundMusic: React.FC<BackgroundMusicProps> = ({
-    audioFile = '/music/background.mp3',
     volume = 0.5
 }) => {
     const [isMuted, setIsMuted] = useState(false);
     const [isPlaying, setIsPlaying] = useState(false);
+    const [currentTrackIndex, setCurrentTrackIndex] = useState(() =>
+        Math.floor(Math.random() * TRACKS.length)
+    );
     const audioRef = useRef<HTMLAudioElement>(null);
 
+    // Get a random different track
+    const getNextTrackIndex = useCallback(() => {
+        let nextIndex;
+        do {
+            nextIndex = Math.floor(Math.random() * TRACKS.length);
+        } while (nextIndex === currentTrackIndex && TRACKS.length > 1);
+        return nextIndex;
+    }, [currentTrackIndex]);
+
+    // Skip to next track
+    const skipTrack = useCallback(() => {
+        setCurrentTrackIndex(getNextTrackIndex());
+    }, [getNextTrackIndex]);
+
+    // Handle track end - play next random track
+    const handleTrackEnd = useCallback(() => {
+        skipTrack();
+    }, [skipTrack]);
+
+    // Play audio when track changes
     useEffect(() => {
-        // Try to play music when component mounts
-        // This might fail due to browser autoplay policy
         const playAudio = async () => {
             if (audioRef.current) {
-                audioRef.current.volume = volume; // Set volume to 50%
+                audioRef.current.volume = volume;
+                audioRef.current.muted = isMuted;
                 try {
                     await audioRef.current.play();
                     setIsPlaying(true);
                 } catch (error) {
-                    console.log('Autoplay prevented. User interaction required.');
+                    console.log('Autoplay prevented. Click to start music.');
                 }
             }
         };
         playAudio();
-    }, [volume]);
+    }, [currentTrackIndex, volume, isMuted]);
 
     const toggleMute = () => {
         if (audioRef.current) {
             if (!isPlaying) {
-                // If not playing yet, start playing
                 audioRef.current.play();
                 setIsPlaying(true);
             }
@@ -43,26 +71,42 @@ export const BackgroundMusic: React.FC<BackgroundMusicProps> = ({
         }
     };
 
+    const handleSkipClick = () => {
+        skipTrack();
+    };
+
     return (
         <>
             <audio
                 ref={audioRef}
-                loop
-                src={audioFile}
+                src={TRACKS[currentTrackIndex]}
+                onEnded={handleTrackEnd}
             />
 
-            {/* Mute/Unmute Button */}
-            <button
-                onClick={toggleMute}
-                className="fixed top-4 right-4 z-50 bg-slate-800/80 hover:bg-slate-700/80 backdrop-blur-sm rounded-full p-3 text-white shadow-lg transition-all duration-200 hover:scale-110"
-                title={isMuted ? 'Musik einschalten' : 'Musik ausschalten'}
-            >
-                {isMuted ? (
-                    <VolumeX size={20} />
-                ) : (
-                    <Volume2 size={20} />
-                )}
-            </button>
+            {/* Music Controls - Fixed top right */}
+            <div className="fixed top-4 right-4 z-50 flex gap-2">
+                {/* Skip Button */}
+                <button
+                    onClick={handleSkipClick}
+                    className="bg-slate-800/80 hover:bg-slate-700/80 backdrop-blur-sm rounded-full p-3 text-white shadow-lg transition-all duration-200 hover:scale-110"
+                    title="Nächstes Lied"
+                >
+                    <SkipForward size={20} />
+                </button>
+
+                {/* Mute/Unmute Button */}
+                <button
+                    onClick={toggleMute}
+                    className="bg-slate-800/80 hover:bg-slate-700/80 backdrop-blur-sm rounded-full p-3 text-white shadow-lg transition-all duration-200 hover:scale-110"
+                    title={isMuted ? 'Musik einschalten' : 'Musik ausschalten'}
+                >
+                    {isMuted ? (
+                        <VolumeX size={20} />
+                    ) : (
+                        <Volume2 size={20} />
+                    )}
+                </button>
+            </div>
         </>
     );
 };
