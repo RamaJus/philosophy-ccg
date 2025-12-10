@@ -39,8 +39,8 @@ function createPlayer(name: string, isPlayer: boolean): Player {
     return {
         id: isPlayer ? 'player' : 'opponent',
         name,
-        health: 30,
-        maxHealth: 30,
+        health: 40,
+        maxHealth: 40,
         mana: 0,
         maxMana: 0,
         deck: remainingDeck,
