@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { Card as CardType, BoardMinion } from '../types';
-import { Swords, Heart, Zap, Sparkles, BookOpen } from 'lucide-react';
+import { Swords, Heart, Zap, BookOpen } from 'lucide-react';
 
 interface CardProps {
     card: CardType | BoardMinion;
@@ -13,12 +13,7 @@ interface CardProps {
     bonusDamage?: number;
 }
 
-const rarityColors: Record<string, string> = {
-    'Gewöhnlich': 'from-gray-400 to-gray-600',
-    'Selten': 'from-blue-400 to-blue-600',
-    'Episch': 'from-purple-400 to-purple-600',
-    'Legendär': 'from-orange-400 to-orange-600',
-};
+
 
 
 export const Card: React.FC<CardProps> = ({
@@ -169,9 +164,12 @@ export const Card: React.FC<CardProps> = ({
                 </div>
 
 
-                <div className={`absolute top-8 right-1 w-6 h-6 rounded-full bg-gradient-to-br ${rarityColors[card.rarity]} flex items-center justify-center shadow-lg z-10 pointer-events-none`}>
-                    <Sparkles size={14} className="text-white" />
-                </div>
+                {/* Synergy Bonus Badge (for philosophers on board with synergy) */}
+                {isMinion && boardMinion?.synergyBonus && boardMinion.synergyBonus > 0 && (
+                    <div className="absolute top-8 right-1 w-7 h-7 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center shadow-lg z-10 pointer-events-none border-2 border-blue-300">
+                        <span className="text-white font-bold text-xs">+{boardMinion.synergyBonus}</span>
+                    </div>
+                )}
 
                 {/* Full Image Area */}
                 <div

@@ -96,9 +96,8 @@ export const Board: React.FC<BoardProps> = ({
 
                                     {/* Synergy Link Logic - Check next minion in full array */}
                                     {minions[actualIndex + 1] && minion.linkedWith?.includes(minions[actualIndex + 1].id) && (
-                                        <div className="absolute top-1/2 -right-5 transform -translate-y-1/2 z-20 flex flex-col items-center bg-slate-900/80 rounded-full p-1 border border-blue-500/50 backdrop-blur-sm">
+                                        <div className="absolute top-1/2 -right-5 transform -translate-y-1/2 z-20 flex items-center bg-slate-900/80 rounded-full p-1.5 border border-blue-500/50 backdrop-blur-sm">
                                             <Link size={14} className="text-blue-400" />
-                                            <span className="text-[10px] font-bold text-blue-300 leading-none">+{minion.synergyBonus}</span>
                                         </div>
                                     )}
                                 </div>
