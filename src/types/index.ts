@@ -16,6 +16,7 @@ export interface Card {
     workBonus?: { school: string; damage: number }; // For 'work' cards
     specialAbility?: 'transform'; // Special abilities for certain cards
     special?: { name: string; description: string }; // Named special abilities like Marx
+    gender?: 'male' | 'female'; // For internal logic/synergies
 }
 
 export interface BoardMinion extends Card {

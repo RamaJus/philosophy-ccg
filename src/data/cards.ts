@@ -11,7 +11,8 @@ export const cardDatabase: Card[] = [
         health: 5,
         description: 'Die Bremse Athens. "I weiß, dass ich nichts weiß."',
         rarity: 'Selten',
-        school: ['Skeptizismus', 'Ethik'],
+        school: ['Ethik', 'Skeptizismus'],
+        gender: 'male',
         image: '/images/cards/sokrates.png',
     },
     {
@@ -23,7 +24,8 @@ export const cardDatabase: Card[] = [
         health: 5,
         description: 'Meister der Formen. Idealismus in Person.',
         rarity: 'Episch',
-        school: ['Idealismus', 'Rationalismus'],
+        school: ['Idealismus', 'Rationalismus', 'Politik'],
+        gender: 'male',
         image: '/images/cards/platon.png',
     },
     {
@@ -35,7 +37,8 @@ export const cardDatabase: Card[] = [
         health: 6,
         description: 'Der Philosoph. Logik und Vernunft definiert.',
         rarity: 'Episch',
-        school: ['Empirismus', 'Logik', 'Ethik'],
+        school: ['Logik', 'Empirismus', 'Ethik'],
+        gender: 'male',
         image: '/images/cards/aristoteles.png',
     },
     {
@@ -47,7 +50,8 @@ export const cardDatabase: Card[] = [
         health: 5,
         description: 'Kategorischer Imperativ. Handle nur nach allgemeingültigem Gesetz.',
         rarity: 'Legendär',
-        school: ['Idealismus', 'Deontologie', 'Aufklärung'],
+        school: ['Idealismus', 'Rationalismus', 'Ethik'],
+        gender: 'male',
         image: '/images/cards/kant.png',
     },
     {
@@ -59,7 +63,8 @@ export const cardDatabase: Card[] = [
         health: 4,
         description: 'Gott ist tot. Der Übermensch erhebt sich.',
         rarity: 'Legendär',
-        school: ['Existentialismus', 'Nihilismus'],
+        school: ['Existentialismus', 'Skeptizismus'],
+        gender: 'male',
         image: '/images/cards/nietzsche.jpg',
     },
     {
@@ -71,7 +76,8 @@ export const cardDatabase: Card[] = [
         health: 5,
         description: 'Cogito ergo sum. Ich denke, also bin ich.',
         rarity: 'Selten',
-        school: ['Rationalismus'],
+        school: ['Rationalismus', 'Metaphysik'],
+        gender: 'male',
         image: '/images/cards/descartes.png',
     },
 
@@ -85,7 +91,8 @@ export const cardDatabase: Card[] = [
         health: 6,
         description: 'Meister Kong. Tugend und soziale Harmonie.',
         rarity: 'Episch',
-        school: ['Ethik', 'Sozialphilosophie'],
+        school: ['Ethik', 'Politik'],
+        gender: 'male',
         image: '/images/cards/confucius.png',
     },
     {
@@ -97,7 +104,8 @@ export const cardDatabase: Card[] = [
         health: 8,
         description: 'Das Tao, das gesagt werden kann, ist nicht das ewige Tao.',
         rarity: 'Legendär',
-        school: ['Daoismus'],
+        school: ['Metaphysik'],
+        gender: 'male',
         image: '/images/cards/laozi.png',
     },
     {
@@ -109,7 +117,8 @@ export const cardDatabase: Card[] = [
         health: 4,
         description: 'Die Kunst des Krieges. Jede Kriegsführung basiert auf Täuschung.',
         rarity: 'Episch',
-        school: ['Strategie'],
+        school: ['Politik'],
+        gender: 'male',
         image: '/images/cards/sun-tzu.png',
     },
     {
@@ -121,7 +130,8 @@ export const cardDatabase: Card[] = [
         health: 7,
         description: 'Der Erleuchtete. Der mittlere Weg zum Nirvana.',
         rarity: 'Legendär',
-        school: ['Religion', 'Metaphysik'],
+        school: ['Religion', 'Metaphysik', 'Ethik'],
+        gender: 'male',
         image: '/images/cards/buddha.png',
     },
     {
@@ -133,7 +143,8 @@ export const cardDatabase: Card[] = [
         health: 4,
         description: 'Bin ich ein Mensch, der träumt ein Schmetterling zu sein?',
         rarity: 'Selten',
-        school: ['Daoismus', 'Skeptizismus'],
+        school: ['Metaphysik', 'Skeptizismus'],
+        gender: 'male',
         image: '/images/cards/zhuangzi.png',
     },
     {
@@ -145,7 +156,8 @@ export const cardDatabase: Card[] = [
         health: 4,
         description: 'Die menschliche Natur ist inhärent gut.',
         rarity: 'Selten',
-        school: ['Konfuzianismus', 'Idealismus'],
+        school: ['Ethik', 'Politik'],
+        gender: 'male',
         image: '/images/cards/mencius.png',
     },
 
@@ -211,7 +223,8 @@ export const cardDatabase: Card[] = [
         health: 1,
         description: 'Der Kyniker. Lebt in einer Tonne.',
         rarity: 'Selten',
-        school: ['Kynismus'],
+        school: ['Ethik', 'Skeptizismus'],
+        gender: 'male',
         image: '/images/cards/diogenes.png',
         special: {
             name: 'In der Tonne lebend',
@@ -228,6 +241,7 @@ export const cardDatabase: Card[] = [
         description: 'Nichts kann mit Sicherheit gewusst werden. Begründer des Skeptizismus.',
         rarity: 'Gewöhnlich',
         school: ['Skeptizismus'],
+        gender: 'male',
         image: '/images/cards/pyrrhon.png',
     },
     {
@@ -290,7 +304,8 @@ export const cardDatabase: Card[] = [
         health: 4,
         description: 'Sprachphilosoph und Logiker.',
         rarity: 'Legendär',
-        school: ['Analytische Philosophie', 'Logik'],
+        school: ['Logik', 'Skeptizismus'],
+        gender: 'male',
         image: '/images/cards/wittgenstein.png',
         special: {
             name: 'Wovon man nicht sprechen kann, darüber muss man schweigen',
@@ -306,7 +321,8 @@ export const cardDatabase: Card[] = [
         health: 5,
         description: 'Die Banalität des Bösen. Größte Kritikerin des Totalitarismus.',
         rarity: 'Episch',
-        school: ['Politische Philosophie', 'Existentialismus'],
+        school: ['Politik', 'Existentialismus'],
+        gender: 'female',
         image: '/images/cards/arendt.png',
     },
     {
@@ -318,7 +334,8 @@ export const cardDatabase: Card[] = [
         health: 6,
         description: 'Der Meister der Dialektik. These, Antithese, Synthese.',
         rarity: 'Legendär',
-        school: ['Idealismus', 'Dialektik'],
+        school: ['Idealismus', 'Logik'],
+        gender: 'male',
         image: '/images/cards/hegel.png',
     },
 
@@ -333,7 +350,8 @@ export const cardDatabase: Card[] = [
         health: 7,
         description: 'Meister der Leere. Alle Dinge fehlt inhärente Existenz.',
         rarity: 'Episch',
-        school: ['Madhyamaka', 'Buddhismus'],
+        school: ['Metaphysik', 'Skeptizismus'],
+        gender: 'male',
         image: '/images/cards/nagarjuna.png',
     },
     {
@@ -345,7 +363,8 @@ export const cardDatabase: Card[] = [
         health: 6,
         description: 'Die Wunde ist, wo das Licht eintritt. Sufi-Mystiker.',
         rarity: 'Selten',
-        school: ['Mystizismus', 'Sufismus'],
+        school: ['Religion', 'Metaphysik'],
+        gender: 'male',
         image: '/images/cards/rumi.png',
     },
     {
@@ -357,7 +376,8 @@ export const cardDatabase: Card[] = [
         health: 5,
         description: 'Die Wiederbelebung der religiösen Wissenschaften. Islamische Philosophie.',
         rarity: 'Episch',
-        school: ['Theologie', 'Mystizismus'],
+        school: ['Religion', 'Skeptizismus'],
+        gender: 'male',
         image: '/images/cards/al-ghazali.png',
     },
     {
@@ -369,7 +389,8 @@ export const cardDatabase: Card[] = [
         health: 3,
         description: 'Universelle Liebe und unparteiisches Kümmern.',
         rarity: 'Gewöhnlich',
-        school: ['Mohismus', 'Utilitarismus'],
+        school: ['Ethik', 'Politik', 'Logik'],
+        gender: 'male',
         image: '/images/cards/mozi.png',
     },
 
@@ -383,7 +404,8 @@ export const cardDatabase: Card[] = [
         health: 6,
         description: 'Glaube und Vernunft in Harmonie. Die fünf Wege.',
         rarity: 'Selten',
-        school: ['Scholastik', 'Religion'],
+        school: ['Religion', 'Rationalismus', 'Ethik'],
+        gender: 'male',
         image: '/images/cards/aquinas.png',
     },
     {
@@ -396,6 +418,7 @@ export const cardDatabase: Card[] = [
         description: 'Die Vernunft ist nur die Sklavin der Leidenschaften.',
         rarity: 'Selten',
         school: ['Empirismus', 'Skeptizismus'],
+        gender: 'male',
         image: '/images/cards/hume.png',
     },
     {
@@ -407,7 +430,8 @@ export const cardDatabase: Card[] = [
         health: 5,
         description: 'Gott oder die Natur. Alles geschieht aus Notwendigkeit.',
         rarity: 'Episch',
-        school: ['Rationalismus', 'Pantheismus'],
+        school: ['Rationalismus', 'Metaphysik', 'Ethik'],
+        gender: 'male',
         image: '/images/cards/spinoza.png',
     },
     {
@@ -419,7 +443,8 @@ export const cardDatabase: Card[] = [
         health: 5,
         description: 'Proletarier aller Länder, vereinigt euch!',
         rarity: 'Legendär',
-        school: ['Materialismus', 'Sozialismus'],
+        school: ['Politik', 'Empirismus'],
+        gender: 'male',
         image: '/images/cards/marx.png',
         special: {
             name: 'Proletarier aller Länder',
@@ -436,6 +461,7 @@ export const cardDatabase: Card[] = [
         description: 'Der Sprung in den Glauben. Vater des Existentialismus.',
         rarity: 'Selten',
         school: ['Existentialismus', 'Religion'],
+        gender: 'male',
         image: '/images/cards/kierkegaard.png',
     },
     {
@@ -447,7 +473,8 @@ export const cardDatabase: Card[] = [
         health: 4,
         description: 'Lust ist das höchste Gut, aber durch Mäßigung.',
         rarity: 'Gewöhnlich',
-        school: ['Epikureismus', 'Materialismus'],
+        school: ['Ethik', 'Empirismus'],
+        gender: 'male',
         image: '/images/cards/epicurus.png',
     },
     {
@@ -459,7 +486,8 @@ export const cardDatabase: Card[] = [
         health: 6,
         description: 'Wir leiden öfter in der Vorstellung als in der Wirklichkeit.',
         rarity: 'Selten',
-        school: ['Stoizismus'],
+        school: ['Ethik'],
+        gender: 'male',
         image: '/images/cards/seneca.png',
     },
     {
@@ -471,7 +499,8 @@ export const cardDatabase: Card[] = [
         health: 5,
         description: 'Bewahre dein Recht zu denken, denn selbst falsch zu denken ist besser als gar nicht zu denken.',
         rarity: 'Episch',
-        school: ['Neoplatonismus', 'Mathematik'],
+        school: ['Rationalismus', 'Logik', 'Metaphysik'],
+        gender: 'female',
         image: '/images/cards/hypatia.png',
     },
     {
@@ -483,7 +512,8 @@ export const cardDatabase: Card[] = [
         health: 4,
         description: 'Man kommt nicht als Frau zur Welt, man wird es.',
         rarity: 'Episch',
-        school: ['Existentialismus', 'Feminismus'],
+        school: ['Existentialismus', 'Politik', 'Ethik'],
+        gender: 'female',
         image: '/images/cards/beauvoir.png',
     },
     {
@@ -495,7 +525,8 @@ export const cardDatabase: Card[] = [
         health: 7,
         description: 'Wissen ist Macht. Überwachen und Strafen.',
         rarity: 'Legendär',
-        school: ['Poststrukturalismus'],
+        school: ['Politik', 'Skeptizismus'],
+        gender: 'male',
         special: { name: 'Panoptischer Blick', description: 'Schaue die ersten 3 Karten des Decks deines Gegners an.' },
         image: '/images/cards/foucault.png',
     },
@@ -508,7 +539,8 @@ export const cardDatabase: Card[] = [
         health: 5,
         description: 'Tabula Rasa. Der Geist ist ein unbeschriebenes Blatt.',
         rarity: 'Selten',
-        school: ['Empirismus', 'Politische Philosophie'],
+        school: ['Empirismus', 'Politik'],
+        gender: 'male',
         image: '/images/cards/locke.png',
     },
     {
@@ -520,7 +552,8 @@ export const cardDatabase: Card[] = [
         health: 4,
         description: 'Der Mensch ist frei geboren, und überall liegt er in Ketten.',
         rarity: 'Episch',
-        school: ['Politische Philosophie', 'Romantik'],
+        school: ['Politik', 'Ethik'],
+        gender: 'male',
         image: '/images/cards/rousseau.png',
     },
     {
@@ -532,7 +565,8 @@ export const cardDatabase: Card[] = [
         health: 3,
         description: 'Die Existenz geht der Essenz voraus. Wir sind zur Freiheit verurteilt.',
         rarity: 'Legendär',
-        school: ['Existentialismus'],
+        school: ['Existentialismus', 'Politik'],
+        gender: 'male',
         image: '/images/cards/sartre.png',
     },
     {
@@ -544,7 +578,8 @@ export const cardDatabase: Card[] = [
         health: 6,
         description: 'Das Dasein ist das Seiende, dem es in seinem Sein um dieses Sein selbst geht.',
         rarity: 'Legendär',
-        school: ['Phänomenologie', 'Existentialismus'],
+        school: ['Existentialismus', 'Metaphysik'],
+        gender: 'male',
         image: '/images/cards/heidegger.png',
     },
     {
@@ -556,7 +591,8 @@ export const cardDatabase: Card[] = [
         health: 4,
         description: 'Der Wille zum Leben ist die Quelle allen Leids.',
         rarity: 'Legendär',
-        school: ['Pessimismus', 'Idealismus'],
+        school: ['Idealismus', 'Metaphysik'],
+        gender: 'male',
         image: '/images/cards/schopenhauer.png',
         special: {
             name: 'Leben ist Leiden',
@@ -572,7 +608,8 @@ export const cardDatabase: Card[] = [
         health: 6,
         description: 'Freier Wille ist ein Mysterium.',
         rarity: 'Legendär',
-        school: ['Metaphysik', 'Analytische Philosophie'],
+        school: ['Metaphysik', 'Logik'],
+        gender: 'male',
         image: '/images/cards/van_inwagen.png',
         specialAbility: 'transform',
         special: {
@@ -587,7 +624,7 @@ export const cardDatabase: Card[] = [
         name: 'Tractatus Logico-Philosophicus',
         type: 'Werk',
         cost: 4,
-        description: 'Die Welt ist alles, was der Fall ist. +2 Schaden für Analytische Philosophie/Logik.',
+        description: 'Die Welt ist alles, was der Fall ist. +2 Schaden für Logik/Analytik.',
         rarity: 'Legendär',
         image: '/images/cards/tractatus.png',
         workBonus: { school: 'Logik', damage: 2 }
@@ -597,7 +634,7 @@ export const cardDatabase: Card[] = [
         name: 'Also sprach Zarathustra',
         type: 'Werk',
         cost: 5,
-        description: 'Ich lehre euch den Übermenschen. +2 Schaden für Existentialismus/Nihilismus.',
+        description: 'Ich lehre euch den Übermenschen. +2 Schaden für Existentialismus.',
         rarity: 'Legendär',
         image: '/images/cards/zarathustra.png',
         workBonus: { school: 'Existentialismus', damage: 2 }
@@ -617,20 +654,20 @@ export const cardDatabase: Card[] = [
         name: 'Die Welt als Wille und Vorstellung',
         type: 'Werk',
         cost: 4,
-        description: 'Die Welt ist meine Vorstellung. +2 Schaden für Pessimismus.',
+        description: 'Die Welt ist meine Vorstellung. +2 Schaden für Metaphysik.',
         rarity: 'Legendär',
         image: '/images/cards/wille.png',
-        workBonus: { school: 'Pessimismus', damage: 2 }
+        workBonus: { school: 'Metaphysik', damage: 2 }
     },
     {
         id: 'politeia',
         name: 'Politeia',
         type: 'Werk',
         cost: 5,
-        description: 'Der Staat und die Gerechtigkeit. +2 Schaden für Politische Philosophie.',
+        description: 'Der Staat und die Gerechtigkeit. +2 Schaden für Politik.',
         rarity: 'Legendär',
         image: '/images/cards/politeia.png',
-        workBonus: { school: 'Politische Philosophie', damage: 2 }
+        workBonus: { school: 'Politik', damage: 2 }
     },
 
     // New Spells
