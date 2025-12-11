@@ -341,6 +341,7 @@ export const GameArea: React.FC<GameAreaProps> = ({ mode }) => {
                                     const m = viewPlayer.board.find(min => (min.instanceId || min.id) === selectedMinions[0]);
                                     return !!(m?.specialAbility && !m.hasUsedSpecial && !m.hasAttacked);
                                 })()}
+                                synergiesBlocked={(viewOpponent.synergyBlockTurns || 0) > 0}
                             />
                         </div>
 
@@ -438,6 +439,7 @@ export const GameArea: React.FC<GameAreaProps> = ({ mode }) => {
                                 activeWork={viewPlayer.activeWork}
                                 canTarget={(targetMode === 'gottesbeweis_target' || targetMode === 'trolley_sacrifice') && !!isMyTargetMode}
                                 isSpecialTargeting={(targetMode === 'gottesbeweis_target' || targetMode === 'trolley_sacrifice') && !!isMyTargetMode}
+                                synergiesBlocked={(viewPlayer.synergyBlockTurns || 0) > 0}
                             />
                         </div>
                     </div>

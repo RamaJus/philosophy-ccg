@@ -49,6 +49,7 @@ export interface Player {
     graveyard: Card[];
     lockedMana: number; // Mana locked for the next turn
     activeWork?: Card; // Currently active philosophical work
+    synergyBlockTurns?: number; // Number of turns synergy bonuses are disabled
 }
 
 export interface GameState {

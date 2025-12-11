@@ -72,26 +72,40 @@ function createInitialState(): GameState {
 // Each philosopher gets +1 synergy for each OTHER distinct philosopher they share at least one school with.
 // Multiple shared schools with the same philosopher only count as +1, not more.
 // We also track which schools contributed to the synergy for hover display.
-const calculateSynergies = (board: BoardMinion[]): BoardMinion[] => {
-    // 1. Reset synergy bonuses first
-    let updatedBoard = board.map(minion => {
-        const bonus = minion.synergyBonus || 0;
+const calculateSynergies = (currentBoard: BoardMinion[], synergyBlockTurns: number = 0): BoardMinion[] => {
+    // RESET all synergy values first
+    const resetBoard = currentBoard.map(minion => ({
+        ...minion,
+        attack: minion.attack - (minion.synergyBonus || 0),
+        maxHealth: minion.maxHealth - (minion.synergyBonus || 0),
+        health: minion.health - (minion.synergyBonus || 0),
+        synergyBonus: 0,
+        synergyBreakdown: {},
+        linkedWith: []
+    })).map(m => {
+        // Safety check to ensure health doesn't drop below 1 from removing bonuses (unless it was already 0)
         return {
-            ...minion,
-            attack: minion.attack - bonus,
-            maxHealth: minion.maxHealth - bonus,
-            health: minion.health - bonus,
-            synergyBonus: 0,
-            synergyBreakdown: {} as Record<string, number>,
-            linkedWith: [] as string[]
+            ...m,
+            health: m.health > 0 ? Math.max(1, m.health) : 0
         };
     });
 
-    // 2. Build adjacency and track which schools cause the synergy
-    // For each minion, track: for each school, how many OTHER minions share that school
-    const schoolCounts: Record<string, Record<string, number>> = {};
-    updatedBoard.forEach(m => schoolCounts[m.instanceId || m.id] = {});
+    // If synergies are blocked, return board with cleared bonuses
+    if (synergyBlockTurns > 0) {
+        return resetBoard;
+    }
 
+    const updatedBoard = [...resetBoard];
+    const schoolCounts: Record<string, Record<string, number>> = {};
+    const links: Record<string, string[]> = {}; // Store links for each minion
+
+    // Initialize counts
+    updatedBoard.forEach(minion => {
+        schoolCounts[minion.instanceId || minion.id] = {};
+        links[minion.instanceId || minion.id] = [];
+    });
+
+    // 1. Calculate school synergies (Self + Connection)
     for (let i = 0; i < updatedBoard.length; i++) {
         for (let j = i + 1; j < updatedBoard.length; j++) {
             const m1 = updatedBoard[i];
@@ -101,12 +115,14 @@ const calculateSynergies = (board: BoardMinion[]): BoardMinion[] => {
             const sharedSchools = m1.school?.filter(s => m2.school?.includes(s)) || [];
 
             if (sharedSchools.length > 0) {
-                // For display purposes, pick ONE representative school (the first shared one)
-                // This represents the "connection" between these two philosophers
                 const representativeSchool = sharedSchools[0];
 
                 schoolCounts[m1.instanceId || m1.id][representativeSchool] = (schoolCounts[m1.instanceId || m1.id][representativeSchool] || 0) + 1;
                 schoolCounts[m2.instanceId || m2.id][representativeSchool] = (schoolCounts[m2.instanceId || m2.id][representativeSchool] || 0) + 1;
+
+                // Track links
+                links[m1.instanceId || m1.id].push(m2.instanceId || m2.id);
+                links[m2.instanceId || m2.id].push(m1.instanceId || m1.id);
             }
         }
     }
@@ -123,7 +139,7 @@ const calculateSynergies = (board: BoardMinion[]): BoardMinion[] => {
             health: minion.health + bonus,
             synergyBonus: bonus,
             synergyBreakdown: breakdown,
-            linkedWith: [] as string[] // No longer needed for UI
+            linkedWith: links[minion.instanceId || minion.id]
         };
     });
 
@@ -138,12 +154,13 @@ export function useGameLogic(mode: 'single' | 'multiplayer_host' | 'multiplayer_
         setGameState(prev => {
             const newState = updateFn(prev);
 
-            // Only recalculate if board changed
-            if (newState.player.board !== prev.player.board || newState.opponent.board !== prev.opponent.board) {
+            // Only recalculate if board changed or synergy block turns changed
+            if (newState.player.board !== prev.player.board || newState.opponent.board !== prev.opponent.board ||
+                newState.player.synergyBlockTurns !== prev.player.synergyBlockTurns || newState.opponent.synergyBlockTurns !== prev.opponent.synergyBlockTurns) {
                 return {
                     ...newState,
-                    player: { ...newState.player, board: calculateSynergies(newState.player.board) },
-                    opponent: { ...newState.opponent, board: calculateSynergies(newState.opponent.board) }
+                    player: { ...newState.player, board: calculateSynergies(newState.player.board, newState.player.synergyBlockTurns) },
+                    opponent: { ...newState.opponent, board: calculateSynergies(newState.opponent.board, newState.opponent.synergyBlockTurns) }
                 };
             }
             return newState;
@@ -218,7 +235,7 @@ export function useGameLogic(mode: 'single' | 'multiplayer_host' | 'multiplayer_
     }, []);
 
     const startTurn = useCallback((player: Player): Player => {
-        const newMaxMana = Math.min(player.maxMana + 1, 10);
+        const newMaxMana = Math.min(player.maxMana + 1, 12);
         // Apply locked mana and reset it
         const availableMana = Math.max(0, newMaxMana - player.lockedMana);
 
@@ -245,6 +262,7 @@ export function useGameLogic(mode: 'single' | 'multiplayer_host' | 'multiplayer_
             const { activePlayer: activePlayerKey, player, opponent } = prev;
             let currentLog = prev.log;
             const activePlayer = activePlayerKey === 'player' ? player : opponent;
+            const enemyPlayer = activePlayerKey === 'player' ? opponent : player;
 
             const cardIndex = activePlayer.hand.findIndex(c => c.instanceId === cardId);
             if (cardIndex === -1) return prev;
@@ -384,21 +402,62 @@ export function useGameLogic(mode: 'single' | 'multiplayer_host' | 'multiplayer_
                         updatedPlayer = drawCard(updatedPlayer);
                     }
                     currentLog = appendLog(currentLog, `${activePlayer.name} wirkte ${card.name} und zog ${drawCount} Karte(n).`);
-                } else if (card.id.includes('meditation') || card.id.includes('Aufklärung')) {
-                    // Heal
-                    const healAmount = card.id.includes('meditation') ? 3 : 5;
-                    updatedPlayer.health = Math.min(updatedPlayer.health + healAmount, updatedPlayer.maxHealth);
-                    currentLog = appendLog(currentLog, `${activePlayer.name} wirkte ${card.name} und stellte ${healAmount} Glaubwürdigkeit wieder her.`);
-                } else if (card.id.includes('aporia') || card.id.includes('wu-wei')) {
-                    // Damage spells - target opponent
-                    const damage = card.id.includes('aporia') ? 3 : 5;
-                    updatedEnemy = { ...updatedEnemy, health: updatedEnemy.health - damage };
-                    currentLog = appendLog(currentLog, `${activePlayer.name} wirkte ${card.name} und verursachte ${damage} Schaden!`);
+                } else if (card.id.includes('skeptischer_zweifel')) {
+                    // Block synergies for 1 turn
+                    currentLog = appendLog(currentLog, `${activePlayer.name} säte Zweifel! Keine Synergien für den Gegner im nächsten Zug.`);
 
-                    // Check win conditions immediately after spell damage
-                    if (updatedEnemy.health <= 0) {
-                        // Win condition handled by useEffect
-                    }
+                    const updatedEnemy = {
+                        ...enemyPlayer,
+                        synergyBlockTurns: (enemyPlayer.synergyBlockTurns || 0) + 1
+                    };
+                    // Recalculate board immediately to show effect? No, effect says "next attack turn".
+                    // But if it's "next turn", the opponent will see it immediately.
+                    // Let's apply it. The "next attack turn" implies the opponent's NEXT turn.
+                    // If we set it to 1 now, it will be active during opponent's turn, then decremented at end of opponent's turn. Correct.
+
+                    return {
+                        ...prev,
+                        player: activePlayerKey === 'player' ? updatedPlayer : updatedEnemy,
+                        opponent: activePlayerKey === 'player' ? updatedEnemy : updatedPlayer,
+                        selectedCard: undefined,
+                        log: currentLog
+                    };
+                }
+
+                if (card.id.includes('radikale_dekonstruktion')) {
+                    // Block synergies for 2 turns
+                    currentLog = appendLog(currentLog, `${activePlayer.name} dekonstruierte die Realität! Keine Synergien für den Gegner für 2 Runden.`);
+
+                    const updatedEnemy = {
+                        ...enemyPlayer,
+                        synergyBlockTurns: (enemyPlayer.synergyBlockTurns || 0) + 2
+                    };
+
+                    return {
+                        ...prev,
+                        player: activePlayerKey === 'player' ? updatedPlayer : updatedEnemy,
+                        opponent: activePlayerKey === 'player' ? updatedEnemy : updatedPlayer,
+                        selectedCard: undefined,
+                        log: currentLog
+                    };
+                }
+
+                if (card.id.includes('aporia')) {
+                    // 6 damage to opponent
+                    updatedEnemy.health -= 6;
+                    currentLog = appendLog(currentLog, `${activePlayer.name} nutzte Aporia: 6 Schaden!`);
+                } else if (card.id.includes('wu-wei')) {
+                    // 10 damage
+                    updatedEnemy.health -= 10;
+                    currentLog = appendLog(currentLog, `${activePlayer.name} handelte durch Nicht-Handeln: 10 Schaden!`);
+                } else if (card.id.includes('meditation')) {
+                    // Heal 6
+                    updatedPlayer.health = Math.min(updatedPlayer.health + 6, updatedPlayer.maxHealth);
+                    currentLog = appendLog(currentLog, `${activePlayer.name} meditierte: +6 Leben.`);
+                } else if (card.id.includes('Aufklärung')) {
+                    // Heal 10
+                    updatedPlayer.health = Math.min(updatedPlayer.health + 10, updatedPlayer.maxHealth);
+                    currentLog = appendLog(currentLog, `${activePlayer.name} erreichte die Aufklärung: +10 Leben.`);
                 } else if (card.id.includes('sophistry')) {
                     // Lock 1 enemy mana next turn + gain 1 temporary mana this turn
                     updatedEnemy.lockedMana = (updatedEnemy.lockedMana || 0) + 1;
@@ -647,6 +706,14 @@ export function useGameLogic(mode: 'single' | 'multiplayer_host' | 'multiplayer_
                 return { ...prev, log: currentLog };
             }
 
+            // Decrement synergy block turns for the player ending their turn
+            const playerEndingTurn = currentPlayer === 'player' ? player : opponent;
+            let updatedPlayerEndingTurn = { ...playerEndingTurn };
+            if (updatedPlayerEndingTurn.synergyBlockTurns && updatedPlayerEndingTurn.synergyBlockTurns > 0) {
+                updatedPlayerEndingTurn.synergyBlockTurns -= 1;
+                // If it becomes 0, synergies will be recalculated automatically by calculateSynergies in setGameStateWithSynergies
+            }
+
             currentLog = appendLog(currentLog, `${currentPlayer === 'player' ? player.name : opponent.name} beendete den Zug.`);
 
             const nextPlayer = currentPlayer === 'player' ? 'opponent' : 'player';
@@ -660,8 +727,8 @@ export function useGameLogic(mode: 'single' | 'multiplayer_host' | 'multiplayer_
                 ...prev,
                 turn: nextPlayer === 'player' ? turn + 1 : turn,
                 activePlayer: nextPlayer,
-                player: nextPlayer === 'player' ? updatedPlayer : player,
-                opponent: nextPlayer === 'opponent' ? updatedPlayer : opponent,
+                player: nextPlayer === 'player' ? updatedPlayer : (currentPlayer === 'player' ? updatedPlayerEndingTurn : player),
+                opponent: nextPlayer === 'opponent' ? updatedPlayer : (currentPlayer === 'opponent' ? updatedPlayerEndingTurn : opponent),
                 selectedCard: undefined,
                 selectedMinions: undefined,
                 log: currentLog,
@@ -1026,14 +1093,14 @@ export function useGameLogic(mode: 'single' | 'multiplayer_host' | 'multiplayer_
 
                     if (targetMinion.school?.includes('Religion')) {
                         // Heal / Buff
-                        updatedTarget.health += 2;
-                        updatedTarget.maxHealth += 2;
-                        message = `${activePlayer.name} führte den Gottesbeweis auf ${targetMinion.name}: +2 Leben durch göttliche Stärkung!`;
+                        updatedTarget.health += 4;
+                        updatedTarget.maxHealth += 4;
+                        message = `${activePlayer.name} führte den Gottesbeweis auf ${targetMinion.name}: +4 Leben durch göttliche Stärkung!`;
                         isHeal = true;
                     } else {
                         // Damage
-                        updatedTarget.health -= 4;
-                        message = `${activePlayer.name} führte den Gottesbeweis auf ${targetMinion.name}: 4 Schaden durch göttlichen Zorn!`;
+                        updatedTarget.health -= 8;
+                        message = `${activePlayer.name} führte den Gottesbeweis auf ${targetMinion.name}: 8 Schaden durch göttlichen Zorn!`;
                     }
 
                     // Update State
