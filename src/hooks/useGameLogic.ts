@@ -867,20 +867,22 @@ export function useGameLogic(mode: 'single' | 'multiplayer_host' | 'multiplayer_
             case 'TROLLEY_SACRIFICE':
                 // Handle trolley problem sacrifice selection
                 setGameStateWithSynergies(prev => {
-                    const { player, opponent } = prev;
+                    const { player, opponent, activePlayer: activePlayerKey } = prev;
+                    const activePlayer = activePlayerKey === 'player' ? player : opponent;
+                    const enemyPlayer = activePlayerKey === 'player' ? opponent : player;
 
-                    // Find the minion to sacrifice
-                    const sacrificeIndex = player.board.findIndex(m => m.id === action.minionId);
+                    // Find the minion to sacrifice in active player's board
+                    const sacrificeIndex = activePlayer.board.findIndex(m => m.id === action.minionId);
                     if (sacrificeIndex === -1) return prev;
 
-                    const sacrificedMinion = player.board[sacrificeIndex];
+                    const sacrificedMinion = activePlayer.board[sacrificeIndex];
 
                     // Remove sacrificed minion and add to graveyard
-                    const updatedPlayerBoard = player.board.filter((_, i) => i !== sacrificeIndex);
-                    const updatedPlayerGraveyard = [...player.graveyard, sacrificedMinion];
+                    const updatedActiveBoard = activePlayer.board.filter((_, i) => i !== sacrificeIndex);
+                    const updatedActiveGraveyard = [...activePlayer.graveyard, sacrificedMinion];
 
                     // Damage all enemy minions
-                    const damagedEnemyBoard = opponent.board.map(m => ({
+                    const damagedEnemyBoard = enemyPlayer.board.map(m => ({
                         ...m,
                         health: m.health - 4
                     }));
@@ -888,22 +890,26 @@ export function useGameLogic(mode: 'single' | 'multiplayer_host' | 'multiplayer_
                     // Remove dead minions
                     const deadMinions = damagedEnemyBoard.filter(m => m.health <= 0);
                     const aliveEnemyBoard = damagedEnemyBoard.filter(m => m.health > 0);
-                    const updatedEnemyGraveyard = [...opponent.graveyard, ...deadMinions];
+                    const updatedEnemyGraveyard = [...enemyPlayer.graveyard, ...deadMinions];
 
-                    addLog(`${player.name} opferte ${sacrificedMinion.name} und fügte allen gegnerischen Philosophen 4 Schaden zu!`);
+                    addLog(`${activePlayer.name} opferte ${sacrificedMinion.name} und fügte allen gegnerischen Philosophen 4 Schaden zu!`);
+
+                    const updatedPlayer = {
+                        ...activePlayer,
+                        board: updatedActiveBoard,
+                        graveyard: updatedActiveGraveyard,
+                    };
+
+                    const updatedEnemy = {
+                        ...enemyPlayer,
+                        board: aliveEnemyBoard,
+                        graveyard: updatedEnemyGraveyard,
+                    };
 
                     return {
                         ...prev,
-                        player: {
-                            ...player,
-                            board: updatedPlayerBoard,
-                            graveyard: updatedPlayerGraveyard,
-                        },
-                        opponent: {
-                            ...opponent,
-                            board: aliveEnemyBoard,
-                            graveyard: updatedEnemyGraveyard,
-                        },
+                        player: activePlayerKey === 'player' ? updatedPlayer : updatedEnemy,
+                        opponent: activePlayerKey === 'player' ? updatedEnemy : updatedPlayer,
                         targetMode: undefined,
                         selectedMinion: undefined,
                     };
@@ -912,8 +918,10 @@ export function useGameLogic(mode: 'single' | 'multiplayer_host' | 'multiplayer_
             case 'KONTEMPLATION_SELECT':
                 // Handle Kontemplation card selection (top 3 cards, pick 1)
                 setGameStateWithSynergies(prev => {
-                    const { player, kontemplationCards } = prev;
+                    const { player, opponent, activePlayer: activePlayerKey, kontemplationCards } = prev;
                     if (!kontemplationCards || kontemplationCards.length === 0) return prev;
+
+                    const activePlayer = activePlayerKey === 'player' ? player : opponent;
 
                     // Find the selected card
                     const selectedCard = kontemplationCards.find(c => c.id === action.cardId);
@@ -923,7 +931,7 @@ export function useGameLogic(mode: 'single' | 'multiplayer_host' | 'multiplayer_
                     const otherCards = kontemplationCards.filter(c => c.id !== action.cardId);
 
                     // Remove all top 3 cards from deck, then add back the non-selected ones (shuffled)
-                    let newDeck = player.deck.slice(kontemplationCards.length);
+                    let newDeck = activePlayer.deck.slice(kontemplationCards.length);
                     // Shuffle the non-selected cards back into the deck
                     otherCards.forEach(card => {
                         const insertIndex = Math.floor(Math.random() * (newDeck.length + 1));
@@ -932,13 +940,16 @@ export function useGameLogic(mode: 'single' | 'multiplayer_host' | 'multiplayer_
 
                     addLog(`Du hast "${selectedCard.name}" gewählt. Die anderen Karten wurden zurückgemischt.`);
 
+                    const updatedPlayer = {
+                        ...activePlayer,
+                        deck: newDeck,
+                        hand: [...activePlayer.hand, selectedCard],
+                    };
+
                     return {
                         ...prev,
-                        player: {
-                            ...player,
-                            deck: newDeck,
-                            hand: [...player.hand, selectedCard],
-                        },
+                        player: activePlayerKey === 'player' ? updatedPlayer : player,
+                        opponent: activePlayerKey === 'player' ? opponent : updatedPlayer,
                         targetMode: undefined,
                         kontemplationCards: undefined,
                     };
