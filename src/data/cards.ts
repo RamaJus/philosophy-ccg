@@ -624,7 +624,7 @@ export const cardDatabase: Card[] = [
         name: 'Tractatus Logico-Philosophicus',
         type: 'Werk',
         cost: 4,
-        description: 'Die Welt ist alles, was der Fall ist. +2 Schaden für Logik/Analytik.',
+        description: 'Die Welt ist alles, was der Fall ist. +2 Schaden für Logik.',
         rarity: 'Legendär',
         image: '/images/cards/tractatus.png',
         workBonus: { school: 'Logik', damage: 2 }
@@ -644,7 +644,7 @@ export const cardDatabase: Card[] = [
         name: 'Kritik der reinen Vernunft',
         type: 'Werk',
         cost: 5,
-        description: 'Gedanken ohne Inhalt sind leer. +2 Schaden für Idealismus/Rationalismus.',
+        description: 'Gedanken ohne Inhalt sind leer. +2 Schaden für Idealismus.',
         rarity: 'Legendär',
         image: '/images/cards/kritik.png',
         workBonus: { school: 'Idealismus', damage: 2 }

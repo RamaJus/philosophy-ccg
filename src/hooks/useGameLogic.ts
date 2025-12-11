@@ -7,10 +7,10 @@ const STARTING_HAND_SIZE = 4;
 const MAX_HAND_SIZE = 10;
 // const MAX_BOARD_SIZE = 7; // Removed per user request
 
-function createPlayer(name: string, isPlayer: boolean): Player {
+function createPlayer(name: string, isPlayer: boolean, startingHandSize: number = STARTING_HAND_SIZE): Player {
     const deck = generateDeck();
-    let hand = deck.slice(0, STARTING_HAND_SIZE);
-    let remainingDeck = deck.slice(STARTING_HAND_SIZE);
+    let hand = deck.slice(0, startingHandSize);
+    let remainingDeck = deck.slice(startingHandSize);
 
     // Guarantee at least one 1-cost card in starting hand
     const hasOneCostCard = hand.some(c => c.cost === 1);
@@ -55,8 +55,8 @@ function createInitialState(): GameState {
     return {
         turn: 0,
         activePlayer: 'player',
-        player: createPlayer('Player', true),
-        opponent: createPlayer('Gegner', false),
+        player: createPlayer('Player', true, STARTING_HAND_SIZE),
+        opponent: createPlayer('Gegner', false, STARTING_HAND_SIZE + 1), // Second player gets +1 card balance
         gameOver: false,
         log: ['Spiel gestartet! Möge der beste Philosoph gewinnen.'],
     };
@@ -854,6 +854,7 @@ export function useGameLogic(mode: 'single' | 'multiplayer_host' | 'multiplayer_
                             hasUsedSpecial: false,
                             description: 'Verwandelte Materie ohne Bewusstsein.',
                             rarity: 'Gewöhnlich',
+                            image: '/images/cards/chair_matter.png',
                         };
 
                         // Update boards
