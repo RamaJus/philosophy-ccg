@@ -234,10 +234,10 @@ export const Card: React.FC<CardProps> = ({
 
                 {!isMinion && (
                     <div className="absolute bottom-0 left-0 right-0 flex justify-center items-center py-2 bg-slate-900/90 border-t border-slate-700/50 rounded-b-xl" style={{ pointerEvents: 'none' }}>
-                        <div className="flex items-center gap-2 text-purple-400">
-                            <Zap size={16} />
-                            <span className="text-xs font-semibold">ZAUBER</span>
-                            <BookOpen size={16} />
+                        <div className={`flex items-center gap-2 ${card.type === 'Werk' ? 'text-amber-400' : 'text-purple-400'}`}>
+                            {card.type === 'Werk' ? <BookOpen size={16} /> : <Zap size={16} />}
+                            <span className="text-xs font-semibold uppercase">{card.type}</span>
+                            {card.type === 'Werk' ? <BookOpen size={16} /> : <BookOpen size={16} />}
                         </div>
                     </div>
                 )}
