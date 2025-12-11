@@ -85,12 +85,22 @@ export const GameArea: React.FC<GameAreaProps> = ({ mode }) => {
             return;
         }
 
+        if (targetMode === 'gottesbeweis_target') {
+            dispatch({ type: 'GOTTESBEWEIS_TARGET', minionId });
+            return;
+        }
+
         // Toggle selection (add/remove from array)
         dispatch({ type: 'SELECT_MINION', minionId, toggle: true });
     };
 
     const handleOpponentMinionClick = (minionId: string) => {
         if (!viewIsPlayerTurn || !selectedMinions?.length) return;
+
+        if (targetMode === 'gottesbeweis_target') {
+            dispatch({ type: 'GOTTESBEWEIS_TARGET', minionId });
+            return;
+        }
 
         // Check if first selected minion has a special ability (only for single selection)
         if (selectedMinions.length === 1) {
@@ -308,10 +318,11 @@ export const GameArea: React.FC<GameAreaProps> = ({ mode }) => {
                         <div className="flex-1">
                             <Board
                                 minions={viewOpponent.board}
-                                onMinionClick={viewIsPlayerTurn && selectedMinions?.length ? handleOpponentMinionClick : undefined}
-                                canTarget={viewIsPlayerTurn && !!selectedMinions?.length}
+                                onMinionClick={viewIsPlayerTurn && (selectedMinions?.length || targetMode === 'gottesbeweis_target') ? handleOpponentMinionClick : undefined}
+                                canTarget={viewIsPlayerTurn && (!!selectedMinions?.length || targetMode === 'gottesbeweis_target')}
                                 activeWork={viewOpponent.activeWork}
                                 isSpecialTargeting={(() => {
+                                    if (targetMode === 'gottesbeweis_target') return true;
                                     if (!selectedMinions?.length || selectedMinions.length > 1) return false;
                                     const m = viewPlayer.board.find(min => min.id === selectedMinions[0]);
                                     return !!(m?.specialAbility && !m.hasUsedSpecial && !m.hasAttacked);
@@ -336,6 +347,12 @@ export const GameArea: React.FC<GameAreaProps> = ({ mode }) => {
                                 {targetMode === 'kontemplation' && (
                                     <div className="px-4 py-2 bg-purple-500/20 text-purple-400 rounded-lg border border-purple-500/50 animate-pulse">
                                         <p className="text-sm font-bold">Wähle eine der obersten 3 Karten</p>
+                                    </div>
+                                )}
+
+                                {targetMode === 'gottesbeweis_target' && (
+                                    <div className="px-4 py-2 bg-amber-500/20 text-amber-400 rounded-lg border border-amber-500/50 animate-pulse">
+                                        <p className="text-sm font-bold">Wähle einen Philosophen für den Gottesbeweis</p>
                                     </div>
                                 )}
 
@@ -389,6 +406,8 @@ export const GameArea: React.FC<GameAreaProps> = ({ mode }) => {
                                 selectedMinionIds={selectedMinions || []}
                                 isPlayerBoard={true}
                                 activeWork={viewPlayer.activeWork}
+                                canTarget={targetMode === 'gottesbeweis_target'}
+                                isSpecialTargeting={targetMode === 'gottesbeweis_target'}
                             />
                         </div>
                     </div>

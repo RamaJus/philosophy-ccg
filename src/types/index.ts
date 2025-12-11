@@ -58,7 +58,7 @@ export interface GameState {
     winner?: 'player' | 'opponent';
     selectedCard?: string; // Card ID in hand
     selectedMinions?: string[]; // Minion IDs on board for attacking (multi-select)
-    targetMode?: 'attack' | 'spell' | 'search' | 'transform' | 'trolley_sacrifice' | 'special' | 'kontemplation' | 'foucault_reveal'; // What we're targeting for
+    targetMode?: 'attack' | 'spell' | 'search' | 'transform' | 'trolley_sacrifice' | 'special' | 'kontemplation' | 'foucault_reveal' | 'gottesbeweis_target'; // What we're targeting for
     kontemplationCards?: Card[]; // Top 3 cards for Kontemplation selection
     foucaultRevealCards?: Card[]; // Top 3 opponent cards for Foucault reveal
     log: string[]; // Game log messages
@@ -75,4 +75,5 @@ export type GameAction =
     | { type: 'SEARCH_DECK'; cardId: string }
     | { type: 'TROLLEY_SACRIFICE'; minionId: string }
     | { type: 'KONTEMPLATION_SELECT'; cardId: string }
-    | { type: 'FOUCAULT_CLOSE' };
+    | { type: 'FOUCAULT_CLOSE' }
+    | { type: 'GOTTESBEWEIS_TARGET'; minionId: string };

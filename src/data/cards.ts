@@ -687,7 +687,6 @@ export const cardDatabase: Card[] = [
         cost: 6,
         description: 'Opfere einen eigenen Philosophen. Alle gegnerischen Philosophen erleiden 4 Schaden.',
         rarity: 'Episch',
-        school: ['Ethik'],
         image: '/images/cards/trolley_problem.png',
     },
     {
@@ -695,9 +694,8 @@ export const cardDatabase: Card[] = [
         name: 'Gottesbeweis',
         type: 'Zauber',
         cost: 3,
-        description: 'Die letzte Zuflucht der Vernunft. Verursacht 4 Schaden an allen nicht-religiösen Philosophen. Religiöse Philosophen erhalten +2 Leben.',
+        description: 'Wähle einen Philosophen. Verursacht 4 Schaden (Nicht-Religiös) oder heilt um 2 (Religiös).',
         rarity: 'Episch',
-        school: ['Religion', 'Logik'],
         image: '/images/cards/gottesbeweis.png',
     },
     // DEBUG Cards for testing
@@ -708,7 +706,6 @@ export const cardDatabase: Card[] = [
         cost: 0,
         description: 'Wähle eine Karte aus deinem Deck.',
         rarity: 'Gewöhnlich',
-        school: ['Hermeneutik'],
     },
     {
         id: 'debug_2',
@@ -717,7 +714,7 @@ export const cardDatabase: Card[] = [
         cost: 0,
         description: 'Wähle eine Karte aus deinem Deck.',
         rarity: 'Gewöhnlich',
-        school: ['Hermeneutik'],
+        // school: ['Hermeneutik'], removed
     },
 ];
 

@@ -517,50 +517,16 @@ export function useGameLogic(mode: 'single' | 'multiplayer_host' | 'multiplayer_
                         addLog(`${activePlayer.name} wirkte ${card.name} und wählte eine Karte.`);
                     }
                 } else if (card.id.includes('axiom')) {
-                    // Gain 1 additional mana this turn
-                    updatedPlayer.mana = Math.min(updatedPlayer.mana + 1, 10);
                     addLog(`${activePlayer.name} wirkte ${card.name} und erhielt 1 zusätzliche Dialektik!`);
                 } else if (card.id.includes('gottesbeweis')) {
-                    // Cost 3, 4 damage to all non-Religion minions, +2 health to all Religion minions
-                    // Affects BOTH boards
-
-                    const processBoard = (board: BoardMinion[]) => {
-                        let deadMinions: BoardMinion[] = [];
-                        let newBoard: BoardMinion[] = [];
-
-                        board.forEach(minion => {
-                            if (minion.school?.includes('Religion')) {
-                                // Heal / Buff
-                                newBoard.push({
-                                    ...minion,
-                                    health: minion.health + 2,
-                                    maxHealth: minion.maxHealth + 2
-                                });
-                            } else {
-                                // Damage
-                                const newHealth = minion.health - 4;
-                                if (newHealth <= 0) {
-                                    deadMinions.push(minion);
-                                } else {
-                                    newBoard.push({
-                                        ...minion,
-                                        health: newHealth
-                                    });
-                                }
-                            }
-                        });
-                        return { newBoard, deadMinions };
+                    // Trigger target mode
+                    return {
+                        ...prev,
+                        player: updatedPlayer,
+                        opponent: updatedEnemy,
+                        selectedCard: undefined,
+                        targetMode: 'gottesbeweis_target',
                     };
-
-                    const playerResult = processBoard(updatedPlayer.board);
-                    updatedPlayer.board = playerResult.newBoard;
-                    updatedPlayer.graveyard = [...updatedPlayer.graveyard, ...playerResult.deadMinions];
-
-                    const enemyResult = processBoard(updatedEnemy.board);
-                    updatedEnemy.board = enemyResult.newBoard;
-                    updatedEnemy.graveyard = [...updatedEnemy.graveyard, ...enemyResult.deadMinions];
-
-                    addLog(`${activePlayer.name} führte den Gottesbeweis: Nicht-Religiöse Philosophen litten, Religiöse wurden gestärkt!`);
                 }
             }
 
@@ -1047,6 +1013,70 @@ export function useGameLogic(mode: 'single' | 'multiplayer_host' | 'multiplayer_
                     targetMode: undefined,
                     foucaultRevealCards: undefined,
                 }));
+                break;
+            case 'GOTTESBEWEIS_TARGET':
+                setGameStateWithSynergies(prev => {
+                    const { player, opponent, activePlayer: activePlayerKey } = prev;
+                    const activePlayer = activePlayerKey === 'player' ? player : opponent;
+                    // Target can be on ANY board
+                    const targetOnPlayerBoard = player.board.find(m => m.id === action.minionId);
+                    const targetOnOpponentBoard = opponent.board.find(m => m.id === action.minionId);
+
+                    const targetMinion = targetOnPlayerBoard || targetOnOpponentBoard;
+                    if (!targetMinion) return prev;
+
+                    // Apply Effect
+                    let updatedTarget = { ...targetMinion };
+                    let message = '';
+                    let isHeal = false;
+
+                    if (targetMinion.school?.includes('Religion')) {
+                        // Heal / Buff
+                        updatedTarget.health += 2;
+                        updatedTarget.maxHealth += 2;
+                        message = `${activePlayer.name} führte den Gottesbeweis auf ${targetMinion.name}: +2 Leben durch göttliche Stärkung!`;
+                        isHeal = true;
+                    } else {
+                        // Damage
+                        updatedTarget.health -= 4;
+                        message = `${activePlayer.name} führte den Gottesbeweis auf ${targetMinion.name}: 4 Schaden durch göttlichen Zorn!`;
+                    }
+
+                    // Update State
+                    // We need to update the specific board where the minion was found
+                    let updatedPlayerBoard = player.board;
+                    let updatedPlayerGraveyard = player.graveyard;
+                    let updatedOpponentBoard = opponent.board;
+                    let updatedOpponentGraveyard = opponent.graveyard;
+
+                    if (targetOnPlayerBoard) {
+                        if (!isHeal && updatedTarget.health <= 0) {
+                            updatedPlayerBoard = updatedPlayerBoard.filter(m => m.id !== action.minionId);
+                            updatedPlayerGraveyard = [...updatedPlayerGraveyard, targetMinion];
+                            message += " Besiegt!";
+                        } else {
+                            updatedPlayerBoard = updatedPlayerBoard.map(m => m.id === action.minionId ? updatedTarget : m);
+                        }
+                    } else if (targetOnOpponentBoard) {
+                        if (!isHeal && updatedTarget.health <= 0) {
+                            updatedOpponentBoard = updatedOpponentBoard.filter(m => m.id !== action.minionId);
+                            updatedOpponentGraveyard = [...updatedOpponentGraveyard, targetMinion];
+                            message += " Besiegt!";
+                        } else {
+                            updatedOpponentBoard = updatedOpponentBoard.map(m => m.id === action.minionId ? updatedTarget : m);
+                        }
+                    }
+
+                    addLog(message);
+
+                    return {
+                        ...prev,
+                        player: { ...player, board: updatedPlayerBoard, graveyard: updatedPlayerGraveyard },
+                        opponent: { ...opponent, board: updatedOpponentBoard, graveyard: updatedOpponentGraveyard },
+                        targetMode: undefined,
+                        selectedCard: undefined
+                    };
+                });
                 break;
         }
     }, [endTurn, playCard, attack, selectCard, selectMinion, startTurn, addLog, mode]);
