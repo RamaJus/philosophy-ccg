@@ -34,6 +34,8 @@ export interface BoardMinion extends Card {
     synergyBreakdown?: Record<string, number>; // Per-school synergy counts, e.g. { "Ethik": 2, "Skeptizismus": 1 }
     linkedWith?: string[]; // IDs of minions this is linked with (for visual effect)
     turnPlayed?: number; // Turn when this minion was played (for Diogenes)
+    silencedUntilTurn?: number; // Turn until the minion is silenced (cannot attack)
+    pendingTransformation?: { turnTrigger: number; newStats: { attack: number; health: number; } }; // For Sartre
 }
 
 export interface Player {
@@ -50,6 +52,7 @@ export interface Player {
     lockedMana: number; // Mana locked for the next turn
     activeWork?: Card; // Currently active philosophical work
     synergyBlockTurns?: number; // Number of turns synergy bonuses are disabled
+    minionAttackBlockTurns?: number; // Number of turns opponent minions cannot attack (Kant)
 }
 
 export interface GameState {

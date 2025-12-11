@@ -48,7 +48,8 @@ export const cardDatabase: Card[] = [
         cost: 6,
         attack: 5,
         health: 5,
-        description: 'Kategorischer Imperativ. Handle nur nach allgemeingültigem Gesetz.',
+        description: 'Instrumentalisierungsverbot. Handle so, dass du die Menschheit sowohl in deiner Person, als in der Person eines jeden anderen jederzeit zugleich als Zweck, niemals bloß als Mittel brauchst.',
+        effect: 'Das Instrumentalisierungsverbot: Eine Runde lang kann der Gegner keine Philosophen angreifen.',
         rarity: 'Legendär',
         school: ['Idealismus', 'Rationalismus', 'Ethik'],
         gender: 'male',
@@ -560,14 +561,19 @@ export const cardDatabase: Card[] = [
         id: 'sartre',
         name: 'Jean-Paul Sartre',
         type: 'Philosoph',
-        cost: 5,
-        attack: 5,
-        health: 3,
+        cost: 4,
+        attack: 1,
+        health: 1,
         description: 'Die Existenz geht der Essenz voraus. Wir sind zur Freiheit verurteilt.',
+        effect: 'Nach einer Runde: Verwandelt sich in eine 8/6 Version seiner selbst.',
         rarity: 'Legendär',
         school: ['Existentialismus', 'Politik'],
         gender: 'male',
         image: '/images/cards/sartre.png',
+        special: {
+            name: 'Existenz vor Essenz',
+            description: 'Startet als 1/1 und wird erst in der nächsten eigenen Angriffsrunde zu einem mächtigen 8/6 Philosophen.'
+        }
     },
     {
         id: 'heidegger',
@@ -703,7 +709,7 @@ export const cardDatabase: Card[] = [
     },
     {
         id: 'skeptischer_zweifel',
-        name: 'Skeptischer Zweifel',
+        name: 'Methodischer Zweifel',
         type: 'Zauber',
         cost: 2,
         description: 'Zweifle an allem.',
@@ -720,6 +726,48 @@ export const cardDatabase: Card[] = [
         effect: 'Der Gegner verliert für seine nächsten 2 Angriffszüge alle Schul-Synergien.',
         rarity: 'Gewöhnlich',
         image: '/images/cards/radikale_dekonstruktion.png',
+    },
+    {
+        id: 'diotima',
+        name: 'Diotima',
+        type: 'Philosoph',
+        cost: 6,
+        attack: 2,
+        health: 3,
+        description: 'Lehrerin des Sokrates über die Liebe.',
+        effect: 'Alle männlichen Philosophen schweigen für eine Runde (können nicht angreifen).',
+        rarity: 'Legendär',
+        school: ['Metaphysik', 'Ethik'],
+        gender: 'female',
+        image: '/images/cards/diotima.png',
+    },
+    {
+        id: 'camus',
+        name: 'Albert Camus',
+        type: 'Philosoph',
+        cost: 12,
+        attack: 1,
+        health: 1,
+        description: 'Wir müssen uns den Verlierer als glücklichen Menschen vorstellen.',
+        effect: 'Tauscht verbliebene Glaubwürdigkeit mit der des Gegners.',
+        rarity: 'Legendär',
+        school: ['Existentialismus'],
+        gender: 'male',
+        image: '/images/cards/camus.png',
+        special: {
+            name: 'Absurder Tausch',
+            description: 'Tauscht beim Ausspielen die Lebenspunkte der Spieler.'
+        }
+    },
+    {
+        id: 'idee_des_guten',
+        name: 'Idee des Guten',
+        type: 'Zauber',
+        cost: 5,
+        description: 'Das höchste Prinzip, Quelle von Wahrheit und Vernunft.',
+        effect: 'Heile alle eigenen Philosophen um 2.',
+        rarity: 'Gewöhnlich', // Maybe legendary spell? User didn't specify, default to common or legendary based on power. 5 cost AOE heal +2 is okay.
+        image: '/images/cards/idee_des_guten.png',
     },
     // DEBUG Cards for testing
     {

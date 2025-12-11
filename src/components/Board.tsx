@@ -12,6 +12,8 @@ interface BoardProps {
     activeWork?: CardType;
     isSpecialTargeting?: boolean;
     synergiesBlocked?: boolean;
+    attacksBlocked?: boolean;
+    currentTurn?: number;
 }
 
 export const Board: React.FC<BoardProps> = ({
@@ -22,7 +24,9 @@ export const Board: React.FC<BoardProps> = ({
     canTarget = false,
     activeWork,
     isSpecialTargeting = false,
-    synergiesBlocked = false
+    synergiesBlocked = false,
+    attacksBlocked = false,
+    currentTurn = 0
 }) => {
     const [startIndex, setStartIndex] = useState(0);
     const VISIBLE_COUNT = 6;
@@ -42,6 +46,7 @@ export const Board: React.FC<BoardProps> = ({
             <h3 className="text-sm font-semibold mb-2 text-center text-gray-300">
                 {isPlayerBoard ? 'Deine Philosophen' : 'Gegnerische Philosophen'}
                 {synergiesBlocked && <span className="block text-xs text-red-400 font-bold animate-pulse mt-1">⚠ SCHUL-SYNERGIEN BLOCKIERT</span>}
+                {attacksBlocked && <span className="block text-xs text-red-400 font-bold animate-pulse mt-1">⚠ ANGRIFF BLOCKIERT (KANT)</span>}
             </h3>
 
             <div className="relative flex items-center justify-center">
@@ -62,7 +67,7 @@ export const Board: React.FC<BoardProps> = ({
                         </div>
                     ) : (
                         visibleMinions.map((minion) => {
-                            const canAttack = isPlayerBoard && minion.canAttack && !minion.hasAttacked;
+                            const canAttack = isPlayerBoard && minion.canAttack && !minion.hasAttacked && !attacksBlocked;
                             const isTargetable = canTarget;
 
                             // Calculate Work Bonus
@@ -71,23 +76,45 @@ export const Board: React.FC<BoardProps> = ({
                                 bonusDamage = activeWork.workBonus.damage;
                             }
 
+                            // Status Effects
+                            const isSilenced = minion.silencedUntilTurn && minion.silencedUntilTurn > currentTurn;
+                            const isPendingTransform = minion.pendingTransformation;
+
                             return (
                                 <div key={minion.instanceId || minion.id} className="relative flex flex-col items-center gap-2">
-                                    <Card
-                                        card={minion}
-                                        onClick={onMinionClick ? () => onMinionClick(minion.instanceId || minion.id) : undefined}
-                                        isSelected={selectedMinionIds.includes(minion.instanceId || minion.id)}
-                                        isPlayable={canAttack || isTargetable}
-                                        showHealth={true}
-                                        bonusDamage={bonusDamage}
-                                        className={`
-                                            ${canAttack ? 'ring-2 ring-green-400' : ''}
-                                            ${isTargetable && !isSpecialTargeting ? 'ring-2 ring-red-400 cursor-attack' : ''}
-                                            ${isTargetable && isSpecialTargeting ? 'ring-2 ring-purple-400 cursor-magic' : ''}
-                                            ${!minion.canAttack && isPlayerBoard && !minion.hasAttacked ? 'ring-4 ring-red-600' : ''}
-                                            ${minion.hasAttacked || minion.hasUsedSpecial ? 'opacity-50' : ''}
-                                        `}
-                                    />
+                                    <div className="relative">
+                                        <Card
+                                            card={minion}
+                                            onClick={onMinionClick ? () => onMinionClick(minion.instanceId || minion.id) : undefined}
+                                            isSelected={selectedMinionIds.includes(minion.instanceId || minion.id)}
+                                            isPlayable={(canAttack && !isSilenced) || isTargetable}
+                                            showHealth={true}
+                                            bonusDamage={bonusDamage}
+                                            className={`
+                                                ${canAttack && !isSilenced ? 'ring-2 ring-green-400' : ''}
+                                                ${isTargetable && !isSpecialTargeting ? 'ring-2 ring-red-400 cursor-attack' : ''}
+                                                ${isTargetable && isSpecialTargeting ? 'ring-2 ring-purple-400 cursor-magic' : ''}
+                                                ${(!minion.canAttack || attacksBlocked || isSilenced) && isPlayerBoard && !minion.hasAttacked ? 'ring-4 ring-red-600' : ''}
+                                                ${minion.hasAttacked || minion.hasUsedSpecial ? 'opacity-50' : ''}
+                                            `}
+                                        />
+                                        {isSilenced && (
+                                            <div className="absolute top-0 right-0 bg-red-900/90 text-white text-[10px] px-1 rounded-bl border border-red-500" title="Stummgeschaltet (Diotima)">
+                                                🔇
+                                            </div>
+                                        )}
+                                        {isPendingTransform && (
+                                            <div className="absolute top-0 left-0 bg-purple-900/90 text-white text-[10px] px-1 rounded-br border border-purple-500" title="Transformation ausstehend (Sartre)">
+                                                ⏳
+                                            </div>
+                                        )}
+                                        {attacksBlocked && isPlayerBoard && (
+                                            <div className="absolute inset-0 flex items-center justify-center bg-black/40 rounded-lg pointer-events-none">
+                                                <span className="text-2xl" title="Angriff Blockiert">🚫</span>
+                                            </div>
+                                        )}
+                                    </div>
+
 
 
                                 </div>

@@ -234,7 +234,7 @@ export function useGameLogic(mode: 'single' | 'multiplayer_host' | 'multiplayer_
         };
     }, []);
 
-    const startTurn = useCallback((player: Player): Player => {
+    const startTurn = useCallback((player: Player, upcomingTurn: number): Player => {
         const newMaxMana = Math.min(player.maxMana + 1, 12);
         // Apply locked mana and reset it
         const availableMana = Math.max(0, newMaxMana - player.lockedMana);
@@ -248,7 +248,23 @@ export function useGameLogic(mode: 'single' | 'multiplayer_host' | 'multiplayer_
                 ...minion,
                 canAttack: true,
                 hasAttacked: false,
-            })),
+            })).map(minion => {
+                // SARTRE TRANSFORMATION LOGIC
+                if (minion.id.includes('sartre') && minion.pendingTransformation) {
+                    if (upcomingTurn >= minion.pendingTransformation.turnTrigger) {
+                        // Transform!
+                        return {
+                            ...minion,
+                            attack: minion.pendingTransformation.newStats.attack,
+                            maxHealth: minion.pendingTransformation.newStats.health,
+                            health: minion.pendingTransformation.newStats.health,
+                            pendingTransformation: undefined // Remove pending status
+                        };
+                    }
+                }
+                return minion;
+            }),
+            minionAttackBlockTurns: Math.max(0, (player.minionAttackBlockTurns || 0) - 1),
         };
 
         // Draw a card
@@ -389,6 +405,71 @@ export function useGameLogic(mode: 'single' | 'multiplayer_host' | 'multiplayer_
                     } else {
                         currentLog = appendLog(currentLog, `${card.name}: "Panoptischer Blick!" Das Deck des Gegners ist leer.`);
                     }
+                }
+
+                // Kant Special: Instrumentalisierungsverbot
+                if (card.id.includes('kant')) {
+                    // Block attacks for opponent next turn
+                    updatedEnemy.minionAttackBlockTurns = (updatedEnemy.minionAttackBlockTurns || 0) + 1;
+                    currentLog = appendLog(currentLog, `${card.name}: "Instrumentalisierungsverbot!" Der Gegner kann nächste Runde nicht angreifen.`);
+                }
+
+                // Diotima Special: Silence Males
+                if (card.id.includes('diotima')) {
+                    // Silence ALL male philosophers on BOTH sides? Description says "Alle männlichen Philosophen".
+                    // Usually beneficial effects target self, harmful target enemy.
+                    // But "schweigen" means cannot attack. So it's a disable.
+                    // A disable on OWN minions is bad. A disable on ENEMY is good.
+                    // Let's apply to ALL to be lore accurate ("Alle"), but effectively it impacts the one who wants to attack next.
+                    const silenceDuration = 2; // Current turn + next turn. Effectively next round.
+                    const targetTurn = prev.turn + silenceDuration;
+
+                    const silenceMinions = (minions: BoardMinion[]) => minions.map(m => {
+                        if (m.gender === 'male') {
+                            return { ...m, silencedUntilTurn: targetTurn };
+                        }
+                        return m;
+                    });
+
+                    updatedPlayer.board = silenceMinions(updatedPlayer.board);
+                    updatedEnemy.board = silenceMinions(updatedEnemy.board);
+                    currentLog = appendLog(currentLog, `${card.name}: "Lehre der Liebe!" Alle männlichen Philosophen schweigen ehrfürchtig.`);
+                }
+
+                // Sartre Special: Setup Transformation
+                if (card.id.includes('sartre')) {
+                    // Set trigger for next own turn (current turn + 2)
+                    // We need to find the specific Sartre instance we just added.
+                    // It's the last one in the list.
+                    const lastMinionIndex = updatedPlayer.board.length - 1;
+                    if (lastMinionIndex >= 0) {
+                        const sartreMinion = updatedPlayer.board[lastMinionIndex];
+                        updatedPlayer.board[lastMinionIndex] = {
+                            ...sartreMinion,
+                            pendingTransformation: {
+                                turnTrigger: prev.turn + 1,
+                                newStats: { attack: 8, health: 6 }
+                            }
+                        };
+                        currentLog = appendLog(currentLog, `${card.name}: "Die Existenz geht der Essenz voraus." Sartre wird sich entwickeln...`);
+                    }
+                }
+
+                // Camus Special: HP Swap
+                if (card.id.includes('camus')) {
+                    const playerHP = updatedPlayer.health;
+                    const enemyHP = updatedEnemy.health;
+
+                    updatedPlayer.health = enemyHP;
+                    updatedEnemy.health = playerHP;
+
+                    // Cap at max health logic? User said "Unabhängig von Max HP".
+                    // But we should probably respect the hard cap of MaxHealth to avoid bugs?
+                    // User said: "Wenn der Gegner noch 50 HP hat und ich noch 30. Dann werden diese Werte einfach getauscht, sodass ich noch 50 habe und er noch 30."
+                    // MaxHealth is mostly 80. If someone has > 80, it's weird.
+                    // Lets just swap.
+
+                    currentLog = appendLog(currentLog, `${card.name}: "Wir müssen uns den Verlierer als glücklichen Menschen vorstellen." Lebenspunkte getauscht!`);
                 }
             } else {
                 // Spell logic
@@ -539,6 +620,13 @@ export function useGameLogic(mode: 'single' | 'multiplayer_host' | 'multiplayer_
                         pendingPlayedCard: card,
                         log: currentLog, // No log added yet but passing it anyway
                     };
+                } else if (card.id.includes('idee_des_guten')) {
+                    // AOE Heal +2 for own board
+                    updatedPlayer.board = updatedPlayer.board.map(m => ({
+                        ...m,
+                        health: Math.min(m.health + 2, m.maxHealth)
+                    }));
+                    currentLog = appendLog(currentLog, `${activePlayer.name} wirkte ${card.name}: Alle eigenen Philosophen geheilt (+2).`);
                 }
             }
 
@@ -578,6 +666,18 @@ export function useGameLogic(mode: 'single' | 'multiplayer_host' | 'multiplayer_
             const attackerNames: string[] = [];
 
             for (const attacker of attackers) {
+                // Check for Kant's Block
+                if (activePlayer.minionAttackBlockTurns && activePlayer.minionAttackBlockTurns > 0) {
+                    currentLog = appendLog(currentLog, `Angriff fehlgeschlagen! ${attacker.name} achtet das Instrumentalisierungsverbot.`);
+                    continue; // Skip this attacker
+                }
+
+                // Check for Diotima's Silence
+                if (attacker.gender === 'male' && attacker.silencedUntilTurn && attacker.silencedUntilTurn > prev.turn) {
+                    currentLog = appendLog(currentLog, `${attacker.name} schweigt ehrfürchtig vor Diotima und kann nicht angreifen!`);
+                    continue;
+                }
+
                 let damage = attacker.attack;
                 if (activePlayer.activeWork?.workBonus && attacker.school?.includes(activePlayer.activeWork.workBonus.school)) {
                     damage += activePlayer.activeWork.workBonus.damage;
@@ -718,14 +818,15 @@ export function useGameLogic(mode: 'single' | 'multiplayer_host' | 'multiplayer_
 
             const nextPlayer = currentPlayer === 'player' ? 'opponent' : 'player';
             const playerToActivate = nextPlayer === 'player' ? player : opponent;
+            const nextTurnNumber = nextPlayer === 'player' ? turn + 1 : turn;
 
-            const updatedPlayer = startTurn(playerToActivate);
+            const updatedPlayer = startTurn(playerToActivate, nextTurnNumber);
 
-            currentLog = appendLog(currentLog, `Runde ${turn + 1}: ${updatedPlayer.name} ist am Zug.`);
+            currentLog = appendLog(currentLog, `Runde ${nextTurnNumber}: ${updatedPlayer.name} ist am Zug.`);
 
             const newState: GameState = {
                 ...prev,
-                turn: nextPlayer === 'player' ? turn + 1 : turn,
+                turn: nextTurnNumber,
                 activePlayer: nextPlayer,
                 player: nextPlayer === 'player' ? updatedPlayer : (currentPlayer === 'player' ? updatedPlayerEndingTurn : player),
                 opponent: nextPlayer === 'opponent' ? updatedPlayer : (currentPlayer === 'opponent' ? updatedPlayerEndingTurn : opponent),
@@ -781,7 +882,7 @@ export function useGameLogic(mode: 'single' | 'multiplayer_host' | 'multiplayer_
                 setTimeout(() => {
                     setGameStateWithSynergies(prev => {
                         let currentLog = prev.log;
-                        const updatedPlayer = startTurn(prev.player);
+                        const updatedPlayer = startTurn(prev.player, 1);
                         currentLog = appendLog(currentLog, 'Runde 1: Player beginnt.');
                         return { ...prev, player: updatedPlayer, turn: 1, log: currentLog };
                     });
