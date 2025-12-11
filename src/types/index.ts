@@ -58,6 +58,7 @@ export interface GameState {
     gameOver: boolean;
     winner?: 'player' | 'opponent';
     selectedCard?: string; // Card ID in hand
+    pendingPlayedCard?: Card; // Card currently being cast (for cancellation refund checks)
     selectedMinions?: string[]; // Minion IDs on board for attacking (multi-select)
     targetMode?: 'attack' | 'spell' | 'search' | 'transform' | 'trolley_sacrifice' | 'special' | 'kontemplation' | 'foucault_reveal' | 'gottesbeweis_target'; // What we're targeting for
     kontemplationCards?: Card[]; // Top 3 cards for Kontemplation selection
@@ -77,4 +78,5 @@ export type GameAction =
     | { type: 'TROLLEY_SACRIFICE'; minionId: string }
     | { type: 'KONTEMPLATION_SELECT'; cardId: string }
     | { type: 'FOUCAULT_CLOSE' }
-    | { type: 'GOTTESBEWEIS_TARGET'; minionId: string };
+    | { type: 'GOTTESBEWEIS_TARGET'; minionId: string }
+    | { type: 'CANCEL_CAST' };

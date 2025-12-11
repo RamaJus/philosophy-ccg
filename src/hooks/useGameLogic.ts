@@ -413,6 +413,7 @@ export function useGameLogic(mode: 'single' | 'multiplayer_host' | 'multiplayer_
                                 opponent: updatedEnemy,
                                 selectedCard: undefined,
                                 targetMode: 'trolley_sacrifice',
+                                pendingPlayedCard: card,
                             };
                         }
                     } else {
@@ -441,25 +442,18 @@ export function useGameLogic(mode: 'single' | 'multiplayer_host' | 'multiplayer_
                         }
                     }
                 } else if (card.id.includes('hermeneutics') || card.id.includes('debug')) {
-                    // Trigger search mode only for player
-                    if (activePlayerKey === 'player') {
-                        return {
-                            ...prev,
-                            player: updatedPlayer,
-                            opponent: updatedEnemy,
-                            selectedCard: undefined,
-                            targetMode: 'search',
-                        };
-                    } else {
-                        // AI Logic: Pick a random card from deck
-                        if (updatedPlayer.deck.length > 0) {
-                            const randomIndex = Math.floor(Math.random() * updatedPlayer.deck.length);
-                            const searchedCard = updatedPlayer.deck[randomIndex];
-                            updatedPlayer.deck.splice(randomIndex, 1);
-                            updatedPlayer.hand.push(searchedCard);
-                            addLog(`${activePlayer.name} wirkte ${card.name} und suchte eine Karte aus dem Deck.`);
-                        }
-                    }
+                    addLog(`${activePlayer.name} wirkte ${card.name} und sucht im Deck.`);
+                    // We don't remove the card from hand logic yet? 
+                    // Wait, logic above ALREADY removed it from filter: "hand: activePlayer.hand.filter..."
+                    // So we must store it here.
+                    return {
+                        ...prev,
+                        player: activePlayerKey === 'player' ? updatedPlayer : updatedEnemy,
+                        opponent: activePlayerKey === 'player' ? updatedEnemy : updatedPlayer,
+                        selectedCard: undefined,
+                        targetMode: 'search',
+                        pendingPlayedCard: card,
+                    };
                 } else if (card.id.includes('kontemplation')) {
                     // Look at top 3 cards of your deck, pick 1
                     const top3 = updatedPlayer.deck.slice(0, 3);
@@ -496,6 +490,7 @@ export function useGameLogic(mode: 'single' | 'multiplayer_host' | 'multiplayer_
                         opponent: updatedEnemy,
                         selectedCard: undefined,
                         targetMode: 'gottesbeweis_target',
+                        pendingPlayedCard: card,
                     };
                 }
             }
@@ -1044,7 +1039,51 @@ export function useGameLogic(mode: 'single' | 'multiplayer_host' | 'multiplayer_
                         player: { ...player, board: updatedPlayerBoard, graveyard: updatedPlayerGraveyard },
                         opponent: { ...opponent, board: updatedOpponentBoard, graveyard: updatedOpponentGraveyard },
                         targetMode: undefined,
-                        selectedCard: undefined
+                        selectedCard: undefined,
+                        pendingPlayedCard: undefined
+                    };
+                });
+                break;
+
+            case 'CANCEL_CAST':
+                setGameStateWithSynergies(prev => {
+                    // Only refund if we have a pending card and a cancellable mode
+                    if (!prev.pendingPlayedCard) {
+                        // Fallback: just clear mode if no card pending?
+                        return { ...prev, targetMode: undefined };
+                    }
+
+                    const { player: p, pendingPlayedCard: card } = prev;
+                    if (!card) return prev; // check again for TS
+
+                    // Check if cancellable mode
+                    // Kontemplation is excluded per request? Actually user said: "Bei Karten, die trotzdem einen Vorteil geben... nicht zurückkehren (z.B. Kontemplation)"
+                    // So if mode is kontemplation, we just clear mode but don't refund?
+                    // But wait, if we clear mode, we lose the card (it was removed). This matches "nicht auf die Hand zurückkehren".
+
+                    if (prev.targetMode === 'kontemplation') {
+                        // User aborts selecting. Card is lost.
+                        return {
+                            ...prev,
+                            targetMode: undefined,
+                            kontemplationCards: undefined,
+                            pendingPlayedCard: undefined
+                        };
+                    }
+
+                    // For others (gottesbeweis, trolley, search/hermeneutics): Refund.
+                    // Put card back in hand
+                    const updatedHand = [...p.hand, card];
+                    // Refund Mana
+                    const updatedMana = p.mana + card.cost;
+
+                    addLog(`Zauber ${card.name} abgebrochen.`);
+
+                    return {
+                        ...prev,
+                        player: { ...p, hand: updatedHand, mana: updatedMana },
+                        targetMode: undefined,
+                        pendingPlayedCard: undefined
                     };
                 });
                 break;

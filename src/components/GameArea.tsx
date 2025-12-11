@@ -95,12 +95,15 @@ export const GameArea: React.FC<GameAreaProps> = ({ mode }) => {
     };
 
     const handleOpponentMinionClick = (minionId: string) => {
-        if (!viewIsPlayerTurn || !selectedMinions?.length) return;
+        if (!viewIsPlayerTurn) return;
+        if (!selectedMinions?.length && targetMode !== 'gottesbeweis_target') return;
 
         if (targetMode === 'gottesbeweis_target') {
             dispatch({ type: 'GOTTESBEWEIS_TARGET', minionId });
             return;
         }
+
+        if (!selectedMinions?.length) return;
 
         // Check if first selected minion has a special ability (only for single selection)
         if (selectedMinions.length === 1) {
@@ -244,7 +247,12 @@ export const GameArea: React.FC<GameAreaProps> = ({ mode }) => {
                 <DeckView
                     deck={viewPlayer.deck}
                     isOpen={isDeckViewOpen}
-                    onClose={() => setIsDeckViewOpen(false)}
+                    onClose={() => {
+                        setIsDeckViewOpen(false);
+                        if (targetMode === 'search') {
+                            dispatch({ type: 'CANCEL_CAST' });
+                        }
+                    }}
                     onSelectCard={handleSearchSelect}
                     mode={targetMode === 'search' ? 'search' : 'view'}
                 />
@@ -339,9 +347,17 @@ export const GameArea: React.FC<GameAreaProps> = ({ mode }) => {
                                 </div>
 
                                 {targetMode === 'trolley_sacrifice' && (
-                                    <div className="px-4 py-2 bg-red-500/20 text-red-400 rounded-lg border border-red-500/50 animate-pulse">
-                                        <p className="text-sm font-bold">Wähle einen Philosophen zum Opfern</p>
-                                    </div>
+                                    <>
+                                        <div className="px-4 py-2 bg-red-500/20 text-red-400 rounded-lg border border-red-500/50 animate-pulse">
+                                            <p className="text-sm font-bold">Wähle einen Philosophen zum Opfern</p>
+                                        </div>
+                                        <button
+                                            onClick={() => dispatch({ type: 'CANCEL_CAST' })}
+                                            className="px-3 py-1 bg-red-800 hover:bg-red-700 text-white rounded border border-red-500 text-sm"
+                                        >
+                                            Zauber abbrechen
+                                        </button>
+                                    </>
                                 )}
 
                                 {targetMode === 'kontemplation' && (
@@ -351,9 +367,17 @@ export const GameArea: React.FC<GameAreaProps> = ({ mode }) => {
                                 )}
 
                                 {targetMode === 'gottesbeweis_target' && (
-                                    <div className="px-4 py-2 bg-amber-500/20 text-amber-400 rounded-lg border border-amber-500/50 animate-pulse">
-                                        <p className="text-sm font-bold">Wähle einen Philosophen für den Gottesbeweis</p>
-                                    </div>
+                                    <>
+                                        <div className="px-4 py-2 bg-amber-500/20 text-amber-400 rounded-lg border border-amber-500/50 animate-pulse">
+                                            <p className="text-sm font-bold">Wähle einen Philosophen für den Gottesbeweis</p>
+                                        </div>
+                                        <button
+                                            onClick={() => dispatch({ type: 'CANCEL_CAST' })}
+                                            className="px-3 py-1 bg-red-800 hover:bg-red-700 text-white rounded border border-red-500 text-sm"
+                                        >
+                                            Zauber abbrechen
+                                        </button>
+                                    </>
                                 )}
 
                                 {viewIsPlayerTurn && selectedMinions?.length && (
