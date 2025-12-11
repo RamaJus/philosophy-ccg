@@ -176,7 +176,18 @@ export const Card: React.FC<CardProps> = ({
 
                 {/* Synergy Bonus Badge (for philosophers on board with synergy) */}
                 {isMinion && boardMinion?.synergyBonus && boardMinion.synergyBonus > 0 && (
-                    <div className="absolute top-8 right-1 z-30 group/synergy" style={{ pointerEvents: 'auto' }}>
+                    <div
+                        className="absolute top-8 right-1 z-[60] group/synergy"
+                        style={{ pointerEvents: 'auto' }}
+                        onClick={(e) => {
+                            // Forward click to main card handler if playable, 
+                            // otherwise allow default (which might be nothing or selection)
+                            if (onClick && isPlayable) {
+                                e.stopPropagation();
+                                onClick();
+                            }
+                        }}
+                    >
                         <div className="w-7 h-7 rounded-full bg-gradient-to-br from-purple-400 to-purple-600 flex items-center justify-center shadow-lg border-2 border-purple-300 cursor-help">
                             <span className="text-white font-bold text-xs">+{boardMinion.synergyBonus}</span>
                         </div>
