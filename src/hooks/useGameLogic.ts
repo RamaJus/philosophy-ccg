@@ -520,6 +520,47 @@ export function useGameLogic(mode: 'single' | 'multiplayer_host' | 'multiplayer_
                     // Gain 1 additional mana this turn
                     updatedPlayer.mana = Math.min(updatedPlayer.mana + 1, 10);
                     addLog(`${activePlayer.name} wirkte ${card.name} und erhielt 1 zusätzliche Dialektik!`);
+                } else if (card.id.includes('gottesbeweis')) {
+                    // Cost 3, 4 damage to all non-Religion minions, +2 health to all Religion minions
+                    // Affects BOTH boards
+
+                    const processBoard = (board: BoardMinion[]) => {
+                        let deadMinions: BoardMinion[] = [];
+                        let newBoard: BoardMinion[] = [];
+
+                        board.forEach(minion => {
+                            if (minion.school?.includes('Religion')) {
+                                // Heal / Buff
+                                newBoard.push({
+                                    ...minion,
+                                    health: minion.health + 2,
+                                    maxHealth: minion.maxHealth + 2
+                                });
+                            } else {
+                                // Damage
+                                const newHealth = minion.health - 4;
+                                if (newHealth <= 0) {
+                                    deadMinions.push(minion);
+                                } else {
+                                    newBoard.push({
+                                        ...minion,
+                                        health: newHealth
+                                    });
+                                }
+                            }
+                        });
+                        return { newBoard, deadMinions };
+                    };
+
+                    const playerResult = processBoard(updatedPlayer.board);
+                    updatedPlayer.board = playerResult.newBoard;
+                    updatedPlayer.graveyard = [...updatedPlayer.graveyard, ...playerResult.deadMinions];
+
+                    const enemyResult = processBoard(updatedEnemy.board);
+                    updatedEnemy.board = enemyResult.newBoard;
+                    updatedEnemy.graveyard = [...updatedEnemy.graveyard, ...enemyResult.deadMinions];
+
+                    addLog(`${activePlayer.name} führte den Gottesbeweis: Nicht-Religiöse Philosophen litten, Religiöse wurden gestärkt!`);
                 }
             }
 

@@ -690,6 +690,16 @@ export const cardDatabase: Card[] = [
         school: ['Ethik'],
         image: '/images/cards/trolley_problem.png',
     },
+    {
+        id: 'gottesbeweis',
+        name: 'Gottesbeweis',
+        type: 'Zauber',
+        cost: 3,
+        description: 'Die letzte Zuflucht der Vernunft. Verursacht 4 Schaden an allen nicht-religiösen Philosophen. Religiöse Philosophen erhalten +2 Leben.',
+        rarity: 'Episch',
+        school: ['Religion', 'Logik'],
+        image: '/images/cards/gottesbeweis.png',
+    },
     // DEBUG Cards for testing
     {
         id: 'debug_1',
