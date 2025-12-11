@@ -738,10 +738,12 @@ export function generateDeck(): Card[] {
     // Return the entire card database, shuffled
     // Each player gets all cards exactly once
     // We add a unique instanceId to each card to solve the "same card on both sides" selection bug
-    const deckWithIds = cardDatabase.map(card => ({
-        ...card,
-        instanceId: `${card.id}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
-    }));
+    const deckWithIds = cardDatabase
+        .filter(c => !c.id.startsWith('debug_')) // Filter out DEBUG cards
+        .map(card => ({
+            ...card,
+            instanceId: `${card.id}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
+        }));
 
     return shuffleDeck(deckWithIds);
 }

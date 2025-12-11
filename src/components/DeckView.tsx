@@ -87,7 +87,7 @@ export const DeckView: React.FC<DeckViewProps> = ({ deck, isOpen, onClose, onSel
                     <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
                         {filteredDeck.map((card) => (
                             <div
-                                key={card.id}
+                                key={card.instanceId || card.id}
                                 className={`transform transition-all duration-300 ${mode === 'search'
                                     ? 'hover:scale-105 hover:shadow-xl hover:shadow-amber-500/20'
                                     : ''
@@ -96,7 +96,7 @@ export const DeckView: React.FC<DeckViewProps> = ({ deck, isOpen, onClose, onSel
                                 <CardComponent
                                     card={card}
                                     isPlayable={mode === 'search'}
-                                    onClick={mode === 'search' && onSelectCard ? () => onSelectCard(card.id) : undefined}
+                                    onClick={mode === 'search' && onSelectCard ? () => onSelectCard(card.instanceId || card.id) : undefined}
                                 />
                             </div>
                         ))}

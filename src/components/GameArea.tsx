@@ -435,8 +435,8 @@ export const GameArea: React.FC<GameAreaProps> = ({ mode }) => {
                                 selectedMinionIds={selectedMinions || []}
                                 isPlayerBoard={true}
                                 activeWork={viewPlayer.activeWork}
-                                canTarget={targetMode === 'gottesbeweis_target'}
-                                isSpecialTargeting={targetMode === 'gottesbeweis_target'}
+                                canTarget={targetMode === 'gottesbeweis_target' || targetMode === 'trolley_sacrifice'}
+                                isSpecialTargeting={targetMode === 'gottesbeweis_target' || targetMode === 'trolley_sacrifice'}
                             />
                         </div>
                     </div>

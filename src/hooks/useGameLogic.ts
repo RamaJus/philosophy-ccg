@@ -182,12 +182,16 @@ export function useGameLogic(mode: 'single' | 'multiplayer_host' | 'multiplayer_
         }
     }, [mode]);
 
+    const appendLog = useCallback((currentLog: string[], message: string) => {
+        return [...currentLog.slice(-9), message];
+    }, []);
+
     const addLog = useCallback((message: string) => {
         setGameStateWithSynergies(prev => ({
             ...prev,
-            log: [...prev.log.slice(-9), message], // Keep last 10 messages
+            log: appendLog(prev.log, message),
         }));
-    }, [setGameStateWithSynergies]);
+    }, [setGameStateWithSynergies, appendLog]);
 
     const drawCard = useCallback((player: Player): Player => {
         if (player.deck.length === 0) {
@@ -239,6 +243,7 @@ export function useGameLogic(mode: 'single' | 'multiplayer_host' | 'multiplayer_
     const playCard = useCallback((cardId: string) => {
         setGameStateWithSynergies(prev => {
             const { activePlayer: activePlayerKey, player, opponent } = prev;
+            let currentLog = prev.log;
             const activePlayer = activePlayerKey === 'player' ? player : opponent;
 
             const cardIndex = activePlayer.hand.findIndex(c => c.instanceId === cardId);
@@ -248,8 +253,8 @@ export function useGameLogic(mode: 'single' | 'multiplayer_host' | 'multiplayer_
 
             // Check mana
             if (activePlayer.mana < card.cost) {
-                addLog('Nicht genug Dialektik (Mana)!');
-                return prev;
+                currentLog = appendLog(currentLog, 'Nicht genug Dialektik (Mana)!');
+                return { ...prev, log: currentLog };
             }
 
             // Check board space for minions (unless it's Wittgenstein who clears the board)
@@ -271,9 +276,9 @@ export function useGameLogic(mode: 'single' | 'multiplayer_host' | 'multiplayer_
                 // Handle Work cards
                 if (updatedPlayer.activeWork) {
                     updatedPlayer.graveyard = [...updatedPlayer.graveyard, updatedPlayer.activeWork];
-                    addLog(`${activePlayer.name} ersetzte "${updatedPlayer.activeWork.name}" durch "${card.name}".`);
+                    currentLog = appendLog(currentLog, `${activePlayer.name} ersetzte "${updatedPlayer.activeWork.name}" durch "${card.name}".`);
                 } else {
-                    addLog(`${activePlayer.name} veröffentlichte "${card.name}".`);
+                    currentLog = appendLog(currentLog, `${activePlayer.name} veröffentlichte "${card.name}".`);
                 }
                 updatedPlayer.activeWork = card;
             } else if (card.type === 'Philosoph') {
@@ -291,7 +296,7 @@ export function useGameLogic(mode: 'single' | 'multiplayer_host' | 'multiplayer_
                     updatedPlayer.board = [];
                     updatedEnemy.board = [];
 
-                    addLog(`${activePlayer.name} beschwor ${card.name}! "Wovon man nicht sprechen kann, darüber muss man schweigen." - Das Spielfeld wurde geleert!`);
+                    currentLog = appendLog(currentLog, `${activePlayer.name} beschwor ${card.name}! "Wovon man nicht sprechen kann, darüber muss man schweigen." - Das Spielfeld wurde geleert!`);
                 }
 
                 const minion: BoardMinion = {
@@ -309,7 +314,7 @@ export function useGameLogic(mode: 'single' | 'multiplayer_host' | 'multiplayer_
                 // Schopenhauer: Deal 5 damage to player when played
                 if (card.id.includes('schopenhauer')) {
                     updatedPlayer.health = Math.max(0, updatedPlayer.health - 5);
-                    addLog(`${card.name} fügt dir 5 Schaden zu! Leben ist Leiden.`);
+                    currentLog = appendLog(currentLog, `${card.name} fügt dir 5 Schaden zu! Leben ist Leiden.`);
                 }
 
                 updatedPlayer = {
@@ -318,7 +323,7 @@ export function useGameLogic(mode: 'single' | 'multiplayer_host' | 'multiplayer_
                 };
 
                 if (!card.id.includes('wittgenstein')) {
-                    addLog(`${activePlayer.name} beschwor ${card.name}!`);
+                    currentLog = appendLog(currentLog, `${activePlayer.name} beschwor ${card.name}!`);
                 }
 
                 // Marx Special: Auto-trigger steal on play
@@ -340,9 +345,9 @@ export function useGameLogic(mode: 'single' | 'multiplayer_host' | 'multiplayer_
                         updatedEnemy.board = updatedEnemy.board.filter(m => m.id !== lowestCostMinion.id);
                         updatedPlayer.board = [...updatedPlayer.board, stolenMinion];
 
-                        addLog(`${card.name}: "Proletarier aller Länder, vereinigt euch!" ${stolenMinion.name} wechselt die Seiten!`);
+                        currentLog = appendLog(currentLog, `${card.name}: "Proletarier aller Länder, vereinigt euch!" ${stolenMinion.name} wechselt die Seiten!`);
                     } else {
-                        addLog(`${card.name} wurde beschworen, aber es gibt keine Philosophen zum vereinigen!`);
+                        currentLog = appendLog(currentLog, `${card.name} wurde beschworen, aber es gibt keine Philosophen zum vereinigen!`);
                     }
                 }
 
@@ -350,7 +355,7 @@ export function useGameLogic(mode: 'single' | 'multiplayer_host' | 'multiplayer_
                 if (card.id.includes('foucault')) {
                     const top3Cards = updatedEnemy.deck.slice(0, 3);
                     if (top3Cards.length > 0) {
-                        addLog(`${card.name}: "Panoptischer Blick!" Du siehst die nächsten Karten des Gegners.`);
+                        currentLog = appendLog(currentLog, `${card.name}: "Panoptischer Blick!" Du siehst die nächsten Karten des Gegners.`);
                         // Return early to show modal
                         return {
                             ...prev,
@@ -361,9 +366,10 @@ export function useGameLogic(mode: 'single' | 'multiplayer_host' | 'multiplayer_
                             targetMode: 'foucault_reveal',
                             targetModeOwner: activePlayerKey,
                             foucaultRevealCards: top3Cards,
+                            log: currentLog,
                         };
                     } else {
-                        addLog(`${card.name}: "Panoptischer Blick!" Das Deck des Gegners ist leer.`);
+                        currentLog = appendLog(currentLog, `${card.name}: "Panoptischer Blick!" Das Deck des Gegners ist leer.`);
                     }
                 }
             } else {
@@ -377,17 +383,17 @@ export function useGameLogic(mode: 'single' | 'multiplayer_host' | 'multiplayer_
                     for (let i = 0; i < drawCount; i++) {
                         updatedPlayer = drawCard(updatedPlayer);
                     }
-                    addLog(`${activePlayer.name} wirkte ${card.name} und zog ${drawCount} Karte(n).`);
+                    currentLog = appendLog(currentLog, `${activePlayer.name} wirkte ${card.name} und zog ${drawCount} Karte(n).`);
                 } else if (card.id.includes('meditation') || card.id.includes('Aufklärung')) {
                     // Heal
                     const healAmount = card.id.includes('meditation') ? 3 : 5;
                     updatedPlayer.health = Math.min(updatedPlayer.health + healAmount, updatedPlayer.maxHealth);
-                    addLog(`${activePlayer.name} wirkte ${card.name} und stellte ${healAmount} Glaubwürdigkeit wieder her.`);
+                    currentLog = appendLog(currentLog, `${activePlayer.name} wirkte ${card.name} und stellte ${healAmount} Glaubwürdigkeit wieder her.`);
                 } else if (card.id.includes('aporia') || card.id.includes('wu-wei')) {
                     // Damage spells - target opponent
                     const damage = card.id.includes('aporia') ? 3 : 5;
                     updatedEnemy = { ...updatedEnemy, health: updatedEnemy.health - damage };
-                    addLog(`${activePlayer.name} wirkte ${card.name} und verursachte ${damage} Schaden!`);
+                    currentLog = appendLog(currentLog, `${activePlayer.name} wirkte ${card.name} und verursachte ${damage} Schaden!`);
 
                     // Check win conditions immediately after spell damage
                     if (updatedEnemy.health <= 0) {
@@ -397,16 +403,16 @@ export function useGameLogic(mode: 'single' | 'multiplayer_host' | 'multiplayer_
                     // Lock 1 enemy mana next turn + gain 1 temporary mana this turn
                     updatedEnemy.lockedMana = (updatedEnemy.lockedMana || 0) + 1;
                     updatedPlayer.mana = Math.min(updatedPlayer.mana + 1, 10);
-                    addLog(`${activePlayer.name} nutzte Sophistik: +1 Dialektik und sperrte 1 Dialektik des Gegners!`);
+                    currentLog = appendLog(currentLog, `${activePlayer.name} nutzte Sophistik: +1 Dialektik und sperrte 1 Dialektik des Gegners!`);
                 } else if (card.id.includes('dogmatism')) {
                     // Lock 2 Mana next turn
                     updatedEnemy.lockedMana += 2;
-                    addLog(`${activePlayer.name} wirkte ${card.name} und sperrte 2 Dialektik des Gegners!`);
+                    currentLog = appendLog(currentLog, `${activePlayer.name} wirkte ${card.name} und sperrte 2 Dialektik des Gegners!`);
                 } else if (card.id.includes('trolley')) {
                     // Trolley Problem: Sacrifice own minion to damage all enemies
                     // Check if board is empty
                     if (updatedPlayer.board.length === 0) {
-                        addLog('Du hast keine Philosophen zum Opfern!');
+                        currentLog = appendLog(currentLog, 'Du hast keine Philosophen zum Opfern!');
                         // Refund mana since spell can't be cast
                         updatedPlayer.mana += card.cost;
                         updatedPlayer.hand.push(card);
@@ -421,10 +427,11 @@ export function useGameLogic(mode: 'single' | 'multiplayer_host' | 'multiplayer_
                             targetMode: 'trolley_sacrifice',
                             targetModeOwner: activePlayerKey,
                             pendingPlayedCard: card,
+                            log: currentLog,
                         };
                     }
                 } else if (card.id.includes('hermeneutics') || card.id.includes('debug')) {
-                    addLog(`${activePlayer.name} wirkte ${card.name} und sucht im Deck.`);
+                    currentLog = appendLog(currentLog, `${activePlayer.name} wirkte ${card.name} und sucht im Deck.`);
                     // We don't remove the card from hand logic yet? 
                     // Wait, logic above ALREADY removed it from filter: "hand: activePlayer.hand.filter..."
                     // So we must store it here.
@@ -436,15 +443,16 @@ export function useGameLogic(mode: 'single' | 'multiplayer_host' | 'multiplayer_
                         targetMode: 'search',
                         targetModeOwner: activePlayerKey,
                         pendingPlayedCard: card,
+                        log: currentLog,
                     };
                 } else if (card.id.includes('kontemplation')) {
                     // Look at top 3 cards of your deck, pick 1
                     const top3 = updatedPlayer.deck.slice(0, 3);
                     if (top3.length === 0) {
-                        addLog(`${activePlayer.name} wirkte ${card.name}, aber das Deck ist leer!`);
+                        currentLog = appendLog(currentLog, `${activePlayer.name} wirkte ${card.name}, aber das Deck ist leer!`);
                     } else {
                         // Enter kontemplation mode to select a card (works for all players)
-                        addLog(`${activePlayer.name} wirkte ${card.name}. Wähle eine der obersten 3 Karten.`);
+                        currentLog = appendLog(currentLog, `${activePlayer.name} wirkte ${card.name}. Wähle eine der obersten 3 Karten.`);
                         return {
                             ...prev,
                             player: activePlayerKey === 'player' ? updatedPlayer : updatedEnemy,
@@ -453,12 +461,13 @@ export function useGameLogic(mode: 'single' | 'multiplayer_host' | 'multiplayer_
                             targetMode: 'kontemplation',
                             targetModeOwner: activePlayerKey,
                             kontemplationCards: top3,
+                            log: currentLog,
                         };
                     }
                 } else if (card.id.includes('axiom')) {
                     // Grant +1 mana for this turn
                     updatedPlayer.mana = updatedPlayer.mana + 1;
-                    addLog(`${activePlayer.name} wirkte ${card.name} und erhielt 1 zusätzliche Dialektik!`);
+                    currentLog = appendLog(currentLog, `${activePlayer.name} wirkte ${card.name} und erhielt 1 zusätzliche Dialektik!`);
                 } else if (card.id.includes('gottesbeweis')) {
                     // Trigger target mode
                     return {
@@ -469,6 +478,7 @@ export function useGameLogic(mode: 'single' | 'multiplayer_host' | 'multiplayer_
                         targetMode: 'gottesbeweis_target',
                         targetModeOwner: activePlayerKey,
                         pendingPlayedCard: card,
+                        log: currentLog, // No log added yet but passing it anyway
                     };
                 }
             }
@@ -478,13 +488,16 @@ export function useGameLogic(mode: 'single' | 'multiplayer_host' | 'multiplayer_
                 player: activePlayerKey === 'player' ? updatedPlayer : updatedEnemy,
                 opponent: activePlayerKey === 'player' ? updatedEnemy : updatedPlayer,
                 selectedCard: undefined,
+                log: currentLog,
             };
         });
-    }, [addLog, drawCard]);
+    }, [appendLog, drawCard]);
 
     const attack = useCallback((attackerIds: string[], targetId?: string) => {
         setGameStateWithSynergies(prev => {
             const { activePlayer: activePlayerKey, player, opponent } = prev;
+            let currentLog = prev.log;
+
             const activePlayer = activePlayerKey === 'player' ? player : opponent;
             const enemyPlayer = activePlayerKey === 'player' ? opponent : player;
 
@@ -494,8 +507,8 @@ export function useGameLogic(mode: 'single' | 'multiplayer_host' | 'multiplayer_
                 .filter((m): m is BoardMinion => m !== undefined && m.canAttack && !m.hasAttacked);
 
             if (attackers.length === 0) {
-                addLog('Keine gültigen Angreifer ausgewählt!');
-                return prev;
+                currentLog = appendLog(currentLog, 'Keine gültigen Angreifer ausgewählt!');
+                return { ...prev, log: currentLog };
             }
 
             let updatedActivePlayer = { ...activePlayer };
@@ -521,7 +534,7 @@ export function useGameLogic(mode: 'single' | 'multiplayer_host' | 'multiplayer_
             if (!targetId) {
                 // Attack player directly
                 updatedEnemyPlayer.health -= totalDamage;
-                addLog(`${attackerNamesStr} griff${attackers.length > 1 ? 'en' : ''} ${enemyPlayer.name} an! (${totalDamage} Schaden)`);
+                currentLog = appendLog(currentLog, `${attackerNamesStr} griff${attackers.length > 1 ? 'en' : ''} ${enemyPlayer.name} an! (${totalDamage} Schaden)`);
 
                 // Mark all attackers as having attacked
                 updatedActivePlayer.board = activePlayer.board.map(m =>
@@ -540,9 +553,9 @@ export function useGameLogic(mode: 'single' | 'multiplayer_host' | 'multiplayer_
                     if (turnsOnField < 3) {
                         const diogenesMsg = `${target.name} lebt noch in seiner Tonne und kann erst in ${3 - turnsOnField} Runde(n) angegriffen werden!`;
                         if (prev.log.length === 0 || prev.log[prev.log.length - 1] !== diogenesMsg) {
-                            addLog(diogenesMsg);
+                            currentLog = appendLog(currentLog, diogenesMsg);
                         }
-                        return prev;
+                        return { ...prev, log: currentLog };
                     }
                 }
 
@@ -552,7 +565,7 @@ export function useGameLogic(mode: 'single' | 'multiplayer_host' | 'multiplayer_
                 const firstAttacker = attackers[0];
                 const firstAttackerIndex = activePlayer.board.findIndex(m => (m.instanceId || m.id) === firstAttacker.instanceId);
 
-                addLog(`${attackerNamesStr} griff${attackers.length > 1 ? 'en' : ''} ${target.name} an! (${totalDamage} Schaden vs ${targetDamage} Gegenschlag)`);
+                currentLog = appendLog(currentLog, `${attackerNamesStr} griff${attackers.length > 1 ? 'en' : ''} ${target.name} an! (${totalDamage} Schaden vs ${targetDamage} Gegenschlag)`);
 
                 // Update boards
                 updatedActivePlayer.board = [...activePlayer.board];
@@ -577,7 +590,7 @@ export function useGameLogic(mode: 'single' | 'multiplayer_host' | 'multiplayer_
                 if (updatedFirstAttacker.health <= 0) {
                     updatedActivePlayer.board = updatedActivePlayer.board.filter(m => (m.instanceId || m.id) !== (firstAttacker.instanceId || firstAttacker.id));
                     updatedActivePlayer.graveyard = [...updatedActivePlayer.graveyard, firstAttacker];
-                    addLog(`${firstAttacker.name} wurde besiegt!`);
+                    currentLog = appendLog(currentLog, `${firstAttacker.name} wurde besiegt!`);
                 } else {
                     updatedActivePlayer.board[firstAttackerIndex] = updatedFirstAttacker;
                 }
@@ -586,7 +599,7 @@ export function useGameLogic(mode: 'single' | 'multiplayer_host' | 'multiplayer_
                 if (updatedTarget.health <= 0) {
                     updatedEnemyPlayer.board = updatedEnemyPlayer.board.filter(m => (m.instanceId || m.id) !== (target.instanceId || target.id));
                     updatedEnemyPlayer.graveyard = [...updatedEnemyPlayer.graveyard, target];
-                    addLog(`${target.name} wurde besiegt!`);
+                    currentLog = appendLog(currentLog, `${target.name} wurde besiegt!`);
                 } else {
                     updatedEnemyPlayer.board[targetIndex] = updatedTarget;
                 }
@@ -609,6 +622,7 @@ export function useGameLogic(mode: 'single' | 'multiplayer_host' | 'multiplayer_
                 selectedMinions: undefined,
                 gameOver,
                 winner,
+                log: currentLog,
             };
         });
     }, [addLog]);
@@ -616,15 +630,16 @@ export function useGameLogic(mode: 'single' | 'multiplayer_host' | 'multiplayer_
     const endTurn = useCallback(() => {
         setGameStateWithSynergies(prev => {
             const { activePlayer: currentPlayer, player, opponent, turn } = prev;
+            let currentLog = prev.log;
 
-            addLog(`${currentPlayer === 'player' ? player.name : opponent.name} beendete den Zug.`);
+            currentLog = appendLog(currentLog, `${currentPlayer === 'player' ? player.name : opponent.name} beendete den Zug.`);
 
             const nextPlayer = currentPlayer === 'player' ? 'opponent' : 'player';
             const playerToActivate = nextPlayer === 'player' ? player : opponent;
 
             const updatedPlayer = startTurn(playerToActivate);
 
-            addLog(`Runde ${turn + 1}: ${updatedPlayer.name} ist am Zug.`);
+            currentLog = appendLog(currentLog, `Runde ${turn + 1}: ${updatedPlayer.name} ist am Zug.`);
 
             const newState: GameState = {
                 ...prev,
@@ -634,6 +649,7 @@ export function useGameLogic(mode: 'single' | 'multiplayer_host' | 'multiplayer_
                 opponent: nextPlayer === 'opponent' ? updatedPlayer : opponent,
                 selectedCard: undefined,
                 selectedMinions: undefined,
+                log: currentLog,
             };
 
             return newState;
@@ -682,9 +698,10 @@ export function useGameLogic(mode: 'single' | 'multiplayer_host' | 'multiplayer_
                 // Start first turn
                 setTimeout(() => {
                     setGameStateWithSynergies(prev => {
+                        let currentLog = prev.log;
                         const updatedPlayer = startTurn(prev.player);
-                        addLog('Runde 1: Player beginnt.');
-                        return { ...prev, player: updatedPlayer, turn: 1 };
+                        currentLog = appendLog(currentLog, 'Runde 1: Player beginnt.');
+                        return { ...prev, player: updatedPlayer, turn: 1, log: currentLog };
                     });
                 }, 100);
                 break;
@@ -701,6 +718,7 @@ export function useGameLogic(mode: 'single' | 'multiplayer_host' | 'multiplayer_
                 // Handle special abilities (currently only Van Inwagen transformation)
                 setGameStateWithSynergies(prev => {
                     const { player, opponent, activePlayer: activePlayerKey } = prev;
+                    let currentLog = prev.log;
                     const activePlayer = activePlayerKey === 'player' ? player : opponent;
                     const enemyPlayer = activePlayerKey === 'player' ? prev.opponent : prev.player;
 
@@ -712,8 +730,8 @@ export function useGameLogic(mode: 'single' | 'multiplayer_host' | 'multiplayer_
                     // Marx Special: Steal opponent's lowest-cost minion
                     if (minion.id.includes('marx')) {
                         if (enemyPlayer.board.length === 0) {
-                            addLog('Keine gegnerischen Philosophen zum vereinigen!');
-                            return prev;
+                            currentLog = appendLog(currentLog, 'Keine gegnerischen Philosophen zum vereinigen!');
+                            return { ...prev, log: currentLog };
                         }
 
                         // Find lowest-cost enemy minion
@@ -744,7 +762,7 @@ export function useGameLogic(mode: 'single' | 'multiplayer_host' | 'multiplayer_
                             ? { ...opponent, board: updatedEnemyBoard }
                             : { ...opponent, board: updatedActiveBoard };
 
-                        addLog(`${minion.name}: "Proletarier aller Länder, vereinigt euch!" ${stolenMinion.name} wechselt die Seiten!`);
+                        currentLog = appendLog(currentLog, `${minion.name}: "Proletarier aller Länder, vereinigt euch!" ${stolenMinion.name} wechselt die Seiten!`);
 
                         return {
                             ...prev,
@@ -752,6 +770,7 @@ export function useGameLogic(mode: 'single' | 'multiplayer_host' | 'multiplayer_
                             opponent: updatedOpponent,
                             selectedMinion: undefined,
                             targetMode: undefined,
+                            log: currentLog,
                         };
                     }
 
@@ -759,12 +778,12 @@ export function useGameLogic(mode: 'single' | 'multiplayer_host' | 'multiplayer_
                     if (minion.id.includes('foucault')) {
                         const top3Cards = enemyPlayer.deck.slice(0, 3);
                         if (top3Cards.length === 0) {
-                            addLog('Das Deck des Gegners ist leer!');
-                            return prev;
+                            currentLog = appendLog(currentLog, 'Das Deck des Gegners ist leer!');
+                            return { ...prev, log: currentLog };
                         }
 
                         const cardNames = top3Cards.map(c => c.name).join(', ');
-                        addLog(`${minion.name}: "Panoptischer Blick!" Du siehst: ${cardNames}`);
+                        currentLog = appendLog(currentLog, `${minion.name}: "Panoptischer Blick!" Du siehst: ${cardNames}`);
 
                         // Mark special as used
                         const updatedActiveBoard = activePlayer.board.map(m =>
@@ -783,6 +802,7 @@ export function useGameLogic(mode: 'single' | 'multiplayer_host' | 'multiplayer_
                             player: updatedPlayer,
                             opponent: updatedOpponent,
                             selectedMinion: undefined,
+                            log: currentLog,
                         };
                     }
 
@@ -828,7 +848,7 @@ export function useGameLogic(mode: 'single' | 'multiplayer_host' | 'multiplayer_
                             opponent: updatedOpponent,
                             selectedMinion: undefined,
                             targetMode: undefined,
-                            log: [...prev.log, `${minion.name} verwandelte ${targetMinion.name} in stuhlartige Materie!`],
+                            log: [...currentLog, `${minion.name} verwandelte ${targetMinion.name} in stuhlartige Materie!`],
                         };
                     }
 
@@ -873,6 +893,7 @@ export function useGameLogic(mode: 'single' | 'multiplayer_host' | 'multiplayer_
                 // Handle trolley problem sacrifice selection
                 setGameStateWithSynergies(prev => {
                     const { player, opponent, activePlayer: activePlayerKey } = prev;
+                    let currentLog = prev.log;
                     const activePlayer = activePlayerKey === 'player' ? player : opponent;
                     const enemyPlayer = activePlayerKey === 'player' ? opponent : player;
 
@@ -897,7 +918,7 @@ export function useGameLogic(mode: 'single' | 'multiplayer_host' | 'multiplayer_
                     const aliveEnemyBoard = damagedEnemyBoard.filter(m => m.health > 0);
                     const updatedEnemyGraveyard = [...enemyPlayer.graveyard, ...deadMinions];
 
-                    addLog(`${activePlayer.name} opferte ${sacrificedMinion.name} und fügte allen gegnerischen Philosophen 4 Schaden zu!`);
+                    currentLog = appendLog(currentLog, `${activePlayer.name} opferte ${sacrificedMinion.name} und fügte allen gegnerischen Philosophen 4 Schaden zu!`);
 
                     const updatedPlayer = {
                         ...activePlayer,
@@ -917,6 +938,7 @@ export function useGameLogic(mode: 'single' | 'multiplayer_host' | 'multiplayer_
                         opponent: activePlayerKey === 'player' ? updatedEnemy : updatedPlayer,
                         targetMode: undefined,
                         selectedMinion: undefined,
+                        log: currentLog,
                     };
                 });
                 break;
@@ -925,6 +947,7 @@ export function useGameLogic(mode: 'single' | 'multiplayer_host' | 'multiplayer_
                 setGameStateWithSynergies(prev => {
                     const { player, opponent, activePlayer: activePlayerKey, kontemplationCards } = prev;
                     if (!kontemplationCards || kontemplationCards.length === 0) return prev;
+                    let currentLog = prev.log;
 
                     const activePlayer = activePlayerKey === 'player' ? player : opponent;
 
@@ -943,7 +966,7 @@ export function useGameLogic(mode: 'single' | 'multiplayer_host' | 'multiplayer_
                         newDeck = [...newDeck.slice(0, insertIndex), card, ...newDeck.slice(insertIndex)];
                     });
 
-                    addLog(`Du hast "${selectedCard.name}" gewählt. Die anderen Karten wurden zurückgemischt.`);
+                    currentLog = appendLog(currentLog, `Du hast "${selectedCard.name}" gewählt. Die anderen Karten wurden zurückgemischt.`);
 
                     const updatedPlayer = {
                         ...activePlayer,
@@ -957,6 +980,7 @@ export function useGameLogic(mode: 'single' | 'multiplayer_host' | 'multiplayer_
                         opponent: activePlayerKey === 'player' ? opponent : updatedPlayer,
                         targetMode: undefined,
                         kontemplationCards: undefined,
+                        log: currentLog,
                     };
                 });
                 break;
@@ -971,6 +995,7 @@ export function useGameLogic(mode: 'single' | 'multiplayer_host' | 'multiplayer_
             case 'GOTTESBEWEIS_TARGET':
                 setGameStateWithSynergies(prev => {
                     const { player, opponent, activePlayer: activePlayerKey } = prev;
+                    let currentLog = prev.log;
                     const activePlayer = activePlayerKey === 'player' ? player : opponent;
                     // Target can be on ANY board
                     const targetOnPlayerBoard = player.board.find(m => (m.instanceId || m.id) === action.minionId);
@@ -1021,10 +1046,11 @@ export function useGameLogic(mode: 'single' | 'multiplayer_host' | 'multiplayer_
                         }
                     }
 
-                    addLog(message);
+                    currentLog = appendLog(currentLog, message);
 
                     return {
                         ...prev,
+                        log: currentLog,
                         player: { ...player, board: updatedPlayerBoard, graveyard: updatedPlayerGraveyard },
                         opponent: { ...opponent, board: updatedOpponentBoard, graveyard: updatedOpponentGraveyard },
                         targetMode: undefined,
@@ -1036,6 +1062,7 @@ export function useGameLogic(mode: 'single' | 'multiplayer_host' | 'multiplayer_
 
             case 'CANCEL_CAST':
                 setGameStateWithSynergies(prev => {
+                    let currentLog = prev.log;
                     // Only refund if we have a pending card and a cancellable mode
                     if (!prev.pendingPlayedCard) {
                         // Fallback: just clear mode if no card pending?
@@ -1068,7 +1095,7 @@ export function useGameLogic(mode: 'single' | 'multiplayer_host' | 'multiplayer_
                     // Refund Mana
                     const updatedMana = refundPlayer.mana + card.cost;
 
-                    addLog(`Zauber ${card.name} abgebrochen.`);
+                    currentLog = appendLog(currentLog, `Zauber ${card.name} abgebrochen.`);
 
                     return {
                         ...prev,
@@ -1079,7 +1106,8 @@ export function useGameLogic(mode: 'single' | 'multiplayer_host' | 'multiplayer_
                             ? { ...refundPlayer, hand: updatedHand, mana: updatedMana }
                             : opponent,
                         targetMode: undefined,
-                        pendingPlayedCard: undefined
+                        pendingPlayedCard: undefined,
+                        log: currentLog
                     };
                 });
                 break;
