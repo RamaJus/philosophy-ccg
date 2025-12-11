@@ -30,6 +30,7 @@ export const Card: React.FC<CardProps> = ({
     const isWittgenstein = card.id.includes('wittgenstein');
 
     const [isDamaged, setIsDamaged] = useState(false);
+    const [isHealed, setIsHealed] = useState(false);
     const currentHealth = boardMinion ? boardMinion.health : (card as any).health;
     const prevHealth = useRef(currentHealth);
 
@@ -39,10 +40,18 @@ export const Card: React.FC<CardProps> = ({
     const [showPreview, setShowPreview] = useState(false);
 
     useEffect(() => {
-        if (currentHealth !== undefined && prevHealth.current !== undefined && currentHealth < prevHealth.current) {
-            setIsDamaged(true);
-            const timer = setTimeout(() => setIsDamaged(false), 500);
-            return () => clearTimeout(timer);
+        if (currentHealth !== undefined && prevHealth.current !== undefined) {
+            if (currentHealth < prevHealth.current) {
+                // Damage animation
+                setIsDamaged(true);
+                const timer = setTimeout(() => setIsDamaged(false), 500);
+                return () => clearTimeout(timer);
+            } else if (currentHealth > prevHealth.current) {
+                // Healing animation
+                setIsHealed(true);
+                const timer = setTimeout(() => setIsHealed(false), 600);
+                return () => clearTimeout(timer);
+            }
         }
         prevHealth.current = currentHealth;
     }, [currentHealth]);
@@ -68,6 +77,7 @@ export const Card: React.FC<CardProps> = ({
         ${isSelected ? 'ring-4 ring-yellow-400 scale-110' : ''}
         ${isPlayable ? 'cursor-pointer' : 'cursor-not-allowed'}
         ${isDamaged ? 'animate-shake ring-4 ring-red-500' : ''}
+        ${isHealed ? 'ring-4 ring-green-400 animate-pulse' : ''}
         relative group transition-all duration-300 transform hover:scale-105 hover:z-10
         ${className}
     `;
@@ -166,12 +176,12 @@ export const Card: React.FC<CardProps> = ({
 
                 {/* Synergy Bonus Badge (for philosophers on board with synergy) */}
                 {isMinion && boardMinion?.synergyBonus && boardMinion.synergyBonus > 0 && (
-                    <div className="absolute top-8 right-1 z-20 group/synergy">
+                    <div className="absolute top-8 right-1 z-30 group/synergy" style={{ pointerEvents: 'auto' }}>
                         <div className="w-7 h-7 rounded-full bg-gradient-to-br from-purple-400 to-purple-600 flex items-center justify-center shadow-lg border-2 border-purple-300 cursor-help">
                             <span className="text-white font-bold text-xs">+{boardMinion.synergyBonus}</span>
                         </div>
                         {/* Hover Tooltip with School Breakdown */}
-                        <div className="absolute top-full right-0 mt-1 hidden group-hover/synergy:block pointer-events-none">
+                        <div className="absolute top-full right-0 mt-1 hidden group-hover/synergy:block pointer-events-none z-50">
                             <div className="bg-slate-900/95 border border-purple-500/50 rounded-lg px-2 py-1.5 shadow-xl min-w-max">
                                 <div className="text-[10px] text-purple-300 font-semibold mb-1">Synergie</div>
                                 {boardMinion.synergyBreakdown && Object.entries(boardMinion.synergyBreakdown).map(([school, count]) => (

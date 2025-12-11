@@ -5,6 +5,34 @@ interface GameLogProps {
     messages: string[];
 }
 
+// Determine message type and return appropriate color class
+const getMessageStyle = (msg: string): string => {
+    const lowerMsg = msg.toLowerCase();
+
+    // Damage/Attack messages
+    if (lowerMsg.includes('schaden') || lowerMsg.includes('angriff') || lowerMsg.includes('greift an') || lowerMsg.includes('stirbt') || lowerMsg.includes('zerstört')) {
+        return 'text-red-400';
+    }
+    // Healing messages
+    if (lowerMsg.includes('heil') || lowerMsg.includes('glaubwürdigkeit') || lowerMsg.includes('wiederhergestellt')) {
+        return 'text-green-400';
+    }
+    // Card draw/mana messages
+    if (lowerMsg.includes('zieh') || lowerMsg.includes('karte') || lowerMsg.includes('dialektik')) {
+        return 'text-blue-400';
+    }
+    // Spell/special effect messages
+    if (lowerMsg.includes('zauber') || lowerMsg.includes('effekt') || lowerMsg.includes('spezial') || lowerMsg.includes('verwandel')) {
+        return 'text-purple-400';
+    }
+    // Turn messages
+    if (lowerMsg.includes('zug') || lowerMsg.includes('runde')) {
+        return 'text-amber-400';
+    }
+    // Default
+    return 'text-gray-400';
+};
+
 export const GameLog: React.FC<GameLogProps> = ({ messages }) => {
     const [isExpanded, setIsExpanded] = useState(false);
 
@@ -27,7 +55,7 @@ export const GameLog: React.FC<GameLogProps> = ({ messages }) => {
             {isExpanded && (
                 <div className="px-4 pb-4 max-h-64 overflow-y-auto space-y-1">
                     {messages.map((msg, idx) => (
-                        <p key={idx} className="text-xs text-gray-400 leading-relaxed">
+                        <p key={idx} className={`text-xs leading-relaxed ${getMessageStyle(msg)}`}>
                             {msg}
                         </p>
                     ))}
