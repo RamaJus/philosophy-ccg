@@ -61,6 +61,7 @@ export interface GameState {
     pendingPlayedCard?: Card; // Card currently being cast (for cancellation refund checks)
     selectedMinions?: string[]; // Minion IDs on board for attacking (multi-select)
     targetMode?: 'attack' | 'spell' | 'search' | 'transform' | 'trolley_sacrifice' | 'special' | 'kontemplation' | 'foucault_reveal' | 'gottesbeweis_target'; // What we're targeting for
+    targetModeOwner?: 'player' | 'opponent'; // Who initiated the targetMode (for multiplayer modal visibility)
     kontemplationCards?: Card[]; // Top 3 cards for Kontemplation selection
     foucaultRevealCards?: Card[]; // Top 3 opponent cards for Foucault reveal
     log: string[]; // Game log messages

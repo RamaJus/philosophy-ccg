@@ -354,6 +354,7 @@ export function useGameLogic(mode: 'single' | 'multiplayer_host' | 'multiplayer_
                             opponent: updatedEnemy,
                             selectedCard: undefined,
                             targetMode: 'foucault_reveal',
+                            targetModeOwner: activePlayerKey,
                             foucaultRevealCards: top3Cards,
                         };
                     } else {
@@ -398,48 +399,24 @@ export function useGameLogic(mode: 'single' | 'multiplayer_host' | 'multiplayer_
                     addLog(`${activePlayer.name} wirkte ${card.name} und sperrte 2 Dialektik des Gegners!`);
                 } else if (card.id.includes('trolley')) {
                     // Trolley Problem: Sacrifice own minion to damage all enemies
-                    if (activePlayerKey === 'player') {
-                        // Player needs to select a minion to sacrifice
-                        if (updatedPlayer.board.length === 0) {
-                            addLog('Du hast keine Philosophen zum Opfern!');
-                            // Refund mana since spell can't be cast
-                            updatedPlayer.mana += card.cost;
-                            updatedPlayer.hand.push(card);
-                            updatedPlayer.graveyard = updatedPlayer.graveyard.filter(c => c.id !== card.id);
-                        } else {
-                            return {
-                                ...prev,
-                                player: updatedPlayer,
-                                opponent: updatedEnemy,
-                                selectedCard: undefined,
-                                targetMode: 'trolley_sacrifice',
-                                pendingPlayedCard: card,
-                            };
-                        }
+                    // Check if board is empty
+                    if (updatedPlayer.board.length === 0) {
+                        addLog('Du hast keine Philosophen zum Opfern!');
+                        // Refund mana since spell can't be cast
+                        updatedPlayer.mana += card.cost;
+                        updatedPlayer.hand.push(card);
+                        updatedPlayer.graveyard = updatedPlayer.graveyard.filter(c => c.id !== card.id);
                     } else {
-                        // AI Logic: Sacrifice weakest minion
-                        if (updatedPlayer.board.length > 0) {
-                            const weakestMinion = updatedPlayer.board.reduce((weakest, current) =>
-                                current.health < weakest.health ? current : weakest
-                            );
-
-                            // Remove sacrificed minion
-                            updatedPlayer.board = updatedPlayer.board.filter(m => m.id !== weakestMinion.id);
-                            updatedPlayer.graveyard.push(weakestMinion);
-
-                            // Damage all enemy minions
-                            updatedEnemy.board = updatedEnemy.board.map(m => ({
-                                ...m,
-                                health: m.health - 4
-                            })).filter(m => m.health > 0);
-
-                            // Move dead minions to graveyard
-                            const deadMinions = updatedEnemy.board.filter(m => m.health <= 0);
-                            updatedEnemy.graveyard = [...updatedEnemy.graveyard, ...deadMinions];
-                            updatedEnemy.board = updatedEnemy.board.filter(m => m.health > 0);
-
-                            addLog(`${activePlayer.name} opferte ${weakestMinion.name} und fügte allen gegnerischen Philosophen 4 Schaden zu!`);
-                        }
+                        // Both human players and AI need to select (AI handled elsewhere or shows UI)
+                        return {
+                            ...prev,
+                            player: updatedPlayer,
+                            opponent: updatedEnemy,
+                            selectedCard: undefined,
+                            targetMode: 'trolley_sacrifice',
+                            targetModeOwner: activePlayerKey,
+                            pendingPlayedCard: card,
+                        };
                     }
                 } else if (card.id.includes('hermeneutics') || card.id.includes('debug')) {
                     addLog(`${activePlayer.name} wirkte ${card.name} und sucht im Deck.`);
@@ -452,6 +429,7 @@ export function useGameLogic(mode: 'single' | 'multiplayer_host' | 'multiplayer_
                         opponent: activePlayerKey === 'player' ? updatedEnemy : updatedPlayer,
                         selectedCard: undefined,
                         targetMode: 'search',
+                        targetModeOwner: activePlayerKey,
                         pendingPlayedCard: card,
                     };
                 } else if (card.id.includes('kontemplation')) {
@@ -459,8 +437,8 @@ export function useGameLogic(mode: 'single' | 'multiplayer_host' | 'multiplayer_
                     const top3 = updatedPlayer.deck.slice(0, 3);
                     if (top3.length === 0) {
                         addLog(`${activePlayer.name} wirkte ${card.name}, aber das Deck ist leer!`);
-                    } else if (activePlayerKey === 'player') {
-                        // Player: Enter kontemplation mode to select a card
+                    } else {
+                        // Enter kontemplation mode to select a card (works for all players)
                         addLog(`${activePlayer.name} wirkte ${card.name}. Wähle eine der obersten 3 Karten.`);
                         return {
                             ...prev,
@@ -468,15 +446,9 @@ export function useGameLogic(mode: 'single' | 'multiplayer_host' | 'multiplayer_
                             opponent: updatedEnemy,
                             selectedCard: undefined,
                             targetMode: 'kontemplation',
+                            targetModeOwner: activePlayerKey,
                             kontemplationCards: top3,
                         };
-                    } else {
-                        // AI: Pick first card
-                        const pickedCard = top3[0];
-                        updatedPlayer.deck = updatedPlayer.deck.slice(1);
-                        updatedPlayer.hand = [...updatedPlayer.hand, pickedCard];
-                        // Shuffle remaining top cards back (they're already in deck)
-                        addLog(`${activePlayer.name} wirkte ${card.name} und wählte eine Karte.`);
                     }
                 } else if (card.id.includes('axiom')) {
                     // Grant +1 mana for this turn
@@ -490,6 +462,7 @@ export function useGameLogic(mode: 'single' | 'multiplayer_host' | 'multiplayer_
                         opponent: updatedEnemy,
                         selectedCard: undefined,
                         targetMode: 'gottesbeweis_target',
+                        targetModeOwner: activePlayerKey,
                         pendingPlayedCard: card,
                     };
                 }

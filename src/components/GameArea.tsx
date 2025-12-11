@@ -19,7 +19,7 @@ interface GameAreaProps {
 
 export const GameArea: React.FC<GameAreaProps> = ({ mode }) => {
     const { gameState, dispatch } = useGameLogic(mode);
-    const { player, opponent, activePlayer, selectedCard, selectedMinions, gameOver, winner, log, targetMode, kontemplationCards, foucaultRevealCards } = gameState;
+    const { player, opponent, activePlayer, selectedCard, selectedMinions, gameOver, winner, log, targetMode, targetModeOwner, kontemplationCards, foucaultRevealCards } = gameState;
 
     // Use ref to always have the latest state in AI callbacks
     const gameStateRef = useRef(gameState);
@@ -37,12 +37,19 @@ export const GameArea: React.FC<GameAreaProps> = ({ mode }) => {
         }
     }, [gameOver, winner]);
 
-    // Auto-open deck view when in search mode
+    // Auto-open deck view when in search mode (only for the owner)
+    const isClient = mode === 'multiplayer_client';
+
+    // Check if the current player owns the targetMode
+    // Host sees 'player' as their own, Client sees 'opponent' as their own
+    const isMyTargetMode = targetModeOwner !== undefined &&
+        (isClient ? targetModeOwner === 'opponent' : targetModeOwner === 'player');
+
     useEffect(() => {
-        if (targetMode === 'search') {
+        if (targetMode === 'search' && isMyTargetMode) {
             setIsDeckViewOpen(true);
         }
-    }, [targetMode]);
+    }, [targetMode, isMyTargetMode]);
 
     // In multiplayer client mode, we are the 'opponent' from the host's perspective, but we want to see ourselves as 'player'
     // This is tricky. The simplest way for P2P is:
@@ -51,8 +58,6 @@ export const GameArea: React.FC<GameAreaProps> = ({ mode }) => {
     // BUT our state is synchronized from Host.
     // So if Host says "Player", it means Host.
     // If we are Client, we need to swap the view.
-
-    const isClient = mode === 'multiplayer_client';
 
     // View Transformation for Client
     const viewPlayer = isClient ? opponent : player;
@@ -258,7 +263,7 @@ export const GameArea: React.FC<GameAreaProps> = ({ mode }) => {
                 />
 
                 {/* Kontemplation Card Selection Modal */}
-                {targetMode === 'kontemplation' && kontemplationCards && kontemplationCards.length > 0 && (
+                {targetMode === 'kontemplation' && isMyTargetMode && kontemplationCards && kontemplationCards.length > 0 && (
                     <div className="fixed inset-0 bg-black/80 z-50 flex flex-col items-center justify-center p-8 backdrop-blur-sm">
                         <div className="bg-slate-900 border-2 border-purple-600 rounded-xl p-8 shadow-2xl shadow-purple-900/20">
                             <h2 className="text-3xl font-serif text-purple-400 mb-2 text-center">Kontemplation</h2>
@@ -281,7 +286,7 @@ export const GameArea: React.FC<GameAreaProps> = ({ mode }) => {
                 )}
 
                 {/* Foucault Reveal Modal (View-only) */}
-                {targetMode === 'foucault_reveal' && foucaultRevealCards && foucaultRevealCards.length > 0 && (
+                {targetMode === 'foucault_reveal' && isMyTargetMode && foucaultRevealCards && foucaultRevealCards.length > 0 && (
                     <div className="fixed inset-0 bg-black/80 z-50 flex flex-col items-center justify-center p-8 backdrop-blur-sm">
                         <div className="bg-slate-900 border-2 border-cyan-600 rounded-xl p-8 shadow-2xl shadow-cyan-900/20">
                             <h2 className="text-3xl font-serif text-cyan-400 mb-2 text-center">Panoptischer Blick</h2>
@@ -346,7 +351,7 @@ export const GameArea: React.FC<GameAreaProps> = ({ mode }) => {
                                     <p className="text-xs">{viewIsPlayerTurn ? 'Dein Zug' : 'Gegner-Zug'}</p>
                                 </div>
 
-                                {targetMode === 'trolley_sacrifice' && (
+                                {targetMode === 'trolley_sacrifice' && isMyTargetMode && (
                                     <>
                                         <div className="px-4 py-2 bg-red-500/20 text-red-400 rounded-lg border border-red-500/50 animate-pulse">
                                             <p className="text-sm font-bold">Wähle einen Philosophen zum Opfern</p>
@@ -360,13 +365,13 @@ export const GameArea: React.FC<GameAreaProps> = ({ mode }) => {
                                     </>
                                 )}
 
-                                {targetMode === 'kontemplation' && (
+                                {targetMode === 'kontemplation' && isMyTargetMode && (
                                     <div className="px-4 py-2 bg-purple-500/20 text-purple-400 rounded-lg border border-purple-500/50 animate-pulse">
                                         <p className="text-sm font-bold">Wähle eine der obersten 3 Karten</p>
                                     </div>
                                 )}
 
-                                {targetMode === 'gottesbeweis_target' && (
+                                {targetMode === 'gottesbeweis_target' && isMyTargetMode && (
                                     <>
                                         <div className="px-4 py-2 bg-amber-500/20 text-amber-400 rounded-lg border border-amber-500/50 animate-pulse">
                                             <p className="text-sm font-bold">Wähle einen Philosophen für den Gottesbeweis</p>
