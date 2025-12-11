@@ -485,6 +485,8 @@ export function useGameLogic(mode: 'single' | 'multiplayer_host' | 'multiplayer_
                         addLog(`${activePlayer.name} wirkte ${card.name} und wählte eine Karte.`);
                     }
                 } else if (card.id.includes('axiom')) {
+                    // Grant +1 mana for this turn
+                    updatedPlayer.mana = updatedPlayer.mana + 1;
                     addLog(`${activePlayer.name} wirkte ${card.name} und erhielt 1 zusätzliche Dialektik!`);
                 } else if (card.id.includes('gottesbeweis')) {
                     // Trigger target mode

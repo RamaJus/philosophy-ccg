@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { BoardMinion, Card as CardType } from '../types';
 import { Card } from './Card';
-import { Target, ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 interface BoardProps {
     minions: BoardMinion[];
@@ -85,11 +85,6 @@ export const Board: React.FC<BoardProps> = ({
                                             ${minion.hasAttacked || minion.hasUsedSpecial ? 'opacity-50' : ''}
                                         `}
                                     />
-                                    {canAttack && (
-                                        <div className="absolute -top-2 -right-2 bg-green-500 rounded-full p-1 animate-bounce">
-                                            <Target size={16} className="text-white" />
-                                        </div>
-                                    )}
 
 
                                 </div>
