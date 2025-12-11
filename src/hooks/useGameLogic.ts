@@ -27,6 +27,9 @@ function createPlayer(name: string, isPlayer: boolean, startingHandSize: number 
     }
 
     // Add DEBUG cards to player's starting hand for testing
+    // Add DEBUG cards to player's starting hand for testing
+    // DISABLED: User requested to disable debug cards but keep code
+    /*
     if (isPlayer) {
         const debugDeck = generateDeck();
         const debug1 = debugDeck.find(c => c.id === 'debug_1');
@@ -35,12 +38,13 @@ function createPlayer(name: string, isPlayer: boolean, startingHandSize: number 
         if (debug1) hand.push({ ...debug1, instanceId: `debug-1-${Date.now()}` });
         if (debug2) hand.push({ ...debug2, instanceId: `debug-2-${Date.now()}` });
     }
+    */
 
     return {
         id: isPlayer ? 'player' : 'opponent',
         name,
-        health: 40,
-        maxHealth: 40,
+        health: 80,
+        maxHealth: 80,
         mana: 0,
         maxMana: 0,
         deck: remainingDeck,
