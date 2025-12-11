@@ -65,6 +65,8 @@ function createInitialState(): GameState {
 
 
 // Synergy Logic
+// Each philosopher gets +1 synergy for each OTHER distinct philosopher they share at least one school with.
+// Multiple shared schools with the same philosopher only count as +1, not more.
 const calculateSynergies = (board: BoardMinion[]): BoardMinion[] => {
     // 1. Reset synergy bonuses first
     let updatedBoard = board.map(minion => {
@@ -73,15 +75,13 @@ const calculateSynergies = (board: BoardMinion[]): BoardMinion[] => {
             ...minion,
             attack: minion.attack - bonus,
             maxHealth: minion.maxHealth - bonus,
-            health: minion.health - bonus, // Reduce current health too? Usually yes for aura removal.
+            health: minion.health - bonus,
             synergyBonus: 0,
             linkedWith: [] as string[]
         };
     });
 
-    // 2. Identify clusters and calculate bonuses
-    // We need to group minions that share AT LEAST ONE school.
-    // This is a graph problem (connected components).
+    // 2. Build adjacency: track which minions share at least one school with each other
     const adjacency: Record<string, string[]> = {};
     updatedBoard.forEach(m => adjacency[m.id] = []);
 
@@ -98,62 +98,21 @@ const calculateSynergies = (board: BoardMinion[]): BoardMinion[] => {
         }
     }
 
-    // Find connected components
-    const visited = new Set<string>();
-    const clusters: BoardMinion[][] = [];
+    // 3. Calculate individual synergy bonuses
+    // Each minion's bonus = number of OTHER philosophers it directly shares at least one school with
+    const finalBoard = updatedBoard.map(minion => {
+        const linkedNeighbors = adjacency[minion.id];
+        const bonus = linkedNeighbors.length; // +1 for each distinct neighbor
 
-    for (const minion of updatedBoard) {
-        if (visited.has(minion.id)) continue;
-
-        const cluster: BoardMinion[] = [];
-        const queue = [minion];
-        visited.add(minion.id);
-
-        while (queue.length > 0) {
-            const current = queue.shift()!;
-            cluster.push(current);
-
-            for (const neighborId of adjacency[current.id]) {
-                if (!visited.has(neighborId)) {
-                    visited.add(neighborId);
-                    const neighbor = updatedBoard.find(m => m.id === neighborId)!;
-                    queue.push(neighbor);
-                }
-            }
-        }
-        clusters.push(cluster);
-    }
-
-    // 3. Apply bonuses and reorder
-    let finalBoard: BoardMinion[] = [];
-
-    for (const cluster of clusters) {
-        // Calculate bonus: +1 for 2, +2 for 3+, etc. (Size - 1)
-        // User said: "Wenn sie mehr als eine Schule gemeinsam haben, bleibt es trotzdem bei +1. Die Zahl erhöht sich erst, wenn ein dritter Philosoph auf das Feld kommt und wird dann zu +2"
-        // This implies: 2 minions -> +1. 3 minions -> +2. 4 minions -> +3?
-        // Let's assume linear scaling: size - 1.
-        const bonus = Math.max(0, cluster.length - 1);
-
-        const updatedCluster = cluster.map(minion => {
-            // Fix health: if health dropped below 1 during reset, keep it at 1? 
-            // Or let it die? Usually aura removal can kill.
-            // But here we just re-add the bonus immediately if it still applies.
-            // To avoid "healing" by re-applying, we should be careful.
-            // Current implementation: reset subtracts, new adds.
-            // If bonus stays same, net change is 0.
-
-            return {
-                ...minion,
-                attack: minion.attack + bonus,
-                maxHealth: minion.maxHealth + bonus,
-                health: minion.health + bonus,
-                synergyBonus: bonus,
-                linkedWith: cluster.filter(m => m.id !== minion.id).map(m => m.id)
-            };
-        });
-
-        finalBoard = [...finalBoard, ...updatedCluster];
-    }
+        return {
+            ...minion,
+            attack: minion.attack + bonus,
+            maxHealth: minion.maxHealth + bonus,
+            health: minion.health + bonus,
+            synergyBonus: bonus,
+            linkedWith: linkedNeighbors
+        };
+    });
 
     return finalBoard;
 };
