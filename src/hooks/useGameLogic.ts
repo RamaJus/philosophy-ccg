@@ -239,7 +239,7 @@ export function useGameLogic(mode: 'single' | 'multiplayer_host' | 'multiplayer_
         // Apply locked mana and reset it
         const availableMana = Math.max(0, newMaxMana - player.lockedMana);
 
-        let updatedPlayer = {
+        let updatedPlayer: Player = {
             ...player,
             maxMana: newMaxMana,
             mana: availableMana,
