@@ -67,6 +67,7 @@ function createInitialState(): GameState {
 // Synergy Logic
 // Each philosopher gets +1 synergy for each OTHER distinct philosopher they share at least one school with.
 // Multiple shared schools with the same philosopher only count as +1, not more.
+// We also track which schools contributed to the synergy for hover display.
 const calculateSynergies = (board: BoardMinion[]): BoardMinion[] => {
     // 1. Reset synergy bonuses first
     let updatedBoard = board.map(minion => {
@@ -77,32 +78,39 @@ const calculateSynergies = (board: BoardMinion[]): BoardMinion[] => {
             maxHealth: minion.maxHealth - bonus,
             health: minion.health - bonus,
             synergyBonus: 0,
+            synergyBreakdown: {} as Record<string, number>,
             linkedWith: [] as string[]
         };
     });
 
-    // 2. Build adjacency: track which minions share at least one school with each other
-    const adjacency: Record<string, string[]> = {};
-    updatedBoard.forEach(m => adjacency[m.id] = []);
+    // 2. Build adjacency and track which schools cause the synergy
+    // For each minion, track: for each school, how many OTHER minions share that school
+    const schoolCounts: Record<string, Record<string, number>> = {};
+    updatedBoard.forEach(m => schoolCounts[m.id] = {});
 
     for (let i = 0; i < updatedBoard.length; i++) {
         for (let j = i + 1; j < updatedBoard.length; j++) {
             const m1 = updatedBoard[i];
             const m2 = updatedBoard[j];
-            const hasSharedSchool = m1.school?.some(s => m2.school?.includes(s));
 
-            if (hasSharedSchool) {
-                adjacency[m1.id].push(m2.id);
-                adjacency[m2.id].push(m1.id);
+            // Find all shared schools between m1 and m2
+            const sharedSchools = m1.school?.filter(s => m2.school?.includes(s)) || [];
+
+            if (sharedSchools.length > 0) {
+                // For display purposes, pick ONE representative school (the first shared one)
+                // This represents the "connection" between these two philosophers
+                const representativeSchool = sharedSchools[0];
+
+                schoolCounts[m1.id][representativeSchool] = (schoolCounts[m1.id][representativeSchool] || 0) + 1;
+                schoolCounts[m2.id][representativeSchool] = (schoolCounts[m2.id][representativeSchool] || 0) + 1;
             }
         }
     }
 
     // 3. Calculate individual synergy bonuses
-    // Each minion's bonus = number of OTHER philosophers it directly shares at least one school with
     const finalBoard = updatedBoard.map(minion => {
-        const linkedNeighbors = adjacency[minion.id];
-        const bonus = linkedNeighbors.length; // +1 for each distinct neighbor
+        const breakdown = schoolCounts[minion.id];
+        const bonus = Object.values(breakdown).reduce((sum, count) => sum + count, 0);
 
         return {
             ...minion,
@@ -110,7 +118,8 @@ const calculateSynergies = (board: BoardMinion[]): BoardMinion[] => {
             maxHealth: minion.maxHealth + bonus,
             health: minion.health + bonus,
             synergyBonus: bonus,
-            linkedWith: linkedNeighbors
+            synergyBreakdown: breakdown,
+            linkedWith: [] as string[] // No longer needed for UI
         };
     });
 

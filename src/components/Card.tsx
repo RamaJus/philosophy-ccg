@@ -166,8 +166,21 @@ export const Card: React.FC<CardProps> = ({
 
                 {/* Synergy Bonus Badge (for philosophers on board with synergy) */}
                 {isMinion && boardMinion?.synergyBonus && boardMinion.synergyBonus > 0 && (
-                    <div className="absolute top-8 right-1 w-7 h-7 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center shadow-lg z-10 pointer-events-none border-2 border-blue-300">
-                        <span className="text-white font-bold text-xs">+{boardMinion.synergyBonus}</span>
+                    <div className="absolute top-8 right-1 z-20 group/synergy">
+                        <div className="w-7 h-7 rounded-full bg-gradient-to-br from-purple-400 to-purple-600 flex items-center justify-center shadow-lg border-2 border-purple-300 cursor-help">
+                            <span className="text-white font-bold text-xs">+{boardMinion.synergyBonus}</span>
+                        </div>
+                        {/* Hover Tooltip with School Breakdown */}
+                        <div className="absolute top-full right-0 mt-1 hidden group-hover/synergy:block pointer-events-none">
+                            <div className="bg-slate-900/95 border border-purple-500/50 rounded-lg px-2 py-1.5 shadow-xl min-w-max">
+                                <div className="text-[10px] text-purple-300 font-semibold mb-1">Synergie</div>
+                                {boardMinion.synergyBreakdown && Object.entries(boardMinion.synergyBreakdown).map(([school, count]) => (
+                                    <div key={school} className="text-[10px] text-white whitespace-nowrap">
+                                        +{count} {school}
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
                     </div>
                 )}
 
