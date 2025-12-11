@@ -1,7 +1,8 @@
 export type CardType = 'Philosoph' | 'Zauber' | 'Werk';
 
 export interface Card {
-    id: string;
+    instanceId?: string; // Unique ID for this specific card instance (assigned at runtime)
+    id: string; // Base ID from database (e.g. 'kant')
     name: string;
     type: CardType;
     cost: number;
@@ -57,9 +58,9 @@ export interface GameState {
     opponent: Player;
     gameOver: boolean;
     winner?: 'player' | 'opponent';
-    selectedCard?: string; // Card ID in hand
+    selectedCard?: string; // Card instanceId in hand
     pendingPlayedCard?: Card; // Card currently being cast (for cancellation refund checks)
-    selectedMinions?: string[]; // Minion IDs on board for attacking (multi-select)
+    selectedMinions?: string[]; // Minion instanceIds on board for attacking (multi-select)
     targetMode?: 'attack' | 'spell' | 'search' | 'transform' | 'trolley_sacrifice' | 'special' | 'kontemplation' | 'foucault_reveal' | 'gottesbeweis_target'; // What we're targeting for
     targetModeOwner?: 'player' | 'opponent'; // Who initiated the targetMode (for multiplayer modal visibility)
     kontemplationCards?: Card[]; // Top 3 cards for Kontemplation selection
@@ -70,14 +71,14 @@ export interface GameState {
 export type GameAction =
     | { type: 'START_GAME' }
     | { type: 'END_TURN' }
-    | { type: 'PLAY_CARD'; cardId: string }
-    | { type: 'ATTACK'; attackerIds: string[]; targetId?: string } // Multiple attackers, no targetId = attack player
-    | { type: 'USE_SPECIAL'; minionId: string; targetId?: string } // Special ability (e.g. Van Inwagen)
-    | { type: 'SELECT_CARD'; cardId?: string }
-    | { type: 'SELECT_MINION'; minionId: string; toggle?: boolean } // Toggle adds/removes from selection
-    | { type: 'SEARCH_DECK'; cardId: string }
-    | { type: 'TROLLEY_SACRIFICE'; minionId: string }
-    | { type: 'KONTEMPLATION_SELECT'; cardId: string }
+    | { type: 'PLAY_CARD'; cardId: string } // Uses instanceId
+    | { type: 'ATTACK'; attackerIds: string[]; targetId?: string } // Uses instanceIds
+    | { type: 'USE_SPECIAL'; minionId: string; targetId?: string } // Uses instanceIds
+    | { type: 'SELECT_CARD'; cardId?: string } // Uses instanceId
+    | { type: 'SELECT_MINION'; minionId: string; toggle?: boolean } // Uses instanceId
+    | { type: 'SEARCH_DECK'; cardId: string } // Uses instanceId
+    | { type: 'TROLLEY_SACRIFICE'; minionId: string } // Uses instanceId
+    | { type: 'KONTEMPLATION_SELECT'; cardId: string } // Uses instanceId
     | { type: 'FOUCAULT_CLOSE' }
-    | { type: 'GOTTESBEWEIS_TARGET'; minionId: string }
+    | { type: 'GOTTESBEWEIS_TARGET'; minionId: string } // Uses instanceId
     | { type: 'CANCEL_CAST' };

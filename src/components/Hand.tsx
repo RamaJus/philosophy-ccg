@@ -18,14 +18,14 @@ export const Hand: React.FC<HandProps> = ({ cards, onCardClick, selectedCardId, 
                 ) : (
                     cards.map((card, index) => (
                         <div
-                            key={card.id}
+                            key={card.instanceId || card.id}
                             className="transition-all duration-300 transform hover:-translate-y-12 hover:!z-50 hover:scale-110 -ml-8 first:ml-0 pointer-events-auto"
                             style={{ zIndex: index + 1 }}
                         >
                             <Card
                                 card={card}
-                                onClick={() => onCardClick(card.id)}
-                                isSelected={selectedCardId === card.id}
+                                onClick={() => onCardClick(card.instanceId || card.id)}
+                                isSelected={selectedCardId === (card.instanceId || card.id)}
                                 isPlayable={card.cost <= currentMana}
                             />
                         </div>

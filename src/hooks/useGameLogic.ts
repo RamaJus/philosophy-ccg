@@ -32,8 +32,8 @@ function createPlayer(name: string, isPlayer: boolean, startingHandSize: number 
         const debug1 = debugDeck.find(c => c.id === 'debug_1');
         const debug2 = debugDeck.find(c => c.id === 'debug_2');
 
-        if (debug1) hand.push(debug1);
-        if (debug2) hand.push(debug2);
+        if (debug1) hand.push({ ...debug1, instanceId: `debug-1-${Date.now()}` });
+        if (debug2) hand.push({ ...debug2, instanceId: `debug-2-${Date.now()}` });
     }
 
     return {
@@ -86,7 +86,7 @@ const calculateSynergies = (board: BoardMinion[]): BoardMinion[] => {
     // 2. Build adjacency and track which schools cause the synergy
     // For each minion, track: for each school, how many OTHER minions share that school
     const schoolCounts: Record<string, Record<string, number>> = {};
-    updatedBoard.forEach(m => schoolCounts[m.id] = {});
+    updatedBoard.forEach(m => schoolCounts[m.instanceId || m.id] = {});
 
     for (let i = 0; i < updatedBoard.length; i++) {
         for (let j = i + 1; j < updatedBoard.length; j++) {
@@ -101,15 +101,15 @@ const calculateSynergies = (board: BoardMinion[]): BoardMinion[] => {
                 // This represents the "connection" between these two philosophers
                 const representativeSchool = sharedSchools[0];
 
-                schoolCounts[m1.id][representativeSchool] = (schoolCounts[m1.id][representativeSchool] || 0) + 1;
-                schoolCounts[m2.id][representativeSchool] = (schoolCounts[m2.id][representativeSchool] || 0) + 1;
+                schoolCounts[m1.instanceId || m1.id][representativeSchool] = (schoolCounts[m1.instanceId || m1.id][representativeSchool] || 0) + 1;
+                schoolCounts[m2.instanceId || m2.id][representativeSchool] = (schoolCounts[m2.instanceId || m2.id][representativeSchool] || 0) + 1;
             }
         }
     }
 
     // 3. Calculate individual synergy bonuses
     const finalBoard = updatedBoard.map(minion => {
-        const breakdown = schoolCounts[minion.id];
+        const breakdown = schoolCounts[minion.instanceId || minion.id];
         const bonus = Object.values(breakdown).reduce((sum, count) => sum + count, 0);
 
         return {
@@ -237,7 +237,7 @@ export function useGameLogic(mode: 'single' | 'multiplayer_host' | 'multiplayer_
             const { activePlayer: activePlayerKey, player, opponent } = prev;
             const activePlayer = activePlayerKey === 'player' ? player : opponent;
 
-            const cardIndex = activePlayer.hand.findIndex(c => c.id === cardId);
+            const cardIndex = activePlayer.hand.findIndex(c => c.instanceId === cardId);
             if (cardIndex === -1) return prev;
 
             const card = activePlayer.hand[cardIndex];
@@ -350,8 +350,9 @@ export function useGameLogic(mode: 'single' | 'multiplayer_host' | 'multiplayer_
                         // Return early to show modal
                         return {
                             ...prev,
-                            player: updatedPlayer,
-                            opponent: updatedEnemy,
+                            // Correctly assign updated players based on active turn
+                            player: activePlayerKey === 'player' ? updatedPlayer : updatedEnemy,
+                            opponent: activePlayerKey === 'player' ? updatedEnemy : updatedPlayer,
                             selectedCard: undefined,
                             targetMode: 'foucault_reveal',
                             targetModeOwner: activePlayerKey,
@@ -410,8 +411,8 @@ export function useGameLogic(mode: 'single' | 'multiplayer_host' | 'multiplayer_
                         // Both human players and AI need to select (AI handled elsewhere or shows UI)
                         return {
                             ...prev,
-                            player: updatedPlayer,
-                            opponent: updatedEnemy,
+                            player: activePlayerKey === 'player' ? updatedPlayer : updatedEnemy,
+                            opponent: activePlayerKey === 'player' ? updatedEnemy : updatedPlayer,
                             selectedCard: undefined,
                             targetMode: 'trolley_sacrifice',
                             targetModeOwner: activePlayerKey,
@@ -442,8 +443,8 @@ export function useGameLogic(mode: 'single' | 'multiplayer_host' | 'multiplayer_
                         addLog(`${activePlayer.name} wirkte ${card.name}. Wähle eine der obersten 3 Karten.`);
                         return {
                             ...prev,
-                            player: updatedPlayer,
-                            opponent: updatedEnemy,
+                            player: activePlayerKey === 'player' ? updatedPlayer : updatedEnemy,
+                            opponent: activePlayerKey === 'player' ? updatedEnemy : updatedPlayer,
                             selectedCard: undefined,
                             targetMode: 'kontemplation',
                             targetModeOwner: activePlayerKey,
@@ -458,8 +459,8 @@ export function useGameLogic(mode: 'single' | 'multiplayer_host' | 'multiplayer_
                     // Trigger target mode
                     return {
                         ...prev,
-                        player: updatedPlayer,
-                        opponent: updatedEnemy,
+                        player: activePlayerKey === 'player' ? updatedPlayer : updatedEnemy,
+                        opponent: activePlayerKey === 'player' ? updatedEnemy : updatedPlayer,
                         selectedCard: undefined,
                         targetMode: 'gottesbeweis_target',
                         targetModeOwner: activePlayerKey,
@@ -485,7 +486,7 @@ export function useGameLogic(mode: 'single' | 'multiplayer_host' | 'multiplayer_
 
             // Get all attackers
             const attackers = attackerIds
-                .map(id => activePlayer.board.find(m => m.id === id))
+                .map(id => activePlayer.board.find(m => (m.instanceId || m.id) === id)) // Support both ID types for safety
                 .filter((m): m is BoardMinion => m !== undefined && m.canAttack && !m.hasAttacked);
 
             if (attackers.length === 0) {
@@ -520,11 +521,11 @@ export function useGameLogic(mode: 'single' | 'multiplayer_host' | 'multiplayer_
 
                 // Mark all attackers as having attacked
                 updatedActivePlayer.board = activePlayer.board.map(m =>
-                    attackerIds.includes(m.id) ? { ...m, hasAttacked: true } : m
+                    attackerIds.includes(m.instanceId || m.id) ? { ...m, hasAttacked: true } : m
                 );
             } else {
                 // Attack minion
-                const targetIndex = enemyPlayer.board.findIndex(m => m.id === targetId);
+                const targetIndex = enemyPlayer.board.findIndex(m => (m.instanceId || m.id) === targetId);
                 if (targetIndex === -1) return prev;
 
                 const target = enemyPlayer.board[targetIndex];
@@ -545,7 +546,7 @@ export function useGameLogic(mode: 'single' | 'multiplayer_host' | 'multiplayer_
 
                 // First attacker takes all counter-damage
                 const firstAttacker = attackers[0];
-                const firstAttackerIndex = activePlayer.board.findIndex(m => m.id === firstAttacker.id);
+                const firstAttackerIndex = activePlayer.board.findIndex(m => (m.instanceId || m.id) === firstAttacker.instanceId);
 
                 addLog(`${attackerNamesStr} griff${attackers.length > 1 ? 'en' : ''} ${target.name} an! (${totalDamage} Schaden vs ${targetDamage} Gegenschlag)`);
 
@@ -555,7 +556,7 @@ export function useGameLogic(mode: 'single' | 'multiplayer_host' | 'multiplayer_
 
                 // Mark all attackers as having attacked
                 updatedActivePlayer.board = updatedActivePlayer.board.map(m =>
-                    attackerIds.includes(m.id) ? { ...m, hasAttacked: true } : m
+                    attackerIds.includes(m.instanceId || m.id) ? { ...m, hasAttacked: true } : m
                 );
 
                 // First attacker takes counter-damage
@@ -570,7 +571,7 @@ export function useGameLogic(mode: 'single' | 'multiplayer_host' | 'multiplayer_
 
                 // Handle first attacker death
                 if (updatedFirstAttacker.health <= 0) {
-                    updatedActivePlayer.board = updatedActivePlayer.board.filter(m => m.id !== firstAttacker.id);
+                    updatedActivePlayer.board = updatedActivePlayer.board.filter(m => (m.instanceId || m.id) !== (firstAttacker.instanceId || firstAttacker.id));
                     updatedActivePlayer.graveyard = [...updatedActivePlayer.graveyard, firstAttacker];
                     addLog(`${firstAttacker.name} wurde besiegt!`);
                 } else {
@@ -579,7 +580,7 @@ export function useGameLogic(mode: 'single' | 'multiplayer_host' | 'multiplayer_
 
                 // Handle target death
                 if (updatedTarget.health <= 0) {
-                    updatedEnemyPlayer.board = updatedEnemyPlayer.board.filter(m => m.id !== target.id);
+                    updatedEnemyPlayer.board = updatedEnemyPlayer.board.filter(m => (m.instanceId || m.id) !== (target.instanceId || target.id));
                     updatedEnemyPlayer.graveyard = [...updatedEnemyPlayer.graveyard, target];
                     addLog(`${target.name} wurde besiegt!`);
                 } else {
@@ -699,7 +700,7 @@ export function useGameLogic(mode: 'single' | 'multiplayer_host' | 'multiplayer_
                     const activePlayer = activePlayerKey === 'player' ? player : opponent;
                     const enemyPlayer = activePlayerKey === 'player' ? prev.opponent : prev.player;
 
-                    const minion = activePlayer.board.find(m => m.id === action.minionId);
+                    const minion = activePlayer.board.find(m => (m.instanceId || m.id) === action.minionId);
                     if (!minion || !minion.specialAbility || !minion.canAttack || minion.hasAttacked || minion.hasUsedSpecial) {
                         return prev; // Invalid special use
                     }
@@ -724,10 +725,10 @@ export function useGameLogic(mode: 'single' | 'multiplayer_host' | 'multiplayer_
                         };
 
                         // Remove from enemy board, add to active board
-                        const updatedEnemyBoard = enemyPlayer.board.filter(m => m.id !== lowestCostMinion.id);
+                        const updatedEnemyBoard = enemyPlayer.board.filter(m => (m.instanceId || m.id) !== (lowestCostMinion.instanceId || lowestCostMinion.id));
                         const updatedActiveBoard = [
                             ...activePlayer.board.map(m =>
-                                m.id === action.minionId ? { ...m, hasUsedSpecial: true } : m
+                                (m.instanceId || m.id) === action.minionId ? { ...m, hasUsedSpecial: true } : m
                             ),
                             stolenMinion
                         ];
@@ -763,7 +764,7 @@ export function useGameLogic(mode: 'single' | 'multiplayer_host' | 'multiplayer_
 
                         // Mark special as used
                         const updatedActiveBoard = activePlayer.board.map(m =>
-                            m.id === action.minionId ? { ...m, hasUsedSpecial: true } : m
+                            (m.instanceId || m.id) === action.minionId ? { ...m, hasUsedSpecial: true } : m
                         );
 
                         const updatedPlayer = activePlayerKey === 'player'
@@ -782,7 +783,7 @@ export function useGameLogic(mode: 'single' | 'multiplayer_host' | 'multiplayer_
                     }
 
                     if (minion.specialAbility === 'transform' && action.targetId) {
-                        const targetMinion = enemyPlayer.board.find(m => m.id === action.targetId);
+                        const targetMinion = enemyPlayer.board.find(m => (m.instanceId || m.id) === action.targetId);
                         if (!targetMinion) return prev;
 
                         // Create "Chair Matter" minion (0/1)
@@ -804,10 +805,10 @@ export function useGameLogic(mode: 'single' | 'multiplayer_host' | 'multiplayer_
 
                         // Update boards
                         const updatedEnemyBoard = enemyPlayer.board.map(m =>
-                            m.id === action.targetId ? chairMatter : m
+                            (m.instanceId || m.id) === action.targetId ? chairMatter : m
                         );
                         const updatedActiveBoard = activePlayer.board.map(m =>
-                            m.id === action.minionId ? { ...m, hasUsedSpecial: true, hasAttacked: true } : m
+                            (m.instanceId || m.id) === action.minionId ? { ...m, hasUsedSpecial: true, hasAttacked: true } : m
                         );
 
                         const updatedPlayer = activePlayerKey === 'player'
@@ -843,7 +844,7 @@ export function useGameLogic(mode: 'single' | 'multiplayer_host' | 'multiplayer_
                     const activePlayer = activePlayerKey === 'player' ? player : opponent;
 
                     // Find card in deck
-                    const cardIndex = activePlayer.deck.findIndex(c => c.id === action.cardId);
+                    const cardIndex = activePlayer.deck.findIndex(c => c.instanceId === action.cardId);
                     if (cardIndex === -1) return prev;
 
                     const card = activePlayer.deck[cardIndex];
@@ -872,7 +873,7 @@ export function useGameLogic(mode: 'single' | 'multiplayer_host' | 'multiplayer_
                     const enemyPlayer = activePlayerKey === 'player' ? opponent : player;
 
                     // Find the minion to sacrifice in active player's board
-                    const sacrificeIndex = activePlayer.board.findIndex(m => m.id === action.minionId);
+                    const sacrificeIndex = activePlayer.board.findIndex(m => (m.instanceId || m.id) === action.minionId);
                     if (sacrificeIndex === -1) return prev;
 
                     const sacrificedMinion = activePlayer.board[sacrificeIndex];
@@ -924,11 +925,11 @@ export function useGameLogic(mode: 'single' | 'multiplayer_host' | 'multiplayer_
                     const activePlayer = activePlayerKey === 'player' ? player : opponent;
 
                     // Find the selected card
-                    const selectedCard = kontemplationCards.find(c => c.id === action.cardId);
+                    const selectedCard = kontemplationCards.find(c => c.instanceId === action.cardId);
                     if (!selectedCard) return prev;
 
                     // Get the other cards (not selected)
-                    const otherCards = kontemplationCards.filter(c => c.id !== action.cardId);
+                    const otherCards = kontemplationCards.filter(c => c.instanceId !== action.cardId);
 
                     // Remove all top 3 cards from deck, then add back the non-selected ones (shuffled)
                     let newDeck = activePlayer.deck.slice(kontemplationCards.length);
@@ -968,8 +969,8 @@ export function useGameLogic(mode: 'single' | 'multiplayer_host' | 'multiplayer_
                     const { player, opponent, activePlayer: activePlayerKey } = prev;
                     const activePlayer = activePlayerKey === 'player' ? player : opponent;
                     // Target can be on ANY board
-                    const targetOnPlayerBoard = player.board.find(m => m.id === action.minionId);
-                    const targetOnOpponentBoard = opponent.board.find(m => m.id === action.minionId);
+                    const targetOnPlayerBoard = player.board.find(m => (m.instanceId || m.id) === action.minionId);
+                    const targetOnOpponentBoard = opponent.board.find(m => (m.instanceId || m.id) === action.minionId);
 
                     const targetMinion = targetOnPlayerBoard || targetOnOpponentBoard;
                     if (!targetMinion) return prev;
@@ -1000,19 +1001,19 @@ export function useGameLogic(mode: 'single' | 'multiplayer_host' | 'multiplayer_
 
                     if (targetOnPlayerBoard) {
                         if (!isHeal && updatedTarget.health <= 0) {
-                            updatedPlayerBoard = updatedPlayerBoard.filter(m => m.id !== action.minionId);
+                            updatedPlayerBoard = updatedPlayerBoard.filter(m => (m.instanceId || m.id) !== action.minionId);
                             updatedPlayerGraveyard = [...updatedPlayerGraveyard, targetMinion];
                             message += " Besiegt!";
                         } else {
-                            updatedPlayerBoard = updatedPlayerBoard.map(m => m.id === action.minionId ? updatedTarget : m);
+                            updatedPlayerBoard = updatedPlayerBoard.map(m => (m.instanceId || m.id) === action.minionId ? updatedTarget : m);
                         }
                     } else if (targetOnOpponentBoard) {
                         if (!isHeal && updatedTarget.health <= 0) {
-                            updatedOpponentBoard = updatedOpponentBoard.filter(m => m.id !== action.minionId);
+                            updatedOpponentBoard = updatedOpponentBoard.filter(m => (m.instanceId || m.id) !== action.minionId);
                             updatedOpponentGraveyard = [...updatedOpponentGraveyard, targetMinion];
                             message += " Besiegt!";
                         } else {
-                            updatedOpponentBoard = updatedOpponentBoard.map(m => m.id === action.minionId ? updatedTarget : m);
+                            updatedOpponentBoard = updatedOpponentBoard.map(m => (m.instanceId || m.id) === action.minionId ? updatedTarget : m);
                         }
                     }
 
@@ -1037,8 +1038,10 @@ export function useGameLogic(mode: 'single' | 'multiplayer_host' | 'multiplayer_
                         return { ...prev, targetMode: undefined };
                     }
 
-                    const { player: p, pendingPlayedCard: card } = prev;
+                    const { pendingPlayedCard: card, activePlayer: activePlayerKey, player, opponent } = prev;
                     if (!card) return prev; // check again for TS
+
+                    const refundPlayer = activePlayerKey === 'player' ? player : opponent;
 
                     // Check if cancellable mode
                     // Kontemplation is excluded per request? Actually user said: "Bei Karten, die trotzdem einen Vorteil geben... nicht zurückkehren (z.B. Kontemplation)"
@@ -1057,15 +1060,20 @@ export function useGameLogic(mode: 'single' | 'multiplayer_host' | 'multiplayer_
 
                     // For others (gottesbeweis, trolley, search/hermeneutics): Refund.
                     // Put card back in hand
-                    const updatedHand = [...p.hand, card];
+                    const updatedHand = [...refundPlayer.hand, card];
                     // Refund Mana
-                    const updatedMana = p.mana + card.cost;
+                    const updatedMana = refundPlayer.mana + card.cost;
 
                     addLog(`Zauber ${card.name} abgebrochen.`);
 
                     return {
                         ...prev,
-                        player: { ...p, hand: updatedHand, mana: updatedMana },
+                        player: activePlayerKey === 'player'
+                            ? { ...refundPlayer, hand: updatedHand, mana: updatedMana }
+                            : player,
+                        opponent: activePlayerKey === 'opponent'
+                            ? { ...refundPlayer, hand: updatedHand, mana: updatedMana }
+                            : opponent,
                         targetMode: undefined,
                         pendingPlayedCard: undefined
                     };

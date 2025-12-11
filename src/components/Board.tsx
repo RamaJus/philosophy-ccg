@@ -69,11 +69,11 @@ export const Board: React.FC<BoardProps> = ({
                             }
 
                             return (
-                                <div key={minion.id} className="relative flex flex-col items-center gap-2">
+                                <div key={minion.instanceId || minion.id} className="relative flex flex-col items-center gap-2">
                                     <Card
                                         card={minion}
-                                        onClick={onMinionClick ? () => onMinionClick(minion.id) : undefined}
-                                        isSelected={selectedMinionIds.includes(minion.id)}
+                                        onClick={onMinionClick ? () => onMinionClick(minion.instanceId || minion.id) : undefined}
+                                        isSelected={selectedMinionIds.includes(minion.instanceId || minion.id)}
                                         isPlayable={canAttack || isTargetable}
                                         showHealth={true}
                                         bonusDamage={bonusDamage}

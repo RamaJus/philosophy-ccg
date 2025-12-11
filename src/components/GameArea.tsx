@@ -112,7 +112,7 @@ export const GameArea: React.FC<GameAreaProps> = ({ mode }) => {
 
         // Check if first selected minion has a special ability (only for single selection)
         if (selectedMinions.length === 1) {
-            const selectedMinionData = viewPlayer.board.find(m => m.id === selectedMinions[0]);
+            const selectedMinionData = viewPlayer.board.find(m => (m.instanceId || m.id) === selectedMinions[0]);
             if (selectedMinionData?.specialAbility && !selectedMinionData.hasUsedSpecial && !selectedMinionData.hasAttacked) {
                 // Use special ability on target
                 dispatch({ type: 'USE_SPECIAL', minionId: selectedMinions[0], targetId: minionId });
@@ -273,9 +273,9 @@ export const GameArea: React.FC<GameAreaProps> = ({ mode }) => {
                             <div className="flex gap-6 justify-center">
                                 {kontemplationCards.map((card) => (
                                     <div
-                                        key={card.id}
+                                        key={card.instanceId || card.id}
                                         className="transform transition-all duration-300 hover:scale-105 hover:shadow-xl hover:shadow-purple-500/20 cursor-pointer"
-                                        onClick={() => handleKontemplationSelect(card.id)}
+                                        onClick={() => handleKontemplationSelect(card.instanceId || card.id)}
                                     >
                                         <CardComponent card={card} isPlayable={true} />
                                     </div>
@@ -296,7 +296,7 @@ export const GameArea: React.FC<GameAreaProps> = ({ mode }) => {
                             <div className="flex gap-6 justify-center mb-6">
                                 {foucaultRevealCards.map((card) => (
                                     <div
-                                        key={card.id}
+                                        key={card.instanceId || card.id}
                                         className="transform transition-all duration-300"
                                     >
                                         <CardComponent card={card} isPlayable={false} />
@@ -337,7 +337,7 @@ export const GameArea: React.FC<GameAreaProps> = ({ mode }) => {
                                 isSpecialTargeting={(() => {
                                     if (targetMode === 'gottesbeweis_target') return true;
                                     if (!selectedMinions?.length || selectedMinions.length > 1) return false;
-                                    const m = viewPlayer.board.find(min => min.id === selectedMinions[0]);
+                                    const m = viewPlayer.board.find(min => (min.instanceId || min.id) === selectedMinions[0]);
                                     return !!(m?.specialAbility && !m.hasUsedSpecial && !m.hasAttacked);
                                 })()}
                             />
@@ -397,7 +397,7 @@ export const GameArea: React.FC<GameAreaProps> = ({ mode }) => {
 
                                         {(() => {
                                             if (selectedMinions.length === 1) {
-                                                const minion = viewPlayer.board.find(m => m.id === selectedMinions[0]);
+                                                const minion = viewPlayer.board.find(m => (m.instanceId || m.id) === selectedMinions[0]);
                                                 if (minion?.specialAbility && !minion.hasUsedSpecial && !minion.hasAttacked) {
                                                     return (
                                                         <button
