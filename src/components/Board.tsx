@@ -60,7 +60,7 @@ export const Board: React.FC<BoardProps> = ({
                     ) : (
                         visibleMinions.map((minion) => {
                             const canAttack = isPlayerBoard && minion.canAttack && !minion.hasAttacked;
-                            const isTargetable = !isPlayerBoard && canTarget;
+                            const isTargetable = canTarget;
 
                             // Calculate Work Bonus
                             let bonusDamage = 0;

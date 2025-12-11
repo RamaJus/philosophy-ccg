@@ -335,6 +335,7 @@ export const GameArea: React.FC<GameAreaProps> = ({ mode }) => {
                                 canTarget={viewIsPlayerTurn && (!!selectedMinions?.length || targetMode === 'gottesbeweis_target')}
                                 activeWork={viewOpponent.activeWork}
                                 isSpecialTargeting={(() => {
+                                    if (!isMyTargetMode) return false;
                                     if (targetMode === 'gottesbeweis_target') return true;
                                     if (!selectedMinions?.length || selectedMinions.length > 1) return false;
                                     const m = viewPlayer.board.find(min => (min.instanceId || min.id) === selectedMinions[0]);
@@ -435,8 +436,8 @@ export const GameArea: React.FC<GameAreaProps> = ({ mode }) => {
                                 selectedMinionIds={selectedMinions || []}
                                 isPlayerBoard={true}
                                 activeWork={viewPlayer.activeWork}
-                                canTarget={targetMode === 'gottesbeweis_target' || targetMode === 'trolley_sacrifice'}
-                                isSpecialTargeting={targetMode === 'gottesbeweis_target' || targetMode === 'trolley_sacrifice'}
+                                canTarget={(targetMode === 'gottesbeweis_target' || targetMode === 'trolley_sacrifice') && !!isMyTargetMode}
+                                isSpecialTargeting={(targetMode === 'gottesbeweis_target' || targetMode === 'trolley_sacrifice') && !!isMyTargetMode}
                             />
                         </div>
                     </div>

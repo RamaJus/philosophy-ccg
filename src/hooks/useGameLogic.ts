@@ -379,7 +379,7 @@ export function useGameLogic(mode: 'single' | 'multiplayer_host' | 'multiplayer_
                 // Simple spell effects
                 if (card.id.includes('dialectic') || card.id.includes('cogito')) {
                     // Draw cards
-                    const drawCount = card.id.includes('dialectic') ? 2 : 1;
+                    const drawCount = card.id.includes('cogito') || card.id.includes('dialectic') ? 2 : 1;
                     for (let i = 0; i < drawCount; i++) {
                         updatedPlayer = drawCard(updatedPlayer);
                     }
@@ -631,6 +631,21 @@ export function useGameLogic(mode: 'single' | 'multiplayer_host' | 'multiplayer_
         setGameStateWithSynergies(prev => {
             const { activePlayer: currentPlayer, player, opponent, turn } = prev;
             let currentLog = prev.log;
+
+            if (currentPlayer === 'player' && player.hand.length >= 10) {
+                currentLog = appendLog(currentLog, 'Hand ist voll! Du musst Karten spielen, bevor du den Zug beenden kannst.');
+                return { ...prev, log: currentLog };
+            } else if (currentPlayer === 'opponent' && opponent.hand.length >= 10 && prev.activePlayer === 'player') { // Check if opponent is active player? No, 'currentPlayer' is active player.
+                // Actually logic: currentPlayer is who is ending turn.
+            }
+
+            // Wait, logic above is slightly wrong for multiplayer context if we just use 'player' state. 
+            // activePlayerKey === 'player' means the one who has the turn.
+            const endedTurnPlayer = currentPlayer === 'player' ? player : opponent;
+            if (endedTurnPlayer.hand.length >= 10) {
+                currentLog = appendLog(currentLog, 'Hand ist voll! Du musst Karten spielen, bevor du den Zug beenden kannst.');
+                return { ...prev, log: currentLog };
+            }
 
             currentLog = appendLog(currentLog, `${currentPlayer === 'player' ? player.name : opponent.name} beendete den Zug.`);
 
@@ -885,7 +900,7 @@ export function useGameLogic(mode: 'single' | 'multiplayer_host' | 'multiplayer_
                         player: activePlayerKey === 'player' ? updatedPlayer : player,
                         opponent: activePlayerKey === 'player' ? opponent : updatedPlayer,
                         targetMode: undefined, // Exit search mode
-                        log: [...prev.log, `${activePlayer.name} suchte "${card.name}" aus dem Deck.`],
+                        log: [...prev.log, `${activePlayer.name} suchte eine Karte aus dem Deck.`],
                     };
                 });
                 break;
@@ -966,7 +981,7 @@ export function useGameLogic(mode: 'single' | 'multiplayer_host' | 'multiplayer_
                         newDeck = [...newDeck.slice(0, insertIndex), card, ...newDeck.slice(insertIndex)];
                     });
 
-                    currentLog = appendLog(currentLog, `Du hast "${selectedCard.name}" gewählt. Die anderen Karten wurden zurückgemischt.`);
+                    currentLog = appendLog(currentLog, `Du hast eine Karte gewählt. Die anderen Karten wurden zurückgemischt.`);
 
                     const updatedPlayer = {
                         ...activePlayer,
