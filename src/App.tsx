@@ -5,6 +5,7 @@ import { BackgroundMusic } from './components/BackgroundMusic';
 
 export const App: React.FC = () => {
     const [gameMode, setGameMode] = useState<'single' | 'multiplayer_host' | 'multiplayer_client' | null>(null);
+    const [isDebugMode, setIsDebugMode] = useState(false);
 
     const handleStartGame = (mode: 'single' | 'multiplayer_host' | 'multiplayer_client') => {
         setGameMode(mode);
@@ -14,7 +15,11 @@ export const App: React.FC = () => {
         return (
             <>
                 <BackgroundMusic volume={0.5} />
-                <Lobby onStartGame={handleStartGame} />
+                <Lobby
+                    onStartGame={handleStartGame}
+                    isDebugMode={isDebugMode}
+                    setIsDebugMode={setIsDebugMode}
+                />
             </>
         );
     }
@@ -22,7 +27,7 @@ export const App: React.FC = () => {
     return (
         <>
             <BackgroundMusic volume={0.5} />
-            <GameArea mode={gameMode} />
+            <GameArea mode={gameMode} isDebugMode={isDebugMode} />
         </>
     );
 };

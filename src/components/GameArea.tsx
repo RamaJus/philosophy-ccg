@@ -15,10 +15,11 @@ const MAX_BOARD_SIZE = 7;
 
 interface GameAreaProps {
     mode: 'single' | 'multiplayer_host' | 'multiplayer_client';
+    isDebugMode: boolean;
 }
 
-export const GameArea: React.FC<GameAreaProps> = ({ mode }) => {
-    const { gameState, dispatch } = useGameLogic(mode);
+export const GameArea: React.FC<GameAreaProps> = ({ mode, isDebugMode }) => {
+    const { gameState, dispatch } = useGameLogic(mode, isDebugMode);
     const { player, opponent, activePlayer, selectedCard, selectedMinions, gameOver, winner, log, targetMode, targetModeOwner, kontemplationCards, foucaultRevealCards } = gameState;
 
     // Use ref to always have the latest state in AI callbacks

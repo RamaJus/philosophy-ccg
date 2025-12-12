@@ -5,9 +5,11 @@ import { QRCodeSVG } from 'qrcode.react';
 
 interface LobbyProps {
     onStartGame: (mode: 'single' | 'multiplayer_host' | 'multiplayer_client') => void;
+    isDebugMode: boolean;
+    setIsDebugMode: (value: boolean) => void;
 }
 
-export const Lobby: React.FC<LobbyProps> = ({ onStartGame }) => {
+export const Lobby: React.FC<LobbyProps> = ({ onStartGame, isDebugMode, setIsDebugMode }) => {
     const [myId, setMyId] = useState<string>('');
     const [peerIdInput, setPeerIdInput] = useState('');
     const [status, setStatus] = useState<'idle' | 'connecting' | 'waiting'>('idle');
@@ -110,7 +112,7 @@ export const Lobby: React.FC<LobbyProps> = ({ onStartGame }) => {
             <div className="relative z-10 w-full max-w-4xl">
                 <div className="glass-panel p-12 max-w-4xl w-full space-y-10 border-2 border-amber-700/30 shadow-2xl backdrop-blur-xl bg-gradient-to-br from-slate-900/80 to-slate-800/70">
                     {/* Title */}
-                    <div className="text-center">
+                    <div className="text-center relative">
                         <h1 className="text-6xl font-bold" style={{
                             background: 'linear-gradient(135deg, #fbbf24 0%, #f59e0b 25%, #d97706 50%, #b45309 75%, #92400e 100%)',
                             WebkitBackgroundClip: 'text',
@@ -121,6 +123,19 @@ export const Lobby: React.FC<LobbyProps> = ({ onStartGame }) => {
                         }}>
                             DIALECTICA
                         </h1>
+
+                        {/* Debug Toggle */}
+                        <div className="absolute top-0 right-0">
+                            <button
+                                onClick={() => setIsDebugMode(!isDebugMode)}
+                                className={`text-xs px-2 py-1 rounded border transition-all ${isDebugMode
+                                        ? 'bg-red-900/50 border-red-500 text-red-200 shadow-[0_0_10px_rgba(239,68,68,0.5)]'
+                                        : 'bg-slate-800/50 border-slate-700 text-slate-500'
+                                    }`}
+                            >
+                                {isDebugMode ? '🛠️ DEBUG AKTIV' : 'Debug Modus'}
+                            </button>
+                        </div>
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

@@ -7,7 +7,7 @@ const STARTING_HAND_SIZE = 4;
 const MAX_HAND_SIZE = 10;
 // const MAX_BOARD_SIZE = 7; // Removed per user request
 
-function createPlayer(name: string, isPlayer: boolean, startingHandSize: number = STARTING_HAND_SIZE): Player {
+function createPlayer(name: string, isPlayer: boolean, startingHandSize: number = STARTING_HAND_SIZE, isDebugMode: boolean = false): Player {
     const deck = generateDeck();
     let hand = deck.slice(0, startingHandSize);
     let remainingDeck = deck.slice(startingHandSize);
@@ -28,17 +28,20 @@ function createPlayer(name: string, isPlayer: boolean, startingHandSize: number 
 
     // Add DEBUG cards to player's starting hand for testing
     // Add DEBUG cards to player's starting hand for testing
-    // DISABLED: User requested to disable debug cards but keep code
-    /*
-    if (isPlayer) {
+    // Add DEBUG cards to player's starting hand if Debug Mode is active
+    if (isDebugMode) {
         const debugDeck = generateDeck();
         const debug1 = debugDeck.find(c => c.id === 'debug_1');
         const debug2 = debugDeck.find(c => c.id === 'debug_2');
 
-        if (debug1) hand.push({ ...debug1, instanceId: `debug-1-${Date.now()}` });
-        if (debug2) hand.push({ ...debug2, instanceId: `debug-2-${Date.now()}` });
+        if (debug1) {
+            hand.push({ ...debug1, instanceId: `debug-1-a-${Date.now()}` });
+            hand.push({ ...debug1, instanceId: `debug-1-b-${Date.now()}` });
+        }
+        if (debug2) {
+            hand.push({ ...debug2, instanceId: `debug-2-${Date.now()}` });
+        }
     }
-    */
 
     return {
         id: isPlayer ? 'player' : 'opponent',
@@ -55,12 +58,12 @@ function createPlayer(name: string, isPlayer: boolean, startingHandSize: number 
     };
 }
 
-function createInitialState(): GameState {
+function createInitialState(isDebugMode: boolean): GameState {
     return {
         turn: 0,
         activePlayer: 'player',
-        player: createPlayer('Player', true, STARTING_HAND_SIZE),
-        opponent: createPlayer('Gegner', false, STARTING_HAND_SIZE + 1), // Second player gets +1 card balance
+        player: createPlayer('Player', true, STARTING_HAND_SIZE, isDebugMode),
+        opponent: createPlayer('Gegner', false, STARTING_HAND_SIZE + 1, isDebugMode), // Second player gets +1 card balance
         gameOver: false,
         log: ['Spiel gestartet! Möge der beste Philosoph gewinnen.'],
     };
@@ -146,8 +149,8 @@ const calculateSynergies = (currentBoard: BoardMinion[], synergyBlockTurns: numb
     return finalBoard;
 };
 
-export function useGameLogic(mode: 'single' | 'multiplayer_host' | 'multiplayer_client' = 'single') {
-    const [gameState, setGameState] = useState<GameState>(createInitialState());
+export function useGameLogic(mode: 'single' | 'multiplayer_host' | 'multiplayer_client' = 'single', isDebugMode: boolean = false) {
+    const [gameState, setGameState] = useState<GameState>(() => createInitialState(isDebugMode));
 
     // Helper to update state with synergies
     const setGameStateWithSynergies = useCallback((updateFn: (prev: GameState) => GameState) => {
@@ -410,8 +413,9 @@ export function useGameLogic(mode: 'single' | 'multiplayer_host' | 'multiplayer_
                 // Kant Special: Instrumentalisierungsverbot
                 if (card.id.includes('kant')) {
                     // Block attacks for opponent next turn
-                    updatedEnemy.minionAttackBlockTurns = (updatedEnemy.minionAttackBlockTurns || 0) + 1;
-                    currentLog = appendLog(currentLog, `${card.name}: "Instrumentalisierungsverbot!" Der Gegner kann nächste Runde nicht angreifen.`);
+                    // Block attacks for opponent next turn (set to 2 because startTurn decrements it)
+                    updatedEnemy.minionAttackBlockTurns = (updatedEnemy.minionAttackBlockTurns || 0) + 2;
+                    currentLog = appendLog(currentLog, `${card.name}: "Instrumentalisierungsverbot!" Der Gegner kann nächste Runde keine Philosophen angreifen.`);
                 }
 
                 // Diotima Special: Silence Males
@@ -431,9 +435,8 @@ export function useGameLogic(mode: 'single' | 'multiplayer_host' | 'multiplayer_
                         return m;
                     });
 
-                    updatedPlayer.board = silenceMinions(updatedPlayer.board);
                     updatedEnemy.board = silenceMinions(updatedEnemy.board);
-                    currentLog = appendLog(currentLog, `${card.name}: "Lehre der Liebe!" Alle männlichen Philosophen schweigen ehrfürchtig.`);
+                    currentLog = appendLog(currentLog, `${card.name}: "Lehre der Liebe!" Die männlichen Philosophen des Gegners schweigen ehrfürchtig.`);
                 }
 
                 // Sartre Special: Setup Transformation
@@ -666,8 +669,8 @@ export function useGameLogic(mode: 'single' | 'multiplayer_host' | 'multiplayer_
             const attackerNames: string[] = [];
 
             for (const attacker of attackers) {
-                // Check for Kant's Block
-                if (activePlayer.minionAttackBlockTurns && activePlayer.minionAttackBlockTurns > 0) {
+                // Check for Kant's Block: Only blocks minion attacks (targetId present), not face attacks
+                if (activePlayer.minionAttackBlockTurns && activePlayer.minionAttackBlockTurns > 0 && targetId) {
                     currentLog = appendLog(currentLog, `Angriff fehlgeschlagen! ${attacker.name} achtet das Instrumentalisierungsverbot.`);
                     continue; // Skip this attacker
                 }
@@ -877,7 +880,7 @@ export function useGameLogic(mode: 'single' | 'multiplayer_host' | 'multiplayer_
 
         switch (action.type) {
             case 'START_GAME':
-                setGameStateWithSynergies(() => createInitialState());
+                setGameStateWithSynergies(() => createInitialState(isDebugMode));
                 // Start first turn
                 setTimeout(() => {
                     setGameStateWithSynergies(prev => {
