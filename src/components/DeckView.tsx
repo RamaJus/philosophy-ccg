@@ -75,6 +75,8 @@ export const DeckView: React.FC<DeckViewProps> = ({ deck, isOpen, onClose, onSel
                         className="bg-slate-900 text-amber-100 border border-amber-600/50 rounded px-3 py-1 focus:outline-none focus:border-amber-500"
                     >
                         <option value="All">Alle Schulen</option>
+                        {schools.map(school => (
+                            <option key={school} value={school}>{school}</option>
                         ))}
                     </select>
 
