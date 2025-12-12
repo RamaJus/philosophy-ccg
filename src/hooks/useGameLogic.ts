@@ -700,12 +700,6 @@ export function useGameLogic(mode: 'single' | 'multiplayer_host' | 'multiplayer_
             const attackerNames: string[] = [];
 
             for (const attacker of attackers) {
-                // Check for Kant's Block: Only blocks minion attacks (targetId present), not face attacks
-                if (activePlayer.minionAttackBlockTurns && activePlayer.minionAttackBlockTurns > 0 && targetId) {
-                    currentLog = appendLog(currentLog, `Angriff fehlgeschlagen! ${attacker.name} achtet das Instrumentalisierungsverbot.`);
-                    continue; // Skip this attacker
-                }
-
                 // Check for Diotima's Silence
                 if (attacker.gender === 'male' && attacker.silencedUntilTurn && attacker.silencedUntilTurn > prev.turn) {
                     currentLog = appendLog(currentLog, `${attacker.name} schweigt ehrfürchtig vor Diotima und kann nicht angreifen!`);
@@ -750,6 +744,15 @@ export function useGameLogic(mode: 'single' | 'multiplayer_host' | 'multiplayer_
                         }
                         return { ...prev, log: currentLog };
                     }
+                }
+
+                // Kant's Block: Check if enemy has Kant's protection active
+                if (enemyPlayer.minionAttackBlockTurns && enemyPlayer.minionAttackBlockTurns > 0) {
+                    const kantMsg = `Angriff fehlgeschlagen! ${attackerNamesStr} acht${attackers.length > 1 ? 'en' : 'et'} Kants Instrumentalisierungsverbot.`;
+                    if (prev.log.length === 0 || prev.log[prev.log.length - 1] !== kantMsg) {
+                        currentLog = appendLog(currentLog, kantMsg);
+                    }
+                    return { ...prev, log: currentLog };
                 }
 
                 const targetDamage = target.attack;
