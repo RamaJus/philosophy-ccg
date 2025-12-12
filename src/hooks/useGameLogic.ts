@@ -139,8 +139,9 @@ const calculateSynergies = (currentBoard: BoardMinion[], synergyBlockTurns: numb
         return {
             ...minion,
             attack: minion.attack + bonus,
-            maxHealth: minion.maxHealth + bonus,
-            health: minion.health + bonus,
+            // Health bonus removed as per request to nerve synergies
+            // maxHealth: minion.maxHealth + bonus,
+            // health: minion.health + bonus,
             synergyBonus: bonus,
             synergyBreakdown: breakdown,
             linkedWith: links[minion.instanceId || minion.id]
