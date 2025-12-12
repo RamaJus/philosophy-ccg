@@ -114,7 +114,7 @@ export const BackgroundMusic: React.FC<BackgroundMusicProps> = ({
                 {/* Skip Button */}
                 <button
                     onClick={handleSkipClick}
-                    className="bg-slate-800/80 hover:bg-slate-700/80 backdrop-blur-sm rounded-full p-3 text-white shadow-lg transition-all duration-200 hover:scale-110"
+                    className="bg-slate-800/80 hover:bg-slate-700/80 backdrop-blur-sm rounded-full p-1.5 text-white shadow-lg transition-all duration-200 hover:scale-110"
                     title="Nächstes Lied"
                 >
                     <SkipForward size={20} />
@@ -123,7 +123,7 @@ export const BackgroundMusic: React.FC<BackgroundMusicProps> = ({
                 {/* Mute/Unmute Button */}
                 <button
                     onClick={toggleMute}
-                    className="bg-slate-800/80 hover:bg-slate-700/80 backdrop-blur-sm rounded-full p-3 text-white shadow-lg transition-all duration-200 hover:scale-110"
+                    className="bg-slate-800/80 hover:bg-slate-700/80 backdrop-blur-sm rounded-full p-1.5 text-white shadow-lg transition-all duration-200 hover:scale-110"
                     title={isMuted ? 'Musik einschalten' : 'Musik ausschalten'}
                 >
                     {isMuted ? (

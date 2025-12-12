@@ -478,7 +478,7 @@ export function useGameLogic(mode: 'single' | 'multiplayer_host' | 'multiplayer_
                 // Simple spell effects
                 if (card.id.includes('dialectic') || card.id.includes('cogito')) {
                     // Draw cards
-                    const drawCount = card.id.includes('cogito') || card.id.includes('dialectic') ? 2 : 1;
+                    const drawCount = card.id.includes('dialectic') ? 2 : 1;
                     for (let i = 0; i < drawCount; i++) {
                         updatedPlayer = drawCard(updatedPlayer);
                     }
@@ -1149,7 +1149,7 @@ export function useGameLogic(mode: 'single' | 'multiplayer_host' | 'multiplayer_
                         newDeck = [...newDeck.slice(0, insertIndex), card, ...newDeck.slice(insertIndex)];
                     });
 
-                    currentLog = appendLog(currentLog, `Du hast eine Karte gewählt. Die anderen Karten wurden zurückgemischt.`);
+                    currentLog = appendLog(currentLog, `${activePlayer.name} hat eine Karte gewählt. Die anderen Karten wurden zurückgemischt.`);
 
                     const updatedPlayer = {
                         ...activePlayer,

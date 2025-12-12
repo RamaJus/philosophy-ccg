@@ -165,10 +165,10 @@ export const cardDatabase: Card[] = [
     // Spell Cards
     {
         id: 'dialectic',
-        name: 'Dialektik',
+        name: 'Dualismus',
         type: 'Zauber',
         cost: 2,
-        description: 'Die Synthese von These und Antithese.',
+        description: 'Zwei unabhängige Substanzen: Geist und Materie.',
         effect: 'Ziehe 2 Karten.',
         rarity: 'Gewöhnlich',
         image: '/images/cards/dialectic.png',
@@ -223,7 +223,7 @@ export const cardDatabase: Card[] = [
         attack: 2,
         health: 1,
         description: 'Der Kyniker. Lebt in einer Tonne.',
-        rarity: 'Gewöhnlich',
+        rarity: 'Legendär',
         school: ['Ethik', 'Skeptizismus'],
         gender: 'male',
         image: '/images/cards/diogenes.png',
