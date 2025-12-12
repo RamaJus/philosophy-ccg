@@ -17,25 +17,23 @@ export const DeckView: React.FC<DeckViewProps> = ({ deck, isOpen, onClose, onSel
     // Sort deck alphabetically by name (hides the actual draw order)
     const [filterType, setFilterType] = useState<'All' | 'Philosoph' | 'Zauber' | 'Werk'>('All');
     const [filterSchool, setFilterSchool] = useState<string>('All');
+    const [filterCost, setFilterCost] = useState<number | 'All'>('All');
 
     const schools = ['Metaphysik', 'Logik', 'Ethik', 'Politik', 'Empirismus', 'Rationalismus', 'Idealismus', 'Existentialismus', 'Religion', 'Skeptizismus'];
 
     const filteredDeck = useMemo(() => {
         return deck.filter(card => {
             if (filterType !== 'All' && card.type !== filterType) return false;
+            if (filterCost !== 'All' && card.cost !== filterCost) return false;
             if (filterSchool !== 'All') {
                 if (card.school) {
                     return card.school.includes(filterSchool);
                 }
-                // Cards without schools (some Spells) should count as not matching unless searching for specific mechanics?
-                // Actually Works have workBonus.school, but usually schools are in card.school array.
-                // Works don't have arrays of schools usually? Let's check type definition.
-                // Card type has school?: string[]. So check that.
                 return false;
             }
             return true;
         }).sort((a, b) => a.name.localeCompare(b.name, 'de'));
-    }, [deck, filterType, filterSchool]);
+    }, [deck, filterType, filterSchool, filterCost]);
 
     return (
         <div className="fixed inset-0 bg-black/80 z-50 flex flex-col items-center justify-center p-8">
