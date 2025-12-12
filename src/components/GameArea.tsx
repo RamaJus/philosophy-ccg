@@ -443,7 +443,7 @@ export const GameArea: React.FC<GameAreaProps> = ({ mode, isDebugMode }) => {
                                 canTarget={(targetMode === 'gottesbeweis_target' || targetMode === 'trolley_sacrifice') && !!isMyTargetMode}
                                 isSpecialTargeting={(targetMode === 'gottesbeweis_target' || targetMode === 'trolley_sacrifice') && !!isMyTargetMode}
                                 synergiesBlocked={(viewPlayer.synergyBlockTurns || 0) > 0}
-                                attacksBlocked={(viewOpponent.minionAttackBlockTurns || 0) > 0}
+                                attacksBlocked={false}
                                 currentTurn={gameState.turn}
                             />
                         </div>

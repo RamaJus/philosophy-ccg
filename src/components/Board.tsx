@@ -70,7 +70,7 @@ export const Board: React.FC<BoardProps> = ({
                             // Kant's block only applies to minion-vs-minion attacks, not face attacks.
                             // So we show minions as attackable, but highlight that minion targets are blocked.
                             const canAttack = isPlayerBoard && minion.canAttack && !minion.hasAttacked;
-                            const isTargetable = canTarget && !attacksBlocked; // Can only target enemy minions if NOT blocked
+                            const isTargetable = canTarget; // Can target even if blocked (logic prevents attack and shows log)
 
                             // Calculate Work Bonus
                             let bonusDamage = 0;
@@ -109,11 +109,7 @@ export const Board: React.FC<BoardProps> = ({
                                                 ⏳
                                             </div>
                                         )}
-                                        {attacksBlocked && isPlayerBoard && (
-                                            <div className="absolute inset-0 flex items-center justify-center bg-black/40 rounded-lg pointer-events-none">
-                                                <span className="text-2xl" title="Angriff Blockiert">🚫</span>
-                                            </div>
-                                        )}
+
                                     </div>
 
 
