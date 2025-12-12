@@ -46,7 +46,7 @@ export const Board: React.FC<BoardProps> = ({
             <h3 className="text-sm font-semibold mb-2 text-center text-gray-300">
                 {isPlayerBoard ? 'Deine Philosophen' : 'Gegnerische Philosophen'}
                 {synergiesBlocked && <span className="block text-xs text-red-400 font-bold animate-pulse mt-1">⚠ SCHUL-SYNERGIEN BLOCKIERT</span>}
-                {attacksBlocked && <span className="block text-xs text-red-400 font-bold animate-pulse mt-1">⚠ PHILOSOPHEN-ANGRIFF BLOCKIERT (KANT)</span>}
+                {attacksBlocked && <span className="block text-xs text-red-400 font-bold animate-pulse mt-1">⚠ ANGRIFFE AUF PHILOSOPHEN BLOCKIERT (KANT)</span>}
             </h3>
 
             <div className="relative flex items-center justify-center">
@@ -96,7 +96,6 @@ export const Board: React.FC<BoardProps> = ({
                                                 ${canAttack && !isSilenced ? 'ring-2 ring-green-400' : ''}
                                                 ${isTargetable && !isSpecialTargeting ? 'ring-2 ring-red-400 cursor-attack' : ''}
                                                 ${isTargetable && isSpecialTargeting ? 'ring-2 ring-purple-400 cursor-magic' : ''}
-                                                ${(!minion.canAttack || attacksBlocked || isSilenced) && isPlayerBoard && !minion.hasAttacked ? 'ring-4 ring-red-600' : ''}
                                                 ${minion.hasAttacked || minion.hasUsedSpecial ? 'opacity-50' : ''}
                                             `}
                                         />

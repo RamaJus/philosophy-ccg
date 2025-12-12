@@ -62,8 +62,9 @@ function createInitialState(isDebugMode: boolean): GameState {
     return {
         turn: 0,
         activePlayer: 'player',
+        // Only give debug cards to host (player), clients handle their own debug mode separately
         player: createPlayer('Player', true, STARTING_HAND_SIZE, isDebugMode),
-        opponent: createPlayer('Gegner', false, STARTING_HAND_SIZE + 1, isDebugMode), // Second player gets +1 card balance
+        opponent: createPlayer('Gegner', false, STARTING_HAND_SIZE + 1, false), // Never give debug cards from host to opponent
         gameOver: false,
         log: ['Spiel gestartet! Möge der beste Philosoph gewinnen.'],
     };
