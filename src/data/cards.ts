@@ -171,7 +171,7 @@ export const cardDatabase: Card[] = [
         description: 'Zwei unabhängige Substanzen: Geist und Materie.',
         effect: 'Ziehe 2 Karten.',
         rarity: 'Gewöhnlich',
-        image: '/images/cards/dialectic.png',
+        image: '/images/cards/dualismus.png',
     },
     {
         id: 'aporia',
