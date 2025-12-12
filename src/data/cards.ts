@@ -228,8 +228,8 @@ export const cardDatabase: Card[] = [
         gender: 'male',
         image: '/images/cards/diogenes.png',
         special: {
-            name: 'In der Tonne lebend',
-            description: 'Kann erst angegriffen werden, wenn er 3 Runden auf dem Feld liegt.'
+            name: 'In der Tonne verschanzt',
+            description: 'Hat sich in seiner Tonne verschanzt. Kann erst angegriffen werden, wenn er 3 Runden auf dem Feld liegt.'
         }
     },
     {

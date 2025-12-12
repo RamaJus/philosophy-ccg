@@ -343,7 +343,7 @@ export const GameArea: React.FC<GameAreaProps> = ({ mode, isDebugMode }) => {
                                     return !!(m?.specialAbility && !m.hasUsedSpecial && !m.hasAttacked);
                                 })()}
                                 synergiesBlocked={(viewOpponent.synergyBlockTurns || 0) > 0}
-                                attacksBlocked={(viewOpponent.minionAttackBlockTurns || 0) > 0}
+                                attacksBlocked={isClient ? (gameState.player.minionAttackBlockTurns || 0) > 0 : (gameState.opponent.minionAttackBlockTurns || 0) > 0}
                                 currentTurn={gameState.turn}
                             />
                         </div>
@@ -443,7 +443,7 @@ export const GameArea: React.FC<GameAreaProps> = ({ mode, isDebugMode }) => {
                                 canTarget={(targetMode === 'gottesbeweis_target' || targetMode === 'trolley_sacrifice') && !!isMyTargetMode}
                                 isSpecialTargeting={(targetMode === 'gottesbeweis_target' || targetMode === 'trolley_sacrifice') && !!isMyTargetMode}
                                 synergiesBlocked={(viewPlayer.synergyBlockTurns || 0) > 0}
-                                attacksBlocked={(viewPlayer.minionAttackBlockTurns || 0) > 0}
+                                attacksBlocked={isClient ? (gameState.opponent.minionAttackBlockTurns || 0) > 0 : (gameState.player.minionAttackBlockTurns || 0) > 0}
                                 currentTurn={gameState.turn}
                             />
                         </div>

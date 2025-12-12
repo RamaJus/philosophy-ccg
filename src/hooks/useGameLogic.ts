@@ -738,7 +738,7 @@ export function useGameLogic(mode: 'single' | 'multiplayer_host' | 'multiplayer_
                 if (target.id.includes('diogenes') && target.turnPlayed !== undefined) {
                     const turnsOnField = prev.turn - target.turnPlayed;
                     if (turnsOnField < 3) {
-                        const diogenesMsg = `${target.name} lebt noch in seiner Tonne und kann erst in ${3 - turnsOnField} Runde(n) angegriffen werden!`;
+                        const diogenesMsg = `Angriff fehlgeschlagen! ${target.name} hat sich in seiner Tonne verschanzt und kann erst in ${3 - turnsOnField} Runde(n) angegriffen werden!`;
                         if (prev.log.length === 0 || prev.log[prev.log.length - 1] !== diogenesMsg) {
                             currentLog = appendLog(currentLog, diogenesMsg);
                         }
