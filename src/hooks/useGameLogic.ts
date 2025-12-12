@@ -746,8 +746,8 @@ export function useGameLogic(mode: 'single' | 'multiplayer_host' | 'multiplayer_
                     }
                 }
 
-                // Kant's Block: Check if enemy has Kant's protection active
-                if (enemyPlayer.minionAttackBlockTurns && enemyPlayer.minionAttackBlockTurns > 0) {
+                // Kant's Block: Check if attacker is restricted by Kant
+                if (activePlayer.minionAttackBlockTurns && activePlayer.minionAttackBlockTurns > 0) {
                     const kantMsg = `Angriff fehlgeschlagen! ${attackerNamesStr} acht${attackers.length > 1 ? 'en' : 'et'} Kants Instrumentalisierungsverbot.`;
                     if (prev.log.length === 0 || prev.log[prev.log.length - 1] !== kantMsg) {
                         currentLog = appendLog(currentLog, kantMsg);

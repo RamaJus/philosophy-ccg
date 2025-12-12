@@ -75,7 +75,7 @@ export const Card: React.FC<CardProps> = ({
     const cardClasses = `
         ${isMinion ? 'card-minion' : 'card-spell'}
         ${isSelected ? 'ring-4 ring-yellow-400 scale-110' : ''}
-        ${isPlayable ? 'cursor-pointer' : 'cursor-not-allowed'}
+        ${isPlayable ? 'cursor-pointer' : 'cursor-default'}
         ${isDamaged ? 'animate-shake ring-4 ring-red-500' : ''}
         ${isHealed ? 'ring-4 ring-green-400 animate-pulse' : ''}
         relative group transition-all duration-300 transform hover:scale-105 hover:z-10
