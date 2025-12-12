@@ -46,7 +46,7 @@ export const Board: React.FC<BoardProps> = ({
             <h3 className="text-sm font-semibold mb-2 text-center text-gray-300">
                 {isPlayerBoard ? 'Deine Philosophen' : 'Gegnerische Philosophen'}
                 {synergiesBlocked && <span className="block text-xs text-red-400 font-bold animate-pulse mt-1">⚠ SCHUL-SYNERGIEN BLOCKIERT</span>}
-                {attacksBlocked && <span className="block text-xs text-red-400 font-bold animate-pulse mt-1">⚠ ANGRIFF BLOCKIERT (KANT)</span>}
+                {attacksBlocked && <span className="block text-xs text-red-400 font-bold animate-pulse mt-1">⚠ PHILOSOPHEN-ANGRIFF BLOCKIERT (KANT)</span>}
             </h3>
 
             <div className="relative flex items-center justify-center">
@@ -67,8 +67,10 @@ export const Board: React.FC<BoardProps> = ({
                         </div>
                     ) : (
                         visibleMinions.map((minion) => {
-                            const canAttack = isPlayerBoard && minion.canAttack && !minion.hasAttacked && !attacksBlocked;
-                            const isTargetable = canTarget;
+                            // Kant's block only applies to minion-vs-minion attacks, not face attacks.
+                            // So we show minions as attackable, but highlight that minion targets are blocked.
+                            const canAttack = isPlayerBoard && minion.canAttack && !minion.hasAttacked;
+                            const isTargetable = canTarget && !attacksBlocked; // Can only target enemy minions if NOT blocked
 
                             // Calculate Work Bonus
                             let bonusDamage = 0;

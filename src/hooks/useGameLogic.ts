@@ -1,6 +1,6 @@
 import { useState, useCallback, useEffect } from 'react';
 import { GameState, Player, BoardMinion, GameAction } from '../types';
-import { generateDeck } from '../data/cards';
+import { generateDeck, cardDatabase } from '../data/cards';
 import { multiplayer } from '../network/MultiplayerManager';
 
 const STARTING_HAND_SIZE = 4;
@@ -30,9 +30,9 @@ function createPlayer(name: string, isPlayer: boolean, startingHandSize: number 
     // Add DEBUG cards to player's starting hand for testing
     // Add DEBUG cards to player's starting hand if Debug Mode is active
     if (isDebugMode) {
-        const debugDeck = generateDeck();
-        const debug1 = debugDeck.find(c => c.id === 'debug_1');
-        const debug2 = debugDeck.find(c => c.id === 'debug_2');
+        // Use cardDatabase directly as generateDeck filters out debug cards
+        const debug1 = cardDatabase.find(c => c.id === 'debug_1');
+        const debug2 = cardDatabase.find(c => c.id === 'debug_2');
 
         if (debug1) {
             hand.push({ ...debug1, instanceId: `debug-1-a-${Date.now()}` });
@@ -194,6 +194,36 @@ export function useGameLogic(mode: 'single' | 'multiplayer_host' | 'multiplayer_
             multiplayer.setCallbacks(
                 (newState) => {
                     console.log('Client received state update');
+
+                    // If client has debug mode enabled, inject debug cards into their hand (opponent from host's view)
+                    if (isDebugMode) {
+                        // Only add on the first turn (to avoid duplicating on every state sync)
+                        const clientPlayer = newState.opponent; // Client is 'opponent' from host's perspective
+                        const hasDebugCards = clientPlayer.hand.some(c => c.id.startsWith('debug_'));
+
+                        if (!hasDebugCards && newState.turn <= 1) {
+                            const debug1 = cardDatabase.find(c => c.id === 'debug_1');
+                            const debug2 = cardDatabase.find(c => c.id === 'debug_2');
+
+                            const debugCards = [];
+                            if (debug1) {
+                                debugCards.push({ ...debug1, instanceId: `debug-client-1-a-${Date.now()}` });
+                                debugCards.push({ ...debug1, instanceId: `debug-client-1-b-${Date.now()}` });
+                            }
+                            if (debug2) {
+                                debugCards.push({ ...debug2, instanceId: `debug-client-2-${Date.now()}` });
+                            }
+
+                            newState = {
+                                ...newState,
+                                opponent: {
+                                    ...clientPlayer,
+                                    hand: [...clientPlayer.hand, ...debugCards]
+                                }
+                            };
+                        }
+                    }
+
                     setGameState(newState);
                 },
                 () => { }, // Client ignores actions
@@ -203,7 +233,7 @@ export function useGameLogic(mode: 'single' | 'multiplayer_host' | 'multiplayer_
     }, [mode]);
 
     const appendLog = useCallback((currentLog: string[], message: string) => {
-        return [...currentLog.slice(-9), message];
+        return [...currentLog, message];
     }, []);
 
     const addLog = useCallback((message: string) => {
