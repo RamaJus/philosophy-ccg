@@ -32,7 +32,7 @@ export const Hand: React.FC<HandProps> = ({ cards, onCardClick, selectedCardId, 
                                 initial={{ opacity: 0, y: 100, scale: 0.5, rotate: -10 }}
                                 animate={{
                                     opacity: 1,
-                                    y: (index - (cards.length - 1) / 2) * 8, // Corrected linear adjustment for flatter top alignment
+                                    y: Math.abs(index - (cards.length - 1) / 2) * 4 + (index - (cards.length - 1) / 2) * 6, // Arc + Tilt correction
                                     scale: 1,
                                     rotate: (index - (cards.length - 1) / 2) * 3, // Reduced fan angle
                                     zIndex: index + 1
