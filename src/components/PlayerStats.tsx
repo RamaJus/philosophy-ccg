@@ -44,20 +44,22 @@ export const PlayerStats: React.FC<PlayerStatsProps> = ({ player, isOpponent = f
                         <Heart className={`${isDamaged ? 'text-red-500 scale-125' : 'text-red-400'} transition-all duration-200`} size={16} />
                         <span className="font-semibold text-sm">Glaubwürdigkeit</span>
                     </div>
-                    <div className="text-base font-bold relative h-6 min-w-[3.5rem] text-right">
-                        <AnimatePresence mode="wait">
-                            <motion.span
-                                key={player.health}
-                                initial={{ y: -10, opacity: 0 }}
-                                animate={{ y: 0, opacity: 1 }}
-                                exit={{ y: 10, opacity: 0 }}
-                                transition={{ duration: 0.2 }}
-                                className={`absolute right-8 top-0 ${player.health <= 10 ? 'text-red-400 animate-pulse' : 'text-green-400'} ${isDamaged ? 'text-red-500' : ''}`}
-                            >
-                                {player.health}
-                            </motion.span>
-                        </AnimatePresence>
-                        <span className="text-gray-400 text-xs absolute right-0 top-0.5">/{player.maxHealth}</span>
+                    <div className="flex items-baseline justify-end gap-0.5 min-w-[4.5rem]">
+                        <div className="relative w-8 h-6">
+                            <AnimatePresence mode="wait">
+                                <motion.span
+                                    key={player.health}
+                                    initial={{ y: -10, opacity: 0 }}
+                                    animate={{ y: 0, opacity: 1 }}
+                                    exit={{ y: 10, opacity: 0 }}
+                                    transition={{ duration: 0.2 }}
+                                    className={`absolute right-0 top-0 block w-full text-right ${player.health <= 10 ? 'text-red-400 animate-pulse' : 'text-green-400'} ${isDamaged ? 'text-red-500' : ''}`}
+                                >
+                                    {player.health}
+                                </motion.span>
+                            </AnimatePresence>
+                        </div>
+                        <span className="text-gray-400 text-xs font-bold">/{player.maxHealth}</span>
                     </div>
                 </div>
 
