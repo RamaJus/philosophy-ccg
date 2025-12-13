@@ -44,19 +44,20 @@ export const PlayerStats: React.FC<PlayerStatsProps> = ({ player, isOpponent = f
                         <Heart className={`${isDamaged ? 'text-red-500 scale-125' : 'text-red-400'} transition-all duration-200`} size={16} />
                         <span className="font-semibold text-sm">Glaubwürdigkeit</span>
                     </div>
-                    <div className="text-base font-bold relative h-6 w-12 text-right overflow-hidden">
-                        <AnimatePresence mode="popLayout">
+                    <div className="text-base font-bold relative h-6 min-w-[3.5rem] text-right">
+                        <AnimatePresence mode="wait">
                             <motion.span
                                 key={player.health}
-                                initial={{ y: -20, opacity: 0 }}
+                                initial={{ y: -10, opacity: 0 }}
                                 animate={{ y: 0, opacity: 1 }}
-                                exit={{ y: 20, opacity: 0 }}
-                                className={`absolute right-0 ${player.health <= 10 ? 'text-red-400 animate-pulse' : 'text-green-400'} ${isDamaged ? 'text-red-500 scale-150' : ''}`}
+                                exit={{ y: 10, opacity: 0 }}
+                                transition={{ duration: 0.2 }}
+                                className={`absolute right-8 top-0 ${player.health <= 10 ? 'text-red-400 animate-pulse' : 'text-green-400'} ${isDamaged ? 'text-red-500' : ''}`}
                             >
                                 {player.health}
                             </motion.span>
                         </AnimatePresence>
-                        <span className="text-gray-400 text-xs ml-8">/{player.maxHealth}</span>
+                        <span className="text-gray-400 text-xs absolute right-0 top-0.5">/{player.maxHealth}</span>
                     </div>
                 </div>
 
@@ -83,23 +84,7 @@ export const PlayerStats: React.FC<PlayerStatsProps> = ({ player, isOpponent = f
                         </div>
                     </div>
 
-                    {/* Crystal Bar */}
-                    <div className="flex flex-wrap gap-1 mt-1 justify-end">
-                        {Array.from({ length: Math.min(10, player.maxMana) }).map((_, i) => (
-                            <motion.div
-                                key={i}
-                                initial={false}
-                                animate={{
-                                    scale: i < player.mana ? 1 : 0.8,
-                                    opacity: i < player.mana ? 1 : 0.3
-                                }}
-                                className={`w-3 h-3 rounded-full ${i < player.mana
-                                    ? 'bg-gradient-to-br from-blue-400 to-blue-600 shadow-blue-500/50 shadow-sm'
-                                    : 'bg-slate-700 border border-slate-600'
-                                    }`}
-                            />
-                        ))}
-                    </div>
+
 
                     {/* Lock Warning Overlay */}
                     <AnimatePresence>

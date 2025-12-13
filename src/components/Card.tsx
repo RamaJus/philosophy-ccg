@@ -38,7 +38,8 @@ export const Card: React.FC<CardProps> = ({
     const prevHealth = useRef(currentHealth);
 
     const currentSynergy = boardMinion ? (boardMinion.synergyBonus || 0) : 0;
-    const prevSynergy = useRef(currentSynergy);
+    // Initialize to 0 so that if a card enters with synergy, it glows immediately
+    const prevSynergy = useRef(0);
 
     const baseAttack = boardMinion ? boardMinion.attack : (card.attack || 0);
     const totalAttack = baseAttack + bonusDamage;
@@ -65,7 +66,7 @@ export const Card: React.FC<CardProps> = ({
     useEffect(() => {
         if (currentSynergy > prevSynergy.current) {
             setIsSynergyTriggered(true);
-            const timer = setTimeout(() => setIsSynergyTriggered(false), 800);
+            const timer = setTimeout(() => setIsSynergyTriggered(false), 1100); // Increased duration
             return () => clearTimeout(timer);
         }
         prevSynergy.current = currentSynergy;
@@ -180,7 +181,7 @@ export const Card: React.FC<CardProps> = ({
                     boxShadow: isHealed
                         ? "0 0 20px #4ade80"
                         : isSynergyTriggered
-                            ? "0 0 20px #a855f7"
+                            ? "0 0 40px #d8b4fe, 0 0 20px #a855f7" // Stronger glow
                             : isSelected
                                 ? "0 0 0 4px #fbbf24"
                                 : "0 25px 50px -12px rgba(0, 0, 0, 0.25)"

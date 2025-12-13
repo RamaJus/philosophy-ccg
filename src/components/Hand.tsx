@@ -32,7 +32,7 @@ export const Hand: React.FC<HandProps> = ({ cards, onCardClick, selectedCardId, 
                                 initial={{ opacity: 0, y: 100, scale: 0.5, rotate: -10 }}
                                 animate={{
                                     opacity: 1,
-                                    y: 0,
+                                    y: Math.abs(index - (cards.length - 1) / 2) * -15, // Lift the edges
                                     scale: 1,
                                     rotate: (index - (cards.length - 1) / 2) * 5, // Fan effect
                                     zIndex: index + 1
