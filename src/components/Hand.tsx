@@ -30,18 +30,18 @@ export const Hand: React.FC<HandProps> = ({ cards, onCardClick, selectedCardId, 
                             const center = (cards.length - 1) / 2;
                             const offset = index - center;
 
-                            // Rotation: 3° per card position from center
+                            // Rotation: 3 degrees per unit
                             const rotationDeg = offset * 3;
 
-                            // Y-offset: Push outer cards down for natural arc
-                            const yOffset = Math.abs(offset) * 6;
-
-                            // X-offset: Position cards with overlap (symmetric from center)
-                            // Each card is 140px wide, we want ~100px spacing (40px overlap)
+                            // X-offset: Symmetric positioning logic with fixed overlap
                             const xOffset = offset * 100;
 
-                            // Z-index: Center cards on top, outer cards below (symmetric)
-                            const zIndex = cards.length - Math.abs(offset);
+                            // Y-Offset Calculation to fix visual asymmetry:
+                            // 1. Arc effect: |offset| * 5 (lower outer cards)
+                            // 2. Geometric correction: offset * 4
+                            //    - Left cards (neg rotation) drop their top-left corner geometrically.
+                            //      We counteract this by adding a negative Y (lifting them).
+                            const yOffset = (Math.abs(offset) * 5) + (offset * 4);
 
                             return (
                                 <motion.div
@@ -54,7 +54,7 @@ export const Hand: React.FC<HandProps> = ({ cards, onCardClick, selectedCardId, 
                                         y: yOffset,
                                         scale: 1,
                                         rotate: rotationDeg,
-                                        zIndex: zIndex
+                                        zIndex: index // Standard stacking: right cards on top of left cards
                                     }}
                                     exit={{ opacity: 0, y: -100, scale: 0.5, transition: { duration: 0.2 } }}
                                     whileHover={{
