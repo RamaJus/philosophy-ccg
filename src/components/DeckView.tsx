@@ -19,7 +19,7 @@ export const DeckView: React.FC<DeckViewProps> = ({ deck, isOpen, onClose, onSel
     const [filterSchool, setFilterSchool] = useState<string>('All');
     const [filterCost, setFilterCost] = useState<number | 'All'>('All');
 
-    const schools = ['Metaphysik', 'Logik', 'Ethik', 'Politik', 'Empirismus', 'Rationalismus', 'Idealismus', 'Existentialismus', 'Religion', 'Skeptizismus'];
+    const schools = ['Vorsokratiker', 'Metaphysik', 'Logik', 'Ethik', 'Politik', 'Empirismus', 'Rationalismus', 'Idealismus', 'Existentialismus', 'Religion', 'Skeptizismus'];
 
     const filteredDeck = useMemo(() => {
         return deck.filter(card => {

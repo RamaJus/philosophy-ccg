@@ -662,6 +662,19 @@ export const cardDatabase: Card[] = [
         gender: 'male',
         image: '/images/cards/heraklit.png',
     },
+    {
+        id: 'anselm',
+        name: 'Anselm von Canterbury',
+        type: 'Philosoph',
+        cost: 2,
+        attack: 2,
+        health: 2,
+        description: 'Gott ist das, worüber hinaus nichts Größeres gedacht werden kann.',
+        rarity: 'Gewöhnlich',
+        school: ['Rationalismus', 'Metaphysik', 'Religion'],
+        gender: 'male',
+        image: '/images/cards/anselm.png',
+    },
 
     // Permanent Works
     {
