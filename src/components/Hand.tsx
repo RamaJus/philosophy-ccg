@@ -40,8 +40,8 @@ export const Hand: React.FC<HandProps> = ({ cards, onCardClick, selectedCardId, 
                             // 1. Arc effect: |offset| * 5 (lower outer cards)
                             // 2. Geometric correction: offset * 2
                             //    - Counteracts the natural drop of the top-left corner when rotating left.
-                            //    - Previous factor of 4 was too strong (overcorrected).
-                            const yOffset = (Math.abs(offset) * 5) + (offset * 2);
+                            // 3. Global lift: -40px (1cm) to raise the entire fan
+                            const yOffset = (Math.abs(offset) * 5) + (offset * 2) - 40;
 
                             return (
                                 <motion.div
