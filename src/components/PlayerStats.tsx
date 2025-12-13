@@ -45,7 +45,7 @@ export const PlayerStats: React.FC<PlayerStatsProps> = ({ player, isOpponent = f
                         <span className="font-semibold text-sm">Glaubwürdigkeit</span>
                     </div>
                     <div className="flex items-baseline justify-end gap-0.5 min-w-[4.5rem]">
-                        <div className="relative w-8 h-6">
+                        <div className="relative w-full h-6">
                             <AnimatePresence mode="wait">
                                 <motion.span
                                     key={player.health}
@@ -59,7 +59,6 @@ export const PlayerStats: React.FC<PlayerStatsProps> = ({ player, isOpponent = f
                                 </motion.span>
                             </AnimatePresence>
                         </div>
-                        <span className="text-gray-400 text-xs font-bold">/{player.maxHealth}</span>
                     </div>
                 </div>
 
