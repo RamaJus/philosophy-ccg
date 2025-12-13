@@ -31,7 +31,7 @@ export const Hand: React.FC<HandProps> = ({ cards, onCardClick, selectedCardId, 
                             // Compensate for mana circle shift due to rotation
                             // Mana circle is ~50px left and ~152px above the bottom-center pivot
                             // delta_y ≈ 0.87 * angle (degrees) for small angles
-                            const yCompensation = rotationDeg * 0.9;
+                            const yCompensation = rotationDeg * 1.0;
 
                             return (
                                 <motion.div
