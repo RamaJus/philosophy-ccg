@@ -278,6 +278,7 @@ export function useGameLogic(mode: 'single' | 'multiplayer_host' | 'multiplayer_
                 ...minion,
                 canAttack: true,
                 hasAttacked: false,
+                hasUsedSpecial: false, // Reset special ability usage
             })).map(minion => {
                 // SARTRE TRANSFORMATION LOGIC
                 if (minion.id.includes('sartre') && minion.pendingTransformation) {
@@ -998,7 +999,7 @@ export function useGameLogic(mode: 'single' | 'multiplayer_host' | 'multiplayer_
                             ...prev,
                             player: updatedPlayer,
                             opponent: updatedOpponent,
-                            selectedMinion: undefined,
+                            selectedMinions: undefined,
                             targetMode: undefined,
                             log: currentLog,
                         };
@@ -1031,7 +1032,7 @@ export function useGameLogic(mode: 'single' | 'multiplayer_host' | 'multiplayer_
                             ...prev,
                             player: updatedPlayer,
                             opponent: updatedOpponent,
-                            selectedMinion: undefined,
+                            selectedMinions: undefined,
                             log: currentLog,
                         };
                     }
@@ -1076,7 +1077,7 @@ export function useGameLogic(mode: 'single' | 'multiplayer_host' | 'multiplayer_
                             ...prev,
                             player: updatedPlayer,
                             opponent: updatedOpponent,
-                            selectedMinion: undefined,
+                            selectedMinions: undefined,
                             targetMode: undefined,
                             log: [...currentLog, `${minion.name} verwandelte ${targetMinion.name} in stuhlartige Materie!`],
                         };

@@ -363,8 +363,11 @@ export const GameArea: React.FC<GameAreaProps> = ({ mode, isDebugMode }) => {
                                 canTarget={viewIsPlayerTurn && (!!selectedMinions?.length || targetMode === 'gottesbeweis_target')}
                                 activeWork={viewOpponent.activeWork}
                                 isSpecialTargeting={(() => {
-                                    if (!isMyTargetMode) return false;
-                                    if (targetMode === 'gottesbeweis_target') return true;
+                                    // 1. Explicit Target Modes (Spells)
+                                    if (targetMode === 'gottesbeweis_target') return !!isMyTargetMode;
+                                    if (targetMode === 'trolley_sacrifice') return !!isMyTargetMode;
+
+                                    // 2. Minion Special Ability Trigger (Implicit Mode)
                                     if (!selectedMinions?.length || selectedMinions.length > 1) return false;
                                     const m = viewPlayer.board.find(min => (min.instanceId || min.id) === selectedMinions[0]);
                                     return !!(m?.specialAbility && !m.hasUsedSpecial && !m.hasAttacked);
