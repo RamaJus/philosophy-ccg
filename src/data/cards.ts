@@ -623,6 +623,19 @@ export const cardDatabase: Card[] = [
             description: 'Verwandle einen gegnerischen Philosophen in stuhlartige Materie (0/1 Diener).'
         }
     },
+    {
+        id: 'anaximenes',
+        name: 'Anaximenes',
+        type: 'Philosoph',
+        cost: 3,
+        attack: 3,
+        health: 4,
+        description: 'Der Ursprung aller Dinge ist Luft!',
+        rarity: 'Gewöhnlich',
+        school: ['Vorsokratiker', 'Empirismus'],
+        gender: 'male',
+        image: '/images/cards/anaximenes.png',
+    },
 
     // Permanent Works
     {
