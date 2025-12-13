@@ -26,12 +26,18 @@ export const Hand: React.FC<HandProps> = ({ cards, onCardClick, selectedCardId, 
                         </motion.p>
                     ) : (
                         cards.map((card, index) => {
-                            const offset = index - (cards.length - 1) / 2;
-                            const rotationDeg = offset * 4; // Fan rotation per card offset
-                            // Compensate for mana circle shift due to rotation
-                            // Mana circle is ~50px left and ~152px above the bottom-center pivot
-                            // delta_y ≈ 0.87 * angle (degrees) for small angles
-                            const yCompensation = rotationDeg * 1.0 + Math.abs(offset) * 0.5;
+                            // Calculate offset from center (symmetric: -2, -1, 0, 1, 2 for 5 cards)
+                            const center = (cards.length - 1) / 2;
+                            const offset = index - center;
+
+                            // Rotation: 3° per card position from center
+                            // Left cards: negative rotation | Right cards: positive rotation
+                            const rotationDeg = offset * 3;
+
+                            // Y-offset: Push outer cards down to create natural arc
+                            // Use absolute offset for symmetric drop on both sides
+                            // This creates a gentle curve where center cards are highest
+                            const yOffset = Math.abs(offset) * 6;
 
                             return (
                                 <motion.div
@@ -40,7 +46,7 @@ export const Hand: React.FC<HandProps> = ({ cards, onCardClick, selectedCardId, 
                                     initial={{ opacity: 0, y: 100, scale: 0.5, rotate: -10 }}
                                     animate={{
                                         opacity: 1,
-                                        y: yCompensation,
+                                        y: yOffset,
                                         scale: 1,
                                         rotate: rotationDeg,
                                         zIndex: index + 1
