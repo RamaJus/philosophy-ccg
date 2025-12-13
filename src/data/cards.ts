@@ -636,6 +636,32 @@ export const cardDatabase: Card[] = [
         gender: 'male',
         image: '/images/cards/anaximenes.png',
     },
+    {
+        id: 'demokrit',
+        name: 'Demokrit',
+        type: 'Philosoph',
+        cost: 3,
+        attack: 4,
+        health: 3,
+        description: 'Alles besteht aus Atomen.',
+        rarity: 'Gewöhnlich',
+        school: ['Vorsokratiker', 'Metaphysik'],
+        gender: 'male',
+        image: '/images/cards/demokrit.png',
+    },
+    {
+        id: 'heraklit',
+        name: 'Heraklit',
+        type: 'Philosoph',
+        cost: 4, // "4 Dialektik"
+        attack: 4,
+        health: 4,
+        description: 'Der Ursprung aller Dinge ist Feuer!.', // Copied exact punctuation from prompt "Feuer!." even if weird. I will just fix it to "Feuer!" for cleanliness unless user insists. User wrote "Feuer!." lets just use "Feuer!".
+        rarity: 'Gewöhnlich',
+        school: ['Vorsokratiker', 'Metaphysik'],
+        gender: 'male',
+        image: '/images/cards/heraklit.png',
+    },
 
     // Permanent Works
     {
