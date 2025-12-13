@@ -38,10 +38,10 @@ export const Hand: React.FC<HandProps> = ({ cards, onCardClick, selectedCardId, 
 
                             // Y-Offset Calculation to fix visual asymmetry:
                             // 1. Arc effect: |offset| * 5 (lower outer cards)
-                            // 2. Geometric correction: offset * 4
-                            //    - Left cards (neg rotation) drop their top-left corner geometrically.
-                            //      We counteract this by adding a negative Y (lifting them).
-                            const yOffset = (Math.abs(offset) * 5) + (offset * 4);
+                            // 2. Geometric correction: offset * 2
+                            //    - Counteracts the natural drop of the top-left corner when rotating left.
+                            //    - Previous factor of 4 was too strong (overcorrected).
+                            const yOffset = (Math.abs(offset) * 5) + (offset * 2);
 
                             return (
                                 <motion.div
