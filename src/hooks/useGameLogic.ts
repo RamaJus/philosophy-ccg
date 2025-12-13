@@ -678,8 +678,8 @@ export function useGameLogic(mode: 'single' | 'multiplayer_host' | 'multiplayer_
                 opponent: activePlayerKey === 'player' ? updatedEnemy : updatedPlayer,
                 selectedCard: undefined,
                 log: currentLog,
-                lastPlayedCard: card,
-                lastPlayedCardPlayerId: activePlayerKey
+                lastPlayedCard: card.type === 'Zauber' ? card : undefined,
+                lastPlayedCardPlayerId: card.type === 'Zauber' ? activePlayerKey : undefined
             };
         });
     }, [appendLog, drawCard]);

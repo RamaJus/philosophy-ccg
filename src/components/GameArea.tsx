@@ -71,8 +71,16 @@ export const GameArea: React.FC<GameAreaProps> = ({ mode, isDebugMode }) => {
     // Flash Card Logic
     const [flashCard, setFlashCard] = useState<{ card: Card; position: 'top' | 'bottom' } | null>(null);
 
+    const lastFlashedCardId = useRef<string | null>(null);
+
     useEffect(() => {
         if (gameState.lastPlayedCard && gameState.lastPlayedCardPlayerId) {
+            // Prevent repeat flash
+            if (lastFlashedCardId.current === (gameState.lastPlayedCard.instanceId || gameState.lastPlayedCard.id)) {
+                return;
+            }
+            lastFlashedCardId.current = gameState.lastPlayedCard.instanceId || gameState.lastPlayedCard.id;
+
             // Determine position based on who played it relative to view
             const isMe = gameState.lastPlayedCardPlayerId === viewPlayer.id;
             const position = isMe ? 'bottom' : 'top';
@@ -504,7 +512,7 @@ export const GameArea: React.FC<GameAreaProps> = ({ mode, isDebugMode }) => {
                             animate={{ opacity: 1, scale: 1.5, y: 0 }}
                             exit={{ opacity: 0, scale: 2 }}
                             transition={{ duration: 0.3, type: 'spring', stiffness: 200, damping: 20 }}
-                            className={`absolute z-[100] left-1/2 -translate-x-1/2 pointer-events-none drop-shadow-2xl ${flashCard.position === 'top' ? 'top-[30%]' : 'bottom-[40%]'
+                            className={`fixed left-0 right-0 z-[100] flex justify-center pointer-events-none drop-shadow-2xl ${flashCard.position === 'top' ? 'top-[30%]' : 'bottom-[40%]'
                                 }`}
                         >
                             <div className="shadow-2xl shadow-cyan-500/50 rounded-xl">
