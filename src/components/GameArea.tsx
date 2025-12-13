@@ -203,7 +203,7 @@ export const GameArea: React.FC<GameAreaProps> = ({ mode, isDebugMode }) => {
             const playableCards = aiPlayer.hand.filter(c => c.cost <= aiPlayer.mana);
             if (playableCards.length > 0 && aiPlayer.board.length < MAX_BOARD_SIZE) {
                 const randomCard = playableCards[Math.floor(Math.random() * playableCards.length)];
-                dispatch({ type: 'PLAY_CARD', cardId: randomCard.id });
+                dispatch({ type: 'PLAY_CARD', cardId: randomCard.instanceId || randomCard.id });
 
                 setTimeout(() => aiTurn(), 800);
                 return;
@@ -215,9 +215,9 @@ export const GameArea: React.FC<GameAreaProps> = ({ mode, isDebugMode }) => {
 
                 if (humanPlayer.board.length > 0 && Math.random() > 0.5) {
                     const target = humanPlayer.board[Math.floor(Math.random() * humanPlayer.board.length)];
-                    dispatch({ type: 'ATTACK', attackerIds: [attacker.id], targetId: target.id });
+                    dispatch({ type: 'ATTACK', attackerIds: [attacker.instanceId || attacker.id], targetId: target.instanceId || target.id });
                 } else {
-                    dispatch({ type: 'ATTACK', attackerIds: [attacker.id] });
+                    dispatch({ type: 'ATTACK', attackerIds: [attacker.instanceId || attacker.id] });
                 }
 
                 setTimeout(() => aiTurn(), 800);
