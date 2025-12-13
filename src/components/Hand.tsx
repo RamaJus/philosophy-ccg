@@ -31,13 +31,17 @@ export const Hand: React.FC<HandProps> = ({ cards, onCardClick, selectedCardId, 
                             const offset = index - center;
 
                             // Rotation: 3° per card position from center
-                            // Left cards: negative rotation | Right cards: positive rotation
                             const rotationDeg = offset * 3;
 
-                            // Y-offset: Push outer cards down to create natural arc
-                            // Use absolute offset for symmetric drop on both sides
-                            // This creates a gentle curve where center cards are highest
+                            // Y-offset: Push outer cards down for natural arc
                             const yOffset = Math.abs(offset) * 6;
+
+                            // X-offset: Position cards with overlap (symmetric from center)
+                            // Each card is 140px wide, we want ~100px spacing (40px overlap)
+                            const xOffset = offset * 100;
+
+                            // Z-index: Center cards on top, outer cards below (symmetric)
+                            const zIndex = cards.length - Math.abs(offset);
 
                             return (
                                 <motion.div
@@ -46,10 +50,11 @@ export const Hand: React.FC<HandProps> = ({ cards, onCardClick, selectedCardId, 
                                     initial={{ opacity: 0, y: 100, scale: 0.5, rotate: -10 }}
                                     animate={{
                                         opacity: 1,
+                                        x: xOffset,
                                         y: yOffset,
                                         scale: 1,
                                         rotate: rotationDeg,
-                                        zIndex: index + 1
+                                        zIndex: zIndex
                                     }}
                                     exit={{ opacity: 0, y: -100, scale: 0.5, transition: { duration: 0.2 } }}
                                     whileHover={{
@@ -59,7 +64,8 @@ export const Hand: React.FC<HandProps> = ({ cards, onCardClick, selectedCardId, 
                                         zIndex: 100,
                                         transition: { duration: 0.2 }
                                     }}
-                                    className="-ml-8 first:ml-0 pointer-events-auto origin-bottom"
+                                    className="absolute pointer-events-auto origin-bottom"
+                                    style={{ left: '50%', marginLeft: '-70px' }} // Center the card (half of 140px width)
                                 >
                                     <Card
                                         card={card}
