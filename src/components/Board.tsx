@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { BoardMinion, Card as CardType } from '../types';
 import { Card } from './Card';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
@@ -60,64 +61,75 @@ export const Board: React.FC<BoardProps> = ({
                     </button>
                 )}
 
-                <div className="flex gap-3 justify-center flex-wrap px-8">
-                    {minions.length === 0 ? (
-                        <div className="flex items-center justify-center h-48 text-gray-500 italic w-full">
-                            Keine Philosophen auf dem Schlachtfeld
-                        </div>
-                    ) : (
-                        visibleMinions.map((minion) => {
-                            // Kant's block only applies to minion-vs-minion attacks, not face attacks.
-                            // So we show minions as attackable, but highlight that minion targets are blocked.
-                            const canAttack = isPlayerBoard && minion.canAttack && !minion.hasAttacked;
-                            const isTargetable = canTarget; // Can target even if blocked (logic prevents attack and shows log)
+                <div className="flex gap-3 justify-center flex-wrap px-8 min-h-[220px]">
+                    <AnimatePresence mode="popLayout">
+                        {minions.length === 0 ? (
+                            <motion.div
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                exit={{ opacity: 0 }}
+                                className="flex items-center justify-center h-48 text-gray-500 italic w-full absolute"
+                            >
+                                Keine Philosophen auf dem Schlachtfeld
+                            </motion.div>
+                        ) : (
+                            visibleMinions.map((minion) => {
+                                // Kant's block only applies to minion-vs-minion attacks, not face attacks.
+                                // So we show minions as attackable, but highlight that minion targets are blocked.
+                                const canAttack = isPlayerBoard && minion.canAttack && !minion.hasAttacked;
+                                const isTargetable = canTarget; // Can target even if blocked (logic prevents attack and shows log)
 
-                            // Calculate Work Bonus
-                            let bonusDamage = 0;
-                            if (activeWork?.workBonus && minion.school?.includes(activeWork.workBonus.school)) {
-                                bonusDamage = activeWork.workBonus.damage;
-                            }
+                                // Calculate Work Bonus
+                                let bonusDamage = 0;
+                                if (activeWork?.workBonus && minion.school?.includes(activeWork.workBonus.school)) {
+                                    bonusDamage = activeWork.workBonus.damage;
+                                }
 
-                            // Status Effects
-                            const isSilenced = minion.silencedUntilTurn && minion.silencedUntilTurn > currentTurn;
-                            const isPendingTransform = minion.pendingTransformation;
+                                // Status Effects
+                                const isSilenced = minion.silencedUntilTurn && minion.silencedUntilTurn > currentTurn;
+                                const isPendingTransform = minion.pendingTransformation;
 
-                            return (
-                                <div key={minion.instanceId || minion.id} className="relative flex flex-col items-center gap-2">
-                                    <div className="relative">
-                                        <Card
-                                            card={minion}
-                                            onClick={onMinionClick ? () => onMinionClick(minion.instanceId || minion.id) : undefined}
-                                            isSelected={selectedMinionIds.includes(minion.instanceId || minion.id)}
-                                            isPlayable={(canAttack && !isSilenced) || isTargetable}
-                                            showHealth={true}
-                                            bonusDamage={bonusDamage}
-                                            className={`
-                                                ${canAttack && !isSilenced ? 'ring-2 ring-green-400' : ''}
-                                                ${isTargetable && !isSpecialTargeting ? 'ring-2 ring-red-400 cursor-attack' : ''}
-                                                ${isTargetable && isSpecialTargeting ? 'ring-2 ring-purple-400 cursor-magic' : ''}
-                                                ${minion.hasAttacked || minion.hasUsedSpecial ? 'opacity-50' : ''}
-                                            `}
-                                        />
-                                        {isSilenced && (
-                                            <div className="absolute top-0 right-0 bg-red-900/90 text-white text-[10px] px-1 rounded-bl border border-red-500" title="Stummgeschaltet (Diotima)">
-                                                🔇
-                                            </div>
-                                        )}
-                                        {isPendingTransform && (
-                                            <div className="absolute top-0 left-0 bg-purple-900/90 text-white text-[10px] px-1 rounded-br border border-purple-500" title="Transformation ausstehend (Sartre)">
-                                                ⏳
-                                            </div>
-                                        )}
+                                return (
+                                    <motion.div
+                                        key={minion.instanceId || minion.id}
+                                        layout
+                                        initial={{ opacity: 0, scale: 0.8, y: -20 }}
+                                        animate={{ opacity: 1, scale: 1, y: 0 }}
+                                        exit={{ opacity: 0, scale: 0, transition: { duration: 0.3 } }}
+                                        className="relative flex flex-col items-center gap-2"
+                                    >
+                                        <div className="relative">
+                                            <Card
+                                                card={minion}
+                                                onClick={onMinionClick ? () => onMinionClick(minion.instanceId || minion.id) : undefined}
+                                                isSelected={selectedMinionIds.includes(minion.instanceId || minion.id)}
+                                                isPlayable={(canAttack && !isSilenced) || isTargetable}
+                                                showHealth={true}
+                                                bonusDamage={bonusDamage}
+                                                className={`
+                                                    ${canAttack && !isSilenced ? 'ring-2 ring-green-400' : ''}
+                                                    ${isTargetable && !isSpecialTargeting ? 'ring-2 ring-red-400 cursor-attack' : ''}
+                                                    ${isTargetable && isSpecialTargeting ? 'ring-2 ring-purple-400 cursor-magic' : ''}
+                                                    ${minion.hasAttacked || minion.hasUsedSpecial ? 'opacity-50' : ''}
+                                                `}
+                                            />
+                                            {isSilenced && (
+                                                <div className="absolute top-0 right-0 bg-red-900/90 text-white text-[10px] px-1 rounded-bl border border-red-500" title="Stummgeschaltet (Diotima)">
+                                                    🔇
+                                                </div>
+                                            )}
+                                            {isPendingTransform && (
+                                                <div className="absolute top-0 left-0 bg-purple-900/90 text-white text-[10px] px-1 rounded-br border border-purple-500" title="Transformation ausstehend (Sartre)">
+                                                    ⏳
+                                                </div>
+                                            )}
 
-                                    </div>
-
-
-
-                                </div>
-                            );
-                        })
-                    )}
+                                        </div>
+                                    </motion.div>
+                                );
+                            })
+                        )}
+                    </AnimatePresence>
                 </div>
 
                 {/* Right Arrow */}

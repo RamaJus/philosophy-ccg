@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
+import { motion } from 'framer-motion';
 import { Card as CardType, BoardMinion } from '../types';
 import { Swords, Heart, Zap, BookOpen } from 'lucide-react';
 
@@ -31,8 +32,13 @@ export const Card: React.FC<CardProps> = ({
 
     const [isDamaged, setIsDamaged] = useState(false);
     const [isHealed, setIsHealed] = useState(false);
+    const [isSynergyTriggered, setIsSynergyTriggered] = useState(false);
+
     const currentHealth = boardMinion ? boardMinion.health : (card as any).health;
     const prevHealth = useRef(currentHealth);
+
+    const currentSynergy = boardMinion ? (boardMinion.synergyBonus || 0) : 0;
+    const prevSynergy = useRef(currentSynergy);
 
     const baseAttack = boardMinion ? boardMinion.attack : (card.attack || 0);
     const totalAttack = baseAttack + bonusDamage;
@@ -56,6 +62,15 @@ export const Card: React.FC<CardProps> = ({
         prevHealth.current = currentHealth;
     }, [currentHealth]);
 
+    useEffect(() => {
+        if (currentSynergy > prevSynergy.current) {
+            setIsSynergyTriggered(true);
+            const timer = setTimeout(() => setIsSynergyTriggered(false), 800);
+            return () => clearTimeout(timer);
+        }
+        prevSynergy.current = currentSynergy;
+    }, [currentSynergy]);
+
     const handleContextMenu = (e: React.MouseEvent) => {
         e.preventDefault();
         setShowPreview(true);
@@ -72,13 +87,12 @@ export const Card: React.FC<CardProps> = ({
         }
     }, [showPreview]);
 
-    const cardClasses = `
+    // Base classes that don't conflict with motion
+    const baseClasses = `
         ${isMinion ? 'card-minion' : 'card-spell'}
-        ${isSelected ? 'ring-4 ring-yellow-400 scale-110' : ''}
+        ${isSelected ? 'ring-4 ring-yellow-400 z-20' : ''}
         ${isPlayable ? 'cursor-pointer' : 'cursor-default'}
-        ${isDamaged ? 'animate-shake ring-4 ring-red-500' : ''}
-        ${isHealed ? 'ring-4 ring-green-400 animate-pulse' : ''}
-        relative group transition-all duration-300 transform hover:scale-105 hover:z-10
+        relative group
         ${className}
     `;
 
@@ -93,16 +107,24 @@ export const Card: React.FC<CardProps> = ({
             {showPreview && createPortal(
                 <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/80 backdrop-blur-sm" onClick={handleContextMenuRelease}>
                     <div className="flex gap-8 items-center pointer-events-auto" onClick={(e) => e.stopPropagation()}>
-                        <div className="relative transform scale-150 shadow-2xl">
+                        <motion.div
+                            initial={{ scale: 0.8, opacity: 0 }}
+                            animate={{ scale: 1.5, opacity: 1 }}
+                            className="relative transform shadow-2xl"
+                        >
                             <Card
                                 card={card}
                                 isPlayable={false}
                                 showHealth={showHealth}
                                 bonusDamage={bonusDamage}
                             />
-                        </div>
+                        </motion.div>
 
-                        <div className="w-[440px] h-[300px] bg-slate-900/95 border border-slate-600 rounded-xl p-4 text-white shadow-2xl flex flex-col gap-3 overflow-y-auto">
+                        <motion.div
+                            initial={{ x: 50, opacity: 0 }}
+                            animate={{ x: 0, opacity: 1 }}
+                            className="w-[440px] h-[300px] bg-slate-900/95 border border-slate-600 rounded-xl p-4 text-white shadow-2xl flex flex-col gap-3 overflow-y-auto"
+                        >
                             <h3 className="text-lg font-bold text-amber-400 border-b border-slate-700 pb-2">{card.name}</h3>
 
                             {card.school && (
@@ -140,16 +162,40 @@ export const Card: React.FC<CardProps> = ({
                                 <span className="text-xs text-gray-400 uppercase tracking-wider">Typ</span>
                                 <p className="text-sm font-medium">{card.type}</p>
                             </div>
-                        </div>
+                        </motion.div>
                     </div>
                 </div>,
                 document.body
             )}
 
-            <div
-                className={cardClasses}
+            <motion.div
+                layout
+                className={baseClasses}
                 onContextMenu={handleContextMenu}
                 style={{ width: '140px', height: '200px', backgroundColor: '#fef3c7' }}
+                initial={false}
+                animate={{
+                    scale: isSelected ? 1.1 : 1,
+                    x: isDamaged ? [-5, 5, -5, 5, 0] : 0,
+                    boxShadow: isHealed
+                        ? "0 0 20px #4ade80"
+                        : isSynergyTriggered
+                            ? "0 0 20px #a855f7"
+                            : isSelected
+                                ? "0 0 0 4px #fbbf24"
+                                : "0 25px 50px -12px rgba(0, 0, 0, 0.25)"
+                }}
+                whileHover={{
+                    scale: isSelected ? 1.15 : 1.05,
+                    zIndex: 10,
+                    boxShadow: "0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)"
+                }}
+                whileTap={{ scale: 0.95 }}
+                transition={{
+                    type: "spring",
+                    stiffness: 300,
+                    damping: 20
+                }}
             >
                 {/* Transparent clickable overlay - captures ALL clicks */}
                 {onClick && isPlayable && (
@@ -176,12 +222,13 @@ export const Card: React.FC<CardProps> = ({
 
                 {/* Synergy Bonus Badge (for philosophers on board with synergy) */}
                 {isMinion && boardMinion?.synergyBonus && boardMinion.synergyBonus > 0 && (
-                    <div
+                    <motion.div
+                        initial={{ scale: 0 }}
+                        animate={{ scale: 1 }}
                         className="absolute top-8 right-1 z-[60] group/synergy"
                         style={{ pointerEvents: 'auto' }}
                         onClick={(e) => {
-                            // Forward click to main card handler if playable, 
-                            // otherwise allow default (which might be nothing or selection)
+                            // Forward click to main card handler if playable
                             if (onClick && isPlayable) {
                                 e.stopPropagation();
                                 onClick();
@@ -202,7 +249,7 @@ export const Card: React.FC<CardProps> = ({
                                 ))}
                             </div>
                         </div>
-                    </div>
+                    </motion.div>
                 )}
 
                 {/* Full Image Area */}
@@ -276,7 +323,7 @@ export const Card: React.FC<CardProps> = ({
                         </div>
                     </div>
                 )}
-            </div>
+            </motion.div>
         </>
     );
 };

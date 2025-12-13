@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Player } from '../types';
-import { Heart, Droplet, BookMarked } from 'lucide-react';
+import { Heart, Droplet, BookMarked, Lock } from 'lucide-react';
 
 interface PlayerStatsProps {
     player: Player;
@@ -10,6 +11,8 @@ interface PlayerStatsProps {
 export const PlayerStats: React.FC<PlayerStatsProps> = ({ player, isOpponent = false }) => {
     const [isDamaged, setIsDamaged] = useState(false);
     const prevHealth = useRef(player.health);
+    const prevLockedMana = useRef(player.lockedMana);
+    const [showLockWarn, setShowLockWarn] = useState(false);
 
     useEffect(() => {
         if (player.health < prevHealth.current) {
@@ -20,34 +23,100 @@ export const PlayerStats: React.FC<PlayerStatsProps> = ({ player, isOpponent = f
         prevHealth.current = player.health;
     }, [player.health]);
 
+    useEffect(() => {
+        if (player.lockedMana > prevLockedMana.current) {
+            // Mana lock applied
+            setShowLockWarn(true);
+            const timer = setTimeout(() => setShowLockWarn(false), 2000);
+            return () => clearTimeout(timer);
+        }
+        prevLockedMana.current = player.lockedMana;
+    }, [player.lockedMana]);
+
     return (
         <div className={`glass-panel p-3 transition-all duration-200 ${isOpponent ? 'bg-red-500/10' : 'bg-blue-500/10'} ${isDamaged ? 'animate-shake ring-2 ring-red-500 bg-red-500/20' : ''}`}>
             <h2 className="text-lg font-bold mb-2 text-center truncate">{player.name}</h2>
 
-            <div className="space-y-1">
+            <div className="space-y-3">
                 {/* Health */}
                 <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
                         <Heart className={`${isDamaged ? 'text-red-500 scale-125' : 'text-red-400'} transition-all duration-200`} size={16} />
                         <span className="font-semibold text-sm">Glaubwürdigkeit</span>
                     </div>
-                    <div className="text-base font-bold">
-                        <span className={`${player.health <= 10 ? 'text-red-400 animate-pulse' : 'text-green-400'} ${isDamaged ? 'text-red-500 scale-150 inline-block' : ''} transition-all duration-200`}>
-                            {player.health}
-                        </span>
-                        <span className="text-gray-400 text-xs">/{player.maxHealth}</span>
+                    <div className="text-base font-bold relative h-6 w-12 text-right overflow-hidden">
+                        <AnimatePresence mode="popLayout">
+                            <motion.span
+                                key={player.health}
+                                initial={{ y: -20, opacity: 0 }}
+                                animate={{ y: 0, opacity: 1 }}
+                                exit={{ y: 20, opacity: 0 }}
+                                className={`absolute right-0 ${player.health <= 10 ? 'text-red-400 animate-pulse' : 'text-green-400'} ${isDamaged ? 'text-red-500 scale-150' : ''}`}
+                            >
+                                {player.health}
+                            </motion.span>
+                        </AnimatePresence>
+                        <span className="text-gray-400 text-xs ml-8">/{player.maxHealth}</span>
                     </div>
                 </div>
 
-                {/* Mana - Counter only */}
-                <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                        <Droplet className="text-blue-400" size={16} />
-                        <span className="font-semibold text-sm">Dialektik</span>
+                {/* Mana - Visual Crystals */}
+                <div className="flex flex-col gap-1">
+                    <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                            <Droplet className="text-blue-400" size={16} />
+                            <span className="font-semibold text-sm">Dialektik</span>
+                        </div>
+                        <div className="text-base font-bold text-blue-400 flex items-center gap-2">
+                            {player.lockedMana > 0 && (
+                                <motion.div
+                                    initial={{ scale: 0 }}
+                                    animate={{ scale: 1 }}
+                                    className="flex items-center text-xs text-amber-500 bg-amber-900/40 px-2 py-0.5 rounded border border-amber-500/50"
+                                    title={`Nächster Zug: -${player.lockedMana} Dialektik`}
+                                >
+                                    <Lock size={12} className="mr-1" />
+                                    <span>-{player.lockedMana}</span>
+                                </motion.div>
+                            )}
+                            {player.mana}/{player.maxMana}
+                        </div>
                     </div>
-                    <div className="text-base font-bold text-blue-400">
-                        {player.mana}/{player.maxMana}
+
+                    {/* Crystal Bar */}
+                    <div className="flex flex-wrap gap-1 mt-1 justify-end">
+                        {Array.from({ length: Math.min(10, player.maxMana) }).map((_, i) => (
+                            <motion.div
+                                key={i}
+                                initial={false}
+                                animate={{
+                                    scale: i < player.mana ? 1 : 0.8,
+                                    opacity: i < player.mana ? 1 : 0.3
+                                }}
+                                className={`w-3 h-3 rounded-full ${i < player.mana
+                                    ? 'bg-gradient-to-br from-blue-400 to-blue-600 shadow-blue-500/50 shadow-sm'
+                                    : 'bg-slate-700 border border-slate-600'
+                                    }`}
+                            />
+                        ))}
                     </div>
+
+                    {/* Lock Warning Overlay */}
+                    <AnimatePresence>
+                        {showLockWarn && (
+                            <motion.div
+                                initial={{ opacity: 0, y: 10 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                exit={{ opacity: 0 }}
+                                className="absolute left-0 right-0 top-1/2 -translate-y-1/2 flex justify-center pointer-events-none z-50"
+                            >
+                                <div className="bg-slate-900/90 border-2 border-amber-500 text-amber-400 px-4 py-2 rounded-xl shadow-2xl flex items-center gap-2 backdrop-blur-md">
+                                    <Lock size={20} />
+                                    <span className="font-bold">Dialektik gesperrt!</span>
+                                </div>
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
                 </div>
 
                 {/* Deck Count */}

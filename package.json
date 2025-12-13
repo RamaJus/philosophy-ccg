@@ -9,6 +9,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "framer-motion": "^12.23.26",
     "lucide-react": "^0.294.0",
     "peerjs": "^1.5.5",
     "qrcode.react": "^4.2.0",
