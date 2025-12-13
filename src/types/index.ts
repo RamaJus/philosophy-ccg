@@ -70,6 +70,8 @@ export interface GameState {
     kontemplationCards?: Card[]; // Top 3 cards for Kontemplation selection
     foucaultRevealCards?: Card[]; // Top 3 opponent cards for Foucault reveal
     log: string[]; // Game log messages
+    lastPlayedCard?: Card; // For visual flash effect of performed spells
+    lastPlayedCardPlayerId?: 'player' | 'opponent'; // Who played the spell
 }
 
 export type GameAction =

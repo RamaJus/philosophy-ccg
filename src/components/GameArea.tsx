@@ -1,5 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useGameLogic } from '../hooks/useGameLogic';
+import { Card } from '../types';
 import { PlayerStats } from './PlayerStats';
 import { Hand } from './Hand';
 import { Board } from './Board';
@@ -63,7 +65,24 @@ export const GameArea: React.FC<GameAreaProps> = ({ mode, isDebugMode }) => {
     // View Transformation for Client
     const viewPlayer = isClient ? opponent : player;
     const viewOpponent = isClient ? player : opponent;
+
     const viewIsPlayerTurn = isClient ? activePlayer === 'opponent' : activePlayer === 'player';
+
+    // Flash Card Logic
+    const [flashCard, setFlashCard] = useState<{ card: Card; position: 'top' | 'bottom' } | null>(null);
+
+    useEffect(() => {
+        if (gameState.lastPlayedCard && gameState.lastPlayedCardPlayerId) {
+            // Determine position based on who played it relative to view
+            const isMe = gameState.lastPlayedCardPlayerId === viewPlayer.id;
+            const position = isMe ? 'bottom' : 'top';
+
+            setFlashCard({ card: gameState.lastPlayedCard, position });
+
+            const timer = setTimeout(() => setFlashCard(null), 1000); // 1 second duration
+            return () => clearTimeout(timer);
+        }
+    }, [gameState.lastPlayedCard]); // Trigger when card changes
 
     // Auto-start the game on mount (only for single player or host)
     useEffect(() => {
@@ -475,6 +494,25 @@ export const GameArea: React.FC<GameAreaProps> = ({ mode, isDebugMode }) => {
                         </div>
                     </div>
                 </div>
+
+                {/* Flash Card Overlay */}
+                <AnimatePresence>
+                    {flashCard && (
+                        <motion.div
+                            key={flashCard.card.instanceId || 'flash'}
+                            initial={{ opacity: 0, scale: 0.5, y: flashCard.position === 'top' ? -100 : 100 }}
+                            animate={{ opacity: 1, scale: 1.5, y: 0 }}
+                            exit={{ opacity: 0, scale: 2 }}
+                            transition={{ duration: 0.3, type: 'spring', stiffness: 200, damping: 20 }}
+                            className={`absolute z-[100] left-1/2 -translate-x-1/2 pointer-events-none drop-shadow-2xl ${flashCard.position === 'top' ? 'top-[30%]' : 'bottom-[40%]'
+                                }`}
+                        >
+                            <div className="shadow-2xl shadow-cyan-500/50 rounded-xl">
+                                <CardComponent card={flashCard.card} isPlayable={false} />
+                            </div>
+                        </motion.div>
+                    )}
+                </AnimatePresence>
 
                 {/* Hand Overlay - limited height to only cover visible collapsed portion */}
                 <div className="absolute bottom-0 left-0 right-0 h-[100px] z-40 flex justify-center items-end overflow-visible">

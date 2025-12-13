@@ -66,7 +66,7 @@ export const Card: React.FC<CardProps> = ({
     useEffect(() => {
         if (currentSynergy > prevSynergy.current) {
             setIsSynergyTriggered(true);
-            const timer = setTimeout(() => setIsSynergyTriggered(false), 900); // Duration adjusted per feedback
+            const timer = setTimeout(() => setIsSynergyTriggered(false), 500); // Duration adjusted per feedback
             return () => clearTimeout(timer);
         }
         prevSynergy.current = currentSynergy;

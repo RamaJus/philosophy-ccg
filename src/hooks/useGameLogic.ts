@@ -531,7 +531,9 @@ export function useGameLogic(mode: 'single' | 'multiplayer_host' | 'multiplayer_
                         player: activePlayerKey === 'player' ? updatedPlayer : updatedEnemy,
                         opponent: activePlayerKey === 'player' ? updatedEnemy : updatedPlayer,
                         selectedCard: undefined,
-                        log: currentLog
+                        log: currentLog,
+                        lastPlayedCard: card,
+                        lastPlayedCardPlayerId: activePlayerKey
                     };
                 }
 
@@ -549,7 +551,9 @@ export function useGameLogic(mode: 'single' | 'multiplayer_host' | 'multiplayer_
                         player: activePlayerKey === 'player' ? updatedPlayer : updatedEnemy,
                         opponent: activePlayerKey === 'player' ? updatedEnemy : updatedPlayer,
                         selectedCard: undefined,
-                        log: currentLog
+                        log: currentLog,
+                        lastPlayedCard: card,
+                        lastPlayedCardPlayerId: activePlayerKey
                     };
                 }
 
@@ -598,6 +602,8 @@ export function useGameLogic(mode: 'single' | 'multiplayer_host' | 'multiplayer_
                             targetModeOwner: activePlayerKey,
                             pendingPlayedCard: card,
                             log: currentLog,
+                            lastPlayedCard: card,
+                            lastPlayedCardPlayerId: activePlayerKey
                         };
                     }
                 } else if (card.id.includes('hermeneutics') || card.id.includes('debug')) {
@@ -614,6 +620,8 @@ export function useGameLogic(mode: 'single' | 'multiplayer_host' | 'multiplayer_
                         targetModeOwner: activePlayerKey,
                         pendingPlayedCard: card,
                         log: currentLog,
+                        lastPlayedCard: card,
+                        lastPlayedCardPlayerId: activePlayerKey
                     };
                 } else if (card.id.includes('kontemplation')) {
                     // Look at top 3 cards of your deck, pick 1
@@ -632,6 +640,8 @@ export function useGameLogic(mode: 'single' | 'multiplayer_host' | 'multiplayer_
                             targetModeOwner: activePlayerKey,
                             kontemplationCards: top3,
                             log: currentLog,
+                            lastPlayedCard: card,
+                            lastPlayedCardPlayerId: activePlayerKey
                         };
                     }
                 } else if (card.id.includes('axiom')) {
@@ -649,6 +659,8 @@ export function useGameLogic(mode: 'single' | 'multiplayer_host' | 'multiplayer_
                         targetModeOwner: activePlayerKey,
                         pendingPlayedCard: card,
                         log: currentLog, // No log added yet but passing it anyway
+                        lastPlayedCard: card,
+                        lastPlayedCardPlayerId: activePlayerKey
                     };
                 } else if (card.id.includes('idee_des_guten')) {
                     // AOE Heal +2 for own board
@@ -666,6 +678,8 @@ export function useGameLogic(mode: 'single' | 'multiplayer_host' | 'multiplayer_
                 opponent: activePlayerKey === 'player' ? updatedEnemy : updatedPlayer,
                 selectedCard: undefined,
                 log: currentLog,
+                lastPlayedCard: card,
+                lastPlayedCardPlayerId: activePlayerKey
             };
         });
     }, [appendLog, drawCard]);
