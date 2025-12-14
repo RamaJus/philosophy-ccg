@@ -74,23 +74,31 @@ export const GameArea: React.FC<GameAreaProps> = ({ mode, isDebugMode }) => {
     const lastFlashedCardId = useRef<string | null>(null);
 
     useEffect(() => {
-        if (gameState.lastPlayedCard && gameState.lastPlayedCardPlayerId) {
-            // Prevent repeat flash
-            if (lastFlashedCardId.current === (gameState.lastPlayedCard.instanceId || gameState.lastPlayedCard.id)) {
-                return;
-            }
-            lastFlashedCardId.current = gameState.lastPlayedCard.instanceId || gameState.lastPlayedCard.id;
-
-            // Determine position based on who played it relative to view
-            const isMe = gameState.lastPlayedCardPlayerId === viewPlayer.id;
-            const position = isMe ? 'bottom' : 'top';
-
-            setFlashCard({ card: gameState.lastPlayedCard, position });
-
-            const timer = setTimeout(() => setFlashCard(null), 1000); // 1 second duration
-            return () => clearTimeout(timer);
+        // Clear flash if no card is pending
+        if (!gameState.lastPlayedCard || !gameState.lastPlayedCardPlayerId) {
+            setFlashCard(null);
+            return;
         }
-    }, [gameState.lastPlayedCard]); // Trigger when card changes
+
+        // Prevent repeat flash for exact same card instance
+        if (lastFlashedCardId.current === (gameState.lastPlayedCard.instanceId || gameState.lastPlayedCard.id)) {
+            return;
+        }
+        lastFlashedCardId.current = gameState.lastPlayedCard.instanceId || gameState.lastPlayedCard.id;
+
+        // Determine position based on who played it relative to view
+        const isMe = gameState.lastPlayedCardPlayerId === viewPlayer.id;
+        const position = isMe ? 'bottom' : 'top';
+
+        setFlashCard({ card: gameState.lastPlayedCard, position });
+
+        const timer = setTimeout(() => {
+            setFlashCard(null);
+            // Reset ref after flash completes so same card can flash again if played again
+            lastFlashedCardId.current = null;
+        }, 1000); // 1 second duration
+        return () => clearTimeout(timer);
+    }, [gameState.lastPlayedCard, gameState.lastPlayedCardPlayerId]); // Trigger when card changes
 
     // Auto-start the game on mount (only for single player or host)
     useEffect(() => {

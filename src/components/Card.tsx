@@ -92,7 +92,7 @@ export const Card: React.FC<CardProps> = ({
     const baseClasses = `
         ${isMinion ? 'card-minion' : 'card-spell'}
         ${isSelected ? 'ring-4 ring-yellow-400 z-20' : ''}
-        ${isPlayable ? 'cursor-pointer' : 'cursor-default'}
+        ${isPlayable ? 'cursor-pointer' : ''}
         relative group
         ${className}
     `;
