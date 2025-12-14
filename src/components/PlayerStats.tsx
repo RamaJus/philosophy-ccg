@@ -25,11 +25,13 @@ export const PlayerStats: React.FC<PlayerStatsProps> = ({ player, isOpponent = f
 
     useEffect(() => {
         if (player.lockedMana > prevLockedMana.current) {
-            // Mana lock applied
+            // Mana lock applied - show warning
             setShowLockWarn(true);
             const timer = setTimeout(() => setShowLockWarn(false), 2000);
+            prevLockedMana.current = player.lockedMana;
             return () => clearTimeout(timer);
         }
+        // Always sync the ref to current value (important for multiplayer sync)
         prevLockedMana.current = player.lockedMana;
     }, [player.lockedMana]);
 
