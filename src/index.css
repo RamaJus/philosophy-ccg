@@ -10,6 +10,11 @@
     cursor: url('/images/cursors/normal.png') 0 0, auto;
   }
 
+  /* Inherit cursor globally to prevent default cursor on any element */
+  * {
+    cursor: inherit;
+  }
+
   button,
   a,
   [role="button"] {
