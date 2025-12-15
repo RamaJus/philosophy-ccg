@@ -62,12 +62,12 @@ export const cardDatabase: Card[] = [
         cost: 9,
         attack: 9,
         health: 7,
-        description: 'Gott ist tot! Wenn ausgespielt: Wähle einen Philosophen -> seine Werte werden halbiert (Der letzte Mensch).',
+        description: 'Gott ist tot!',
+        effect: 'Der letzte Mensch: Wähle einen Philosophen -> seine Werte werden halbiert.',
         rarity: 'Legendär',
         school: ['Existentialismus', 'Nihilismus'],
         gender: 'male',
-        image: '/images/cards/nietzsche.png',
-        specialAbility: 'transform', // Should be 'target'? Or handled in logic. Logic handles targetMode.
+        image: '/images/cards/nietzsche.jpg',
     },
     {
         id: 'descartes',
@@ -837,6 +837,26 @@ export const cardDatabase: Card[] = [
         description: 'Die Kunst der Überredung. +1 Dialektik für dich, sperrt 1 Dialektik des Gegners.',
         rarity: 'Gewöhnlich',
         image: '/images/cards/sophistry.png',
+    },
+    {
+        id: 'eristik',
+        name: 'Eristische Dialektik',
+        type: 'Zauber',
+        cost: 4,
+        description: 'Die Kunst, Recht zu behalten.',
+        effect: '+2 Dialektik für dich, sperrt 2 Dialektik des Gegners.',
+        rarity: 'Legendär',
+        image: '/images/cards/eristik.png',
+    },
+    {
+        id: 'ewige-wiederkunft',
+        name: 'Ewige Wiederkunft',
+        type: 'Zauber',
+        cost: 8,
+        description: 'Alle Lust will - Ewigkeit!',
+        effect: 'Hole einen Philosophen vom Friedhof zurück auf die Hand.',
+        rarity: 'Legendär',
+        image: '/images/cards/ewige-wiederkunft.png',
     },
 ];
 
