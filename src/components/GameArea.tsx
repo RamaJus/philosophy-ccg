@@ -462,7 +462,6 @@ export const GameArea: React.FC<GameAreaProps> = ({ mode, isDebugMode }) => {
                         <div className="flex-1">
                             <Board
                                 minions={viewOpponent.board}
-                                activeWork={viewOpponent.activeWork}
                                 onMinionClick={viewIsPlayerTurn && (selectedMinions?.length || targetMode === 'gottesbeweis_target' || targetMode === 'nietzsche_target') ? handleOpponentMinionClick : undefined}
                                 canTarget={viewIsPlayerTurn && (
                                     (!!selectedMinions?.length && (() => {
