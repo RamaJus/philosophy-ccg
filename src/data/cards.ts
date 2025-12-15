@@ -68,6 +68,11 @@ export const cardDatabase: Card[] = [
         school: ['Existentialismus', 'Nihilismus'],
         gender: 'male',
         image: '/images/cards/nietzsche.jpg',
+        specialAbility: 'transform',
+        special: {
+            name: 'Der letzte Mensch',
+            description: 'Verwandle einen gegnerischen Philosophen in den letzten Menschen (halbierte Werte).'
+        }
     },
     {
         id: 'descartes',
@@ -847,7 +852,7 @@ export const cardDatabase: Card[] = [
         id: 'eristik',
         name: 'Eristik',
         type: 'Zauber',
-        cost: 4,
+        cost: 2,
         description: 'Die Kunst, Recht zu behalten.',
         effect: '+2 Dialektik für dich, sperrt 2 Dialektik des Gegners.',
         rarity: 'Gewöhnlich',

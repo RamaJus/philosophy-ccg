@@ -1036,6 +1036,23 @@ export function useGameLogic(mode: 'single' | 'multiplayer_host' | 'multiplayer_
                         };
                     }
 
+                    // Nietzsche Special: Der letzte Mensch - halve target's stats
+                    if (minion.id.includes('nietzsche')) {
+                        if (enemyPlayer.board.length === 0) {
+                            currentLog = appendLog(currentLog, 'Keine gegnerischen Philosophen zum transformieren!');
+                            return { ...prev, log: currentLog };
+                        }
+
+                        // Enter targeting mode
+                        return {
+                            ...prev,
+                            targetMode: 'nietzsche_target',
+                            targetModeOwner: activePlayerKey,
+                            selectedMinions: [action.minionId], // Keep track of which Nietzsche is using special
+                            log: appendLog(currentLog, `${minion.name}: \"Der letzte Mensch!\" Wähle einen gegnerischen Philosophen...`),
+                        };
+                    }
+
                     // Foucault Special: Panoptischer Blick - reveal top 3 cards of opponent's deck
                     if (minion.id.includes('foucault')) {
                         const top3Cards = enemyPlayer.deck.slice(0, 3);

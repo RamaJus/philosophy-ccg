@@ -22,7 +22,7 @@ interface GameAreaProps {
 
 export const GameArea: React.FC<GameAreaProps> = ({ mode, isDebugMode }) => {
     const { gameState, dispatch } = useGameLogic(mode, isDebugMode);
-    const { player, opponent, activePlayer, selectedCard, selectedMinions, gameOver, winner, log, targetMode, targetModeOwner, kontemplationCards, foucaultRevealCards } = gameState;
+    const { player, opponent, activePlayer, selectedCard, selectedMinions, gameOver, winner, log, targetMode, targetModeOwner, kontemplationCards, foucaultRevealCards, recurrenceCards } = gameState;
 
     // Use ref to always have the latest state in AI callbacks
     const gameStateRef = useRef(gameState);
@@ -137,10 +137,15 @@ export const GameArea: React.FC<GameAreaProps> = ({ mode, isDebugMode }) => {
 
     const handleOpponentMinionClick = (minionId: string) => {
         if (!viewIsPlayerTurn) return;
-        if (!selectedMinions?.length && targetMode !== 'gottesbeweis_target') return;
+        if (!selectedMinions?.length && targetMode !== 'gottesbeweis_target' && targetMode !== 'nietzsche_target') return;
 
         if (targetMode === 'gottesbeweis_target') {
             dispatch({ type: 'GOTTESBEWEIS_TARGET', minionId });
+            return;
+        }
+
+        if (targetMode === 'nietzsche_target') {
+            dispatch({ type: 'NIETZSCHE_TARGET', minionId });
             return;
         }
 
@@ -194,6 +199,10 @@ export const GameArea: React.FC<GameAreaProps> = ({ mode, isDebugMode }) => {
 
     const handleFoucaultClose = () => {
         dispatch({ type: 'FOUCAULT_CLOSE' });
+    };
+
+    const handleRecurrenceSelect = (cardId: string) => {
+        dispatch({ type: 'RECURRENCE_SELECT', cardId });
     };
 
     const aiTurn = () => {
@@ -273,8 +282,8 @@ export const GameArea: React.FC<GameAreaProps> = ({ mode, isDebugMode }) => {
                                 animate={{ scale: 1, y: 0 }}
                                 transition={{ type: "spring", duration: 0.5 }}
                                 className={`relative p-12 max-w-2xl w-full text-center overflow-hidden rounded-2xl shadow-2xl border-4 ${(mode === 'multiplayer_client' ? winner === 'opponent' : winner === 'player')
-                                        ? 'border-amber-400/50 bg-gradient-to-b from-slate-900 to-amber-900/40'
-                                        : 'border-red-900/50 bg-gradient-to-b from-slate-900 to-red-950/40'
+                                    ? 'border-amber-400/50 bg-gradient-to-b from-slate-900 to-amber-900/40'
+                                    : 'border-red-900/50 bg-gradient-to-b from-slate-900 to-red-950/40'
                                     }`}
                             >
                                 {/* Decorative elements */}
@@ -323,8 +332,8 @@ export const GameArea: React.FC<GameAreaProps> = ({ mode, isDebugMode }) => {
                                     whileTap={{ scale: 0.95 }}
                                     onClick={handleNewGame}
                                     className={`px-8 py-3 rounded-lg font-bold text-lg transition-all shadow-lg flex items-center justify-center mx-auto gap-3 ${(mode === 'multiplayer_client' ? winner === 'opponent' : winner === 'player')
-                                            ? 'bg-amber-600 hover:bg-amber-500 text-white shadow-amber-900/50'
-                                            : 'bg-slate-700 hover:bg-slate-600 text-gray-200 shadow-slate-900/50'
+                                        ? 'bg-amber-600 hover:bg-amber-500 text-white shadow-amber-900/50'
+                                        : 'bg-slate-700 hover:bg-slate-600 text-gray-200 shadow-slate-900/50'
                                         }`}
                                 >
                                     <RotateCcw size={24} />
@@ -401,6 +410,29 @@ export const GameArea: React.FC<GameAreaProps> = ({ mode, isDebugMode }) => {
                     </div>
                 )}
 
+                {/* Ewige Wiederkunft Graveyard Selection Modal */}
+                {targetMode === 'recurrence_select' && isMyTargetMode && recurrenceCards && recurrenceCards.length > 0 && (
+                    <div className="fixed inset-0 bg-black/80 z-50 flex flex-col items-center justify-center p-8 backdrop-blur-sm">
+                        <div className="bg-slate-900 border-2 border-green-600 rounded-xl p-8 shadow-2xl shadow-green-900/20 max-w-4xl max-h-[80vh] overflow-auto">
+                            <h2 className="text-3xl font-serif text-green-400 mb-2 text-center">Ewige Wiederkunft</h2>
+                            <p className="text-green-200/60 mb-6 font-serif italic text-center">
+                                Wähle einen Philosophen aus deinem Friedhof.
+                            </p>
+                            <div className="flex flex-wrap gap-6 justify-center">
+                                {recurrenceCards.map((card) => (
+                                    <div
+                                        key={card.instanceId || card.id}
+                                        className="transform transition-all duration-300 hover:scale-105 hover:shadow-xl hover:shadow-green-500/20 cursor-pointer"
+                                        onClick={() => handleRecurrenceSelect(card.instanceId || card.id)}
+                                    >
+                                        <CardComponent card={card} isPlayable={true} />
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    </div>
+                )}
+
                 {/* Main Game Grid - Adjusted for full height */}
                 <div className="grid grid-cols-12 gap-2 h-full p-2 pb-24">
                     {/* Left Side: Stats & Graveyard (2 cols) */}
@@ -417,13 +449,14 @@ export const GameArea: React.FC<GameAreaProps> = ({ mode, isDebugMode }) => {
                         <div className="flex-1">
                             <Board
                                 minions={viewOpponent.board}
-                                onMinionClick={viewIsPlayerTurn && (selectedMinions?.length || targetMode === 'gottesbeweis_target') ? handleOpponentMinionClick : undefined}
-                                canTarget={viewIsPlayerTurn && (!!selectedMinions?.length || targetMode === 'gottesbeweis_target')}
+                                onMinionClick={viewIsPlayerTurn && (selectedMinions?.length || targetMode === 'gottesbeweis_target' || targetMode === 'nietzsche_target') ? handleOpponentMinionClick : undefined}
+                                canTarget={viewIsPlayerTurn && (!!selectedMinions?.length || targetMode === 'gottesbeweis_target' || targetMode === 'nietzsche_target')}
                                 activeWork={viewOpponent.activeWork}
                                 isSpecialTargeting={(() => {
                                     // 1. Explicit Target Modes (Spells)
                                     if (targetMode === 'gottesbeweis_target') return !!isMyTargetMode;
                                     if (targetMode === 'trolley_sacrifice') return !!isMyTargetMode;
+                                    if (targetMode === 'nietzsche_target') return !!isMyTargetMode;
 
                                     // 2. Minion Special Ability Trigger (Implicit Mode)
                                     if (!selectedMinions?.length || selectedMinions.length > 1) return false;
