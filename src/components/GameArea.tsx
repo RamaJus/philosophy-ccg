@@ -213,6 +213,23 @@ export const GameArea: React.FC<GameAreaProps> = ({ mode, isDebugMode }) => {
                 return;
             }
 
+            // AI Target Logic (for Gottesbeweis etc.)
+            if (currentState.targetMode === 'gottesbeweis_target') {
+                // Determine target (prioritize human board, fallback to self)
+                const targetPool = humanPlayer.board.length > 0 ? humanPlayer.board : aiPlayer.board;
+                if (targetPool.length > 0) {
+                    const randomTarget = targetPool[Math.floor(Math.random() * targetPool.length)];
+                    dispatch({ type: 'GOTTESBEWEIS_TARGET', minionId: randomTarget.instanceId || randomTarget.id });
+                    setTimeout(() => aiTurn(), 800);
+                    return;
+                } else {
+                    // No targets? limit case
+                    dispatch({ type: 'CANCEL_CAST' });
+                    setTimeout(() => aiTurn(), 800);
+                    return;
+                }
+            }
+
             const playableCards = aiPlayer.hand.filter(c => c.cost <= aiPlayer.mana);
             if (playableCards.length > 0 && aiPlayer.board.length < MAX_BOARD_SIZE) {
                 const randomCard = playableCards[Math.floor(Math.random() * playableCards.length)];

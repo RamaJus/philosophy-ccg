@@ -672,7 +672,7 @@ export const cardDatabase: Card[] = [
         rarity: 'Gewöhnlich',
         school: ['Vorsokratiker', 'Logik'],
         gender: 'male',
-        image: '/images/cards/thales.png',
+        image: '/images/cards/thales_von_milet.png',
     },
 
     // Permanent Works

@@ -77,7 +77,11 @@ export const Board: React.FC<BoardProps> = ({
                                 // Kant's block only applies to minion-vs-minion attacks, not face attacks.
                                 // So we show minions as attackable, but highlight that minion targets are blocked.
                                 const canAttack = isPlayerBoard && minion.canAttack && !minion.hasAttacked;
-                                const isTargetable = canTarget; // Can target even if blocked (logic prevents attack and shows log)
+                                const isDiogenesInBarrel = minion.id.includes('diogenes') && minion.turnPlayed === currentTurn;
+                                // Diogenes (in barrel) cannot be ATTACKED, but might be targetable by spells (unless specified)
+                                // If we are in attack mode (selectedMinionIds > 0 and NOT special targeting), Diogenes is untargetable.
+                                const isAttackMode = selectedMinionIds.length > 0 && !isSpecialTargeting;
+                                const isTargetable = canTarget && !(isDiogenesInBarrel && isAttackMode && !isPlayerBoard);
 
                                 // Calculate Work Bonus
                                 let bonusDamage = 0;
