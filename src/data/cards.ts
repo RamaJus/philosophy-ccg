@@ -785,7 +785,7 @@ export const cardDatabase: Card[] = [
         id: 'camus',
         name: 'Albert Camus',
         type: 'Philosoph',
-        cost: 12,
+        cost: 13,
         attack: 1,
         health: 1,
         description: 'Wir müssen uns den Verlierer als glücklichen Menschen vorstellen.',

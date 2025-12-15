@@ -275,6 +275,7 @@ export function useGameLogic(mode: 'single' | 'multiplayer_host' | 'multiplayer_
             mana: availableMana,
             lockedMana: 0, // Reset lock
             currentTurnManaMalus: player.lockedMana, // Track the malus visually for this turn
+            currentTurnBonusMana: 0, // Reset bonus mana tracker
             board: player.board.map(minion => ({
                 ...minion,
                 canAttack: true,
@@ -580,6 +581,7 @@ export function useGameLogic(mode: 'single' | 'multiplayer_host' | 'multiplayer_
                     // Lock 1 enemy mana next turn + gain 1 temporary mana this turn
                     updatedEnemy.lockedMana = (updatedEnemy.lockedMana || 0) + 1;
                     updatedPlayer.mana = Math.min(updatedPlayer.mana + 1, 10);
+                    updatedPlayer.currentTurnBonusMana = (updatedPlayer.currentTurnBonusMana || 0) + 1;
                     currentLog = appendLog(currentLog, `${activePlayer.name} nutzte Sophistik: +1 Dialektik und sperrte 1 Dialektik des Gegners!`);
                 } else if (card.id.includes('dogmatism')) {
                     // Lock 2 Mana next turn
@@ -650,6 +652,7 @@ export function useGameLogic(mode: 'single' | 'multiplayer_host' | 'multiplayer_
                 } else if (card.id.includes('axiom')) {
                     // Grant +1 mana for this turn
                     updatedPlayer.mana = updatedPlayer.mana + 1;
+                    updatedPlayer.currentTurnBonusMana = (updatedPlayer.currentTurnBonusMana || 0) + 1;
                     currentLog = appendLog(currentLog, `${activePlayer.name} wirkte ${card.name} und erhielt 1 zusätzliche Dialektik!`);
                 } else if (card.id.includes('gottesbeweis')) {
                     // Trigger target mode
@@ -1121,6 +1124,8 @@ export function useGameLogic(mode: 'single' | 'multiplayer_host' | 'multiplayer_
                         opponent: activePlayerKey === 'player' ? opponent : updatedPlayer,
                         targetMode: undefined, // Exit search mode
                         log: [...prev.log, `${activePlayer.name} suchte eine Karte aus dem Deck.`],
+                        lastPlayedCard: undefined,
+                        lastPlayedCardPlayerId: undefined,
                     };
                 });
                 break;
@@ -1174,6 +1179,8 @@ export function useGameLogic(mode: 'single' | 'multiplayer_host' | 'multiplayer_
                         targetMode: undefined,
                         selectedMinion: undefined,
                         log: currentLog,
+                        lastPlayedCard: undefined,
+                        lastPlayedCardPlayerId: undefined,
                     };
                 });
                 break;
@@ -1225,6 +1232,8 @@ export function useGameLogic(mode: 'single' | 'multiplayer_host' | 'multiplayer_
                     ...prev,
                     targetMode: undefined,
                     foucaultRevealCards: undefined,
+                    lastPlayedCard: undefined,
+                    lastPlayedCardPlayerId: undefined,
                 }));
                 break;
             case 'GOTTESBEWEIS_TARGET':
@@ -1290,7 +1299,9 @@ export function useGameLogic(mode: 'single' | 'multiplayer_host' | 'multiplayer_
                         opponent: { ...opponent, board: updatedOpponentBoard, graveyard: updatedOpponentGraveyard },
                         targetMode: undefined,
                         selectedCard: undefined,
-                        pendingPlayedCard: undefined
+                        pendingPlayedCard: undefined,
+                        lastPlayedCard: undefined,
+                        lastPlayedCardPlayerId: undefined,
                     };
                 });
                 break;
