@@ -577,12 +577,36 @@ export function useGameLogic(mode: 'single' | 'multiplayer_host' | 'multiplayer_
                     // Heal 10
                     updatedPlayer.health = Math.min(updatedPlayer.health + 10, updatedPlayer.maxHealth);
                     currentLog = appendLog(currentLog, `${activePlayer.name} erreichte die Aufklärung: +10 Leben.`);
-                } else if (card.id.includes('sophistry')) {
+                } else if (card.id.includes('sophistik')) {
                     // Lock 1 enemy mana next turn + gain 1 temporary mana this turn
                     updatedEnemy.lockedMana = (updatedEnemy.lockedMana || 0) + 1;
                     updatedPlayer.mana = Math.min(updatedPlayer.mana + 1, 10);
                     updatedPlayer.currentTurnBonusMana = (updatedPlayer.currentTurnBonusMana || 0) + 1;
                     currentLog = appendLog(currentLog, `${activePlayer.name} nutzte Sophistik: +1 Dialektik und sperrte 1 Dialektik des Gegners!`);
+                } else if (card.id.includes('eristik')) {
+                    // Lock 2 enemy mana next turn + gain 2 temporary mana this turn
+                    updatedEnemy.lockedMana = (updatedEnemy.lockedMana || 0) + 2;
+                    updatedPlayer.mana = Math.min(updatedPlayer.mana + 2, 10); // Cap at 10? Maybe 12? User didn't specify cap increase.
+                    updatedPlayer.currentTurnBonusMana = (updatedPlayer.currentTurnBonusMana || 0) + 2;
+                    currentLog = appendLog(currentLog, `${activePlayer.name} nutzte Eristik: +2 Dialektik und sperrte 2 Dialektik des Gegners!`);
+                } else if (card.id.includes('ewige-wiederkunft')) {
+                    // Trigger graveyard recursion mode
+                    const GraveyardPhilosophers = updatedPlayer.graveyard.filter(c => c.type === 'Philosoph');
+                    if (GraveyardPhilosophers.length > 0) {
+                        return {
+                            ...prev,
+                            // Correctly update player
+                            player: activePlayerKey === 'player' ? updatedPlayer : updatedEnemy, // Cost paid
+                            opponent: activePlayerKey === 'player' ? updatedEnemy : updatedPlayer,
+                            targetMode: 'recurrence_select',
+                            targetModeOwner: activePlayerKey,
+                            recurrenceCards: GraveyardPhilosophers,
+                            log: appendLog(currentLog, `${activePlayer.name} beschwört die Ewige Wiederkunft...`),
+                            lastPlayedCard: undefined, // Prevent flash loop
+                        };
+                    } else {
+                        currentLog = appendLog(currentLog, `${activePlayer.name} wirkte ${card.name}, aber der Friedhof ist leer (keine Philosophen).`);
+                    }
                 } else if (card.id.includes('dogmatism')) {
                     // Lock 2 Mana next turn
                     updatedEnemy.lockedMana += 2;
@@ -1306,6 +1330,102 @@ export function useGameLogic(mode: 'single' | 'multiplayer_host' | 'multiplayer_
                 });
                 break;
 
+
+            case 'NIETZSCHE_TARGET':
+                setGameStateWithSynergies(prev => {
+                    const { player, opponent, activePlayer: activePlayerKey } = prev;
+                    let currentLog = prev.log;
+                    const activePlayer = activePlayerKey === 'player' ? player : opponent;
+
+                    const targetOnPlayerBoard = player.board.find(m => (m.instanceId || m.id) === action.minionId);
+                    const targetOnOpponentBoard = opponent.board.find(m => (m.instanceId || m.id) === action.minionId);
+
+                    const targetMinion = targetOnPlayerBoard || targetOnOpponentBoard;
+                    if (!targetMinion) return prev;
+
+                    // Halve Stats
+                    const newAttack = Math.floor(targetMinion.attack / 2);
+                    const newHealth = Math.floor(targetMinion.health / 2);
+
+                    const updatedTarget = {
+                        ...targetMinion,
+                        attack: newAttack,
+                        health: Math.max(1, newHealth)
+                    };
+
+                    let message = `${activePlayer.name} ließ Nietzsche spechen: ${targetMinion.name} wurde zum 'Letzten Menschen' (Werte halbiert: ${newAttack}/${newHealth}).`;
+
+                    // Update State
+                    let updatedPlayerBoard = player.board;
+                    let updatedPlayerGraveyard = player.graveyard;
+                    let updatedOpponentBoard = opponent.board;
+                    let updatedOpponentGraveyard = opponent.graveyard;
+
+                    if (targetOnPlayerBoard) {
+                        if (updatedTarget.health <= 0) {
+                            updatedPlayerBoard = updatedPlayerBoard.filter(m => (m.instanceId || m.id) !== action.minionId);
+                            updatedPlayerGraveyard = [...updatedPlayerGraveyard, targetMinion];
+                            message += " Besiegt!";
+                        } else {
+                            updatedPlayerBoard = updatedPlayerBoard.map(m => (m.instanceId || m.id) === action.minionId ? updatedTarget : m);
+                        }
+                    } else if (targetOnOpponentBoard) {
+                        if (updatedTarget.health <= 0) {
+                            updatedOpponentBoard = updatedOpponentBoard.filter(m => (m.instanceId || m.id) !== action.minionId);
+                            updatedOpponentGraveyard = [...updatedOpponentGraveyard, targetMinion];
+                            message += " Besiegt!";
+                        } else {
+                            updatedOpponentBoard = updatedOpponentBoard.map(m => (m.instanceId || m.id) === action.minionId ? updatedTarget : m);
+                        }
+                    }
+
+                    currentLog = appendLog(currentLog, message);
+
+                    return {
+                        ...prev,
+                        log: currentLog,
+                        player: { ...player, board: updatedPlayerBoard, graveyard: updatedPlayerGraveyard },
+                        opponent: { ...opponent, board: updatedOpponentBoard, graveyard: updatedOpponentGraveyard },
+                        targetMode: undefined,
+                        lastPlayedCard: undefined,
+                        lastPlayedCardPlayerId: undefined,
+                    };
+                });
+                break;
+            case 'RECURRENCE_SELECT':
+                setGameStateWithSynergies(prev => {
+                    const { player, opponent, activePlayer: activePlayerKey, recurrenceCards } = prev;
+                    if (!recurrenceCards) return prev;
+                    let currentLog = prev.log;
+                    const activePlayer = activePlayerKey === 'player' ? player : opponent;
+
+                    const selectedCard = recurrenceCards.find(c => c.instanceId === action.cardId || c.id === action.cardId);
+                    if (!selectedCard) return prev;
+
+                    const updatedHand = [...activePlayer.hand, selectedCard];
+                    const graveyartdIndex = activePlayer.graveyard.findIndex(c => c.instanceId === selectedCard.instanceId);
+                    const updatedGraveyard = activePlayer.graveyard.filter((_, i) => i !== graveyartdIndex);
+
+                    currentLog = appendLog(currentLog, `${activePlayer.name} holte ${selectedCard.name} durch die Ewige Wiederkunft zurück!`);
+
+                    const updatedPlayer = {
+                        ...activePlayer,
+                        hand: updatedHand,
+                        graveyard: updatedGraveyard
+                    };
+
+                    return {
+                        ...prev,
+                        player: activePlayerKey === 'player' ? updatedPlayer : player,
+                        opponent: activePlayerKey === 'player' ? opponent : updatedPlayer,
+                        targetMode: undefined,
+                        recurrenceCards: undefined,
+                        log: currentLog,
+                        lastPlayedCard: undefined,
+                        lastPlayedCardPlayerId: undefined,
+                    };
+                });
+                break; // End handler block
             case 'CANCEL_CAST':
                 setGameStateWithSynergies(prev => {
                     let currentLog = prev.log;

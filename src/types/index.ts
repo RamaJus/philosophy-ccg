@@ -67,9 +67,10 @@ export interface GameState {
     selectedCard?: string; // Card instanceId in hand
     pendingPlayedCard?: Card; // Card currently being cast (for cancellation refund checks)
     selectedMinions?: string[]; // Minion instanceIds on board for attacking (multi-select)
-    targetMode?: 'attack' | 'spell' | 'search' | 'transform' | 'trolley_sacrifice' | 'special' | 'kontemplation' | 'foucault_reveal' | 'gottesbeweis_target'; // What we're targeting for
+    targetMode?: 'attack' | 'spell' | 'search' | 'transform' | 'trolley_sacrifice' | 'special' | 'kontemplation' | 'foucault_reveal' | 'gottesbeweis_target' | 'nietzsche_target' | 'recurrence_select'; // What we're targeting for
     targetModeOwner?: 'player' | 'opponent'; // Who initiated the targetMode (for multiplayer modal visibility)
     kontemplationCards?: Card[]; // Top 3 cards for Kontemplation selection
+    recurrenceCards?: Card[]; // Cards in graveyard available for 'Ewige Wiederkunft'
     foucaultRevealCards?: Card[]; // Top 3 opponent cards for Foucault reveal
     log: string[]; // Game log messages
     lastPlayedCard?: Card; // For visual flash effect of performed spells
@@ -88,5 +89,8 @@ export type GameAction =
     | { type: 'TROLLEY_SACRIFICE'; minionId: string } // Uses instanceId
     | { type: 'KONTEMPLATION_SELECT'; cardId: string } // Uses instanceId
     | { type: 'FOUCAULT_CLOSE' }
+
     | { type: 'GOTTESBEWEIS_TARGET'; minionId: string } // Uses instanceId
+    | { type: 'NIETZSCHE_TARGET'; minionId: string } // Uses instanceId
+    | { type: 'RECURRENCE_SELECT'; cardId: string } // Uses instanceId
     | { type: 'CANCEL_CAST' };

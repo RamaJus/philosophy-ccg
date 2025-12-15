@@ -59,14 +59,15 @@ export const cardDatabase: Card[] = [
         id: 'nietzsche',
         name: 'Friedrich Nietzsche',
         type: 'Philosoph',
-        cost: 7,
-        attack: 7,
-        health: 4,
-        description: 'Gott ist tot. Der Übermensch erhebt sich.',
+        cost: 9,
+        attack: 9,
+        health: 7,
+        description: 'Gott ist tot! Wenn ausgespielt: Wähle einen Philosophen -> seine Werte werden halbiert (Der letzte Mensch).',
         rarity: 'Legendär',
-        school: ['Existentialismus', 'Skeptizismus'],
+        school: ['Existentialismus', 'Nihilismus'],
         gender: 'male',
-        image: '/images/cards/nietzsche.jpg',
+        image: '/images/cards/nietzsche.png',
+        specialAbility: 'transform', // Should be 'target'? Or handled in logic. Logic handles targetMode.
     },
     {
         id: 'descartes',
@@ -827,6 +828,15 @@ export const cardDatabase: Card[] = [
         description: 'Testkarte.',
         effect: 'Wähle eine Karte aus deinem Deck.',
         rarity: 'Gewöhnlich',
+    },
+    {
+        id: 'sophistik',
+        name: 'Sophistik',
+        type: 'Zauber',
+        cost: 1,
+        description: 'Die Kunst der Überredung. +1 Dialektik für dich, sperrt 1 Dialektik des Gegners.',
+        rarity: 'Gewöhnlich',
+        image: '/images/cards/sophistry.png',
     },
 ];
 
