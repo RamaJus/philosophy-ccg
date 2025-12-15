@@ -260,30 +260,80 @@ export const GameArea: React.FC<GameAreaProps> = ({ mode, isDebugMode }) => {
             <div className="relative z-10 h-full w-full text-white"  >
                 {/* Header removed for laptop optimization */}
 
-                {gameOver && (
-                    <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 backdrop-blur-sm">
-                        <div className="glass-panel p-8 max-w-lg text-center space-y-4">
-                            <Trophy size={64} className="mx-auto text-amber-400 animate-bounce" />
-                            <h2 className="text-3xl font-bold">
-                                {winner === 'player' ? '🎉 Sieg!' : '💀 Niederlage'}
-                            </h2>
-                            <p className="text-gray-300 text-lg">
-                                {winner === 'player'
-                                    ? 'Deine philosophischen Argumente haben gesiegt!'
-                                    : 'Die Logik des Gegners war zu stark.'}
-                            </p>
-                            <div className="border-t border-b border-amber-500/30 py-4 my-4">
-                                <p className="text-amber-200 italic text-sm leading-relaxed">
-                                    {philosophicalQuote}
-                                </p>
-                            </div>
-                            <button onClick={handleNewGame} className="btn-primary">
-                                <RotateCcw size={20} className="inline mr-2" />
-                                Neues Spiel
-                            </button>
-                        </div>
-                    </div>
-                )}
+                <AnimatePresence>
+                    {gameOver && (
+                        <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            className="fixed inset-0 bg-black/90 flex items-center justify-center z-50 backdrop-blur-md"
+                        >
+                            <motion.div
+                                initial={{ scale: 0.9, y: 20 }}
+                                animate={{ scale: 1, y: 0 }}
+                                transition={{ type: "spring", duration: 0.5 }}
+                                className={`relative p-12 max-w-2xl w-full text-center overflow-hidden rounded-2xl shadow-2xl border-4 ${(mode === 'multiplayer_client' ? winner === 'opponent' : winner === 'player')
+                                        ? 'border-amber-400/50 bg-gradient-to-b from-slate-900 to-amber-900/40'
+                                        : 'border-red-900/50 bg-gradient-to-b from-slate-900 to-red-950/40'
+                                    }`}
+                            >
+                                {/* Decorative elements */}
+                                <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-white/20 to-transparent" />
+                                <div className="absolute bottom-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-white/20 to-transparent" />
+
+                                {(mode === 'multiplayer_client' ? winner === 'opponent' : winner === 'player') ? (
+                                    <>
+                                        <motion.div
+                                            animate={{ rotate: 360 }}
+                                            transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+                                            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-amber-500/5 rounded-full blur-3xl pointer-events-none"
+                                        />
+                                        <Trophy size={80} className="mx-auto text-amber-400 mb-6 drop-shadow-[0_0_15px_rgba(251,191,36,0.5)]" />
+                                        <h2 className="text-5xl font-serif font-bold text-transparent bg-clip-text bg-gradient-to-r from-amber-200 via-amber-400 to-amber-200 mb-4 drop-shadow-sm">
+                                            Sieg!
+                                        </h2>
+                                        <p className="text-amber-100/80 text-xl font-serif italic mb-8">
+                                            Deine philosophischen Argumente haben gesiegt!
+                                        </p>
+                                    </>
+                                ) : (
+                                    <>
+                                        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-red-900/5 rounded-full blur-3xl pointer-events-none" />
+                                        <div className="mx-auto mb-6 text-red-500/80 relative">
+                                            <Trophy size={80} className="opacity-20 grayscale" />
+                                            <div className="absolute inset-0 flex items-center justify-center text-red-500 text-4xl font-bold">❌</div>
+                                        </div>
+                                        <h2 className="text-5xl font-serif font-bold text-transparent bg-clip-text bg-gradient-to-r from-red-400 via-red-500 to-red-400 mb-4">
+                                            Niederlage
+                                        </h2>
+                                        <p className="text-red-200/80 text-xl font-serif italic mb-8">
+                                            Die Logik des Gegners war zu stark.
+                                        </p>
+                                    </>
+                                )}
+
+                                <div className="border-t border-b border-white/10 py-6 my-6 bg-black/20 backdrop-blur-sm rounded-lg px-6">
+                                    <p className="text-amber-100/90 italic text-lg leading-relaxed font-serif">
+                                        "{philosophicalQuote}"
+                                    </p>
+                                </div>
+
+                                <motion.button
+                                    whileHover={{ scale: 1.05 }}
+                                    whileTap={{ scale: 0.95 }}
+                                    onClick={handleNewGame}
+                                    className={`px-8 py-3 rounded-lg font-bold text-lg transition-all shadow-lg flex items-center justify-center mx-auto gap-3 ${(mode === 'multiplayer_client' ? winner === 'opponent' : winner === 'player')
+                                            ? 'bg-amber-600 hover:bg-amber-500 text-white shadow-amber-900/50'
+                                            : 'bg-slate-700 hover:bg-slate-600 text-gray-200 shadow-slate-900/50'
+                                        }`}
+                                >
+                                    <RotateCcw size={24} />
+                                    Neues Spiel
+                                </motion.button>
+                            </motion.div>
+                        </motion.div>
+                    )}
+                </AnimatePresence>
 
                 <DeckView
                     deck={viewPlayer.deck}
