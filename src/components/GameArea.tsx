@@ -463,6 +463,7 @@ export const GameArea: React.FC<GameAreaProps> = ({ mode, isDebugMode }) => {
                             <Board
                                 minions={viewOpponent.board}
                                 onMinionClick={viewIsPlayerTurn && (selectedMinions?.length || targetMode === 'gottesbeweis_target' || targetMode === 'nietzsche_target') ? handleOpponentMinionClick : undefined}
+                                selectedMinionIds={selectedMinions || []}
                                 canTarget={viewIsPlayerTurn && (
                                     (!!selectedMinions?.length && (() => {
                                         // Specific check for attack validity (Diotima/Silence check)
