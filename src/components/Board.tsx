@@ -78,10 +78,14 @@ export const Board: React.FC<BoardProps> = ({
                                 // So we show minions as attackable, but highlight that minion targets are blocked.
                                 const canAttack = isPlayerBoard && minion.canAttack && !minion.hasAttacked;
                                 const isDiogenesInBarrel = minion.id.includes('diogenes') && minion.turnPlayed === currentTurn;
-                                // Diogenes (in barrel) cannot be ATTACKED, but might be targetable by spells (unless specified)
-                                // If we are in attack mode (selectedMinionIds > 0 and NOT special targeting), Diogenes is untargetable.
                                 const isAttackMode = selectedMinionIds.length > 0 && !isSpecialTargeting;
-                                const isTargetable = canTarget && !(isDiogenesInBarrel && isAttackMode && !isPlayerBoard);
+                                // Kant logic: attacksBlocked prevents attacking Philosophers
+                                const isKantBlocked = attacksBlocked && minion.type === 'Philosoph';
+
+                                // Combined blocked check: Diogenes OR Kant
+                                const isBlocked = (isDiogenesInBarrel || isKantBlocked) && isAttackMode && !isPlayerBoard;
+
+                                const isTargetable = canTarget && !isBlocked;
 
                                 // Calculate Work Bonus
                                 let bonusDamage = 0;

@@ -94,7 +94,7 @@
 
   .cursor-impossible,
   .cursor-impossible * {
-    cursor: url('/images/cursors/28x28px/Cursor%20impossible.png') 14 14, not-allowed !important;
+    cursor: url('/images/cursors/cursor_forbidden.png') 14 14, not-allowed !important;
   }
 
   .cursor-add,

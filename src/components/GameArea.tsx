@@ -462,8 +462,21 @@ export const GameArea: React.FC<GameAreaProps> = ({ mode, isDebugMode }) => {
                         <div className="flex-1">
                             <Board
                                 minions={viewOpponent.board}
+                                activeWork={viewOpponent.activeWork}
                                 onMinionClick={viewIsPlayerTurn && (selectedMinions?.length || targetMode === 'gottesbeweis_target' || targetMode === 'nietzsche_target') ? handleOpponentMinionClick : undefined}
-                                canTarget={viewIsPlayerTurn && (!!selectedMinions?.length || targetMode === 'gottesbeweis_target' || targetMode === 'nietzsche_target')}
+                                canTarget={viewIsPlayerTurn && (
+                                    (!!selectedMinions?.length && (() => {
+                                        // Specific check for attack validity (Diotima/Silence check)
+                                        const attacker = viewPlayer.board.find(m => (m.instanceId || m.id) === selectedMinions[0]);
+                                        if (!attacker) return false;
+                                        // If silenced (Diotima) or already attacked, cannot target opponent
+                                        if (attacker.silencedUntilTurn && attacker.silencedUntilTurn > gameState.turn) return false;
+                                        if (attacker.hasAttacked) return false; // Should be handled by selection logic but safe to double check
+                                        return true;
+                                    })()) ||
+                                    targetMode === 'gottesbeweis_target' ||
+                                    targetMode === 'nietzsche_target'
+                                )}
                                 activeWork={viewOpponent.activeWork}
                                 isSpecialTargeting={(() => {
                                     // 1. Explicit Target Modes (Spells)
