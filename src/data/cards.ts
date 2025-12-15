@@ -850,7 +850,7 @@ export const cardDatabase: Card[] = [
         cost: 4,
         description: 'Die Kunst, Recht zu behalten.',
         effect: '+2 Dialektik für dich, sperrt 2 Dialektik des Gegners.',
-        rarity: 'Legendär',
+        rarity: 'Gewöhnlich',
         image: '/images/cards/eristik.png',
     },
     {
