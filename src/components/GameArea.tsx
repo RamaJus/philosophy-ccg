@@ -137,7 +137,7 @@ export const GameArea: React.FC<GameAreaProps> = ({ mode, isDebugMode }) => {
 
     const handleOpponentMinionClick = (minionId: string) => {
         if (!viewIsPlayerTurn) return;
-        if (!selectedMinions?.length && targetMode !== 'gottesbeweis_target' && targetMode !== 'nietzsche_target') return;
+        if (!selectedMinions?.length && targetMode !== 'gottesbeweis_target' && targetMode !== 'nietzsche_target' && targetMode !== 'van_inwagen_target') return;
 
         if (targetMode === 'gottesbeweis_target') {
             dispatch({ type: 'GOTTESBEWEIS_TARGET', minionId });
@@ -149,25 +149,21 @@ export const GameArea: React.FC<GameAreaProps> = ({ mode, isDebugMode }) => {
             return;
         }
 
+        if (targetMode === 'van_inwagen_target') {
+            dispatch({ type: 'VAN_INWAGEN_TARGET', minionId });
+            return;
+        }
+
         if (!selectedMinions?.length) return;
 
-        // Check if first selected minion has a special ability (only for single selection)
-        if (selectedMinions.length === 1) {
-            const selectedMinionData = viewPlayer.board.find(m => (m.instanceId || m.id) === selectedMinions[0]);
-            if (selectedMinionData?.specialAbility && !selectedMinionData.hasUsedSpecial && !selectedMinionData.hasAttacked) {
-                // Use special ability on target
-                dispatch({ type: 'USE_SPECIAL', minionId: selectedMinions[0], targetId: minionId });
-                return;
-            }
-        }
         // Multi-attack: use all selected minions
         dispatch({ type: 'ATTACK', attackerIds: selectedMinions, targetId: minionId });
     };
 
     const handleSpecialClick = (minionId: string) => {
         if (!viewIsPlayerTurn) return;
-        // Select the minion for special ability use
-        dispatch({ type: 'SELECT_MINION', minionId });
+        // Dispatch USE_SPECIAL to enter targeting mode for transform abilities
+        dispatch({ type: 'USE_SPECIAL', minionId });
     };
 
     const handleAttackPlayer = () => {
@@ -524,7 +520,7 @@ export const GameArea: React.FC<GameAreaProps> = ({ mode, isDebugMode }) => {
                                         {(() => {
                                             if (selectedMinions.length === 1) {
                                                 const minion = viewPlayer.board.find(m => (m.instanceId || m.id) === selectedMinions[0]);
-                                                if (minion?.specialAbility && !minion.hasUsedSpecial && !minion.hasAttacked) {
+                                                if (minion?.specialAbility && !minion.hasUsedSpecial && !minion.hasAttacked && !minion.specialExhausted) {
                                                     return (
                                                         <button
                                                             onClick={() => handleSpecialClick(selectedMinions[0])}
@@ -538,6 +534,13 @@ export const GameArea: React.FC<GameAreaProps> = ({ mode, isDebugMode }) => {
                                             }
                                             return null;
                                         })()}
+                                        {/* show targeting mode indicator */}
+                                        {(targetMode === 'nietzsche_target' || targetMode === 'van_inwagen_target') && (
+                                            <div className="px-3 py-1 bg-purple-500/30 text-purple-200 rounded-lg border border-purple-400 animate-pulse flex items-center gap-2 text-sm">
+                                                <Zap size={14} className="text-purple-400" />
+                                                Wähle ein Ziel...
+                                            </div>
+                                        )}
                                     </>
                                 )}
 

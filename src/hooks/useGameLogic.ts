@@ -985,7 +985,7 @@ export function useGameLogic(mode: 'single' | 'multiplayer_host' | 'multiplayer_
                     const enemyPlayer = activePlayerKey === 'player' ? prev.opponent : prev.player;
 
                     const minion = activePlayer.board.find(m => (m.instanceId || m.id) === action.minionId);
-                    if (!minion || !minion.specialAbility || !minion.canAttack || minion.hasAttacked || minion.hasUsedSpecial) {
+                    if (!minion || !minion.specialAbility || !minion.canAttack || minion.hasAttacked || minion.hasUsedSpecial || minion.specialExhausted) {
                         return prev; // Invalid special use
                     }
 
@@ -1085,49 +1085,20 @@ export function useGameLogic(mode: 'single' | 'multiplayer_host' | 'multiplayer_
                         };
                     }
 
-                    if (minion.specialAbility === 'transform' && action.targetId) {
-                        const targetMinion = enemyPlayer.board.find(m => (m.instanceId || m.id) === action.targetId);
-                        if (!targetMinion) return prev;
+                    // Van Inwagen Transform: needs targeting mode
+                    if (minion.specialAbility === 'transform' && minion.id.includes('van_inwagen')) {
+                        if (enemyPlayer.board.length === 0) {
+                            currentLog = appendLog(currentLog, 'Keine gegnerischen Philosophen zum transformieren!');
+                            return { ...prev, log: currentLog };
+                        }
 
-                        // Create "Chair Matter" minion (0/1)
-                        const chairMatter: BoardMinion = {
-                            id: `chair_matter_${Date.now()}`,
-                            name: 'Stuhlartige Materie',
-                            type: 'Philosoph',
-                            cost: 0,
-                            attack: 0,
-                            health: 1,
-                            maxHealth: 1,
-                            canAttack: false,
-                            hasAttacked: true,
-                            hasUsedSpecial: false,
-                            description: 'Verwandelte Materie ohne Bewusstsein.',
-                            rarity: 'Gewöhnlich',
-                            image: '/images/cards/chair_matter.png',
-                        };
-
-                        // Update boards
-                        const updatedEnemyBoard = enemyPlayer.board.map(m =>
-                            (m.instanceId || m.id) === action.targetId ? chairMatter : m
-                        );
-                        const updatedActiveBoard = activePlayer.board.map(m =>
-                            (m.instanceId || m.id) === action.minionId ? { ...m, hasUsedSpecial: true, hasAttacked: true } : m
-                        );
-
-                        const updatedPlayer = activePlayerKey === 'player'
-                            ? { ...player, board: updatedActiveBoard }
-                            : { ...player, board: updatedEnemyBoard };
-                        const updatedOpponent = activePlayerKey === 'player'
-                            ? { ...opponent, board: updatedEnemyBoard }
-                            : { ...opponent, board: updatedActiveBoard };
-
+                        // Enter targeting mode
                         return {
                             ...prev,
-                            player: updatedPlayer,
-                            opponent: updatedOpponent,
-                            selectedMinions: undefined,
-                            targetMode: undefined,
-                            log: [...currentLog, `${minion.name} verwandelte ${targetMinion.name} in stuhlartige Materie!`],
+                            targetMode: 'van_inwagen_target',
+                            targetModeOwner: activePlayerKey,
+                            selectedMinions: [action.minionId],
+                            log: appendLog(currentLog, `${minion.name}: "Stuhlartige Materie!" Wähle einen gegnerischen Philosophen...`),
                         };
                     }
 
@@ -1397,9 +1368,9 @@ export function useGameLogic(mode: 'single' | 'multiplayer_host' | 'multiplayer_
                     }
 
                     // Update Boards
-                    // 1. Update Active Player Board (Mark Nietzsche as used AND attacked)
+                    // 1. Update Active Player Board (Mark Nietzsche as used AND attacked AND exhausted)
                     const updatedActiveBoard = activePlayer.board.map(m =>
-                        (m.instanceId || m.id) === nietzscheId ? { ...m, hasUsedSpecial: true, hasAttacked: true } : m
+                        (m.instanceId || m.id) === nietzscheId ? { ...m, hasUsedSpecial: true, hasAttacked: true, specialExhausted: true } : m
                     );
 
                     // Determine which board variables to update based on active player
@@ -1441,6 +1412,66 @@ export function useGameLogic(mode: 'single' | 'multiplayer_host' | 'multiplayer_
                         selectedMinions: undefined,
                         lastPlayedCard: undefined,
                         lastPlayedCardPlayerId: undefined,
+                    };
+                });
+                break;
+            case 'VAN_INWAGEN_TARGET':
+                setGameStateWithSynergies(prev => {
+                    const { player, opponent, activePlayer: activePlayerKey } = prev;
+                    let currentLog = prev.log;
+                    const activePlayer = activePlayerKey === 'player' ? player : opponent;
+                    const enemyPlayer = activePlayerKey === 'player' ? opponent : player;
+
+                    // Find the Van Inwagen (stored in selectedMinions from the USE_SPECIAL step)
+                    const vanInwagenId = prev.selectedMinions?.[0];
+                    if (!vanInwagenId) return prev;
+
+                    const vanInwagen = activePlayer.board.find(m => (m.instanceId || m.id) === vanInwagenId);
+                    if (!vanInwagen) return prev;
+
+                    const targetMinion = enemyPlayer.board.find(m => (m.instanceId || m.id) === action.minionId);
+                    if (!targetMinion) return prev;
+
+                    // Create "Chair Matter" minion (0/1)
+                    const chairMatter: BoardMinion = {
+                        id: `chair_matter_${Date.now()}`,
+                        instanceId: `chair_matter_${Date.now()}`,
+                        name: 'Stuhlartige Materie',
+                        type: 'Philosoph',
+                        cost: 0,
+                        attack: 0,
+                        health: 1,
+                        maxHealth: 1,
+                        canAttack: false,
+                        hasAttacked: true,
+                        hasUsedSpecial: false,
+                        description: 'Verwandelte Materie ohne Bewusstsein.',
+                        rarity: 'Gewöhnlich',
+                        image: '/images/cards/chair_matter.png',
+                    };
+
+                    // Update Boards
+                    const updatedActiveBoard = activePlayer.board.map(m =>
+                        (m.instanceId || m.id) === vanInwagenId ? { ...m, hasUsedSpecial: true, hasAttacked: true, specialExhausted: true } : m
+                    );
+
+                    const updatedEnemyBoard = enemyPlayer.board.map(m =>
+                        (m.instanceId || m.id) === action.minionId ? chairMatter : m
+                    );
+
+                    currentLog = appendLog(currentLog, `${vanInwagen.name} verwandelte ${targetMinion.name} in stuhlartige Materie!`);
+
+                    return {
+                        ...prev,
+                        log: currentLog,
+                        player: activePlayerKey === 'player'
+                            ? { ...player, board: updatedActiveBoard }
+                            : { ...player, board: updatedEnemyBoard },
+                        opponent: activePlayerKey === 'player'
+                            ? { ...opponent, board: updatedEnemyBoard }
+                            : { ...opponent, board: updatedActiveBoard },
+                        targetMode: undefined,
+                        selectedMinions: undefined,
                     };
                 });
                 break;

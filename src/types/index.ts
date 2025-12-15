@@ -28,6 +28,7 @@ export interface BoardMinion extends Card {
     canAttack: boolean; // Summoning sickness
     hasAttacked: boolean; // This turn
     hasUsedSpecial: boolean; // Used special ability this turn
+    specialExhausted?: boolean; // Permanently exhausted until resurrection (one-time-per-life abilities)
     transformedFrom?: BoardMinion; // Original minion before transformation
     transformationEndsTurn?: number; // Turn number when transformation should revert
     synergyBonus?: number; // Current synergy bonus (+X/+X)
@@ -67,7 +68,7 @@ export interface GameState {
     selectedCard?: string; // Card instanceId in hand
     pendingPlayedCard?: Card; // Card currently being cast (for cancellation refund checks)
     selectedMinions?: string[]; // Minion instanceIds on board for attacking (multi-select)
-    targetMode?: 'attack' | 'spell' | 'search' | 'transform' | 'trolley_sacrifice' | 'special' | 'kontemplation' | 'foucault_reveal' | 'gottesbeweis_target' | 'nietzsche_target' | 'recurrence_select'; // What we're targeting for
+    targetMode?: 'attack' | 'spell' | 'search' | 'transform' | 'trolley_sacrifice' | 'special' | 'kontemplation' | 'foucault_reveal' | 'gottesbeweis_target' | 'nietzsche_target' | 'van_inwagen_target' | 'recurrence_select'; // What we're targeting for
     targetModeOwner?: 'player' | 'opponent'; // Who initiated the targetMode (for multiplayer modal visibility)
     kontemplationCards?: Card[]; // Top 3 cards for Kontemplation selection
     recurrenceCards?: Card[]; // Cards in graveyard available for 'Ewige Wiederkunft'
@@ -92,5 +93,6 @@ export type GameAction =
 
     | { type: 'GOTTESBEWEIS_TARGET'; minionId: string } // Uses instanceId
     | { type: 'NIETZSCHE_TARGET'; minionId: string } // Uses instanceId
+    | { type: 'VAN_INWAGEN_TARGET'; minionId: string } // Uses instanceId
     | { type: 'RECURRENCE_SELECT'; cardId: string } // Uses instanceId
     | { type: 'CANCEL_CAST' };
