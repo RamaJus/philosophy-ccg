@@ -24,6 +24,7 @@ The standard format used for all philosopher portraits to ensure visual consiste
 - **David Hume**: `Oil painting portrait of David Hume, Scottish enlightenment philosopher, skeptical expression, 18th century attire, classical style.`
 - **Baruch Spinoza**: `Oil painting portrait of Baruch Spinoza, Dutch philosopher, lens grinder, thoughtful expression, 17th century attire, classical style.`
 - **Karl Marx**: `Oil painting portrait of Karl Marx, German philosopher, iconic beard, intense gaze, 19th century attire, classical style.`
+- **Thales**: `Oil painting portrait of Thales von Milet, ancient Greek presocratic philosopher, thoughtful expression, holding a geometric shape or water symbol, ancient Greece background, classical style.`
 
 ### Spell Cards
 - **Trolley Problem**: `Oil painting of a steam trolley directly approaching on a single track seen from the front, a man standing next to it holding a heavy lever, distinct single railway track, ethical dilemma atmosphere, classical style.`

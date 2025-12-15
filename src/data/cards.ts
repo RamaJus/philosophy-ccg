@@ -63,7 +63,7 @@ export const cardDatabase: Card[] = [
         attack: 9,
         health: 7,
         description: 'Gott ist tot!',
-        effect: 'Der letzte Mensch: Wähle einen Philosophen -> seine Werte werden halbiert.',
+        effect: 'Der letzte Mensch: Wähle einen Philosophen und halbiere dessen Werte.',
         rarity: 'Legendär',
         school: ['Existentialismus', 'Nihilismus'],
         gender: 'male',
@@ -264,16 +264,7 @@ export const cardDatabase: Card[] = [
         rarity: 'Gewöhnlich',
         image: '/images/cards/Aufklärung.png',
     },
-    {
-        id: 'sophistry',
-        name: 'Sophistik',
-        type: 'Zauber',
-        cost: 0,
-        description: 'Kunst der überzeugenden Rede.',
-        effect: 'Erhalte 1 zusätzliche Dialektik. Sperre 1 Dialektik des Gegners im nächsten Zug.',
-        rarity: 'Gewöhnlich',
-        image: '/images/cards/sophistry.png',
-    },
+
     {
         id: 'dogmatism',
         name: 'Dogmatismus',
@@ -665,6 +656,20 @@ export const cardDatabase: Card[] = [
         image: '/images/cards/anselm.png',
     },
 
+    {
+        id: 'thales',
+        name: 'Thales von Milet',
+        type: 'Philosoph',
+        cost: 4,
+        attack: 5,
+        health: 3,
+        description: 'Der Ursprung aller Dinge ist Wasser!',
+        rarity: 'Gewöhnlich',
+        school: ['Vorsokratiker', 'Logik'],
+        gender: 'male',
+        image: '/images/cards/thales.png',
+    },
+
     // Permanent Works
     {
         id: 'tractatus',
@@ -840,7 +845,7 @@ export const cardDatabase: Card[] = [
     },
     {
         id: 'eristik',
-        name: 'Eristische Dialektik',
+        name: 'Eristik',
         type: 'Zauber',
         cost: 4,
         description: 'Die Kunst, Recht zu behalten.',
@@ -855,7 +860,7 @@ export const cardDatabase: Card[] = [
         cost: 8,
         description: 'Alle Lust will - Ewigkeit!',
         effect: 'Hole einen Philosophen vom Friedhof zurück auf die Hand.',
-        rarity: 'Legendär',
+        rarity: 'Gewöhnlich',
         image: '/images/cards/ewige-wiederkunft.png',
     },
 ];
