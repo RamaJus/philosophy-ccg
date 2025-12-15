@@ -109,19 +109,7 @@ export const cardDatabase: Card[] = [
         gender: 'male',
         image: '/images/cards/laozi.png',
     },
-    {
-        id: 'sun-tzu',
-        name: 'Sun Tzu',
-        type: 'Philosoph',
-        cost: 5,
-        attack: 6,
-        health: 4,
-        description: 'Die Kunst des Krieges. Jede Kriegsführung basiert auf Täuschung.',
-        rarity: 'Gewöhnlich',
-        school: ['Politik'],
-        gender: 'male',
-        image: '/images/cards/sun-tzu.png',
-    },
+
     {
         id: 'buddha',
         name: 'Siddhartha Gautama',

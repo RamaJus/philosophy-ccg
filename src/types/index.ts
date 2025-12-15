@@ -50,6 +50,7 @@ export interface Player {
     board: BoardMinion[];
     graveyard: Card[];
     lockedMana: number; // Mana locked for the next turn
+    currentTurnManaMalus?: number; // Visual tracker for mana locked THIS turn (since lockedMana resets to 0)
     activeWork?: Card; // Currently active philosophical work
     synergyBlockTurns?: number; // Number of turns synergy bonuses are disabled
     minionAttackBlockTurns?: number; // Number of turns opponent minions cannot attack (Kant)

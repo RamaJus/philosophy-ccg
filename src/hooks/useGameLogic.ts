@@ -274,6 +274,7 @@ export function useGameLogic(mode: 'single' | 'multiplayer_host' | 'multiplayer_
             maxMana: newMaxMana,
             mana: availableMana,
             lockedMana: 0, // Reset lock
+            currentTurnManaMalus: player.lockedMana, // Track the malus visually for this turn
             board: player.board.map(minion => ({
                 ...minion,
                 canAttack: true,
@@ -453,7 +454,8 @@ export function useGameLogic(mode: 'single' | 'multiplayer_host' | 'multiplayer_
                     // But "schweigen" means cannot attack. So it's a disable.
                     // A disable on OWN minions is bad. A disable on ENEMY is good.
                     // Let's apply to ALL to be lore accurate ("Alle"), but effectively it impacts the one who wants to attack next.
-                    const silenceDuration = 2; // Current turn + next turn. Effectively next round.
+                    // Let's apply to ALL to be lore accurate ("Alle"), but effectively it impacts the one who wants to attack next.
+                    const silenceDuration = 1; // Lasts for the next opponent turn.
                     const targetTurn = prev.turn + silenceDuration;
 
                     const silenceMinions = (minions: BoardMinion[]) => minions.map(m => {
@@ -881,6 +883,8 @@ export function useGameLogic(mode: 'single' | 'multiplayer_host' | 'multiplayer_
                 selectedCard: undefined,
                 selectedMinions: undefined,
                 log: currentLog,
+                lastPlayedCard: undefined, // Clear flash effect
+                lastPlayedCardPlayerId: undefined, // Clear flash effect
             };
 
             return newState;

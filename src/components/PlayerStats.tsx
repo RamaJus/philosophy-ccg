@@ -72,7 +72,7 @@ export const PlayerStats: React.FC<PlayerStatsProps> = ({ player, isOpponent = f
                             <span className="font-semibold text-sm">Dialektik</span>
                         </div>
                         <div className="text-base font-bold text-blue-400 flex items-center gap-2">
-                            {player.lockedMana > 0 && (
+                            {(player.lockedMana > 0 || (player.currentTurnManaMalus || 0) > 0) && (
                                 <motion.div
                                     initial={{ scale: 0 }}
                                     animate={{ scale: 1 }}
