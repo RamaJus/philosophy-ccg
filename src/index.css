@@ -92,6 +92,16 @@
     cursor: url('/images/cursors/attack.png') 0 0, crosshair !important;
   }
 
+  .cursor-impossible,
+  .cursor-impossible * {
+    cursor: url('/images/cursors/28x28px/Cursor%20impossible.png') 14 14, not-allowed !important;
+  }
+
+  .cursor-add,
+  .cursor-add * {
+    cursor: url('/images/cursors/28x28px/Cursor%20Add.png') 14 14, copy !important;
+  }
+
   /* Shake animation for damage */
   .animate-shake {
     animation: shake 0.5s ease-in-out;

@@ -111,6 +111,10 @@ export const Board: React.FC<BoardProps> = ({
                                                     ${isTargetable && !isSpecialTargeting ? 'ring-2 ring-red-400 cursor-attack' : ''}
                                                     ${isTargetable && isSpecialTargeting ? 'ring-2 ring-purple-400 cursor-magic' : ''}
                                                     ${minion.hasAttacked || minion.hasUsedSpecial ? 'opacity-50' : ''}
+                                                    ${/* IMPOSSIBLE CURSOR LOGIC */ ''}
+                                                    ${!isPlayerBoard && !isTargetable && (selectedMinionIds.length > 0 || isSpecialTargeting) ? 'cursor-impossible' : ''}
+                                                    ${/* ADD CURSOR LOGIC - Hovering own minion while another is selected (for multi-select) */ ''}
+                                                    ${isPlayerBoard && !selectedMinionIds.includes(minion.instanceId || minion.id) && selectedMinionIds.length > 0 ? 'cursor-add' : ''}
                                                 `}
                                             />
                                             {isSilenced && (
