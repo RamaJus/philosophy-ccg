@@ -11,9 +11,6 @@ interface PlayerStatsProps {
 export const PlayerStats: React.FC<PlayerStatsProps> = ({ player, isOpponent = false }) => {
     const [isDamaged, setIsDamaged] = useState(false);
     const prevHealth = useRef(player.health);
-    const prevLockedMana = useRef(player.lockedMana);
-    const [showLockWarn, setShowLockWarn] = useState(false);
-
     useEffect(() => {
         if (player.health < prevHealth.current) {
             setIsDamaged(true);
@@ -22,18 +19,6 @@ export const PlayerStats: React.FC<PlayerStatsProps> = ({ player, isOpponent = f
         }
         prevHealth.current = player.health;
     }, [player.health]);
-
-    useEffect(() => {
-        if (player.lockedMana > prevLockedMana.current) {
-            // Mana lock applied - show warning
-            setShowLockWarn(true);
-            const timer = setTimeout(() => setShowLockWarn(false), 2000);
-            prevLockedMana.current = player.lockedMana;
-            return () => clearTimeout(timer);
-        }
-        // Always sync the ref to current value (important for multiplayer sync)
-        prevLockedMana.current = player.lockedMana;
-    }, [player.lockedMana]);
 
     return (
         <div className={`glass-panel p-3 transition-all duration-200 ${isOpponent ? 'bg-red-500/10' : 'bg-blue-500/10'} ${isDamaged ? 'animate-shake ring-2 ring-red-500 bg-red-500/20' : ''}`}>
@@ -76,44 +61,26 @@ export const PlayerStats: React.FC<PlayerStatsProps> = ({ player, isOpponent = f
                                 <motion.div
                                     initial={{ scale: 0 }}
                                     animate={{ scale: 1 }}
-                                    className="flex items-center text-xs text-amber-500 bg-amber-900/40 px-2 py-0.5 rounded border border-amber-500/50"
+                                    className="flex items-center text-xs text-amber-500 bg-amber-900/40 px-1.5 py-0.5 rounded border border-amber-500/50 gap-1"
                                     title={`Nächster Zug: -${player.lockedMana} Dialektik`}
                                 >
                                     <Lock size={12} />
+                                    <span className="font-bold leading-none">{player.lockedMana > 0 ? player.lockedMana : player.currentTurnManaMalus}</span>
                                 </motion.div>
                             )}
                             {(player.currentTurnBonusMana || 0) > 0 && (
                                 <motion.div
                                     initial={{ scale: 0 }}
                                     animate={{ scale: 1 }}
-                                    className="flex items-center text-xs text-yellow-300 bg-yellow-900/40 px-2 py-0.5 rounded border border-yellow-500/50"
+                                    className="flex items-center text-xs text-yellow-300 bg-yellow-900/40 px-1.5 py-0.5 rounded border border-yellow-500/50"
                                     title={`Bonus Dialektik: +${player.currentTurnBonusMana}`}
                                 >
-                                    <span className="font-bold text-lg leading-none">+</span>
+                                    <span className="font-bold leading-none">{player.currentTurnBonusMana}</span>
                                 </motion.div>
                             )}
                             {player.mana}/{player.maxMana}
                         </div>
                     </div>
-
-
-
-                    {/* Lock Warning Overlay */}
-                    <AnimatePresence>
-                        {showLockWarn && (
-                            <motion.div
-                                initial={{ opacity: 0, y: 10 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                exit={{ opacity: 0 }}
-                                className="absolute left-0 right-0 top-1/2 -translate-y-1/2 flex justify-center pointer-events-none z-50"
-                            >
-                                <div className="bg-slate-900/90 border-2 border-amber-500 text-amber-400 px-4 py-2 rounded-xl shadow-2xl flex items-center gap-2 backdrop-blur-md">
-                                    <Lock size={20} />
-                                    <span className="font-bold">Dialektik gesperrt!</span>
-                                </div>
-                            </motion.div>
-                        )}
-                    </AnimatePresence>
                 </div>
 
                 {/* Deck Count */}

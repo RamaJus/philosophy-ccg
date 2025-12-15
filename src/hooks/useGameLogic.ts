@@ -1354,45 +1354,79 @@ export function useGameLogic(mode: 'single' | 'multiplayer_host' | 'multiplayer_
                     let currentLog = prev.log;
                     const activePlayer = activePlayerKey === 'player' ? player : opponent;
 
+                    // Find the attacking Nietzsche (stored in selectedMinions from the USE_SPECIAL step)
+                    const nietzscheId = prev.selectedMinions?.[0];
+                    if (!nietzscheId) return prev;
+
                     const targetOnPlayerBoard = player.board.find(m => (m.instanceId || m.id) === action.minionId);
                     const targetOnOpponentBoard = opponent.board.find(m => (m.instanceId || m.id) === action.minionId);
 
                     const targetMinion = targetOnPlayerBoard || targetOnOpponentBoard;
                     if (!targetMinion) return prev;
 
-                    // Halve Stats
-                    const newAttack = Math.floor(targetMinion.attack / 2);
-                    const newHealth = Math.floor(targetMinion.health / 2);
+                    // Calculate New Stats (-3 / -3)
+                    const newAttack = Math.max(0, targetMinion.attack - 3);
+                    const newHealth = targetMinion.health - 3;
 
-                    const updatedTarget = {
-                        ...targetMinion,
-                        attack: newAttack,
-                        health: Math.max(1, newHealth)
-                    };
+                    let message = '';
+                    let updatedTarget: BoardMinion | null = null;
 
-                    let message = `${activePlayer.name} ließ Nietzsche spechen: ${targetMinion.name} wurde zum 'Letzten Menschen' (Werte halbiert: ${newAttack}/${newHealth}).`;
+                    if (newHealth <= 0) {
+                        message = `${activePlayer.name}'s Nietzsche: ${targetMinion.name} konnte die Wahrheit nicht ertragen und ging unter! (Besiegt)`;
+                        updatedTarget = null; // Mark for deletion
+                    } else {
+                        // Transform into "Der letzte Mensch"
+                        updatedTarget = {
+                            ...targetMinion,
+                            name: 'Der letzte Mensch',
+                            description: 'Ein verächtliches Wesen, das nur Komfort sucht.',
+                            image: '/images/cards/letzter_mensch.png',
+                            attack: newAttack,
+                            health: newHealth,
+                            maxHealth: newHealth,
+                            type: 'Philosoph',
+                            // Reset flags and remove abilities
+                            hasAttacked: true, // Transformed unit cannot attack this turn
+                            hasUsedSpecial: false,
+                            specialAbility: undefined,
+                            special: undefined,
+                            effect: undefined,
+                            school: [] // Keeps schools? Usually transform loses schools unless specified. "Letzter Mensch" has no school.
+                        };
+                        message = `${activePlayer.name}'s Nietzsche verwandelte ${targetMinion.name} in den "Letzten Menschen" (${newAttack}/${newHealth})!`;
+                    }
 
-                    // Update State
-                    let updatedPlayerBoard = player.board;
+                    // Update Boards
+                    // 1. Update Active Player Board (Mark Nietzsche as used AND attacked)
+                    const updatedActiveBoard = activePlayer.board.map(m =>
+                        (m.instanceId || m.id) === nietzscheId ? { ...m, hasUsedSpecial: true, hasAttacked: true } : m
+                    );
+
+                    // Determine which board variables to update based on active player
+                    let updatedPlayerBoard = activePlayerKey === 'player' ? updatedActiveBoard : player.board;
+                    let updatedOpponentBoard = activePlayerKey === 'opponent' ? updatedActiveBoard : opponent.board;
+
                     let updatedPlayerGraveyard = player.graveyard;
-                    let updatedOpponentBoard = opponent.board;
                     let updatedOpponentGraveyard = opponent.graveyard;
 
+                    // 2. Update Target Board (Apply death or transform)
                     if (targetOnPlayerBoard) {
-                        if (updatedTarget.health <= 0) {
+                        if (!updatedTarget) {
+                            // Destroyed
                             updatedPlayerBoard = updatedPlayerBoard.filter(m => (m.instanceId || m.id) !== action.minionId);
                             updatedPlayerGraveyard = [...updatedPlayerGraveyard, targetMinion];
-                            message += " Besiegt!";
                         } else {
-                            updatedPlayerBoard = updatedPlayerBoard.map(m => (m.instanceId || m.id) === action.minionId ? updatedTarget : m);
+                            // Transformed
+                            updatedPlayerBoard = updatedPlayerBoard.map(m => (m.instanceId || m.id) === action.minionId ? updatedTarget! : m);
                         }
                     } else if (targetOnOpponentBoard) {
-                        if (updatedTarget.health <= 0) {
+                        if (!updatedTarget) {
+                            // Destroyed
                             updatedOpponentBoard = updatedOpponentBoard.filter(m => (m.instanceId || m.id) !== action.minionId);
                             updatedOpponentGraveyard = [...updatedOpponentGraveyard, targetMinion];
-                            message += " Besiegt!";
                         } else {
-                            updatedOpponentBoard = updatedOpponentBoard.map(m => (m.instanceId || m.id) === action.minionId ? updatedTarget : m);
+                            // Transformed
+                            updatedOpponentBoard = updatedOpponentBoard.map(m => (m.instanceId || m.id) === action.minionId ? updatedTarget! : m);
                         }
                     }
 
@@ -1404,6 +1438,7 @@ export function useGameLogic(mode: 'single' | 'multiplayer_host' | 'multiplayer_
                         player: { ...player, board: updatedPlayerBoard, graveyard: updatedPlayerGraveyard },
                         opponent: { ...opponent, board: updatedOpponentBoard, graveyard: updatedOpponentGraveyard },
                         targetMode: undefined,
+                        selectedMinions: undefined,
                         lastPlayedCard: undefined,
                         lastPlayedCardPlayerId: undefined,
                     };
