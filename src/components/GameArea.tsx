@@ -531,7 +531,7 @@ export const GameArea: React.FC<GameAreaProps> = ({ mode, isDebugMode }) => {
                                                             className="px-4 py-1 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors flex items-center gap-2 text-sm border border-purple-400"
                                                         >
                                                             <Zap size={14} />
-                                                            SPEZIAL
+                                                            Effekt
                                                         </button>
                                                     );
                                                 }

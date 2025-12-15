@@ -61,8 +61,8 @@ export const PlayerStats: React.FC<PlayerStatsProps> = ({ player, isOpponent = f
                                 <motion.div
                                     initial={{ scale: 0 }}
                                     animate={{ scale: 1 }}
-                                    className="flex items-center text-xs text-amber-500 bg-amber-900/40 px-1.5 py-0.5 rounded border border-amber-500/50 gap-1"
-                                    title={`Nächster Zug: -${player.lockedMana} Dialektik`}
+                                    className="flex items-center text-xs text-amber-500 gap-0.5 ml-1"
+                                    title={`${player.lockedMana} Dialektik gesperrt`}
                                 >
                                     <Lock size={12} />
                                     <span className="font-bold leading-none">{player.lockedMana > 0 ? player.lockedMana : player.currentTurnManaMalus}</span>
@@ -72,9 +72,10 @@ export const PlayerStats: React.FC<PlayerStatsProps> = ({ player, isOpponent = f
                                 <motion.div
                                     initial={{ scale: 0 }}
                                     animate={{ scale: 1 }}
-                                    className="flex items-center text-xs text-yellow-300 bg-yellow-900/40 px-1.5 py-0.5 rounded border border-yellow-500/50"
-                                    title={`Bonus Dialektik: +${player.currentTurnBonusMana}`}
+                                    className="flex items-center text-xs text-yellow-300 gap-0.5 ml-1"
+                                    title={`${player.currentTurnBonusMana} zusätzliche Dialektik`}
                                 >
+                                    <span className="font-bold text-sm leading-none">+</span>
                                     <span className="font-bold leading-none">{player.currentTurnBonusMana}</span>
                                 </motion.div>
                             )}
