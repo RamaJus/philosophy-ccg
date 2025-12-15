@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Player } from '../types';
-import { Heart, Droplet, BookMarked, Lock } from 'lucide-react';
+import { Heart, BookMarked, Lock } from 'lucide-react';
 
 interface PlayerStatsProps {
     player: Player;
