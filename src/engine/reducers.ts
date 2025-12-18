@@ -38,6 +38,8 @@ export function createPlayer(name: string, isPlayer: boolean, startingHandSize: 
         if (debug2) {
             hand.push({ ...debug2, instanceId: `debug-2-${Date.now()}` });
         }
+        console.log('[DEBUG] Hand after adding debug cards:', hand.length, 'cards');
+        console.log('[DEBUG] Debug card names:', hand.filter(c => c.id.startsWith('debug')).map(c => c.name));
     }
 
     return {
