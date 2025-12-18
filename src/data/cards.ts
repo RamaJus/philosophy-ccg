@@ -875,8 +875,34 @@ export const cardDatabase: Card[] = [
         rarity: 'Gewöhnlich',
         image: '/images/cards/ewige-wiederkunft.png',
     },
-];
 
+    // DEBUG CARDS (excluded from normal decks via generateDeck filter)
+    {
+        id: 'debug_1',
+        name: '[DEBUG] Kontemplation',
+        type: 'Zauber',
+        cost: 0,
+        description: 'Debug: Kostenloser DISCOVER-Test',
+        effect: 'Betrachte die obersten 3 Karten.',
+        effects: [
+            { type: 'DISCOVER', target: 'SELF', value: 3 }
+        ],
+        rarity: 'Legendär',
+        image: '/images/cards/kontemplation.png',
+    },
+    {
+        id: 'debug_2',
+        name: '[DEBUG] Überwesen',
+        type: 'Philosoph',
+        cost: 0,
+        attack: 99,
+        health: 99,
+        description: 'Debug: Übermächtiger Test-Philosoph',
+        rarity: 'Legendär',
+        gender: 'male',
+        image: '/images/cards/nietzsche.png',
+    },
+];
 
 
 
