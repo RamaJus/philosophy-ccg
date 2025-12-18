@@ -7,7 +7,8 @@ export type EffectType =
     | 'SILENCE'
     | 'TRANSFORM' // Placeholder for complex effects
     | 'DESTROY' // For removing minions
-    | 'DISCOVER'; // For looking at top cards and picking one
+    | 'DISCOVER' // For looking at top cards and picking one
+    | 'SEARCH'; // For searching entire deck
 
 export interface Effect {
     type: EffectType;

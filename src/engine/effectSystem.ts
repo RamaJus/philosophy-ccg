@@ -102,6 +102,18 @@ export const processEffect = (
             }
             break;
         }
+        case 'SEARCH': {
+            if (effect.target === 'SELF') {
+                return {
+                    player: state.activePlayer === 'player' ? newActivePlayer : newEnemyPlayer,
+                    opponent: state.activePlayer === 'player' ? newEnemyPlayer : newActivePlayer,
+                    log: [...state.log, `${activePlayer.name} searches their deck.`],
+                    targetMode: 'search',
+                    targetModeOwner: state.activePlayer
+                };
+            }
+            break;
+        }
     }
 
     // Reconstruct state with updated players

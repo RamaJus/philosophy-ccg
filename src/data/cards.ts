@@ -878,29 +878,17 @@ export const cardDatabase: Card[] = [
 
     // DEBUG CARDS (excluded from normal decks via generateDeck filter)
     {
-        id: 'debug_1',
-        name: '[DEBUG] Kontemplation',
+        id: 'debug_search',
+        name: '[DEBUG] Deck-Suche',
         type: 'Zauber',
         cost: 0,
-        description: 'Debug: Kostenloser DISCOVER-Test',
-        effect: 'Betrachte die obersten 3 Karten.',
+        description: 'Debug: Durchsuche dein Deck.',
+        effect: 'Wähle eine Karte aus deinem Deck und nimm sie auf die Hand.',
         effects: [
-            { type: 'DISCOVER', target: 'SELF', value: 3 }
+            { type: 'SEARCH', target: 'SELF' }
         ],
         rarity: 'Legendär',
-        image: '/images/cards/kontemplation.png',
-    },
-    {
-        id: 'debug_2',
-        name: '[DEBUG] Überwesen',
-        type: 'Philosoph',
-        cost: 0,
-        attack: 99,
-        health: 99,
-        description: 'Debug: Übermächtiger Test-Philosoph',
-        rarity: 'Legendär',
-        gender: 'male',
-        image: '/images/cards/nietzsche.png',
+        image: '/images/cards/hermeneutics.png',
     },
 ];
 

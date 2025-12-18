@@ -26,15 +26,11 @@ export function createPlayer(name: string, isPlayer: boolean, startingHandSize: 
     }
 
     if (isDebugMode) {
-        const debug1 = cardDatabase.find(c => c.id === 'debug_1');
-        const debug2 = cardDatabase.find(c => c.id === 'debug_2');
-
-        if (debug1) {
-            hand.push({ ...debug1, instanceId: `debug-1-a-${Date.now()}` });
-            hand.push({ ...debug1, instanceId: `debug-1-b-${Date.now()}` });
-        }
-        if (debug2) {
-            hand.push({ ...debug2, instanceId: `debug-2-${Date.now()}` });
+        const debugCard = cardDatabase.find(c => c.id === 'debug_search');
+        if (debugCard) {
+            hand.push({ ...debugCard, instanceId: `debug-search-1-${Date.now()}` });
+            hand.push({ ...debugCard, instanceId: `debug-search-2-${Date.now()}` });
+            hand.push({ ...debugCard, instanceId: `debug-search-3-${Date.now()}` });
         }
     }
 
