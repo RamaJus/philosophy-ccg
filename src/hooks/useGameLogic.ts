@@ -10,7 +10,6 @@ export const useGameLogic = (gameMode: 'single' | 'host' | 'client', isDebugMode
     // 2. Multiplayer Helpers
     const isHost = gameMode === 'host';
     const isClient = gameMode === 'client';
-    const isSingle = gameMode === 'single';
 
     // 3. Sync State (Host -> Client)
     useEffect(() => {
@@ -148,7 +147,7 @@ export const useGameLogic = (gameMode: 'single' | 'host' | 'client', isDebugMode
         // Search Deck is likely initiated by specific cards (Marx)
         // We might trigger this via UI or Effect.
         // For direct call:
-        dispatch({ type: 'SEARCH_DECK', filter, amount });
+        dispatch({ type: 'AUTO_SEARCH_DECK', filter, amount });
     }, []);
 
 
