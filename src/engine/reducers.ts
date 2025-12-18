@@ -99,7 +99,7 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
 
     switch (action.type) {
         case 'START_GAME':
-            return createInitialState(false); // Should pass debug mode via action payload ideally, but defaulting to false for now or keep existing state props if needed
+            return createInitialState(action.isDebugMode || false);
 
         case 'END_TURN': {
             // Logic for ending turn (Switch active player, Draw card, Reset Mana)

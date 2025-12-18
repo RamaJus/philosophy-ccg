@@ -110,7 +110,7 @@ export const GameArea: React.FC<GameAreaProps> = ({ mode, isDebugMode }) => {
     // Auto-start the game on mount (only for single player or host)
     useEffect(() => {
         if (mode !== 'multiplayer_client') {
-            dispatch({ type: 'START_GAME' });
+            dispatch({ type: 'START_GAME', isDebugMode });
         }
     }, []);
 
@@ -272,7 +272,7 @@ export const GameArea: React.FC<GameAreaProps> = ({ mode, isDebugMode }) => {
     };
 
     const handleNewGame = () => {
-        dispatch({ type: 'START_GAME' });
+        dispatch({ type: 'START_GAME', isDebugMode });
     };
 
     return (
