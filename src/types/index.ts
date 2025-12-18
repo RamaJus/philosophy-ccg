@@ -1,3 +1,5 @@
+import { Effect } from './effects';
+
 export type CardType = 'Philosoph' | 'Zauber' | 'Werk';
 
 export interface Card {
@@ -17,6 +19,7 @@ export interface Card {
     workBonus?: { school: string; damage: number }; // For 'work' cards
     specialAbility?: 'transform'; // Special abilities for certain cards
     special?: { name: string; description: string }; // Named special abilities like Marx
+    effects?: Effect[]; // New Rule Engine effects
     gender?: 'male' | 'female'; // For internal logic/synergies
 }
 
@@ -68,7 +71,7 @@ export interface GameState {
     selectedCard?: string; // Card instanceId in hand
     pendingPlayedCard?: Card; // Card currently being cast (for cancellation refund checks)
     selectedMinions?: string[]; // Minion instanceIds on board for attacking (multi-select)
-    targetMode?: 'attack' | 'spell' | 'search' | 'transform' | 'trolley_sacrifice' | 'special' | 'kontemplation' | 'foucault_reveal' | 'gottesbeweis_target' | 'nietzsche_target' | 'van_inwagen_target' | 'recurrence_select'; // What we're targeting for
+    targetMode?: 'attack' | 'spell' | 'search' | 'transform' | 'friendly_minion_transform' | 'trolley_sacrifice' | 'special' | 'kontemplation' | 'foucault_reveal' | 'gottesbeweis_target' | 'nietzsche_target' | 'van_inwagen_target' | 'recurrence_select'; // What we're targeting for
     targetModeOwner?: 'player' | 'opponent'; // Who initiated the targetMode (for multiplayer modal visibility)
     kontemplationCards?: Card[]; // Top 3 cards for Kontemplation selection
     recurrenceCards?: Card[]; // Cards in graveyard available for 'Ewige Wiederkunft'
@@ -86,7 +89,7 @@ export type GameAction =
     | { type: 'USE_SPECIAL'; minionId: string; targetId?: string } // Uses instanceIds
     | { type: 'SELECT_CARD'; cardId?: string } // Uses instanceId
     | { type: 'SELECT_MINION'; minionId: string; toggle?: boolean } // Uses instanceId
-    | { type: 'SEARCH_DECK'; cardId: string } // Uses instanceId
+    | { type: 'SEARCH_DECK'; filter: (card: any) => boolean; amount: number; activePlayerId?: string }
     | { type: 'TROLLEY_SACRIFICE'; minionId: string } // Uses instanceId
     | { type: 'KONTEMPLATION_SELECT'; cardId: string } // Uses instanceId
     | { type: 'FOUCAULT_CLOSE' }
@@ -95,4 +98,5 @@ export type GameAction =
     | { type: 'NIETZSCHE_TARGET'; minionId: string } // Uses instanceId
     | { type: 'VAN_INWAGEN_TARGET'; minionId: string } // Uses instanceId
     | { type: 'RECURRENCE_SELECT'; cardId: string } // Uses instanceId
-    | { type: 'CANCEL_CAST' };
+    | { type: 'CANCEL_CAST' }
+    | { type: 'SYNC_STATE'; newState: GameState };

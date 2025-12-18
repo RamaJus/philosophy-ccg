@@ -1,0 +1,730 @@
+import { GameState, Player, GameAction, BoardMinion, Card } from '../types';
+import { generateDeck, cardDatabase } from '../data/cards';
+import { processEffect } from './effectSystem';
+import { calculateSynergies } from './synergies';
+import { Effect } from '../types/effects';
+
+// Constants
+const STARTING_HAND_SIZE = 4;
+const MAX_HAND_SIZE = 10;
+
+// Helper: Create Player
+export function createPlayer(name: string, isPlayer: boolean, startingHandSize: number = STARTING_HAND_SIZE, isDebugMode: boolean = false): Player {
+    const deck = generateDeck();
+    let hand = deck.slice(0, startingHandSize);
+    let remainingDeck = deck.slice(startingHandSize);
+
+    // Guarantee at least one 1-cost card in starting hand
+    const hasOneCostCard = hand.some(c => c.cost === 1);
+    if (!hasOneCostCard) {
+        const oneCostIndex = remainingDeck.findIndex(c => c.cost === 1);
+        if (oneCostIndex !== -1) {
+            const swapIndex = Math.floor(Math.random() * hand.length);
+            const cardToSwap = hand[swapIndex];
+            hand[swapIndex] = remainingDeck[oneCostIndex];
+            remainingDeck[oneCostIndex] = cardToSwap;
+        }
+    }
+
+    if (isDebugMode) {
+        const debug1 = cardDatabase.find(c => c.id === 'debug_1');
+        const debug2 = cardDatabase.find(c => c.id === 'debug_2');
+
+        if (debug1) {
+            hand.push({ ...debug1, instanceId: `debug-1-a-${Date.now()}` });
+            hand.push({ ...debug1, instanceId: `debug-1-b-${Date.now()}` });
+        }
+        if (debug2) {
+            hand.push({ ...debug2, instanceId: `debug-2-${Date.now()}` });
+        }
+    }
+
+    return {
+        id: isPlayer ? 'player' : 'opponent',
+        name,
+        health: 80,
+        maxHealth: 80,
+        mana: 0,
+        maxMana: 0,
+        deck: remainingDeck,
+        hand,
+        board: [],
+        graveyard: [],
+        lockedMana: 0,
+    };
+}
+
+// Helper: Initial State
+export function createInitialState(isDebugMode: boolean): GameState {
+    return {
+        turn: 0,
+        activePlayer: 'player',
+        player: createPlayer('Player', true, STARTING_HAND_SIZE, isDebugMode),
+        opponent: createPlayer('Gegner', false, STARTING_HAND_SIZE + 1, false),
+        gameOver: false,
+        log: ['Spiel gestartet! Möge der beste Philosoph gewinnen.'],
+    };
+}
+
+// Helper: Append Log
+const appendLog = (currentLog: string[], message: string) => [...currentLog, message];
+
+// Helper: Draw Card
+const drawCard = (player: Player): Player => {
+    if (player.deck.length === 0) return player;
+    if (player.hand.length >= MAX_HAND_SIZE) {
+        return {
+            ...player,
+            deck: player.deck.slice(1),
+            graveyard: [...player.graveyard, player.deck[0]], // Burn
+        };
+    }
+    return {
+        ...player,
+        hand: [...player.hand, player.deck[0]],
+        deck: player.deck.slice(1),
+    };
+};
+
+// REDUCER
+export function gameReducer(state: GameState, action: GameAction): GameState {
+    let newState = { ...state };
+
+    switch (action.type) {
+        case 'START_GAME':
+            return createInitialState(false); // Should pass debug mode via action payload ideally, but defaulting to false for now or keep existing state props if needed
+
+        case 'END_TURN': {
+            // Logic for ending turn (Switch active player, Draw card, Reset Mana)
+            // This is complex and needs precise porting from useGameLogic.
+            // For now, I'm just sketching it.
+            const currentActive = state.activePlayer === 'player' ? state.player : state.opponent;
+            const nextActiveId = state.activePlayer === 'player' ? 'opponent' : 'player';
+            const nextActivePlayer = state.activePlayer === 'player' ? state.opponent : state.player;
+            const nextTurn = state.turn + 1;
+
+            // Start Turn Logic for Next Player
+            const newMaxMana = Math.min(nextActivePlayer.maxMana + 1, 12);
+            const availableMana = Math.max(0, newMaxMana - nextActivePlayer.lockedMana);
+
+            let updatedNextPlayer: Player = {
+                ...nextActivePlayer,
+                maxMana: newMaxMana,
+                mana: availableMana,
+                lockedMana: 0,
+                currentTurnManaMalus: nextActivePlayer.lockedMana,
+                currentTurnBonusMana: 0,
+                // Reset Board State (Attacks etc)
+                board: nextActivePlayer.board.map(m => ({
+                    ...m,
+                    canAttack: true,
+                    hasAttacked: false,
+                    hasUsedSpecial: false
+                })),
+                minionAttackBlockTurns: Math.max(0, (nextActivePlayer.minionAttackBlockTurns || 0) - 1),
+                synergyBlockTurns: Math.max(0, (nextActivePlayer.synergyBlockTurns || 0) - 1),
+            };
+
+            // Draw Card
+            updatedNextPlayer = drawCard(updatedNextPlayer);
+
+            newState = {
+                ...state,
+                turn: nextTurn,
+                activePlayer: nextActiveId as 'player' | 'opponent',
+                [nextActiveId]: updatedNextPlayer,
+                log: appendLog(state.log, `Runde ${nextTurn}: ${updatedNextPlayer.name} ist am Zug.`)
+            };
+            break;
+        }
+
+        case 'PLAY_CARD': {
+            // Logic handled by Effect System partially
+            const activePlayer = state.activePlayer === 'player' ? state.player : state.opponent;
+            const card = activePlayer.hand.find(c => c.instanceId === action.cardId);
+
+            if (!card) return state;
+
+            // Mana Check
+            if (activePlayer.mana < card.cost) {
+                return { ...state, log: appendLog(state.log, 'Nicht genug Dialektik!') };
+            }
+
+            // Pay Mana & Remove Card
+            let updatedPlayer = {
+                ...activePlayer,
+                mana: activePlayer.mana - card.cost,
+                hand: activePlayer.hand.filter(c => c.instanceId !== action.cardId)
+            };
+
+            // Apply to state
+            newState = {
+                ...state,
+                [state.activePlayer]: updatedPlayer
+            };
+
+            // Rule Engine: Process Effects
+            if (card.effects) {
+                card.effects.forEach(effect => {
+                    const partialState = processEffect(newState, effect, card);
+                    // Merge partial state
+                    newState = { ...newState, ...partialState };
+                });
+                newState.log = appendLog(newState.log, `${updatedPlayer.name} played ${card.name}.`);
+
+                // Add to graveyard if it's a Spell
+                if (card.type === 'Zauber') {
+                    const p = newState[state.activePlayer]; // Re-fetch in case it changed
+                    newState = {
+                        ...newState,
+                        [state.activePlayer]: {
+                            ...p,
+                            graveyard: [...p.graveyard, card]
+                        }
+                    };
+                }
+
+                // If it's a minion, summon it (Default fallback if not handled by effects yet)
+                // FUTURE: Summon should be an effect too.
+            } else {
+                // FALLBACK: Legacy Hardcoded Logic (To be ported)
+                // For now, we will handle basic summon here if it's a philosopher
+                if (card.type === 'Philosoph') {
+                    const minion: BoardMinion = {
+                        ...card,
+                        type: 'Philosoph',
+                        attack: card.attack || 0,
+                        health: card.health || 0,
+                        maxHealth: card.health || 0,
+                        canAttack: false,
+                        hasAttacked: false,
+                        hasUsedSpecial: false,
+                        turnPlayed: state.turn
+                    };
+                    const p = newState[state.activePlayer];
+                    newState = {
+                        ...newState,
+                        [state.activePlayer]: {
+                            ...p,
+                            board: [...p.board, minion]
+                        },
+                        log: appendLog(newState.log, `${p.name} summoned ${card.name}.`)
+                    };
+                }
+                else if (card.type === 'Zauber') {
+                    // Legacy spells (Should ideally be migrated, but keeping fallback)
+                    const p = newState[state.activePlayer];
+                    newState = {
+                        ...newState,
+                        [state.activePlayer]: {
+                            ...p,
+                            graveyard: [...p.graveyard, card]
+                        }
+                    };
+                }
+            }
+            break;
+        }
+
+        case 'ATTACK': {
+            const { attackerIds, targetId } = action;
+            const activePlayer = state.activePlayer === 'player' ? state.player : state.opponent;
+            const enemyPlayer = state.activePlayer === 'player' ? state.opponent : state.player;
+            let currentLog = state.log;
+
+            const attackers = attackerIds
+                .map(id => activePlayer.board.find(m => (m.instanceId || m.id) === id))
+                .filter((m): m is BoardMinion => m !== undefined && m.canAttack && !m.hasAttacked);
+
+            if (attackers.length === 0) return state;
+
+            let updatedActivePlayer = { ...activePlayer };
+            let updatedEnemyPlayer = { ...enemyPlayer };
+
+            let totalDamage = 0;
+            const attackerNames: string[] = [];
+
+            for (const attacker of attackers) {
+                // Check Diotima Silence
+                if (attacker.gender === 'male' && attacker.silencedUntilTurn && attacker.silencedUntilTurn > state.turn) {
+                    currentLog = appendLog(currentLog, `${attacker.name} is silenced and cannot attack!`);
+                    continue;
+                }
+
+                let damage = attacker.attack;
+                if (activePlayer.activeWork?.workBonus && attacker.school?.includes(activePlayer.activeWork.workBonus.school)) {
+                    damage += activePlayer.activeWork.workBonus.damage;
+                }
+                totalDamage += damage;
+                attackerNames.push(attacker.name);
+            }
+
+            if (totalDamage === 0) return { ...state, log: currentLog };
+
+            const attackerNamesStr = attackerNames.join(', ');
+
+            if (!targetId) {
+                // Attack Player
+                updatedEnemyPlayer.health -= totalDamage;
+                currentLog = appendLog(currentLog, `${attackerNamesStr} attacked ${enemyPlayer.name} for ${totalDamage} damage!`);
+
+                // Mark as attacked
+                updatedActivePlayer.board = activePlayer.board.map(m =>
+                    attackerIds.includes(m.instanceId || m.id) ? { ...m, hasAttacked: true } : m
+                );
+            } else {
+                // Attack Minion
+                const targetIndex = enemyPlayer.board.findIndex(m => (m.instanceId || m.id) === targetId);
+                if (targetIndex === -1) return state;
+                const target = enemyPlayer.board[targetIndex];
+
+                // Diogenes Check
+                if (target.id.includes('diogenes') && target.turnPlayed !== undefined) {
+                    if (state.turn - target.turnPlayed < 3) {
+                        currentLog = appendLog(currentLog, `${target.name} is hiding in his barrel! Cannot be attacked yet.`);
+                        return { ...state, log: currentLog };
+                    }
+                }
+
+                // Kant Check
+                if ((activePlayer.minionAttackBlockTurns || 0) > 0) {
+                    currentLog = appendLog(currentLog, `Attack failed due to Kant's categorical imperative.`);
+                    return { ...state, log: currentLog };
+                }
+
+                const targetDamage = target.attack;
+
+                // Combat Logic
+                // 1. Attackers hit Target
+                let targetHealth = target.health - totalDamage;
+
+                // 2. Target hits FIRST attacker back
+                let attackersUpdated = [...activePlayer.board];
+                const firstAttackerIndex = attackersUpdated.findIndex(m => (m.instanceId || m.id) === attackers[0].instanceId || (m.id === attackers[0].id));
+
+                if (firstAttackerIndex !== -1) {
+                    attackersUpdated[firstAttackerIndex] = {
+                        ...attackersUpdated[firstAttackerIndex],
+                        health: attackersUpdated[firstAttackerIndex].health - targetDamage,
+                        hasAttacked: true
+                    };
+                }
+
+                // Rest of attackers mark as attacked
+                attackers.slice(1).forEach(att => {
+                    const idx = attackersUpdated.findIndex(m => (m.instanceId || m.id) === att.instanceId);
+                    if (idx !== -1) attackersUpdated[idx] = { ...attackersUpdated[idx], hasAttacked: true };
+                });
+
+                // Remove dead minions
+                updatedActivePlayer.board = attackersUpdated.filter(m => m.health > 0);
+                updatedActivePlayer.graveyard = [...updatedActivePlayer.graveyard, ...attackersUpdated.filter(m => m.health <= 0)];
+
+                if (targetHealth <= 0) {
+                    updatedEnemyPlayer.board = updatedEnemyPlayer.board.filter((_, i) => i !== targetIndex);
+                    updatedEnemyPlayer.graveyard = [...updatedEnemyPlayer.graveyard, target];
+                    currentLog = appendLog(currentLog, `${attackerNamesStr} destroyed ${target.name}!`);
+                } else {
+                    updatedEnemyPlayer.board[targetIndex] = { ...target, health: targetHealth };
+                    currentLog = appendLog(currentLog, `${attackerNamesStr} attacked ${target.name}.`);
+                }
+            }
+
+            newState = {
+                ...state,
+                activePlayer: state.activePlayer, // ensure key preservation
+                [state.activePlayer]: updatedActivePlayer,
+                [state.activePlayer === 'player' ? 'opponent' : 'player']: updatedEnemyPlayer,
+                log: currentLog
+            };
+            break;
+        }
+
+        case 'SELECT_CARD':
+            return { ...state, selectedCard: action.cardId };
+
+        case 'SELECT_MINION': {
+            const { minionId, toggle } = action;
+            let newSelected = state.selectedMinions || [];
+            if (toggle) {
+                if (newSelected.includes(minionId)) {
+                    newSelected = newSelected.filter(id => id !== minionId);
+                } else {
+                    newSelected = [...newSelected, minionId];
+                }
+            } else {
+                newSelected = [minionId];
+            }
+            return { ...state, selectedMinions: newSelected };
+        }
+
+        case 'CANCEL_CAST':
+            return {
+                ...state,
+                targetMode: undefined,
+                targetModeOwner: undefined,
+                pendingPlayedCard: undefined,
+                selectedCard: undefined,
+                selectedMinions: []
+            };
+
+        case 'SEARCH_DECK': {
+            const { filter, amount } = action;
+            const activePlayer = state.activePlayer === 'player' ? state.player : state.opponent;
+            let updatedDeck = [...activePlayer.deck];
+            let updatedHand = [...activePlayer.hand];
+            let log = state.log;
+
+            // Find matching cards
+            const matches = updatedDeck.filter(filter);
+
+            if (matches.length === 0) {
+                // return { ...state, log: appendLog(log, 'Keine passenden Karten gefunden.') };
+                // Just log and do nothing
+            } else {
+                // Shuffle matches to get random ones if needed
+                const shuffledMatches = matches.sort(() => Math.random() - 0.5);
+                const selected = shuffledMatches.slice(0, amount);
+
+                selected.forEach(card => {
+                    if (updatedHand.length < 10) {
+                        // Remove from deck
+                        const index = updatedDeck.findIndex(c => c.instanceId === card.instanceId);
+                        if (index !== -1) {
+                            updatedDeck.splice(index, 1);
+                            updatedHand.push(card);
+                        }
+                    }
+                });
+
+                // Shuffle deck after searching
+                updatedDeck.sort(() => Math.random() - 0.5);
+
+                const updatedPlayer = {
+                    ...activePlayer,
+                    hand: updatedHand,
+                    deck: updatedDeck
+                };
+
+                newState = {
+                    ...state,
+                    [state.activePlayer]: updatedPlayer,
+                    log: appendLog(state.log, `${activePlayer.name} suchte im Deck und zog ${selected.length} Karte(n).`)
+                };
+            }
+            break;
+        }
+
+        case 'USE_SPECIAL': {
+            const { minionId } = action;
+            const activePlayer = state.activePlayer === 'player' ? state.player : state.opponent;
+            const minionIndex = activePlayer.board.findIndex(m => (m.instanceId || m.id) === minionId);
+
+            if (minionIndex === -1) return state;
+
+            const minion = activePlayer.board[minionIndex];
+            if (minion.hasUsedSpecial) return state;
+
+            let updatedMinion = { ...minion, hasUsedSpecial: true };
+            const log = state.log;
+
+            // Sartre Transform Logic (Placeholder trigger)
+            if (minion.specialAbility === 'transform') {
+                // Trigger UI to target friendly minion
+                return {
+                    ...state,
+                    targetMode: 'friendly_minion_transform',
+                    targetModeOwner: state.activePlayer,
+                    selectedMinions: [minionId], // Store source minion
+                    log: appendLog(log, 'Wähle einen Diener zum Transformieren.')
+                };
+            }
+
+            // Handle other specials or just mark used
+            newState = {
+                ...state,
+                [state.activePlayer]: {
+                    ...activePlayer,
+                    board: activePlayer.board.map((m, i) => i === minionIndex ? updatedMinion : m)
+                }
+            };
+            break;
+        }
+
+        case 'TROLLEY_SACRIFICE': {
+            const { minionId } = action;
+            const activePlayer = state.activePlayer === 'player' ? state.player : state.opponent;
+            const enemyPlayer = state.activePlayer === 'player' ? state.opponent : state.player;
+            let log = state.log;
+
+            const sacrificeIndex = activePlayer.board.findIndex(m => (m.instanceId || m.id) === minionId);
+            if (sacrificeIndex === -1) return state;
+
+            const sacrificedMinion = activePlayer.board[sacrificeIndex];
+
+            // Sacrafice
+            const updatedActiveBoard = activePlayer.board.filter((_, i) => i !== sacrificeIndex);
+            const updatedActiveGraveyard = [...activePlayer.graveyard, sacrificedMinion];
+
+            // Damage Enemy Board (4 damage AoE)
+            let updatedEnemyBoard = enemyPlayer.board.map(m => ({ ...m, health: m.health - 4 }));
+            const deadMinions = updatedEnemyBoard.filter(m => m.health <= 0);
+            updatedEnemyBoard = updatedEnemyBoard.filter(m => m.health > 0);
+            const updatedEnemyGraveyard = [...enemyPlayer.graveyard, ...deadMinions];
+
+            log = appendLog(log, `${activePlayer.name} opferte ${sacrificedMinion.name} und fügte allen gegnerischen Philosophen 4 Schaden zu!`);
+
+            newState = {
+                ...state,
+                [state.activePlayer]: { ...activePlayer, board: updatedActiveBoard, graveyard: updatedActiveGraveyard },
+                [state.activePlayer === 'player' ? 'opponent' : 'player']: { ...enemyPlayer, board: updatedEnemyBoard, graveyard: updatedEnemyGraveyard },
+                log,
+                targetMode: undefined
+            };
+            break;
+        }
+
+        case 'KONTEMPLATION_SELECT': {
+            const activePlayer = state.activePlayer === 'player' ? state.player : state.opponent;
+            if (!state.kontemplationCards) return state;
+
+            const selectedCard = state.kontemplationCards.find(c => c.instanceId === action.cardId);
+            if (!selectedCard) return state;
+
+            // Shuffle others back
+            const otherCards = state.kontemplationCards.filter(c => c.instanceId !== action.cardId);
+            let newDeck = [...activePlayer.deck];
+            // Logic in legacy was: deck.slice(3) then shuffle back. 
+            // We can just assume they were removed from deck already? 
+            // The PREVIOUS state (when setting targetMode) probably removed them. 
+            // Let's assume current deck does NOT contain them.
+            // Legacy: "let newDeck = activePlayer.deck.slice(kontemplationCards.length);"
+            // Wait, if they are in kontemplationCards, were they removed from deck in state?
+            // If not, we need to remove them now.
+            // Given the reducer flow, we better ensure they are removed.
+            // BUT, we don't know if they were already removed.
+            // Let's assume they ARE removed if they are in `kontemplationCards`.
+
+            // Shuffle others back
+            otherCards.forEach(c => {
+                const idx = Math.floor(Math.random() * (newDeck.length + 1));
+                newDeck.splice(idx, 0, c);
+            });
+
+            const updatedPlayer = {
+                ...activePlayer,
+                hand: [...activePlayer.hand, selectedCard],
+                deck: newDeck
+            };
+
+            newState = {
+                ...state,
+                [state.activePlayer]: updatedPlayer,
+                kontemplationCards: undefined,
+                targetMode: undefined,
+                log: appendLog(state.log, `${activePlayer.name} wählte eine Karte durch Kontemplation.`)
+            };
+            break;
+        }
+
+        case 'FOUCAULT_CLOSE':
+            newState = {
+                ...state,
+                targetMode: undefined,
+                foucaultRevealCards: undefined
+            };
+            break;
+
+        case 'GOTTESBEWEIS_TARGET': {
+            const { minionId } = action;
+            const activePlayer = state.activePlayer === 'player' ? state.player : state.opponent;
+            const enemyPlayer = state.activePlayer === 'player' ? state.opponent : state.player;
+            let log = state.log;
+
+            // Target search (Any board)
+            const isOnActive = activePlayer.board.some(m => (m.instanceId || m.id) === minionId);
+            const targetValues = isOnActive ? activePlayer.board : enemyPlayer.board;
+            const targetMinion = targetValues.find(m => (m.instanceId || m.id) === minionId);
+
+            if (!targetMinion) return state;
+
+            let updatedMinion = { ...targetMinion };
+            if (targetMinion.school?.includes('Religion')) {
+                updatedMinion.health += 4;
+                updatedMinion.maxHealth += 4;
+                updatedMinion.attack += 4; // Legacy didn't have attack buff? Grep said "+4 Leben". I'll stick to Health.
+                // Wait, grep said: updatedTarget.health += 4; updatedTarget.maxHealth += 4;
+                log = appendLog(log, `${activePlayer.name} stärkte ${targetMinion.name} durch Gottesbeweis (+4 Leben)!`);
+            } else {
+                updatedMinion.health -= 8;
+                log = appendLog(log, `${activePlayer.name} strafte ${targetMinion.name} durch Gottesbeweis (8 Schaden)!`);
+            }
+
+            // Apply update
+            const updateBoard = (board: BoardMinion[]) =>
+                updatedMinion.health <= 0
+                    ? board.filter(m => (m.instanceId || m.id) !== minionId)
+                    : board.map(m => (m.instanceId || m.id) === minionId ? updatedMinion : m);
+
+            const updatedActive = isOnActive ? { ...activePlayer, board: updateBoard(activePlayer.board) } : activePlayer;
+            const updatedEnemy = !isOnActive ? { ...enemyPlayer, board: updateBoard(enemyPlayer.board) } : enemyPlayer;
+
+            // Graveyard handle
+            if (updatedMinion.health <= 0) {
+                const gy = isOnActive ? updatedActive.graveyard : updatedEnemy.graveyard;
+                if (isOnActive) updatedActive.graveyard = [...gy, targetMinion];
+                else updatedEnemy.graveyard = [...gy, targetMinion];
+                log = appendLog(log, `${targetMinion.name} wurde besiegt!`);
+            }
+
+            newState = {
+                ...state,
+                [state.activePlayer]: updatedActive,
+                [state.activePlayer === 'player' ? 'opponent' : 'player']: updatedEnemy,
+                log,
+                targetMode: undefined
+            };
+            break;
+        }
+
+        case 'NIETZSCHE_TARGET': {
+            const { minionId } = action;
+            const activePlayer = state.activePlayer === 'player' ? state.player : state.opponent;
+            const enemyPlayer = state.activePlayer === 'player' ? state.opponent : state.player;
+
+            // Nietzsche is attacker (selectedMinions[0])
+            const nietzscheId = state.selectedMinions?.[0];
+            if (!nietzscheId) return state;
+
+            // Target search
+            const isOnActive = activePlayer.board.some(m => (m.instanceId || m.id) === minionId);
+            const targetValues = isOnActive ? activePlayer.board : enemyPlayer.board;
+            const targetMinion = targetValues.find(m => (m.instanceId || m.id) === minionId);
+            if (!targetMinion) return state;
+
+            // Logic: -3/-3. If alive -> Transform to "Der letzte Mensch"
+            const newAttack = Math.max(0, targetMinion.attack - 3);
+            const newHealth = targetMinion.health - 3;
+
+            let updatedMinion: BoardMinion | null = null;
+            let log = state.log;
+
+            if (newHealth <= 0) {
+                log = appendLog(log, `${targetMinion.name} wurde von Nietzsche zerschmettert!`);
+            } else {
+                updatedMinion = {
+                    ...targetMinion,
+                    name: 'Der letzte Mensch',
+                    description: 'Ein verächtliches Wesen, das nur Komfort sucht.',
+                    image: '/images/cards/letzter_mensch.png',
+                    attack: newAttack,
+                    health: newHealth,
+                    maxHealth: newHealth,
+                    type: 'Philosoph',
+                    hasAttacked: true,
+                    hasUsedSpecial: false,
+                    specialAbility: undefined
+                };
+                log = appendLog(log, `${targetMinion.name} wurde zum letzten Menschen!`);
+            }
+
+            // Update Boards
+            const updateBoard = (board: BoardMinion[]) =>
+                !updatedMinion
+                    ? board.filter(m => (m.instanceId || m.id) !== minionId)
+                    : board.map(m => (m.instanceId || m.id) === minionId ? updatedMinion! : m);
+
+            let updatedActive = isOnActive ? { ...activePlayer, board: updateBoard(activePlayer.board) } : activePlayer;
+            let updatedEnemy = !isOnActive ? { ...enemyPlayer, board: updateBoard(enemyPlayer.board) } : enemyPlayer;
+
+            // Nietzsche Exhaustion
+            updatedActive.board = updatedActive.board.map(m => (m.instanceId || m.id) === nietzscheId ? { ...m, hasUsedSpecial: true, hasAttacked: true } : m);
+
+            newState = {
+                ...state,
+                [state.activePlayer]: updatedActive,
+                [state.activePlayer === 'player' ? 'opponent' : 'player']: updatedEnemy,
+                log,
+                targetMode: undefined,
+                selectedMinions: undefined
+            };
+            break;
+        }
+
+        case 'VAN_INWAGEN_TARGET': {
+            // Transform to Chair Matter (0/1)
+            const { minionId } = action;
+            const activePlayer = state.activePlayer === 'player' ? state.player : state.opponent;
+            const enemyPlayer = state.activePlayer === 'player' ? state.opponent : state.player;
+
+            const vanInwagenId = state.selectedMinions?.[0];
+            const targetMinion = enemyPlayer.board.find(m => (m.instanceId || m.id) === minionId);
+
+            if (!targetMinion || !vanInwagenId) return state;
+
+            const chairMatter: BoardMinion = {
+                id: `chair_matter_${Date.now()}`,
+                instanceId: `chair_matter_${Date.now()}`,
+                name: 'Stuhlartige Materie',
+                type: 'Philosoph',
+                cost: 0,
+                attack: 0,
+                health: 1,
+                maxHealth: 1,
+                canAttack: false,
+                hasAttacked: true,
+                hasUsedSpecial: false,
+                description: 'Verwandelte Materie ohne Bewusstsein.',
+                rarity: 'Gewöhnlich',
+                image: '/images/cards/chair_matter.png',
+            };
+
+            let log = appendLog(state.log, `${targetMinion.name} wurde in stuhlartige Materie verwandelt!`);
+
+            const updatedEnemyBoard = enemyPlayer.board.map(m => (m.instanceId || m.id) === minionId ? chairMatter : m);
+            const updatedActiveBoard = activePlayer.board.map(m => (m.instanceId || m.id) === vanInwagenId ? { ...m, hasUsedSpecial: true, hasAttacked: true } : m);
+
+            newState = {
+                ...state,
+                [state.activePlayer]: { ...activePlayer, board: updatedActiveBoard },
+                [state.activePlayer === 'player' ? 'opponent' : 'player']: { ...enemyPlayer, board: updatedEnemyBoard },
+                log,
+                targetMode: undefined,
+                selectedMinions: undefined
+            };
+            break;
+        }
+
+        case 'RECURRENCE_SELECT': {
+            const activePlayer = state.activePlayer === 'player' ? state.player : state.opponent;
+            const card = state.recurrenceCards?.find(c => c.instanceId === action.cardId || c.id === action.cardId);
+
+            if (!card) return state;
+
+            const newHand = [...activePlayer.hand, card];
+            const newGraveyard = activePlayer.graveyard.filter(c => c.instanceId !== action.cardId);
+
+            newState = {
+                ...state,
+                [state.activePlayer]: { ...activePlayer, hand: newHand, graveyard: newGraveyard },
+                recurrenceCards: undefined,
+                targetMode: undefined,
+                log: appendLog(state.log, `${activePlayer.name} holte ${card.name} zurück!`)
+            };
+            break;
+        }
+
+        case 'SYNC_STATE':
+            return action.newState;
+
+        default:
+            // Do not return state here, break to allow synergy calc
+            break;
+    }
+
+    // Auto-Calculate Synergies on every state change
+    newState.player.board = calculateSynergies(newState.player.board, newState.player.synergyBlockTurns);
+    newState.opponent.board = calculateSynergies(newState.opponent.board, newState.opponent.synergyBlockTurns);
+
+    return newState;
+}
