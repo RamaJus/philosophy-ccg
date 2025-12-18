@@ -197,6 +197,9 @@ export const cardDatabase: Card[] = [
         cost: 1,
         description: 'Tiefes Nachdenken über das Sein.',
         effect: 'Betrachte die obersten 3 Karten deines Decks, nimm 1 auf die Hand.',
+        effects: [
+            { type: 'DISCOVER', target: 'SELF', value: 3 }
+        ],
         rarity: 'Gewöhnlich',
         school: ['Metaphysik'],
         image: '/images/cards/kontemplation.png',
