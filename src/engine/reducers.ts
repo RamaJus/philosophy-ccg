@@ -26,10 +26,8 @@ export function createPlayer(name: string, isPlayer: boolean, startingHandSize: 
     }
 
     if (isDebugMode) {
-        console.log('[DEBUG] Creating debug cards for player...');
         const debug1 = cardDatabase.find(c => c.id === 'debug_1');
         const debug2 = cardDatabase.find(c => c.id === 'debug_2');
-        console.log('[DEBUG] debug_1 found:', !!debug1, 'debug_2 found:', !!debug2);
 
         if (debug1) {
             hand.push({ ...debug1, instanceId: `debug-1-a-${Date.now()}` });
@@ -38,8 +36,6 @@ export function createPlayer(name: string, isPlayer: boolean, startingHandSize: 
         if (debug2) {
             hand.push({ ...debug2, instanceId: `debug-2-${Date.now()}` });
         }
-        console.log('[DEBUG] Hand after adding debug cards:', hand.length, 'cards');
-        console.log('[DEBUG] Debug card names:', hand.filter(c => c.id.startsWith('debug')).map(c => c.name));
     }
 
     return {
@@ -190,8 +186,29 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
                     };
                 }
 
-                // If it's a minion, summon it (Default fallback if not handled by effects yet)
-                // FUTURE: Summon should be an effect too.
+                // If it's a minion, summon it
+                if (card.type === 'Philosoph') {
+                    const minion: BoardMinion = {
+                        ...card,
+                        type: 'Philosoph',
+                        attack: card.attack || 0,
+                        health: card.health || 0,
+                        maxHealth: card.health || 0,
+                        canAttack: false,
+                        hasAttacked: false,
+                        hasUsedSpecial: false,
+                        turnPlayed: state.turn
+                    };
+                    const p = newState[state.activePlayer];
+                    newState = {
+                        ...newState,
+                        [state.activePlayer]: {
+                            ...p,
+                            board: [...p.board, minion]
+                        },
+                        log: appendLog(newState.log, `${p.name} summoned ${card.name}.`)
+                    };
+                }
             } else {
                 // FALLBACK: Legacy Hardcoded Logic (To be ported)
                 // For now, we will handle basic summon here if it's a philosopher

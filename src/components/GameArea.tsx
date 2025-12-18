@@ -69,10 +69,6 @@ export const GameArea: React.FC<GameAreaProps> = ({ mode, isDebugMode }) => {
     const viewPlayer = isClient ? opponent : player;
     const viewOpponent = isClient ? player : opponent;
 
-    // DEBUG: Log hand contents at render time
-    console.log('[DEBUG RENDER] viewPlayer.hand:', viewPlayer.hand.length, 'cards');
-    console.log('[DEBUG RENDER] Debug cards in hand:', viewPlayer.hand.filter(c => c.id?.startsWith('debug')).length);
-
     const viewIsPlayerTurn = isClient ? activePlayer === 'opponent' : activePlayer === 'player';
 
     // Flash Card Logic
