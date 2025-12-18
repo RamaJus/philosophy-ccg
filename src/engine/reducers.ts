@@ -26,8 +26,10 @@ export function createPlayer(name: string, isPlayer: boolean, startingHandSize: 
     }
 
     if (isDebugMode) {
+        console.log('[DEBUG] Creating debug cards for player...');
         const debug1 = cardDatabase.find(c => c.id === 'debug_1');
         const debug2 = cardDatabase.find(c => c.id === 'debug_2');
+        console.log('[DEBUG] debug_1 found:', !!debug1, 'debug_2 found:', !!debug2);
 
         if (debug1) {
             hand.push({ ...debug1, instanceId: `debug-1-a-${Date.now()}` });
