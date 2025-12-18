@@ -27,13 +27,21 @@ describe('gameReducer', () => {
 
     it('should play a card if mana checks out', () => {
         let state = createInitialState(false);
-        const player = state.player;
 
-        // Find a playable card (Cost <= Mana)
-        // Initial mana is 1. If we have a 1-cost card.
-        // We might need to force a card into hand for predictable testing.
-        const mockCard = { ...player.hand[0], cost: 1, instanceId: 'test-card-1' };
-        state.player.hand = [mockCard, ...player.hand.slice(1)];
+        // Create explicit Philosoph card for testing
+        const mockCard = {
+            id: 'test-minion',
+            instanceId: 'test-card-1',
+            name: 'Test Philosopher',
+            type: 'Philosoph' as const,
+            cost: 1,
+            attack: 2,
+            health: 3,
+            maxHealth: 3,
+            description: 'Test minion',
+            rarity: 'Gewöhnlich' as const,
+        };
+        state.player.hand = [mockCard];
         state.player.mana = 1;
 
         const action: GameAction = { type: 'PLAY_CARD', cardId: 'test-card-1' };
@@ -41,12 +49,9 @@ describe('gameReducer', () => {
 
         expect(state.player.mana).toBe(0);
         expect(state.player.hand.find(c => c.instanceId === 'test-card-1')).toBeUndefined();
-        // Depending on type (Minion vs Spell), check board or graveyard
-        if (mockCard.type === 'Philosoph') {
-            expect(state.player.board.length).toBe(1);
-        } else {
-            expect(state.player.graveyard.length).toBe(1); // Spell goes to GY
-        }
+        // Minion should be on board
+        expect(state.player.board.length).toBe(1);
+        expect(state.player.board[0].name).toBe('Test Philosopher');
     });
 
     it('should NOT play a card if mana is insufficient', () => {

@@ -25,7 +25,7 @@ export const GameArea: React.FC<GameAreaProps> = ({ mode, isDebugMode }) => {
         mode === 'multiplayer_host' ? 'host' : mode === 'multiplayer_client' ? 'client' : 'single',
         isDebugMode
     );
-    const { player, opponent, activePlayer, selectedCard, selectedMinions, gameOver, winner, log, targetMode, targetModeOwner, kontemplationCards, foucaultRevealCards, recurrenceCards } = gameState;
+    const { player, opponent, activePlayer, selectedCard, selectedMinions, gameOver, winner, log, targetMode, targetModeOwner, kontemplationCards, foucaultRevealCards, recurrenceCards, discoveryCards } = gameState;
 
     // Use ref to always have the latest state in AI callbacks
     const gameStateRef = useRef(gameState);
@@ -202,6 +202,10 @@ export const GameArea: React.FC<GameAreaProps> = ({ mode, isDebugMode }) => {
 
     const handleRecurrenceSelect = (cardId: string) => {
         dispatch({ type: 'RECURRENCE_SELECT', cardId });
+    };
+
+    const handleDiscoverySelect = (cardId: string) => {
+        dispatch({ type: 'SELECT_DISCOVERY', cardId });
     };
 
     const aiTurn = () => {
@@ -387,6 +391,29 @@ export const GameArea: React.FC<GameAreaProps> = ({ mode, isDebugMode }) => {
                                         key={card.instanceId || card.id}
                                         className="transform transition-all duration-300 hover:scale-105 hover:shadow-xl hover:shadow-purple-500/20 cursor-pointer"
                                         onClick={() => handleKontemplationSelect(card.instanceId || card.id)}
+                                    >
+                                        <CardComponent card={card} isPlayable={true} />
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                {/* Generic Discovery Modal (New Effect System) */}
+                {targetMode === 'discover' && isMyTargetMode && discoveryCards && discoveryCards.length > 0 && (
+                    <div className="fixed inset-0 bg-black/80 z-50 flex flex-col items-center justify-center p-8 backdrop-blur-sm">
+                        <div className="bg-slate-900 border-2 border-emerald-600 rounded-xl p-8 shadow-2xl shadow-emerald-900/20">
+                            <h2 className="text-3xl font-serif text-emerald-400 mb-2 text-center">Entdecken</h2>
+                            <p className="text-emerald-200/60 mb-6 font-serif italic text-center">
+                                Wähle eine Karte.
+                            </p>
+                            <div className="flex gap-6 justify-center">
+                                {discoveryCards.map((card) => (
+                                    <div
+                                        key={card.instanceId || card.id}
+                                        className="transform transition-all duration-300 hover:scale-105 hover:shadow-xl hover:shadow-emerald-500/20 cursor-pointer"
+                                        onClick={() => handleDiscoverySelect(card.instanceId || card.id)}
                                     >
                                         <CardComponent card={card} isPlayable={true} />
                                     </div>
