@@ -1,4 +1,5 @@
-import { Effect } from './effects';
+import { Effect, EffectType } from './effects';
+export type { Effect, EffectType };
 
 export type CardType = 'Philosoph' | 'Zauber' | 'Werk';
 
@@ -89,7 +90,8 @@ export type GameAction =
     | { type: 'USE_SPECIAL'; minionId: string; targetId?: string } // Uses instanceIds
     | { type: 'SELECT_CARD'; cardId?: string } // Uses instanceId
     | { type: 'SELECT_MINION'; minionId: string; toggle?: boolean } // Uses instanceId
-    | { type: 'SEARCH_DECK'; filter: (card: any) => boolean; amount: number; activePlayerId?: string }
+    | { type: 'SEARCH_DECK'; cardId: string } // Legacy: Manual select from deck
+    | { type: 'AUTO_SEARCH_DECK'; filter: (card: any) => boolean; amount: number; activePlayerId?: string }
     | { type: 'TROLLEY_SACRIFICE'; minionId: string } // Uses instanceId
     | { type: 'KONTEMPLATION_SELECT'; cardId: string } // Uses instanceId
     | { type: 'FOUCAULT_CLOSE' }

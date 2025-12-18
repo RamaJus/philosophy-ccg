@@ -109,7 +109,25 @@ export class MultiplayerManager {
         this.onConnect = onConnect;
     }
 
+    public get isConnected(): boolean {
+        return !!this.conn && this.conn.open;
+    }
+
+    public onAction(callback: (action: GameAction) => void) {
+        this.onActionReceived = callback;
+    }
+
+    public onState(callback: (state: GameState) => void) {
+        this.onStateUpdate = callback;
+    }
+
+    public clearListeners() {
+        this.onStateUpdate = null;
+        this.onActionReceived = null;
+    }
+
     public cleanup() {
+        this.clearListeners();
         if (this.conn) this.conn.close();
         if (this.peer) this.peer.destroy();
     }

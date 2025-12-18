@@ -1,8 +1,7 @@
-import { GameState, Player, GameAction, BoardMinion, Card } from '../types';
+import { GameState, Player, GameAction, BoardMinion } from '../types';
 import { generateDeck, cardDatabase } from '../data/cards';
 import { processEffect } from './effectSystem';
 import { calculateSynergies } from './synergies';
-import { Effect } from '../types/effects';
 
 // Constants
 const STARTING_HAND_SIZE = 4;
@@ -98,7 +97,6 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
             // Logic for ending turn (Switch active player, Draw card, Reset Mana)
             // This is complex and needs precise porting from useGameLogic.
             // For now, I'm just sketching it.
-            const currentActive = state.activePlayer === 'player' ? state.player : state.opponent;
             const nextActiveId = state.activePlayer === 'player' ? 'opponent' : 'player';
             const nextActivePlayer = state.activePlayer === 'player' ? state.opponent : state.player;
             const nextTurn = state.turn + 1;
@@ -166,7 +164,7 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
             // Rule Engine: Process Effects
             if (card.effects) {
                 card.effects.forEach(effect => {
-                    const partialState = processEffect(newState, effect, card);
+                    const partialState = processEffect(newState, effect);
                     // Merge partial state
                     newState = { ...newState, ...partialState };
                 });
@@ -369,11 +367,37 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
             };
 
         case 'SEARCH_DECK': {
+            // Manual selection from deck (Marx)
+            const activePlayer = state.activePlayer === 'player' ? state.player : state.opponent;
+            if (!action.cardId) return state; // Safety check
+
+            const cardIndex = activePlayer.deck.findIndex(c => c.instanceId === action.cardId);
+
+            if (cardIndex === -1) return state;
+
+            const card = activePlayer.deck[cardIndex];
+            const updatedDeck = activePlayer.deck.filter((_, i) => i !== cardIndex);
+
+            const updatedPlayer = {
+                ...activePlayer,
+                deck: updatedDeck,
+                hand: [...activePlayer.hand, card]
+            };
+
+            newState = {
+                ...state,
+                [state.activePlayer]: updatedPlayer,
+                targetMode: undefined, // Close search view
+                log: appendLog(state.log, `${activePlayer.name} wählte ${card.name} aus dem Deck.`)
+            };
+            break;
+        }
+
+        case 'AUTO_SEARCH_DECK': {
             const { filter, amount } = action;
             const activePlayer = state.activePlayer === 'player' ? state.player : state.opponent;
             let updatedDeck = [...activePlayer.deck];
             let updatedHand = [...activePlayer.hand];
-            let log = state.log;
 
             // Find matching cards
             const matches = updatedDeck.filter(filter);

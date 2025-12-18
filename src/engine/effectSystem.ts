@@ -1,6 +1,4 @@
-import { GameState, Player, Card } from '../types';
-import { Effect } from '../types/effects';
-import { cardDatabase } from '../data/cards';
+import { GameState, Effect } from '../types';
 
 // Helper to get players safely based on active turn perspective
 export const getActivePlayers = (state: GameState) => {
@@ -13,7 +11,6 @@ export const getActivePlayers = (state: GameState) => {
 export const processEffect = (
     state: GameState,
     effect: Effect,
-    sourceCard?: Card
 ): Partial<GameState> => {
     const { activePlayer, enemyPlayer } = getActivePlayers(state);
     let newActivePlayer = { ...activePlayer };

@@ -21,7 +21,10 @@ interface GameAreaProps {
 }
 
 export const GameArea: React.FC<GameAreaProps> = ({ mode, isDebugMode }) => {
-    const { gameState, dispatch } = useGameLogic(mode, isDebugMode);
+    const { gameState, dispatch } = useGameLogic(
+        mode === 'multiplayer_host' ? 'host' : mode === 'multiplayer_client' ? 'client' : 'single',
+        isDebugMode
+    );
     const { player, opponent, activePlayer, selectedCard, selectedMinions, gameOver, winner, log, targetMode, targetModeOwner, kontemplationCards, foucaultRevealCards, recurrenceCards } = gameState;
 
     // Use ref to always have the latest state in AI callbacks
