@@ -79,6 +79,29 @@ export const processEffect = (
             }
             break;
         }
+        case 'DISCOVER': {
+            const amount = effect.value || 3;
+            if (effect.target === 'SELF') {
+                if (newActivePlayer.deck.length === 0) {
+                    logUpdates.push('Deck is empty, cannot discover.');
+                    break;
+                }
+                const revealed = newActivePlayer.deck.slice(0, amount);
+                // Remove from deck immediately (they are in limbo)
+                newActivePlayer.deck = newActivePlayer.deck.slice(amount);
+
+                // Return state updates including discovery
+                return {
+                    player: state.activePlayer === 'player' ? newActivePlayer : newEnemyPlayer,
+                    opponent: state.activePlayer === 'player' ? newEnemyPlayer : newActivePlayer,
+                    log: [...state.log, ...logUpdates, `${activePlayer.name} looks at top ${amount} cards.`],
+                    discoveryCards: revealed,
+                    targetMode: 'discover',
+                    targetModeOwner: state.activePlayer
+                };
+            }
+            break;
+        }
     }
 
     // Reconstruct state with updated players

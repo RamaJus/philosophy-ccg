@@ -72,9 +72,10 @@ export interface GameState {
     selectedCard?: string; // Card instanceId in hand
     pendingPlayedCard?: Card; // Card currently being cast (for cancellation refund checks)
     selectedMinions?: string[]; // Minion instanceIds on board for attacking (multi-select)
-    targetMode?: 'attack' | 'spell' | 'search' | 'transform' | 'friendly_minion_transform' | 'trolley_sacrifice' | 'special' | 'kontemplation' | 'foucault_reveal' | 'gottesbeweis_target' | 'nietzsche_target' | 'van_inwagen_target' | 'recurrence_select'; // What we're targeting for
+    targetMode?: 'attack' | 'spell' | 'search' | 'transform' | 'friendly_minion_transform' | 'trolley_sacrifice' | 'special' | 'kontemplation' | 'foucault_reveal' | 'gottesbeweis_target' | 'nietzsche_target' | 'van_inwagen_target' | 'recurrence_select' | 'discover'; // What we're targeting for
     targetModeOwner?: 'player' | 'opponent'; // Who initiated the targetMode (for multiplayer modal visibility)
     kontemplationCards?: Card[]; // Top 3 cards for Kontemplation selection
+    discoveryCards?: Card[]; // Generic storage for DISCOVER/Search effects
     recurrenceCards?: Card[]; // Cards in graveyard available for 'Ewige Wiederkunft'
     foucaultRevealCards?: Card[]; // Top 3 opponent cards for Foucault reveal
     log: string[]; // Game log messages
@@ -94,6 +95,8 @@ export type GameAction =
     | { type: 'AUTO_SEARCH_DECK'; filter: (card: any) => boolean; amount: number; activePlayerId?: string }
     | { type: 'TROLLEY_SACRIFICE'; minionId: string } // Uses instanceId
     | { type: 'KONTEMPLATION_SELECT'; cardId: string } // Uses instanceId
+    | { type: 'SELECT_DISCOVERY'; cardId: string } // For picking a card from discoveryCards
+    | { type: 'FOUCAULT_CLOSE' }
     | { type: 'FOUCAULT_CLOSE' }
 
     | { type: 'GOTTESBEWEIS_TARGET'; minionId: string } // Uses instanceId

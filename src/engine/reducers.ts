@@ -55,10 +55,14 @@ export function createPlayer(name: string, isPlayer: boolean, startingHandSize: 
 
 // Helper: Initial State
 export function createInitialState(isDebugMode: boolean): GameState {
+    const player = createPlayer('Player', true, STARTING_HAND_SIZE, isDebugMode);
+    player.mana = 1;
+    player.maxMana = 1;
+
     return {
-        turn: 0,
+        turn: 1,
         activePlayer: 'player',
-        player: createPlayer('Player', true, STARTING_HAND_SIZE, isDebugMode),
+        player,
         opponent: createPlayer('Gegner', false, STARTING_HAND_SIZE + 1, false),
         gameOver: false,
         log: ['Spiel gestartet! Möge der beste Philosoph gewinnen.'],
@@ -518,16 +522,6 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
             // Shuffle others back
             const otherCards = state.kontemplationCards.filter(c => c.instanceId !== action.cardId);
             let newDeck = [...activePlayer.deck];
-            // Logic in legacy was: deck.slice(3) then shuffle back. 
-            // We can just assume they were removed from deck already? 
-            // The PREVIOUS state (when setting targetMode) probably removed them. 
-            // Let's assume current deck does NOT contain them.
-            // Legacy: "let newDeck = activePlayer.deck.slice(kontemplationCards.length);"
-            // Wait, if they are in kontemplationCards, were they removed from deck in state?
-            // If not, we need to remove them now.
-            // Given the reducer flow, we better ensure they are removed.
-            // BUT, we don't know if they were already removed.
-            // Let's assume they ARE removed if they are in `kontemplationCards`.
 
             // Shuffle others back
             otherCards.forEach(c => {
@@ -547,6 +541,38 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
                 kontemplationCards: undefined,
                 targetMode: undefined,
                 log: appendLog(state.log, `${activePlayer.name} wählte eine Karte durch Kontemplation.`)
+            };
+            break;
+        }
+
+        case 'SELECT_DISCOVERY': {
+            const activePlayer = state.activePlayer === 'player' ? state.player : state.opponent;
+            if (!state.discoveryCards) return state;
+
+            const selectedCard = state.discoveryCards.find(c => c.instanceId === action.cardId);
+            if (!selectedCard) return state;
+
+            // Shuffle others back
+            const otherCards = state.discoveryCards.filter(c => c.instanceId !== action.cardId);
+            let newDeck = [...activePlayer.deck];
+
+            otherCards.forEach(c => {
+                const idx = Math.floor(Math.random() * (newDeck.length + 1));
+                newDeck.splice(idx, 0, c);
+            });
+
+            const updatedPlayer = {
+                ...activePlayer,
+                hand: [...activePlayer.hand, selectedCard],
+                deck: newDeck
+            };
+
+            newState = {
+                ...state,
+                [state.activePlayer]: updatedPlayer,
+                discoveryCards: undefined,
+                targetMode: undefined,
+                log: appendLog(state.log, `${activePlayer.name} wählte ${selectedCard.name}.`)
             };
             break;
         }

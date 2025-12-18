@@ -6,7 +6,8 @@ export type EffectType =
     | 'SYNERGY_BLOCK'
     | 'SILENCE'
     | 'TRANSFORM' // Placeholder for complex effects
-    | 'DESTROY'; // For removing minions
+    | 'DESTROY' // For removing minions
+    | 'DISCOVER'; // For looking at top cards and picking one
 
 export interface Effect {
     type: EffectType;
