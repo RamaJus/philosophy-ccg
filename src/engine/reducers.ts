@@ -337,7 +337,8 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
                 activePlayer: state.activePlayer, // ensure key preservation
                 [state.activePlayer]: updatedActivePlayer,
                 [state.activePlayer === 'player' ? 'opponent' : 'player']: updatedEnemyPlayer,
-                log: currentLog
+                log: currentLog,
+                selectedMinions: [] // Clear selection after attack
             };
             break;
         }

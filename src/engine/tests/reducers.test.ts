@@ -125,4 +125,79 @@ describe('gameReducer', () => {
             expect(newState.player.health).toBe(15); // 10 + 5
         });
     });
+
+    describe('Multi-Select', () => {
+        it('should toggle minion selection with toggle: true', () => {
+            let state = createInitialState(false);
+            // Place a minion on board
+            const mockMinion = {
+                id: 'test-minion',
+                instanceId: 'minion-1',
+                name: 'Test Philosopher',
+                type: 'Philosoph' as const,
+                attack: 2,
+                health: 3,
+                maxHealth: 3,
+                cost: 1,
+                description: 'Test',
+                rarity: 'Gewöhnlich' as const,
+                canAttack: true,
+                hasAttacked: false,
+            };
+            // @ts-ignore
+            state.player.board = [mockMinion];
+
+            // First toggle: select
+            state = gameReducer(state, { type: 'SELECT_MINION', minionId: 'minion-1', toggle: true });
+            expect(state.selectedMinions).toContain('minion-1');
+            expect(state.selectedMinions?.length).toBe(1);
+
+            // Second toggle on same: deselect
+            state = gameReducer(state, { type: 'SELECT_MINION', minionId: 'minion-1', toggle: true });
+            expect(state.selectedMinions).not.toContain('minion-1');
+            expect(state.selectedMinions?.length).toBe(0);
+        });
+
+        it('should clear selectedMinions after ATTACK', () => {
+            let state = createInitialState(false);
+            // Setup: player has minion on board, opponent has target
+            const playerMinion = {
+                id: 'attacker',
+                instanceId: 'attacker-1',
+                name: 'Attacker',
+                type: 'Philosoph' as const,
+                attack: 5,
+                health: 5,
+                maxHealth: 5,
+                cost: 1,
+                description: 'Test',
+                rarity: 'Gewöhnlich' as const,
+                canAttack: true,
+                hasAttacked: false,
+            };
+            const opponentMinion = {
+                id: 'target',
+                instanceId: 'target-1',
+                name: 'Target',
+                type: 'Philosoph' as const,
+                attack: 2,
+                health: 3,
+                maxHealth: 3,
+                cost: 1,
+                description: 'Test',
+                rarity: 'Gewöhnlich' as const,
+            };
+            // @ts-ignore
+            state.player.board = [playerMinion];
+            // @ts-ignore
+            state.opponent.board = [opponentMinion];
+            state.selectedMinions = ['attacker-1'];
+
+            // Attack
+            state = gameReducer(state, { type: 'ATTACK', attackerIds: ['attacker-1'], targetId: 'target-1' });
+
+            // Selection should be cleared
+            expect(state.selectedMinions).toEqual([]);
+        });
+    });
 });
