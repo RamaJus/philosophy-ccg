@@ -40,7 +40,6 @@ export interface BoardMinion extends Card {
     transformationEndsTurn?: number; // Turn number when transformation should revert
     synergyBonus?: number; // Current synergy bonus (+X/+X)
     synergyBreakdown?: Record<string, number>; // Per-school synergy counts, e.g. { "Ethik": 2, "Skeptizismus": 1 }
-    linkedWith?: string[]; // IDs of minions this is linked with (for visual effect)
     turnPlayed?: number; // Turn when this minion was played (for Diogenes)
     silencedUntilTurn?: number; // Turn until the minion is silenced (cannot attack)
     pendingTransformation?: { turnTrigger: number; newStats: { attack: number; health: number; } }; // For Sartre

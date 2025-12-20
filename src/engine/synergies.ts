@@ -10,8 +10,7 @@ export const calculateSynergies = (currentBoard: BoardMinion[], synergyBlockTurn
         ...minion,
         attack: minion.attack - (minion.synergyBonus || 0),
         synergyBonus: 0,
-        synergyBreakdown: {},
-        linkedWith: []
+        synergyBreakdown: {}
     })).map(m => {
         // Safety check to ensure health doesn't drop below 1 from removing bonuses (unless it was already 0)
         return {
@@ -27,12 +26,10 @@ export const calculateSynergies = (currentBoard: BoardMinion[], synergyBlockTurn
 
     const updatedBoard = [...resetBoard];
     const schoolCounts: Record<string, Record<string, number>> = {};
-    const links: Record<string, string[]> = {}; // Store links for each minion
 
     // Initialize counts
     updatedBoard.forEach(minion => {
         schoolCounts[minion.instanceId || minion.id] = {};
-        links[minion.instanceId || minion.id] = [];
     });
 
     // 1. Calculate school synergies (Self + Connection)
@@ -49,10 +46,6 @@ export const calculateSynergies = (currentBoard: BoardMinion[], synergyBlockTurn
 
                 schoolCounts[m1.instanceId || m1.id][representativeSchool] = (schoolCounts[m1.instanceId || m1.id][representativeSchool] || 0) + 1;
                 schoolCounts[m2.instanceId || m2.id][representativeSchool] = (schoolCounts[m2.instanceId || m2.id][representativeSchool] || 0) + 1;
-
-                // Track links
-                links[m1.instanceId || m1.id].push(m2.instanceId || m2.id);
-                links[m2.instanceId || m2.id].push(m1.instanceId || m1.id);
             }
         }
     }
@@ -66,8 +59,7 @@ export const calculateSynergies = (currentBoard: BoardMinion[], synergyBlockTurn
             ...minion,
             attack: minion.attack + bonus,
             synergyBonus: bonus,
-            synergyBreakdown: breakdown,
-            linkedWith: links[minion.instanceId || minion.id]
+            synergyBreakdown: breakdown
         };
     });
 
