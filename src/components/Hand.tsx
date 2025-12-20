@@ -47,7 +47,7 @@ export const Hand: React.FC<HandProps> = ({ cards, onCardClick, selectedCardId, 
                                 <motion.div
                                     layout
                                     key={card.instanceId || card.id}
-                                    initial={{ opacity: 0, x: 400, y: 50, scale: 0.3, rotate: 15 }}
+                                    initial={{ opacity: 0, x: 500, y: 100, scale: 0.2, rotate: 20 }}
                                     animate={{
                                         opacity: 1,
                                         x: xOffset,
@@ -55,6 +55,12 @@ export const Hand: React.FC<HandProps> = ({ cards, onCardClick, selectedCardId, 
                                         scale: 1,
                                         rotate: rotationDeg,
                                         zIndex: index // Standard stacking: right cards on top of left cards
+                                    }}
+                                    transition={{
+                                        type: "spring",
+                                        stiffness: 200,
+                                        damping: 20,
+                                        duration: 0.5
                                     }}
                                     exit={{ opacity: 0, y: -100, scale: 0.5, transition: { duration: 0.2 } }}
                                     whileHover={{
