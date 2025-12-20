@@ -211,11 +211,21 @@ export const GameArea: React.FC<GameAreaProps> = ({ mode, isDebugMode }) => {
     };
 
     const handleRecurrenceSelect = (cardId: string) => {
-        dispatch({ type: 'RECURRENCE_SELECT', cardId });
+        const action: import('../types').GameAction = { type: 'RECURRENCE_SELECT', cardId };
+        if (isClient) {
+            multiplayer.sendAction(action);
+        } else {
+            dispatch(action);
+        }
     };
 
     const handleDiscoverySelect = (cardId: string) => {
-        dispatch({ type: 'SELECT_DISCOVERY', cardId });
+        const action: import('../types').GameAction = { type: 'SELECT_DISCOVERY', cardId };
+        if (isClient) {
+            multiplayer.sendAction(action);
+        } else {
+            dispatch(action);
+        }
     };
 
     const aiTurn = () => {

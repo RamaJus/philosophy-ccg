@@ -215,7 +215,7 @@ export const Card: React.FC<CardProps> = ({
                 </div>
 
 
-                <div className={`absolute top-8 left-1 w-8 h-8 rounded-full ${card.rarity === 'Legendär' ? 'bg-gradient-to-br from-yellow-300 via-yellow-500 to-yellow-600 border-yellow-200' : 'bg-gradient-to-br from-blue-400 to-blue-600 border-white'} flex items-center justify-center font-bold text-lg shadow-lg z-10 border-2 pointer-events-none`}>
+                <div className={`absolute top-8 left-1 w-8 h-8 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 border-white flex items-center justify-center font-bold text-lg shadow-lg z-10 border-2 pointer-events-none`}>
                     {card.cost}
                 </div>
 
