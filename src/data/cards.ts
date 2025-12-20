@@ -229,7 +229,7 @@ export const cardDatabase: Card[] = [
         school: ['Ethik', 'Skeptizismus'],
         gender: 'male',
         image: '/images/cards/diogenes.png',
-        untargetableForTurns: 3,
+        untargetableForTurns: 4,
         special: {
             name: 'In der Tonne verschanzt',
             description: 'Hat sich in seiner Tonne verschanzt. Kann erst angegriffen werden, wenn er 3 Runden auf dem Feld liegt.'
@@ -277,6 +277,7 @@ export const cardDatabase: Card[] = [
         cost: 3,
         description: 'Der Pfad zum Verständnis.',
         effect: 'Stelle 10 Glaubwürdigkeit wieder her.',
+        effects: [{ type: 'HEAL', target: 'SELF', value: 10 }],
         rarity: 'Gewöhnlich',
         image: '/images/cards/Aufklärung.png',
     },
@@ -619,7 +620,6 @@ export const cardDatabase: Card[] = [
         school: ['Metaphysik', 'Logik'],
         gender: 'male',
         image: '/images/cards/van_inwagen.png',
-        effects: [{ type: 'TARGET_MODE', target: 'SELF', mode: 'van_inwagen_target' }],
         specialAbility: 'transform',
         special: {
             name: 'Stuhl-Paradoxon',

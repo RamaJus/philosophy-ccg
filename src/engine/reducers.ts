@@ -510,16 +510,39 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
             let updatedMinion = { ...minion, hasUsedSpecial: true };
             const log = state.log;
 
-            // Sartre Transform Logic (Placeholder trigger)
+            // Handle different types of transform abilities
             if (minion.specialAbility === 'transform') {
-                // Trigger UI to target friendly minion
-                return {
-                    ...state,
-                    targetMode: 'friendly_minion_transform',
-                    targetModeOwner: state.activePlayer,
-                    selectedMinions: [minionId], // Store source minion
-                    log: appendLog(log, 'Wähle einen Diener zum Transformieren.')
-                };
+                // Check which philosopher to set the correct target mode
+                const cardId = minion.id.toLowerCase();
+
+                if (cardId.includes('nietzsche')) {
+                    // Nietzsche targets enemy minions
+                    return {
+                        ...state,
+                        targetMode: 'nietzsche_target',
+                        targetModeOwner: state.activePlayer,
+                        selectedMinions: [minionId],
+                        log: appendLog(log, 'Wähle einen Philosophen für Nietzsches Willenszertrümmerung.')
+                    };
+                } else if (cardId.includes('van_inwagen') || cardId.includes('inwagen')) {
+                    // Van Inwagen targets enemy minions
+                    return {
+                        ...state,
+                        targetMode: 'van_inwagen_target',
+                        targetModeOwner: state.activePlayer,
+                        selectedMinions: [minionId],
+                        log: appendLog(log, 'Wähle einen Philosophen für Van Inwagens Stuhl-Paradoxon.')
+                    };
+                } else {
+                    // Sartre and others target friendly minions
+                    return {
+                        ...state,
+                        targetMode: 'friendly_minion_transform',
+                        targetModeOwner: state.activePlayer,
+                        selectedMinions: [minionId],
+                        log: appendLog(log, 'Wähle einen Diener zum Transformieren.')
+                    };
+                }
             }
 
             // Handle other specials or just mark used
