@@ -139,16 +139,18 @@ export const GameArea: React.FC<GameAreaProps> = ({ mode, isDebugMode }) => {
         if (!viewIsPlayerTurn) return;
 
         if (targetMode === 'trolley_sacrifice') {
-            dispatch({ type: 'TROLLEY_SACRIFICE', minionId });
+            const action: import('../types').GameAction = { type: 'TROLLEY_SACRIFICE', minionId };
+            if (isClient) multiplayer.sendAction(action); else dispatch(action);
             return;
         }
 
         if (targetMode === 'gottesbeweis_target') {
-            dispatch({ type: 'GOTTESBEWEIS_TARGET', minionId });
+            const action: import('../types').GameAction = { type: 'GOTTESBEWEIS_TARGET', minionId };
+            if (isClient) multiplayer.sendAction(action); else dispatch(action);
             return;
         }
 
-        // Toggle selection (add/remove from array)
+        // Toggle selection (add/remove from array) - Local UI only
         dispatch({ type: 'SELECT_MINION', minionId, toggle: true });
     };
 
@@ -157,17 +159,20 @@ export const GameArea: React.FC<GameAreaProps> = ({ mode, isDebugMode }) => {
         if (!selectedMinions?.length && targetMode !== 'gottesbeweis_target' && targetMode !== 'nietzsche_target' && targetMode !== 'van_inwagen_target') return;
 
         if (targetMode === 'gottesbeweis_target') {
-            dispatch({ type: 'GOTTESBEWEIS_TARGET', minionId });
+            const action: import('../types').GameAction = { type: 'GOTTESBEWEIS_TARGET', minionId };
+            if (isClient) multiplayer.sendAction(action); else dispatch(action);
             return;
         }
 
         if (targetMode === 'nietzsche_target') {
-            dispatch({ type: 'NIETZSCHE_TARGET', minionId });
+            const action: import('../types').GameAction = { type: 'NIETZSCHE_TARGET', minionId };
+            if (isClient) multiplayer.sendAction(action); else dispatch(action);
             return;
         }
 
         if (targetMode === 'van_inwagen_target') {
-            dispatch({ type: 'VAN_INWAGEN_TARGET', minionId });
+            const action: import('../types').GameAction = { type: 'VAN_INWAGEN_TARGET', minionId };
+            if (isClient) multiplayer.sendAction(action); else dispatch(action);
             return;
         }
 
@@ -180,7 +185,8 @@ export const GameArea: React.FC<GameAreaProps> = ({ mode, isDebugMode }) => {
     const handleSpecialClick = (minionId: string) => {
         if (!viewIsPlayerTurn) return;
         // Dispatch USE_SPECIAL to enter targeting mode for transform abilities
-        dispatch({ type: 'USE_SPECIAL', minionId });
+        const action: import('../types').GameAction = { type: 'USE_SPECIAL', minionId };
+        if (isClient) multiplayer.sendAction(action); else dispatch(action);
     };
 
     const handleAttackPlayer = () => {
@@ -201,13 +207,20 @@ export const GameArea: React.FC<GameAreaProps> = ({ mode, isDebugMode }) => {
 
     const handleSearchSelect = (cardId: string) => {
         if (targetMode === 'search') {
-            dispatch({ type: 'SEARCH_DECK', cardId });
+            const action: import('../types').GameAction = { type: 'SEARCH_DECK', cardId };
+            if (isClient) multiplayer.sendAction(action); else dispatch(action);
             setIsDeckViewOpen(false);
         }
     };
 
     const handleFoucaultClose = () => {
-        dispatch({ type: 'FOUCAULT_CLOSE' });
+        const action: import('../types').GameAction = { type: 'FOUCAULT_CLOSE' };
+        if (isClient) multiplayer.sendAction(action); else dispatch(action);
+    };
+
+    const handleCancelCast = () => {
+        const action: import('../types').GameAction = { type: 'CANCEL_CAST' };
+        if (isClient) multiplayer.sendAction(action); else dispatch(action);
     };
 
     const handleRecurrenceSelect = (cardId: string) => {
@@ -390,7 +403,7 @@ export const GameArea: React.FC<GameAreaProps> = ({ mode, isDebugMode }) => {
                     onClose={() => {
                         setIsDeckViewOpen(false);
                         if (targetMode === 'search') {
-                            dispatch({ type: 'CANCEL_CAST' });
+                            handleCancelCast();
                         }
                     }}
                     onSelectCard={handleSearchSelect}
@@ -537,7 +550,7 @@ export const GameArea: React.FC<GameAreaProps> = ({ mode, isDebugMode }) => {
                                             <p className="text-sm font-bold">Wähle einen Philosophen zum Opfern</p>
                                         </div>
                                         <button
-                                            onClick={() => dispatch({ type: 'CANCEL_CAST' })}
+                                            onClick={handleCancelCast}
                                             className="px-3 py-1 bg-red-800 hover:bg-red-700 text-white rounded border border-red-500 text-sm"
                                         >
                                             Zauber abbrechen
@@ -551,7 +564,7 @@ export const GameArea: React.FC<GameAreaProps> = ({ mode, isDebugMode }) => {
                                             <p className="text-sm font-bold">Wähle einen Philosophen für den Gottesbeweis</p>
                                         </div>
                                         <button
-                                            onClick={() => dispatch({ type: 'CANCEL_CAST' })}
+                                            onClick={handleCancelCast}
                                             className="px-3 py-1 bg-red-800 hover:bg-red-700 text-white rounded border border-red-500 text-sm"
                                         >
                                             Zauber abbrechen
