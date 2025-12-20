@@ -325,6 +325,18 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
                         }
                     };
                 }
+                else if (card.type === 'Werk') {
+                    // Works are permanent buffs - place in activeWork slot
+                    const p = newState[state.activePlayer];
+                    newState = {
+                        ...newState,
+                        [state.activePlayer]: {
+                            ...p,
+                            activeWork: card
+                        },
+                        log: appendLog(newState.log, `${p.name} spielte das Werk: ${card.name}.`)
+                    };
+                }
             }
             break;
         }
