@@ -24,6 +24,7 @@ export interface Card {
     gender?: 'male' | 'female'; // For internal logic/synergies
     pendingTransformation?: { turnTrigger: number; newStats: { attack: number; health: number; } }; // For Sartre
     returnToOwnerAtTurnEnd?: string; // ID of original owner for stolen minions
+    untargetableForTurns?: number; // Diogenes: Cannot be attacked for X turns after placement
 }
 
 export interface BoardMinion extends Card {
@@ -43,6 +44,7 @@ export interface BoardMinion extends Card {
     turnPlayed?: number; // Turn when this minion was played (for Diogenes)
     silencedUntilTurn?: number; // Turn until the minion is silenced (cannot attack)
     pendingTransformation?: { turnTrigger: number; newStats: { attack: number; health: number; } }; // For Sartre
+    untargetableUntilTurn?: number; // Diogenes: Cannot be targeted until this turn
 }
 
 export interface Player {

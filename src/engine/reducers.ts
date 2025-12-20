@@ -277,7 +277,8 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
                         canAttack: false,
                         hasAttacked: false,
                         hasUsedSpecial: false,
-                        turnPlayed: state.turn
+                        turnPlayed: state.turn,
+                        untargetableUntilTurn: card.untargetableForTurns ? state.turn + card.untargetableForTurns : undefined
                     };
                     const p = newState[state.activePlayer];
                     newState = {
@@ -404,6 +405,12 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
                 // Kant Check
                 if ((activePlayer.minionAttackBlockTurns || 0) > 0) {
                     currentLog = appendLog(currentLog, `Attack failed due to Kant's categorical imperative.`);
+                    return { ...state, log: currentLog };
+                }
+
+                // Diogenes Check (Untargetable)
+                if (target.untargetableUntilTurn && target.untargetableUntilTurn > state.turn) {
+                    currentLog = appendLog(currentLog, `${target.name} is hiding in his barrel and cannot be attacked yet!`);
                     return { ...state, log: currentLog };
                 }
 

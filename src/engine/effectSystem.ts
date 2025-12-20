@@ -233,6 +233,15 @@ export const processEffect = (
             }
             break;
         }
+        case 'PROTECT': {
+            const duration = effect.duration || 1;
+            if (effect.target === 'ENEMY') {
+                // Kant: Block enemy from attacking minions for X turns
+                newEnemyPlayer.minionAttackBlockTurns = (newEnemyPlayer.minionAttackBlockTurns || 0) + duration;
+                logUpdates.push(`${activePlayer.name} invoked the Categorical Imperative! Enemy cannot attack philosophers for ${duration} turn(s).`);
+            }
+            break;
+        }
     }
 
     // Reconstruct state with updated players

@@ -50,6 +50,7 @@ export const cardDatabase: Card[] = [
         health: 5,
         description: 'Gedanken ohne Inhalt sind leer, Anschauungen ohne Begriffe sind blind.',
         effect: 'Das Instrumentalisierungsverbot: Im nächsten Zug kann der Gegner keine Philosophen angreifen.',
+        effects: [{ type: 'PROTECT', target: 'ENEMY', duration: 1 }],
         rarity: 'Legendär',
         school: ['Idealismus', 'Rationalismus', 'Ethik'],
         gender: 'male',
@@ -228,6 +229,7 @@ export const cardDatabase: Card[] = [
         school: ['Ethik', 'Skeptizismus'],
         gender: 'male',
         image: '/images/cards/diogenes.png',
+        untargetableForTurns: 3,
         special: {
             name: 'In der Tonne verschanzt',
             description: 'Hat sich in seiner Tonne verschanzt. Kann erst angegriffen werden, wenn er 3 Runden auf dem Feld liegt.'
