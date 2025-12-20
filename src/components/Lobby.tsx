@@ -75,10 +75,8 @@ export const Lobby: React.FC<LobbyProps> = ({ onStartGame, isDebugMode, setIsDeb
 
         // Set up timeout (10 seconds)
         const timeoutId = setTimeout(() => {
-            if (status === 'connecting') {
-                setConnectionError('Verbindung fehlgeschlagen. Host nicht gefunden.');
-                setStatus('idle');
-            }
+            setConnectionError('Verbindung fehlgeschlagen. Host nicht gefunden.');
+            setStatus('idle');
         }, 10000);
 
         // Set up error callback

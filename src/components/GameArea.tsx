@@ -22,7 +22,7 @@ interface GameAreaProps {
 }
 
 export const GameArea: React.FC<GameAreaProps> = ({ mode, isDebugMode }) => {
-    const { gameState, dispatch } = useGameLogic(
+    const { gameState, dispatch, endTurn: endTurnMultiplayer, attack: attackMultiplayer, playCard: playCardMultiplayer } = useGameLogic(
         mode === 'multiplayer_host' ? 'host' : mode === 'multiplayer_client' ? 'client' : 'single',
         isDebugMode
     );
@@ -131,7 +131,7 @@ export const GameArea: React.FC<GameAreaProps> = ({ mode, isDebugMode }) => {
             dispatch({ type: 'SELECT_CARD', cardId: undefined });
         } else {
             dispatch({ type: 'SELECT_CARD', cardId });
-            dispatch({ type: 'PLAY_CARD', cardId });
+            playCardMultiplayer(cardId); // Use multiplayer-aware function
         }
     };
 
@@ -174,7 +174,7 @@ export const GameArea: React.FC<GameAreaProps> = ({ mode, isDebugMode }) => {
         if (!selectedMinions?.length) return;
 
         // Multi-attack: use all selected minions
-        dispatch({ type: 'ATTACK', attackerIds: selectedMinions, targetId: minionId });
+        attackMultiplayer(selectedMinions, minionId); // Use multiplayer-aware function
     };
 
     const handleSpecialClick = (minionId: string) => {
@@ -185,12 +185,12 @@ export const GameArea: React.FC<GameAreaProps> = ({ mode, isDebugMode }) => {
 
     const handleAttackPlayer = () => {
         if (!viewIsPlayerTurn || !selectedMinions?.length) return;
-        dispatch({ type: 'ATTACK', attackerIds: selectedMinions });
+        attackMultiplayer(selectedMinions); // Use multiplayer-aware function
     };
 
     const handleEndTurn = () => {
         if (!viewIsPlayerTurn) return;
-        dispatch({ type: 'END_TURN' });
+        endTurnMultiplayer(); // Use multiplayer-aware function
 
         if (mode === 'single') {
             setTimeout(() => {
