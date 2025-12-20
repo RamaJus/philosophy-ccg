@@ -170,8 +170,8 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
                 });
                 newState.log = appendLog(newState.log, `${updatedPlayer.name} played ${card.name}.`);
 
-                // Add to graveyard if it's a Spell
-                if (card.type === 'Zauber') {
+                // Add to graveyard if it's a Spell (but NOT if targetMode was set - those complete later)
+                if (card.type === 'Zauber' && !newState.targetMode) {
                     const p = newState[state.activePlayer]; // Re-fetch in case it changed
                     newState = {
                         ...newState,
@@ -179,6 +179,12 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
                             ...p,
                             graveyard: [...p.graveyard, card]
                         }
+                    };
+                } else if (card.type === 'Zauber' && newState.targetMode) {
+                    // Store for later completion or refund
+                    newState = {
+                        ...newState,
+                        pendingPlayedCard: card
                     };
                 }
 
@@ -378,16 +384,6 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
             return { ...state, selectedMinions: newSelected };
         }
 
-        case 'CANCEL_CAST':
-            return {
-                ...state,
-                targetMode: undefined,
-                targetModeOwner: undefined,
-                pendingPlayedCard: undefined,
-                selectedCard: undefined,
-                selectedMinions: []
-            };
-
         case 'SEARCH_DECK': {
             // Manual selection from deck (Marx)
             const activePlayer = state.activePlayer === 'player' ? state.player : state.opponent;
@@ -520,12 +516,18 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
 
             log = appendLog(log, `${activePlayer.name} opferte ${sacrificedMinion.name} und fügte allen gegnerischen Philosophen 4 Schaden zu!`);
 
+            // Add pending spell card to graveyard if exists
+            const spellGraveyard = state.pendingPlayedCard
+                ? [...updatedActiveGraveyard, state.pendingPlayedCard]
+                : updatedActiveGraveyard;
+
             newState = {
                 ...state,
-                [state.activePlayer]: { ...activePlayer, board: updatedActiveBoard, graveyard: updatedActiveGraveyard },
+                [state.activePlayer]: { ...activePlayer, board: updatedActiveBoard, graveyard: spellGraveyard },
                 [state.activePlayer === 'player' ? 'opponent' : 'player']: { ...enemyPlayer, board: updatedEnemyBoard, graveyard: updatedEnemyGraveyard },
                 log,
-                targetMode: undefined
+                targetMode: undefined,
+                pendingPlayedCard: undefined
             };
             break;
         }
@@ -612,12 +614,19 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
                 log = appendLog(log, `${targetMinion.name} wurde besiegt!`);
             }
 
+            // Add pending spell card to graveyard if exists
+            if (state.pendingPlayedCard) {
+                const p = updatedActive;
+                updatedActive.graveyard = [...p.graveyard, state.pendingPlayedCard];
+            }
+
             newState = {
                 ...state,
                 [state.activePlayer]: updatedActive,
                 [state.activePlayer === 'player' ? 'opponent' : 'player']: updatedEnemy,
                 log,
-                targetMode: undefined
+                targetMode: undefined,
+                pendingPlayedCard: undefined
             };
             break;
         }
@@ -746,6 +755,33 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
                 targetMode: undefined,
                 log: appendLog(state.log, `${activePlayer.name} holte ${card.name} zurück!`)
             };
+            break;
+        }
+
+        case 'CANCEL_CAST': {
+            // Return pending card to hand if cancel is triggered during targeting
+            const activePlayer = state.activePlayer === 'player' ? state.player : state.opponent;
+            if (state.pendingPlayedCard) {
+                const updatedPlayer = {
+                    ...activePlayer,
+                    hand: [...activePlayer.hand, state.pendingPlayedCard],
+                    mana: activePlayer.mana + state.pendingPlayedCard.cost // Refund mana
+                };
+                newState = {
+                    ...state,
+                    [state.activePlayer]: updatedPlayer,
+                    pendingPlayedCard: undefined,
+                    targetMode: undefined,
+                    targetModeOwner: undefined,
+                    log: appendLog(state.log, `${activePlayer.name} cancelled the spell.`)
+                };
+            } else {
+                newState = {
+                    ...state,
+                    targetMode: undefined,
+                    targetModeOwner: undefined
+                };
+            }
             break;
         }
 
