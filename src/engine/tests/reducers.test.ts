@@ -199,5 +199,96 @@ describe('gameReducer', () => {
             // Selection should be cleared
             expect(state.selectedMinions).toEqual([]);
         });
+
+        describe('Protection Effects', () => {
+            it('should block attacks when Kant protection is active', () => {
+                let state = createInitialState(false);
+
+                // Setup: Give player minion attack block (Kant effect)
+                state.player.minionAttackBlockTurns = 1;
+
+                const playerMinion = {
+                    id: 'attacker',
+                    instanceId: 'attacker-1',
+                    name: 'Attacker',
+                    type: 'Philosoph' as const,
+                    attack: 5,
+                    health: 5,
+                    maxHealth: 5,
+                    cost: 1,
+                    description: 'Test',
+                    rarity: 'Gewöhnlich' as const,
+                    canAttack: true,
+                    hasAttacked: false,
+                };
+                const opponentMinion = {
+                    id: 'target',
+                    instanceId: 'target-1',
+                    name: 'Target',
+                    type: 'Philosoph' as const,
+                    attack: 2,
+                    health: 3,
+                    maxHealth: 3,
+                    cost: 1,
+                    description: 'Test',
+                    rarity: 'Gewöhnlich' as const,
+                };
+                // @ts-ignore
+                state.player.board = [playerMinion];
+                // @ts-ignore
+                state.opponent.board = [opponentMinion];
+
+                // Attempt attack
+                const newState = gameReducer(state, { type: 'ATTACK', attackerIds: ['attacker-1'], targetId: 'target-1' });
+
+                // Attack should be blocked - target health unchanged
+                expect(newState.opponent.board[0].health).toBe(3);
+                expect(newState.log.some(msg => msg.includes('categorical imperative'))).toBe(true);
+            });
+
+            it('should block attacks on Diogenes while in barrel', () => {
+                let state = createInitialState(false);
+                state.turn = 1; // Current turn is 1
+
+                const playerMinion = {
+                    id: 'attacker',
+                    instanceId: 'attacker-1',
+                    name: 'Attacker',
+                    type: 'Philosoph' as const,
+                    attack: 5,
+                    health: 5,
+                    maxHealth: 5,
+                    cost: 1,
+                    description: 'Test',
+                    rarity: 'Gewöhnlich' as const,
+                    canAttack: true,
+                    hasAttacked: false,
+                };
+                const diogenes = {
+                    id: 'diogenes',
+                    instanceId: 'diogenes-1',
+                    name: 'Diogenes von Sinope',
+                    type: 'Philosoph' as const,
+                    attack: 2,
+                    health: 1,
+                    maxHealth: 1,
+                    cost: 1,
+                    description: 'Test',
+                    rarity: 'Legendär' as const,
+                    untargetableUntilTurn: 5, // Protected until turn 5
+                };
+                // @ts-ignore
+                state.player.board = [playerMinion];
+                // @ts-ignore
+                state.opponent.board = [diogenes];
+
+                // Attempt attack
+                const newState = gameReducer(state, { type: 'ATTACK', attackerIds: ['attacker-1'], targetId: 'diogenes-1' });
+
+                // Attack should be blocked - Diogenes health unchanged
+                expect(newState.opponent.board[0].health).toBe(1);
+                expect(newState.log.some(msg => msg.includes('barrel'))).toBe(true);
+            });
+        });
     });
 });
