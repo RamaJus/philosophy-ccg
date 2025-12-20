@@ -12,6 +12,7 @@ import { Card as CardComponent } from './Card';
 import { WorkSlot } from './WorkSlot';
 import { Swords, SkipForward, RotateCcw, Trophy, Zap } from 'lucide-react';
 import { getRandomQuote } from '../data/quotes';
+import { multiplayer } from '../network/MultiplayerManager';
 
 const MAX_BOARD_SIZE = 7;
 
@@ -36,6 +37,7 @@ export const GameArea: React.FC<GameAreaProps> = ({ mode, isDebugMode }) => {
     // Store the philosophical quote when game ends
     const [philosophicalQuote, setPhilosophicalQuote] = useState<string>('');
     const [isDeckViewOpen, setIsDeckViewOpen] = useState(false);
+    const [isDisconnected, setIsDisconnected] = useState(false);
 
     useEffect(() => {
         if (gameOver && winner) {
@@ -109,6 +111,18 @@ export const GameArea: React.FC<GameAreaProps> = ({ mode, isDebugMode }) => {
             dispatch({ type: 'START_GAME', isDebugMode });
         }
     }, []);
+
+    // Multiplayer: Set up disconnect detection
+    useEffect(() => {
+        if (mode === 'multiplayer_host' || mode === 'multiplayer_client') {
+            multiplayer.setDisconnectCallback(() => {
+                setIsDisconnected(true);
+            });
+        }
+        return () => {
+            multiplayer.clearListeners();
+        };
+    }, [mode]);
 
     const handleCardClick = (cardId: string) => {
         if (!viewIsPlayerTurn) return;
@@ -657,6 +671,23 @@ export const GameArea: React.FC<GameAreaProps> = ({ mode, isDebugMode }) => {
                     />
                 </div>
             </div>
+
+            {/* Disconnect Modal */}
+            {isDisconnected && (
+                <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-[100]">
+                    <div className="glass-panel p-8 text-center space-y-4 max-w-md">
+                        <div className="text-6xl">🔌</div>
+                        <h2 className="text-2xl font-bold text-red-400">Verbindung getrennt</h2>
+                        <p className="text-gray-300">Der Gegner hat das Spiel verlassen oder die Verbindung wurde unterbrochen.</p>
+                        <button
+                            onClick={() => window.location.reload()}
+                            className="px-6 py-3 bg-gradient-to-br from-amber-600 to-amber-700 hover:from-amber-500 hover:to-amber-600 rounded-lg font-semibold transition-all"
+                        >
+                            Zurück zur Lobby
+                        </button>
+                    </div>
+                </div>
+            )}
         </div >
     );
 };

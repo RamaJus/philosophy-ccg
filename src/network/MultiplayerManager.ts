@@ -14,6 +14,8 @@ export class MultiplayerManager {
     private onStateUpdate: ((state: GameState) => void) | null = null;
     private onActionReceived: ((action: GameAction) => void) | null = null;
     private onConnect: (() => void) | null = null;
+    private onDisconnect: (() => void) | null = null;
+    private onError: ((error: string) => void) | null = null;
 
     public isHost: boolean = false;
     public myId: string = '';
@@ -74,6 +76,16 @@ export class MultiplayerManager {
             const msg = data as NetworkMessage;
             this.handleMessage(msg);
         });
+
+        this.conn.on('close', () => {
+            console.log('Connection closed');
+            if (this.onDisconnect) this.onDisconnect();
+        });
+
+        this.conn.on('error', (err) => {
+            console.error('Connection error:', err);
+            if (this.onError) this.onError(err.message || 'Verbindungsfehler');
+        });
     }
 
     private handleMessage(msg: NetworkMessage) {
@@ -121,9 +133,19 @@ export class MultiplayerManager {
         this.onStateUpdate = callback;
     }
 
+    public setDisconnectCallback(callback: () => void) {
+        this.onDisconnect = callback;
+    }
+
+    public setErrorCallback(callback: (error: string) => void) {
+        this.onError = callback;
+    }
+
     public clearListeners() {
         this.onStateUpdate = null;
         this.onActionReceived = null;
+        this.onDisconnect = null;
+        this.onError = null;
     }
 
     public cleanup() {

@@ -97,8 +97,12 @@ export const useGameLogic = (gameMode: 'single' | 'host' | 'client', isDebugMode
     }, [isClient]);
 
     const cancelCast = useCallback(() => {
-        dispatch({ type: 'CANCEL_CAST' });
-    }, []);
+        if (isClient) {
+            multiplayer.sendAction({ type: 'CANCEL_CAST' });
+        } else {
+            dispatch({ type: 'CANCEL_CAST' });
+        }
+    }, [isClient]);
 
     // Legacy/Targeting Resolvers (Adapter to Actions)
     const resolveTrolley = useCallback((minionId: string) => {
