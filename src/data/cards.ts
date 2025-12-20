@@ -446,7 +446,7 @@ export const cardDatabase: Card[] = [
         effects: [{ type: 'STEAL_MINION', target: 'ENEMY', condition: 'LOWEST_COST' }],
         special: {
             name: 'Proletarier aller Länder',
-            description: 'Stehle den gegnerischen Philosoph mit den niedrigsten Dialektikkosten für einen Angriff.'
+            description: 'Stehle dauerhaft den gegnerischen Philosoph mit den niedrigsten Dialektikkosten.'
         }
     },
     {
@@ -808,7 +808,7 @@ export const cardDatabase: Card[] = [
         health: 3,
         description: 'Lehrerin des Sokrates über die Liebe.',
         effect: 'Alle männlichen Philosophen schweigen für eine Runde (können nicht angreifen).',
-        effects: [{ type: 'SILENCE', target: 'ENEMY', condition: 'MALE', duration: 1 }],
+        effects: [{ type: 'SILENCE', target: 'ENEMY', condition: 'MALE', duration: 2 }],
         rarity: 'Legendär',
         school: ['Metaphysik', 'Ethik'],
         gender: 'female',

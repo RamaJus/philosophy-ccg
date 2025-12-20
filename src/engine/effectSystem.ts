@@ -219,16 +219,16 @@ export const processEffect = (
                     // Remove from enemy
                     newEnemyPlayer.board = newEnemyPlayer.board.filter(m => (m.instanceId || m.id) !== (stolen.instanceId || stolen.id));
 
-                    // Add to self with Haste and Return flag
+                    // Add to self PERMANENTLY without Haste
                     const stolenMinion: import('../types').BoardMinion = {
                         ...stolen,
-                        canAttack: true,
+                        canAttack: false,
                         hasAttacked: false,
-                        returnToOwnerAtTurnEnd: enemyPlayer.id
+                        returnToOwnerAtTurnEnd: undefined // No return
                     };
 
                     newActivePlayer.board = [...newActivePlayer.board, stolenMinion];
-                    logUpdates.push(`${activePlayer.name} stole ${stolen.name} for this turn!`);
+                    logUpdates.push(`${activePlayer.name} stole ${stolen.name} permanently!`);
                 }
             }
             break;

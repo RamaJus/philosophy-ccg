@@ -96,6 +96,12 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
         case 'END_TURN': {
             // Logic for ending turn (Switch active player, Draw card, Reset Mana)
             const currentActiveId = state.activePlayer;
+            const currentActiveHand = state[currentActiveId].hand;
+
+            if (currentActiveHand.length >= 10) {
+                return { ...state, log: appendLog(state.log, 'Hand ist voll! Spiele eine Karte.') };
+            }
+
             const currentEnemyId = state.activePlayer === 'player' ? 'opponent' : 'player';
             let currentActivePlayer = state[currentActiveId];
             let currentEnemyPlayer = state[currentEnemyId];
@@ -244,6 +250,19 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
                     newState = {
                         ...newState,
                         pendingPlayedCard: card
+                    };
+                }
+
+                // Handling for 'Werk' - Permanent buff card
+                if (card.type === 'Werk') {
+                    const p = newState[state.activePlayer];
+                    newState = {
+                        ...newState,
+                        [state.activePlayer]: {
+                            ...p,
+                            activeWork: card
+                        },
+                        log: appendLog(newState.log, `${p.name} spielte das Werk: ${card.name}.`)
                     };
                 }
 
