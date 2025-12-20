@@ -15,6 +15,7 @@ export const Lobby: React.FC<LobbyProps> = ({ onStartGame, isDebugMode, setIsDeb
     const [status, setStatus] = useState<'idle' | 'connecting' | 'waiting'>('idle');
     const [copySuccess, setCopySuccess] = useState(false);
     const [showQR, setShowQR] = useState(false);
+    const [connectionError, setConnectionError] = useState<string | null>(null);
 
     useEffect(() => {
         // Check for join code in URL
@@ -64,6 +65,7 @@ export const Lobby: React.FC<LobbyProps> = ({ onStartGame, isDebugMode, setIsDeb
     const handleJoin = async () => {
         if (!peerIdInput) return;
         setStatus('connecting');
+        setConnectionError(null);
         multiplayer.isHost = false;
 
         // Client also needs an ID, but it can be random/long
@@ -71,11 +73,27 @@ export const Lobby: React.FC<LobbyProps> = ({ onStartGame, isDebugMode, setIsDeb
             await multiplayer.initialize();
         }
 
+        // Set up timeout (10 seconds)
+        const timeoutId = setTimeout(() => {
+            if (status === 'connecting') {
+                setConnectionError('Verbindung fehlgeschlagen. Host nicht gefunden.');
+                setStatus('idle');
+            }
+        }, 10000);
+
+        // Set up error callback
+        multiplayer.setErrorCallback((error) => {
+            clearTimeout(timeoutId);
+            setConnectionError(error || 'Verbindungsfehler');
+            setStatus('idle');
+        });
+
         multiplayer.connectToPeer(peerIdInput);
         multiplayer.setCallbacks(
             () => { },
             () => { },
             () => {
+                clearTimeout(timeoutId);
                 onStartGame('multiplayer_client');
             }
         );
@@ -129,8 +147,8 @@ export const Lobby: React.FC<LobbyProps> = ({ onStartGame, isDebugMode, setIsDeb
                             <button
                                 onClick={() => setIsDebugMode(!isDebugMode)}
                                 className={`text-xs px-2 py-1 rounded border transition-all ${isDebugMode
-                                        ? 'bg-red-900/50 border-red-500 text-red-200 shadow-[0_0_10px_rgba(239,68,68,0.5)]'
-                                        : 'bg-slate-800/50 border-slate-700 text-slate-500'
+                                    ? 'bg-red-900/50 border-red-500 text-red-200 shadow-[0_0_10px_rgba(239,68,68,0.5)]'
+                                    : 'bg-slate-800/50 border-slate-700 text-slate-500'
                                     }`}
                             >
                                 {isDebugMode ? '🛠️ DEBUG AKTIV' : 'Debug Modus'}
@@ -189,6 +207,12 @@ export const Lobby: React.FC<LobbyProps> = ({ onStartGame, isDebugMode, setIsDeb
                                             </button>
                                         </div>
                                     </div>
+
+                                    {connectionError && (
+                                        <div className="p-2 bg-red-900/50 border border-red-500/50 rounded-lg text-red-300 text-sm text-center">
+                                            {connectionError}
+                                        </div>
+                                    )}
 
                                     <div className="text-center pt-2">
                                         <span className="text-amber-600/60 text-xs font-medium">- ODER -</span>
