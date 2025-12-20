@@ -829,27 +829,8 @@ export const cardDatabase: Card[] = [
         cost: 5,
         description: 'Das höchste Prinzip, Quelle von Wahrheit und Vernunft.',
         effect: 'Heile alle eigenen Philosophen um 2.',
-        rarity: 'Gewöhnlich', // Maybe legendary spell? User didn't specify, default to common or legendary based on power. 5 cost AOE heal +2 is okay.
+        rarity: 'Gewöhnlich',
         image: '/images/cards/idee_des_guten.png',
-    },
-    // DEBUG Cards for testing
-    {
-        id: 'debug_1',
-        name: 'DEBUG',
-        type: 'Zauber',
-        cost: 0,
-        description: 'Testkarte.',
-        effect: 'Wähle eine Karte aus deinem Deck.',
-        rarity: 'Gewöhnlich',
-    },
-    {
-        id: 'debug_2',
-        name: 'DEBUG',
-        type: 'Zauber',
-        cost: 0,
-        description: 'Testkarte.',
-        effect: 'Wähle eine Karte aus deinem Deck.',
-        rarity: 'Gewöhnlich',
     },
     {
         id: 'sophistik',
