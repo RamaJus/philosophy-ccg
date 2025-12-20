@@ -9,7 +9,8 @@ export type EffectType =
     | 'DESTROY' // For removing minions
     | 'DISCOVER' // For looking at top cards and picking one
     | 'SEARCH' // For searching entire deck
-    | 'TARGET_MODE'; // For spells that require targeting (sets targetMode)
+    | 'TARGET_MODE' // For spells that require targeting (sets targetMode)
+    | 'REVEAL'; // For revealing opponent's cards (Foucault)
 
 export interface Effect {
     type: EffectType;

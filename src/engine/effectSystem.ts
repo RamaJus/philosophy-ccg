@@ -127,6 +127,22 @@ export const processEffect = (
             }
             break;
         }
+        case 'REVEAL': {
+            // Reveal top N opponent cards (Foucault's Panoptischer Blick)
+            const count = effect.value || 3;
+            const topCards = newEnemyPlayer.deck.slice(0, count);
+            if (topCards.length > 0) {
+                return {
+                    player: state.activePlayer === 'player' ? newActivePlayer : newEnemyPlayer,
+                    opponent: state.activePlayer === 'player' ? newEnemyPlayer : newActivePlayer,
+                    log: [...state.log, `${activePlayer.name} reveals top ${count} cards of opponent's deck.`],
+                    foucaultRevealCards: topCards,
+                    targetMode: 'foucault_reveal',
+                    targetModeOwner: state.activePlayer
+                };
+            }
+            break;
+        }
     }
 
     // Reconstruct state with updated players
