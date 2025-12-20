@@ -107,12 +107,6 @@ export const useGameLogic = (gameMode: 'single' | 'host' | 'client', isDebugMode
         else dispatch(action);
     }, [isClient]);
 
-    const resolveKontemplation = useCallback((cardId: string) => {
-        const action: GameAction = { type: 'KONTEMPLATION_SELECT', cardId };
-        if (isClient) multiplayer.sendAction(action);
-        else dispatch(action);
-    }, [isClient]);
-
     const resolveFoucault = useCallback(() => {
         const action: GameAction = { type: 'FOUCAULT_CLOSE' };
         if (isClient) multiplayer.sendAction(action);
@@ -166,7 +160,6 @@ export const useGameLogic = (gameMode: 'single' | 'host' | 'client', isDebugMode
         cancelCast,
         // Resolvers
         resolveTrolley,
-        resolveKontemplation,
         resolveFoucault,
         resolveGottesbeweis,
         resolveNietzsche,

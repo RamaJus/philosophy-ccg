@@ -25,7 +25,7 @@ export const GameArea: React.FC<GameAreaProps> = ({ mode, isDebugMode }) => {
         mode === 'multiplayer_host' ? 'host' : mode === 'multiplayer_client' ? 'client' : 'single',
         isDebugMode
     );
-    const { player, opponent, activePlayer, selectedCard, selectedMinions, gameOver, winner, log, targetMode, targetModeOwner, kontemplationCards, foucaultRevealCards, recurrenceCards, discoveryCards } = gameState;
+    const { player, opponent, activePlayer, selectedCard, selectedMinions, gameOver, winner, log, targetMode, targetModeOwner, foucaultRevealCards, recurrenceCards, discoveryCards } = gameState;
 
     // Use ref to always have the latest state in AI callbacks
     const gameStateRef = useRef(gameState);
@@ -190,10 +190,6 @@ export const GameArea: React.FC<GameAreaProps> = ({ mode, isDebugMode }) => {
             dispatch({ type: 'SEARCH_DECK', cardId });
             setIsDeckViewOpen(false);
         }
-    };
-
-    const handleKontemplationSelect = (cardId: string) => {
-        dispatch({ type: 'KONTEMPLATION_SELECT', cardId });
     };
 
     const handleFoucaultClose = () => {
@@ -377,28 +373,6 @@ export const GameArea: React.FC<GameAreaProps> = ({ mode, isDebugMode }) => {
                     mode={targetMode === 'search' ? 'search' : 'view'}
                 />
 
-                {/* Kontemplation Card Selection Modal */}
-                {targetMode === 'kontemplation' && isMyTargetMode && kontemplationCards && kontemplationCards.length > 0 && (
-                    <div className="fixed inset-0 bg-black/80 z-50 flex flex-col items-center justify-center p-8 backdrop-blur-sm">
-                        <div className="bg-slate-900 border-2 border-purple-600 rounded-xl p-8 shadow-2xl shadow-purple-900/20">
-                            <h2 className="text-3xl font-serif text-purple-400 mb-2 text-center">Kontemplation</h2>
-                            <p className="text-purple-200/60 mb-6 font-serif italic text-center">
-                                Wähle eine der obersten 3 Karten deines Decks.
-                            </p>
-                            <div className="flex gap-6 justify-center">
-                                {kontemplationCards.map((card) => (
-                                    <div
-                                        key={card.instanceId || card.id}
-                                        className="transform transition-all duration-300 hover:scale-105 hover:shadow-xl hover:shadow-purple-500/20 cursor-pointer"
-                                        onClick={() => handleKontemplationSelect(card.instanceId || card.id)}
-                                    >
-                                        <CardComponent card={card} isPlayable={true} />
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-                    </div>
-                )}
 
                 {/* Generic Discovery Modal (New Effect System) */}
                 {targetMode === 'discover' && isMyTargetMode && discoveryCards && discoveryCards.length > 0 && (
@@ -545,12 +519,6 @@ export const GameArea: React.FC<GameAreaProps> = ({ mode, isDebugMode }) => {
                                             Zauber abbrechen
                                         </button>
                                     </>
-                                )}
-
-                                {targetMode === 'kontemplation' && isMyTargetMode && (
-                                    <div className="px-4 py-2 bg-purple-500/20 text-purple-400 rounded-lg border border-purple-500/50 animate-pulse">
-                                        <p className="text-sm font-bold">Wähle eine der obersten 3 Karten</p>
-                                    </div>
                                 )}
 
                                 {targetMode === 'gottesbeweis_target' && isMyTargetMode && (

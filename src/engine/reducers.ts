@@ -530,39 +530,6 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
             break;
         }
 
-        case 'KONTEMPLATION_SELECT': {
-            const activePlayer = state.activePlayer === 'player' ? state.player : state.opponent;
-            if (!state.kontemplationCards) return state;
-
-            const selectedCard = state.kontemplationCards.find(c => c.instanceId === action.cardId);
-            if (!selectedCard) return state;
-
-            // Shuffle others back
-            const otherCards = state.kontemplationCards.filter(c => c.instanceId !== action.cardId);
-            let newDeck = [...activePlayer.deck];
-
-            // Shuffle others back
-            otherCards.forEach(c => {
-                const idx = Math.floor(Math.random() * (newDeck.length + 1));
-                newDeck.splice(idx, 0, c);
-            });
-
-            const updatedPlayer = {
-                ...activePlayer,
-                hand: [...activePlayer.hand, selectedCard],
-                deck: newDeck
-            };
-
-            newState = {
-                ...state,
-                [state.activePlayer]: updatedPlayer,
-                kontemplationCards: undefined,
-                targetMode: undefined,
-                log: appendLog(state.log, `${activePlayer.name} wählte eine Karte durch Kontemplation.`)
-            };
-            break;
-        }
-
         case 'SELECT_DISCOVERY': {
             const activePlayer = state.activePlayer === 'player' ? state.player : state.opponent;
             if (!state.discoveryCards) return state;
