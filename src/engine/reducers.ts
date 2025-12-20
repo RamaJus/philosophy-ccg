@@ -345,14 +345,6 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
                 if (targetIndex === -1) return state;
                 const target = enemyPlayer.board[targetIndex];
 
-                // Diogenes Check
-                if (target.id.includes('diogenes') && target.turnPlayed !== undefined) {
-                    if (state.turn - target.turnPlayed < 3) {
-                        currentLog = appendLog(currentLog, `${target.name} is hiding in his barrel! Cannot be attacked yet.`);
-                        return { ...state, log: currentLog };
-                    }
-                }
-
                 // Kant Check
                 if ((activePlayer.minionAttackBlockTurns || 0) > 0) {
                     currentLog = appendLog(currentLog, `Attack failed due to Kant's categorical imperative.`);
@@ -729,8 +721,8 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
             let updatedActive = isOnActive ? { ...activePlayer, board: updateBoard(activePlayer.board) } : activePlayer;
             let updatedEnemy = !isOnActive ? { ...enemyPlayer, board: updateBoard(enemyPlayer.board) } : enemyPlayer;
 
-            // Nietzsche Exhaustion
-            updatedActive.board = updatedActive.board.map(m => (m.instanceId || m.id) === nietzscheId ? { ...m, hasUsedSpecial: true, hasAttacked: true } : m);
+            // Nietzsche Exhaustion - Mark as permanently exhausted so button won't show again
+            updatedActive.board = updatedActive.board.map(m => (m.instanceId || m.id) === nietzscheId ? { ...m, hasUsedSpecial: true, hasAttacked: true, specialExhausted: true } : m);
 
             newState = {
                 ...state,
@@ -774,7 +766,7 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
             let log = appendLog(state.log, `${targetMinion.name} wurde in stuhlartige Materie verwandelt!`);
 
             const updatedEnemyBoard = enemyPlayer.board.map(m => (m.instanceId || m.id) === minionId ? chairMatter : m);
-            const updatedActiveBoard = activePlayer.board.map(m => (m.instanceId || m.id) === vanInwagenId ? { ...m, hasUsedSpecial: true, hasAttacked: true } : m);
+            const updatedActiveBoard = activePlayer.board.map(m => (m.instanceId || m.id) === vanInwagenId ? { ...m, hasUsedSpecial: true, hasAttacked: true, specialExhausted: true } : m);
 
             newState = {
                 ...state,

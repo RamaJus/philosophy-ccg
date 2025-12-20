@@ -50,7 +50,7 @@ export const cardDatabase: Card[] = [
         health: 5,
         description: 'Gedanken ohne Inhalt sind leer, Anschauungen ohne Begriffe sind blind.',
         effect: 'Das Instrumentalisierungsverbot: Im nächsten Zug kann der Gegner keine Philosophen angreifen.',
-        effects: [{ type: 'PROTECT', target: 'ENEMY', duration: 1 }],
+        effects: [{ type: 'PROTECT', target: 'ENEMY', duration: 2 }],
         rarity: 'Legendär',
         school: ['Idealismus', 'Rationalismus', 'Ethik'],
         gender: 'male',
