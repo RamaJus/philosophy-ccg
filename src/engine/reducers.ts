@@ -226,18 +226,21 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
                 [state.activePlayer]: updatedPlayer
             };
 
-            // Rule Engine: Process Effects
-            if (card.effects) {
+            // Rule Engine: Process Effects (if any)
+            if (card.effects && card.effects.length > 0) {
                 card.effects.forEach(effect => {
                     const partialState = processEffect(newState, effect);
                     // Merge partial state
                     newState = { ...newState, ...partialState };
                 });
                 newState.log = appendLog(newState.log, `${updatedPlayer.name} played ${card.name}.`);
+            }
 
-                // Add to graveyard if it's a Spell (but NOT if targetMode was set - those complete later)
-                if (card.type === 'Zauber' && !newState.targetMode) {
-                    const p = newState[state.activePlayer]; // Re-fetch in case it changed
+            // Handle card type placement (runs for ALL cards, regardless of effects)
+            if (card.type === 'Zauber') {
+                if (!newState.targetMode) {
+                    // Spell completed immediately - add to graveyard
+                    const p = newState[state.activePlayer];
                     newState = {
                         ...newState,
                         [state.activePlayer]: {
@@ -245,99 +248,47 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
                             graveyard: [...p.graveyard, card]
                         }
                     };
-                } else if (card.type === 'Zauber' && newState.targetMode) {
-                    // Store for later completion or refund
+                } else {
+                    // Targeting mode active - store spell for later
                     newState = {
                         ...newState,
                         pendingPlayedCard: card
                     };
                 }
-
-                // Handling for 'Werk' - Permanent buff card
-                if (card.type === 'Werk') {
-                    const p = newState[state.activePlayer];
-                    newState = {
-                        ...newState,
-                        [state.activePlayer]: {
-                            ...p,
-                            activeWork: card
-                        },
-                        log: appendLog(newState.log, `${p.name} spielte das Werk: ${card.name}.`)
-                    };
-                }
-
-                // If it's a minion, summon it
-                if (card.type === 'Philosoph') {
-                    const minion: BoardMinion = {
-                        ...card,
-                        type: 'Philosoph',
-                        attack: card.attack || 0,
-                        health: card.health || 0,
-                        maxHealth: card.health || 0,
-                        canAttack: false,
-                        hasAttacked: false,
-                        hasUsedSpecial: false,
-                        turnPlayed: state.turn,
-                        untargetableUntilTurn: card.untargetableForTurns ? state.turn + card.untargetableForTurns : undefined
-                    };
-                    const p = newState[state.activePlayer];
-                    newState = {
-                        ...newState,
-                        [state.activePlayer]: {
-                            ...p,
-                            board: [...p.board, minion]
-                        },
-                        log: appendLog(newState.log, `${p.name} summoned ${card.name}.`)
-                    };
-                }
-            } else {
-                // FALLBACK: Legacy Hardcoded Logic (To be ported)
-                // For now, we will handle basic summon here if it's a philosopher
-                if (card.type === 'Philosoph') {
-                    const minion: BoardMinion = {
-                        ...card,
-                        type: 'Philosoph',
-                        attack: card.attack || 0,
-                        health: card.health || 0,
-                        maxHealth: card.health || 0,
-                        canAttack: false,
-                        hasAttacked: false,
-                        hasUsedSpecial: false,
-                        turnPlayed: state.turn
-                    };
-                    const p = newState[state.activePlayer];
-                    newState = {
-                        ...newState,
-                        [state.activePlayer]: {
-                            ...p,
-                            board: [...p.board, minion]
-                        },
-                        log: appendLog(newState.log, `${p.name} summoned ${card.name}.`)
-                    };
-                }
-                else if (card.type === 'Zauber') {
-                    // Legacy spells (Should ideally be migrated, but keeping fallback)
-                    const p = newState[state.activePlayer];
-                    newState = {
-                        ...newState,
-                        [state.activePlayer]: {
-                            ...p,
-                            graveyard: [...p.graveyard, card]
-                        }
-                    };
-                }
-                else if (card.type === 'Werk') {
-                    // Works are permanent buffs - place in activeWork slot
-                    const p = newState[state.activePlayer];
-                    newState = {
-                        ...newState,
-                        [state.activePlayer]: {
-                            ...p,
-                            activeWork: card
-                        },
-                        log: appendLog(newState.log, `${p.name} spielte das Werk: ${card.name}.`)
-                    };
-                }
+            } else if (card.type === 'Werk') {
+                // Works are permanent buffs - place in activeWork slot
+                const p = newState[state.activePlayer];
+                newState = {
+                    ...newState,
+                    [state.activePlayer]: {
+                        ...p,
+                        activeWork: card
+                    },
+                    log: appendLog(newState.log, `${p.name} spielte das Werk: ${card.name}.`)
+                };
+            } else if (card.type === 'Philosoph') {
+                // Summon minion to board
+                const minion: BoardMinion = {
+                    ...card,
+                    type: 'Philosoph',
+                    attack: card.attack || 0,
+                    health: card.health || 0,
+                    maxHealth: card.health || 0,
+                    canAttack: false,
+                    hasAttacked: false,
+                    hasUsedSpecial: false,
+                    turnPlayed: state.turn,
+                    untargetableUntilTurn: card.untargetableForTurns ? state.turn + card.untargetableForTurns : undefined
+                };
+                const p = newState[state.activePlayer];
+                newState = {
+                    ...newState,
+                    [state.activePlayer]: {
+                        ...p,
+                        board: [...p.board, minion]
+                    },
+                    log: appendLog(newState.log, `${p.name} summoned ${card.name}.`)
+                };
             }
             break;
         }
