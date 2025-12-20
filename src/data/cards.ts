@@ -775,6 +775,7 @@ export const cardDatabase: Card[] = [
         cost: 2,
         description: 'Zweifle an allem.',
         effect: 'Der Gegner verliert für seinen nächsten Angriffszug alle Schul-Synergien.',
+        effects: [{ type: 'SYNERGY_BLOCK', target: 'ENEMY', duration: 1 }],
         rarity: 'Gewöhnlich',
         image: '/images/cards/skeptischer_zweifel.png',
     },
@@ -785,6 +786,7 @@ export const cardDatabase: Card[] = [
         cost: 4,
         description: 'Zerlege die Strukturen der Bedeutung.',
         effect: 'Der Gegner verliert für seine nächsten 2 Angriffszüge alle Schul-Synergien.',
+        effects: [{ type: 'SYNERGY_BLOCK', target: 'ENEMY', duration: 2 }],
         rarity: 'Gewöhnlich',
         image: '/images/cards/radikale_dekonstruktion.png',
     },
@@ -855,6 +857,10 @@ export const cardDatabase: Card[] = [
         type: 'Zauber',
         cost: 1,
         description: 'Die Kunst der Überredung. +1 Dialektik für dich, sperrt 1 Dialektik des Gegners.',
+        effects: [
+            { type: 'MANA_MOD', target: 'SELF', value: 1 },
+            { type: 'MANA_MOD', target: 'ENEMY', value: 1 }
+        ],
         rarity: 'Gewöhnlich',
         image: '/images/cards/sophistry.png',
     },
@@ -865,6 +871,10 @@ export const cardDatabase: Card[] = [
         cost: 2,
         description: 'Die Kunst, Recht zu behalten.',
         effect: '+2 Dialektik für dich, sperrt 2 Dialektik des Gegners.',
+        effects: [
+            { type: 'MANA_MOD', target: 'SELF', value: 2 },
+            { type: 'MANA_MOD', target: 'ENEMY', value: 2 }
+        ],
         rarity: 'Gewöhnlich',
         image: '/images/cards/eristik.png',
     },
