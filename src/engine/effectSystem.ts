@@ -79,6 +79,24 @@ export const processEffect = (
             }
             break;
         }
+        case 'SILENCE': {
+            const duration = effect.duration || 1;
+            // Target specific minions or global
+            if (effect.target === 'ENEMY') {
+                newEnemyPlayer.board = newEnemyPlayer.board.map(m => {
+                    // Check conditions
+                    if (effect.condition === 'MALE' && m.gender !== 'male') return m;
+
+                    // Apply Silence (Can't attack)
+                    // We assume silencedUntilTurn is checked in ATTACK handler
+                    return { ...m, silencedUntilTurn: state.turn + duration };
+                });
+
+                const conditionText = effect.condition === 'MALE' ? 'male ' : '';
+                logUpdates.push(`${activePlayer.name} silenced all enemy ${conditionText}philosophers for ${duration} turn(s)!`);
+            }
+            break;
+        }
         case 'DISCOVER': {
             const amount = effect.value || 3;
             if (effect.target === 'SELF') {
@@ -135,11 +153,83 @@ export const processEffect = (
                 return {
                     player: state.activePlayer === 'player' ? newActivePlayer : newEnemyPlayer,
                     opponent: state.activePlayer === 'player' ? newEnemyPlayer : newActivePlayer,
-                    log: [...state.log, `${activePlayer.name} reveals top ${count} cards of opponent's deck.`],
+                    log: [...state.log, ...logUpdates, `${activePlayer.name} reveals top ${count} cards of opponent's deck.`],
                     foucaultRevealCards: topCards,
                     targetMode: 'foucault_reveal',
                     targetModeOwner: state.activePlayer
                 };
+            }
+            break;
+        }
+        case 'RECURRENCE': {
+            if (effect.target === 'SELF') {
+                const graveyard = newActivePlayer.graveyard;
+                // Filter for philosophers maybe? Or any card? Original prompt said "Philosopher from graveyard".
+                // Let's assume all cards for now or filter if needed. "Hole Philosoph..." -> Filter type 'Philosoph'
+                const philosophers = graveyard.filter(c => c.type === 'Philosoph');
+
+                if (philosophers.length === 0) {
+                    logUpdates.push(`${activePlayer.name} has no philosophers in graveyard.`);
+                    break;
+                }
+
+                return {
+                    player: state.activePlayer === 'player' ? newActivePlayer : newEnemyPlayer,
+                    opponent: state.activePlayer === 'player' ? newEnemyPlayer : newActivePlayer,
+                    log: [...state.log, ...logUpdates, `${activePlayer.name} invokes Eternal Recurrence.`],
+                    recurrenceCards: philosophers,
+                    targetMode: 'recurrence_select',
+                    targetModeOwner: state.activePlayer
+                };
+            }
+            break;
+        }
+        case 'BOARD_CLEAR': {
+            if (effect.target === 'ALL') {
+                const activeGraveyard = [...newActivePlayer.graveyard, ...newActivePlayer.board];
+                const enemyGraveyard = [...newEnemyPlayer.graveyard, ...newEnemyPlayer.board];
+
+                newActivePlayer.board = [];
+                newActivePlayer.graveyard = activeGraveyard;
+                newEnemyPlayer.board = [];
+                newEnemyPlayer.graveyard = enemyGraveyard;
+
+                logUpdates.push(`${activePlayer.name} cleared the board!`);
+            }
+            break;
+        }
+        case 'SWAP_STATS': {
+            if (effect.target === 'ENEMY') {
+                const tempHealth = newActivePlayer.health;
+                newActivePlayer.health = newEnemyPlayer.health;
+                newEnemyPlayer.health = tempHealth;
+                logUpdates.push(`${activePlayer.name} swapped health with opponent!`);
+            }
+            break;
+        }
+        case 'STEAL_MINION': {
+            if (effect.condition === 'LOWEST_COST') {
+                // Find minion with lowest cost
+                // Since board minions might not have cost stored (Wait, BoardMinion extends Card, so it SHOULD have cost),
+                // We need to check if cost is preserved. Yes, Card interface has cost.
+                if (newEnemyPlayer.board.length > 0) {
+                    const sorted = [...newEnemyPlayer.board].sort((a, b) => (a.cost || 0) - (b.cost || 0));
+                    const stolen = sorted[0];
+
+                    // Remove from enemy
+                    newEnemyPlayer.board = newEnemyPlayer.board.filter(m => (m.instanceId || m.id) !== (stolen.instanceId || stolen.id));
+
+                    // Add to self with Haste and Return flag
+                    const stolenMinion: import('../types').BoardMinion = {
+                        ...stolen,
+                        canAttack: true,
+                        hasAttacked: false,
+                        returnToOwnerAtTurnEnd: enemyPlayer.id
+                    };
+
+                    newActivePlayer.board = [...newActivePlayer.board, stolenMinion];
+                    logUpdates.push(`${activePlayer.name} stole ${stolen.name} for this turn!`);
+                }
             }
             break;
         }

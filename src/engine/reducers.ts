@@ -95,11 +95,69 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
 
         case 'END_TURN': {
             // Logic for ending turn (Switch active player, Draw card, Reset Mana)
-            // This is complex and needs precise porting from useGameLogic.
-            // For now, I'm just sketching it.
+            const currentActiveId = state.activePlayer;
+            const currentEnemyId = state.activePlayer === 'player' ? 'opponent' : 'player';
+            let currentActivePlayer = state[currentActiveId];
+            let currentEnemyPlayer = state[currentEnemyId];
+
+            // 1. Return Stolen Minions (Ownership Transfer)
+            const minionsToReturn = currentActivePlayer.board.filter(m => m.returnToOwnerAtTurnEnd);
+            if (minionsToReturn.length > 0) {
+                // Remove from active
+                currentActivePlayer = {
+                    ...currentActivePlayer,
+                    board: currentActivePlayer.board.filter(m => !m.returnToOwnerAtTurnEnd)
+                };
+
+                // Add back to owner (assuming owner is opponent for now, simplified)
+                // We reset HasAttacked logic when returning? Or keep it?
+                // Usually returning control doesn't untap, but next turn logic will untap.
+                const returnedMinions = minionsToReturn.map(m => ({
+                    ...m,
+                    returnToOwnerAtTurnEnd: undefined,
+                    canAttack: false // Safety
+                }));
+                currentEnemyPlayer = {
+                    ...currentEnemyPlayer,
+                    board: [...currentEnemyPlayer.board, ...returnedMinions]
+                };
+            }
+
+            // State update for players before switching context
+            state = {
+                ...state,
+                [currentActiveId]: currentActivePlayer,
+                [currentEnemyId]: currentEnemyPlayer
+            };
+
             const nextActiveId = state.activePlayer === 'player' ? 'opponent' : 'player';
-            const nextActivePlayer = state.activePlayer === 'player' ? state.opponent : state.player;
+            let nextActivePlayer = state[nextActiveId];
             const nextTurn = state.turn + 1;
+
+            // 2. Process Pending Transformations for the player STARTING their turn
+            // "Nach einer Runde" logic: If turnPlayed was T, and now is T+2 (Start of next own turn).
+            const updatedNextBoard = nextActivePlayer.board.map(m => {
+                if (m.pendingTransformation && m.turnPlayed !== undefined) {
+                    // Check if 2 turns passed (1 round)
+                    if (nextTurn - m.turnPlayed >= 2) {
+                        // Transform!
+                        return {
+                            ...m,
+                            ...m.pendingTransformation.newStats,
+                            maxHealth: m.pendingTransformation.newStats.health,
+                            // Keep name/image or update? Sartre card text says "Verwandelt sich in... version seiner selbst". 
+                            // Usually implies name change or just stats. "8/6 Version".
+                            // Let's keep it simple stat change unless we want visual flair.
+                            // We can clear pendingTransformation.
+                            pendingTransformation: undefined,
+                            name: m.name + ' (Entfesselt)',
+                            description: 'Die Essenz wurde durch Existenz bestimmt.'
+                        };
+                    }
+                }
+                return m;
+            });
+            nextActivePlayer = { ...nextActivePlayer, board: updatedNextBoard };
 
             // Start Turn Logic for Next Player
             const newMaxMana = Math.min(nextActivePlayer.maxMana + 1, 12);
@@ -117,7 +175,8 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
                     ...m,
                     canAttack: true,
                     hasAttacked: false,
-                    hasUsedSpecial: false
+                    hasUsedSpecial: false,
+                    silencedUntilTurn: m.silencedUntilTurn && m.silencedUntilTurn <= nextTurn ? undefined : m.silencedUntilTurn // Clear silence if expired
                 })),
                 minionAttackBlockTurns: Math.max(0, (nextActivePlayer.minionAttackBlockTurns || 0) - 1),
                 synergyBlockTurns: Math.max(0, (nextActivePlayer.synergyBlockTurns || 0) - 1),

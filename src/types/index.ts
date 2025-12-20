@@ -22,6 +22,8 @@ export interface Card {
     special?: { name: string; description: string }; // Named special abilities like Marx
     effects?: Effect[]; // New Rule Engine effects
     gender?: 'male' | 'female'; // For internal logic/synergies
+    pendingTransformation?: { turnTrigger: number; newStats: { attack: number; health: number; } }; // For Sartre
+    returnToOwnerAtTurnEnd?: string; // ID of original owner for stolen minions
 }
 
 export interface BoardMinion extends Card {

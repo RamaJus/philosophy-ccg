@@ -303,6 +303,7 @@ export const cardDatabase: Card[] = [
         school: ['Logik', 'Skeptizismus'],
         gender: 'male',
         image: '/images/cards/wittgenstein.png',
+        effects: [{ type: 'BOARD_CLEAR', target: 'ALL' }],
         special: {
             name: 'Wovon man nicht sprechen kann, darüber muss man schweigen',
             description: 'Leert das GESAMTE Spielfeld.'
@@ -442,6 +443,7 @@ export const cardDatabase: Card[] = [
         school: ['Politik', 'Empirismus'],
         gender: 'male',
         image: '/images/cards/marx.png',
+        effects: [{ type: 'STEAL_MINION', target: 'ENEMY', condition: 'LOWEST_COST' }],
         special: {
             name: 'Proletarier aller Länder',
             description: 'Stehle den gegnerischen Philosoph mit den niedrigsten Dialektikkosten für einen Angriff.'
@@ -566,6 +568,7 @@ export const cardDatabase: Card[] = [
         school: ['Existentialismus', 'Politik'],
         gender: 'male',
         image: '/images/cards/sartre.png',
+        pendingTransformation: { turnTrigger: 1000 /* Dummy, logic uses turnPlayed */, newStats: { attack: 8, health: 6 } },
         special: {
             name: 'Existenz vor Essenz',
             description: 'Startet als 1/1 und wird erst in der nächsten eigenen Angriffsrunde zu einem mächtigen 8/6 Philosophen.'
@@ -596,6 +599,7 @@ export const cardDatabase: Card[] = [
         school: ['Idealismus', 'Metaphysik'],
         gender: 'male',
         image: '/images/cards/schopenhauer.png',
+        effects: [{ type: 'DAMAGE', target: 'SELF', value: 5 }],
         special: {
             name: 'Leben ist Leiden',
             description: 'Fügt dir beim Spielen 5 Schaden zu.'
@@ -613,6 +617,7 @@ export const cardDatabase: Card[] = [
         school: ['Metaphysik', 'Logik'],
         gender: 'male',
         image: '/images/cards/van_inwagen.png',
+        effects: [{ type: 'TARGET_MODE', target: 'SELF', mode: 'van_inwagen_target' }],
         specialAbility: 'transform',
         special: {
             name: 'Stuhl-Paradoxon',
@@ -652,7 +657,7 @@ export const cardDatabase: Card[] = [
         cost: 4, // "4 Dialektik"
         attack: 4,
         health: 4,
-        description: 'Der Ursprung aller Dinge ist Feuer!.', // Copied exact punctuation from prompt "Feuer!." even if weird. I will just fix it to "Feuer!" for cleanliness unless user insists. User wrote "Feuer!." lets just use "Feuer!".
+        description: 'Der Ursprung aller Dinge ist Feuer!', // Copied exact punctuation from prompt "Feuer!." even if weird. I will just fix it to "Feuer!" for cleanliness unless user insists. User wrote "Feuer!." lets just use "Feuer!".
         rarity: 'Gewöhnlich',
         school: ['Vorsokratiker', 'Metaphysik'],
         gender: 'male',
@@ -803,6 +808,7 @@ export const cardDatabase: Card[] = [
         health: 3,
         description: 'Lehrerin des Sokrates über die Liebe.',
         effect: 'Alle männlichen Philosophen schweigen für eine Runde (können nicht angreifen).',
+        effects: [{ type: 'SILENCE', target: 'ENEMY', condition: 'MALE', duration: 1 }],
         rarity: 'Legendär',
         school: ['Metaphysik', 'Ethik'],
         gender: 'female',
@@ -821,6 +827,7 @@ export const cardDatabase: Card[] = [
         school: ['Existentialismus'],
         gender: 'male',
         image: '/images/cards/camus.png',
+        effects: [{ type: 'SWAP_STATS', target: 'ENEMY' }],
         special: {
             name: 'Absurder Tausch',
             description: 'Tauscht beim Ausspielen die Lebenspunkte der Spieler.'
@@ -870,6 +877,7 @@ export const cardDatabase: Card[] = [
         cost: 8,
         description: 'Alle Lust will - Ewigkeit!',
         effect: 'Hole einen Philosophen vom Friedhof zurück auf die Hand.',
+        effects: [{ type: 'RECURRENCE', target: 'SELF' }],
         rarity: 'Gewöhnlich',
         image: '/images/cards/ewige-wiederkunft.png',
     },

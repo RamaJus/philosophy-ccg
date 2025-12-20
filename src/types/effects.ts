@@ -10,13 +10,19 @@ export type EffectType =
     | 'DISCOVER' // For looking at top cards and picking one
     | 'SEARCH' // For searching entire deck
     | 'TARGET_MODE' // For spells that require targeting (sets targetMode)
-    | 'REVEAL'; // For revealing opponent's cards (Foucault)
+    | 'REVEAL' // For revealing opponent's cards (Foucault)
+    | 'BOARD_CLEAR' // Wittgenstein
+    | 'STEAL_MINION' // Marx
+    | 'SWAP_STATS' // Camus
+    | 'RECURRENCE' // Ewige Wiederkunft
+    | 'PROTECT'; // Diogenes/Kant
 
 export interface Effect {
     type: EffectType;
     target: 'SELF' | 'ENEMY' | 'ALL' | 'TARGET'; // TARGET implies user selection
     value?: number; // Generic value (damage amount, cards to draw, etc.)
     duration?: number; // For temporary effects like Silence/Synergy Block
-    condition?: string; // Optional condition string
-    mode?: string; // For TARGET_MODE: which targetMode to set
+    condition?: string; // Optional condition string (e.g. 'MALE', 'LOWEST_COST')
+    mode?: string; // For TARGET_MODE
+    transformTo?: Partial<import('./index').BoardMinion>; // For TRANSFORM effect
 }
