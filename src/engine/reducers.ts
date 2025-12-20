@@ -773,13 +773,17 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
                     pendingPlayedCard: undefined,
                     targetMode: undefined,
                     targetModeOwner: undefined,
+                    selectedCard: undefined,
+                    selectedMinions: [],
                     log: appendLog(state.log, `${activePlayer.name} cancelled the spell.`)
                 };
             } else {
                 newState = {
                     ...state,
                     targetMode: undefined,
-                    targetModeOwner: undefined
+                    targetModeOwner: undefined,
+                    selectedCard: undefined,
+                    selectedMinions: []
                 };
             }
             break;
