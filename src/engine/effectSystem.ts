@@ -242,6 +242,18 @@ export const processEffect = (
             }
             break;
         }
+        case 'HEAL_ALL_MINIONS': {
+            // Heal all friendly minions by value
+            const healAmount = effect.value || 0;
+            if (effect.target === 'SELF') {
+                newActivePlayer.board = newActivePlayer.board.map(m => ({
+                    ...m,
+                    health: Math.min(m.health + healAmount, m.maxHealth)
+                }));
+                logUpdates.push(`${activePlayer.name} healed all philosophers by ${healAmount}!`);
+            }
+            break;
+        }
     }
 
     // Reconstruct state with updated players

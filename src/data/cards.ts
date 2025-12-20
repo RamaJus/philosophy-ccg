@@ -842,6 +842,7 @@ export const cardDatabase: Card[] = [
         cost: 5,
         description: 'Das höchste Prinzip, Quelle von Wahrheit und Vernunft.',
         effect: 'Heile alle eigenen Philosophen um 2.',
+        effects: [{ type: 'HEAL_ALL_MINIONS', target: 'SELF', value: 2 }],
         rarity: 'Gewöhnlich',
         image: '/images/cards/idee_des_guten.png',
     },

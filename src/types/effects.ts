@@ -15,7 +15,8 @@ export type EffectType =
     | 'STEAL_MINION' // Marx
     | 'SWAP_STATS' // Camus
     | 'RECURRENCE' // Ewige Wiederkunft
-    | 'PROTECT'; // Diogenes/Kant
+    | 'PROTECT' // Diogenes/Kant
+    | 'HEAL_ALL_MINIONS'; // Idee des Guten
 
 export interface Effect {
     type: EffectType;
