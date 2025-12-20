@@ -47,7 +47,7 @@ export const Hand: React.FC<HandProps> = ({ cards, onCardClick, selectedCardId, 
                                 <motion.div
                                     layout
                                     key={card.instanceId || card.id}
-                                    initial={{ opacity: 0, y: 100, scale: 0.5, rotate: -10 }}
+                                    initial={{ opacity: 0, x: 400, y: 50, scale: 0.3, rotate: 15 }}
                                     animate={{
                                         opacity: 1,
                                         x: xOffset,
