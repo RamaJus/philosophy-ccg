@@ -8,7 +8,8 @@ export type EffectType =
     | 'TRANSFORM' // Placeholder for complex effects
     | 'DESTROY' // For removing minions
     | 'DISCOVER' // For looking at top cards and picking one
-    | 'SEARCH'; // For searching entire deck
+    | 'SEARCH' // For searching entire deck
+    | 'TARGET_MODE'; // For spells that require targeting (sets targetMode)
 
 export interface Effect {
     type: EffectType;
@@ -16,4 +17,5 @@ export interface Effect {
     value?: number; // Generic value (damage amount, cards to draw, etc.)
     duration?: number; // For temporary effects like Silence/Synergy Block
     condition?: string; // Optional condition string
+    mode?: string; // For TARGET_MODE: which targetMode to set
 }

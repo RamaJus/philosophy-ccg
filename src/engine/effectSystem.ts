@@ -114,6 +114,19 @@ export const processEffect = (
             }
             break;
         }
+        case 'TARGET_MODE': {
+            // Sets a targetMode for spells that need targeting (Trolley, Gottesbeweis)
+            if (effect.mode) {
+                return {
+                    player: state.activePlayer === 'player' ? newActivePlayer : newEnemyPlayer,
+                    opponent: state.activePlayer === 'player' ? newEnemyPlayer : newActivePlayer,
+                    log: [...state.log, ...logUpdates],
+                    targetMode: effect.mode as any,
+                    targetModeOwner: state.activePlayer
+                };
+            }
+            break;
+        }
     }
 
     // Reconstruct state with updated players
