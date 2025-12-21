@@ -131,13 +131,15 @@ export const Board: React.FC<BoardProps> = ({
                                                 </div>
                                             )}
                                             {isPendingTransform && (
-                                                <div className="absolute bottom-8 right-1 text-[14px] opacity-90" title="Transformation ausstehend (Sartre)">
-                                                    ⏳
+                                                <div className="absolute bottom-11 right-1 flex items-center gap-0.5 text-blue-400" title={`Transformation in ${minion.pendingTransformation?.turnTrigger ? minion.pendingTransformation.turnTrigger - currentTurn : '?'} Runde(n) (Sartre)`}>
+                                                    <span className="text-[12px]">⏳</span>
+                                                    <span className="text-[10px] font-bold">{minion.pendingTransformation?.turnTrigger ? minion.pendingTransformation.turnTrigger - currentTurn : '?'}</span>
                                                 </div>
                                             )}
                                             {minion.untargetableUntilTurn && minion.untargetableUntilTurn > currentTurn && (
-                                                <div className="absolute bottom-8 right-1 text-[14px] opacity-90" title={`Geschützt für ${minion.untargetableUntilTurn - currentTurn} Runde(n) (Diogenes)`}>
-                                                    🛡️<span className="text-[10px]">{minion.untargetableUntilTurn - currentTurn}</span>
+                                                <div className="absolute bottom-11 right-1 flex items-center gap-0.5 text-blue-400" title={`Geschützt für ${minion.untargetableUntilTurn - currentTurn} Runde(n) (Diogenes)`}>
+                                                    <span className="text-[12px]">🛡️</span>
+                                                    <span className="text-[10px] font-bold">{minion.untargetableUntilTurn - currentTurn}</span>
                                                 </div>
                                             )}
 
