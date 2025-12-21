@@ -26,11 +26,99 @@ export const Lobby: React.FC<LobbyProps> = ({ onStartGame, isDebugMode, setIsDeb
 
     const { cardCount, isValid, isCustom, DECK_SIZE } = useDeck();
 
+    // Portrait orientation mapping: which direction the philosopher faces
+    // 'right' = faces right (good for left side), 'left' = faces left (good for right side), 'center' = faces forward (either side)
+    const portraitOrientation: Record<string, 'left' | 'right' | 'center'> = {
+        // Facing RIGHT (should appear on LEFT side of menu)
+        'sokrates': 'right',
+        'platon': 'right',
+        'kant': 'right',
+        'descartes': 'right',
+        'confucius': 'right',
+        'laozi': 'right',
+        'zhuangzi': 'right',
+        'mencius': 'right',
+        'wittgenstein': 'right',
+        'hegel': 'right',
+        'hume': 'right',
+        'spinoza': 'right',
+        'kierkegaard': 'right',
+        'beauvoir': 'right',
+        'locke': 'right',
+        'heidegger': 'right',
+        'montaigne': 'right',
+        'bentham': 'right',
+        'russell': 'right',
+        'hobbes': 'right',
+        'diotima': 'right',
+        'thales_von_milet': 'right',
+        'diderot': 'right',
+
+        // Facing LEFT (should appear on RIGHT side of menu)
+        'aristoteles': 'left',
+        'nietzsche': 'left',
+        'diogenes': 'left',
+        'arendt': 'left',
+        'nagarjuna': 'left',
+        'rumi': 'left',
+        'al-ghazali': 'left',
+        'mozi': 'left',
+        'aquinas': 'left',
+        'marx': 'left',
+        'epicurus': 'left',
+        'seneca': 'left',
+        'hypatia': 'left',
+        'foucault': 'left',
+        'rousseau': 'left',
+        'sartre': 'left',
+        'schopenhauer': 'left',
+        'popper': 'left',
+        'camus': 'left',
+        'augustinus': 'left',
+        'anselm': 'left',
+        'demokrit': 'left',
+        'heraklit': 'left',
+        'anaximenes': 'left',
+
+        // Facing CENTER (can appear on either side)
+        'buddha': 'center',
+        'pyrrhon': 'center',
+        'van_inwagen': 'center',
+    };
+
     // Get two random philosophers for the portrait display
+    // Left side needs philosophers facing right, right side needs philosophers facing left
     const [leftPhilosopher, rightPhilosopher] = useMemo(() => {
         const philosophers = cardDatabase.filter(c => c.type === 'Philosoph' && c.image);
-        const shuffled = [...philosophers].sort(() => Math.random() - 0.5);
-        return [shuffled[0], shuffled[1]];
+
+        // Get philosopher ID from image path
+        const getIdFromImage = (imagePath: string) => {
+            const match = imagePath.match(/\/([^/]+)\.(png|jpg|jpeg)$/i);
+            return match ? match[1].toLowerCase() : '';
+        };
+
+        // Philosophers that can go on left side (facing right or center)
+        const leftCandidates = philosophers.filter(p => {
+            const id = getIdFromImage(p.image || '');
+            const orientation = portraitOrientation[id] || 'center';
+            return orientation === 'right' || orientation === 'center';
+        });
+
+        // Philosophers that can go on right side (facing left or center)
+        const rightCandidates = philosophers.filter(p => {
+            const id = getIdFromImage(p.image || '');
+            const orientation = portraitOrientation[id] || 'center';
+            return orientation === 'left' || orientation === 'center';
+        });
+
+        const shuffledLeft = [...leftCandidates].sort(() => Math.random() - 0.5);
+        const shuffledRight = [...rightCandidates].sort(() => Math.random() - 0.5);
+
+        const left = shuffledLeft[0];
+        // Make sure we don't pick the same philosopher for both sides
+        const right = shuffledRight.find(p => p.id !== left?.id) || shuffledRight[0];
+
+        return [left, right];
     }, []);
 
     useEffect(() => {
