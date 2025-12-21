@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { X, Download, Upload, Trash2, Wand2, Plus, Minus, ChevronDown, BookOpen, Sparkles, Eye } from 'lucide-react';
+import { X, Download, Upload, Trash2, Wand2, Plus, Minus, ChevronDown, ChevronUp, BookOpen, Sparkles, Eye, BarChart3 } from 'lucide-react';
 import { cardDatabase as cards } from '../data/cards';
 import { Card } from '../types';
 import { useDeck } from '../hooks/useDeck';
@@ -96,6 +96,9 @@ export const DeckEditor: React.FC<DeckEditorProps> = ({ isOpen, onClose }) => {
 
     // Tooltip state
     const [previewCard, setPreviewCard] = useState<Card | null>(null);
+
+    // Statistics panel state
+    const [showStats, setShowStats] = useState(false);
 
     const allSchools = useMemo(() => getAllSchools(), []);
 
@@ -455,12 +458,14 @@ export const DeckEditor: React.FC<DeckEditorProps> = ({ isOpen, onClose }) => {
                                     className="flex items-center gap-1 px-2 py-1.5 bg-slate-700 hover:bg-slate-600 text-white rounded-lg transition-colors text-xs"
                                 >
                                     <Download size={14} />
+                                    Deck exportieren
                                 </button>
                                 <button
                                     onClick={handleImport}
                                     className="flex items-center gap-1 px-2 py-1.5 bg-slate-700 hover:bg-slate-600 text-white rounded-lg transition-colors text-xs"
                                 >
                                     <Upload size={14} />
+                                    Deck importieren
                                 </button>
                                 <button
                                     onClick={resetToDefault}
@@ -469,6 +474,149 @@ export const DeckEditor: React.FC<DeckEditorProps> = ({ isOpen, onClose }) => {
                                     Reset
                                 </button>
                             </div>
+
+                            {/* Statistics Toggle Button */}
+                            <button
+                                onClick={() => setShowStats(!showStats)}
+                                className="w-full flex items-center justify-between px-3 py-2 bg-slate-700/50 hover:bg-slate-600/50 rounded-lg transition-colors mt-2"
+                            >
+                                <div className="flex items-center gap-2">
+                                    <BarChart3 size={16} className="text-amber-400" />
+                                    <span className="text-sm font-medium text-white">Deck-Statistiken</span>
+                                </div>
+                                {showStats ? <ChevronUp size={16} className="text-gray-400" /> : <ChevronDown size={16} className="text-gray-400" />}
+                            </button>
+
+                            {/* Collapsible Statistics Panel */}
+                            {showStats && cardCount > 0 && (() => {
+                                // Calculate statistics from deck cards
+                                const allDeckCards = deck.cardIds.map(id => cards.find(c => c.id === id)).filter((c): c is Card => c !== undefined);
+
+                                // Type counts
+                                const philosophCount = allDeckCards.filter(c => c.type === 'Philosoph').length;
+                                const spellCount = allDeckCards.filter(c => c.type === 'Zauber').length;
+                                const workCount = allDeckCards.filter(c => c.type === 'Werk').length;
+
+                                // School distribution
+                                const schoolCounts: Record<string, number> = {};
+                                allDeckCards.forEach(c => {
+                                    c.school?.forEach(s => {
+                                        if (VALID_SCHOOLS.includes(s)) {
+                                            schoolCounts[s] = (schoolCounts[s] || 0) + 1;
+                                        }
+                                    });
+                                });
+                                const sortedSchools = Object.entries(schoolCounts).sort((a, b) => b[1] - a[1]);
+
+                                // Mana curve (how many cards at each cost)
+                                const manaCurve: Record<number, number> = {};
+                                allDeckCards.forEach(c => {
+                                    const cost = Math.min(c.cost, 10); // Cap display at 10+
+                                    manaCurve[cost] = (manaCurve[cost] || 0) + 1;
+                                });
+                                const maxManaCount = Math.max(...Object.values(manaCurve), 1);
+
+                                // Average cost
+                                const avgCost = allDeckCards.reduce((sum, c) => sum + c.cost, 0) / allDeckCards.length;
+
+                                // Rarity distribution
+                                const rarityCount = {
+                                    'Gewöhnlich': allDeckCards.filter(c => c.rarity === 'Gewöhnlich').length,
+                                    'Selten': allDeckCards.filter(c => c.rarity === 'Selten').length,
+                                    'Legendär': allDeckCards.filter(c => c.rarity === 'Legendär').length,
+                                };
+
+                                return (
+                                    <div className="mt-2 bg-slate-800/60 rounded-lg p-3 space-y-4 border border-slate-600/50">
+                                        {/* Card Type Distribution */}
+                                        <div>
+                                            <h4 className="text-xs text-gray-400 uppercase tracking-wider mb-2">Karten nach Typ</h4>
+                                            <div className="flex gap-3">
+                                                <div className="flex items-center gap-1">
+                                                    <span className="text-amber-400">👤</span>
+                                                    <span className="text-white font-bold">{philosophCount}</span>
+                                                    <span className="text-gray-400 text-xs">Philosophen</span>
+                                                </div>
+                                                <div className="flex items-center gap-1">
+                                                    <span className="text-purple-400">✨</span>
+                                                    <span className="text-white font-bold">{spellCount}</span>
+                                                    <span className="text-gray-400 text-xs">Zauber</span>
+                                                </div>
+                                                <div className="flex items-center gap-1">
+                                                    <span className="text-blue-400">📚</span>
+                                                    <span className="text-white font-bold">{workCount}</span>
+                                                    <span className="text-gray-400 text-xs">Werke</span>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        {/* Rarity Distribution */}
+                                        <div>
+                                            <h4 className="text-xs text-gray-400 uppercase tracking-wider mb-2">Seltenheit</h4>
+                                            <div className="flex gap-3">
+                                                <div className="flex items-center gap-1">
+                                                    <span className="text-gray-300 font-bold">{rarityCount['Gewöhnlich']}</span>
+                                                    <span className="text-gray-400 text-xs">Gewöhnlich</span>
+                                                </div>
+                                                <div className="flex items-center gap-1">
+                                                    <span className="text-blue-300 font-bold">{rarityCount['Selten']}</span>
+                                                    <span className="text-gray-400 text-xs">Selten</span>
+                                                </div>
+                                                <div className="flex items-center gap-1">
+                                                    <span className="text-yellow-400 font-bold">{rarityCount['Legendär']}</span>
+                                                    <span className="text-gray-400 text-xs">Legendär</span>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        {/* Average Cost */}
+                                        <div>
+                                            <h4 className="text-xs text-gray-400 uppercase tracking-wider mb-1">Durchschnittliche Kosten</h4>
+                                            <div className="flex items-center gap-2">
+                                                <span className="text-2xl font-bold text-blue-400">{avgCost.toFixed(1)}</span>
+                                                <span className="text-gray-400 text-xs">Dialektik</span>
+                                            </div>
+                                        </div>
+
+                                        {/* Mana Curve */}
+                                        <div>
+                                            <h4 className="text-xs text-gray-400 uppercase tracking-wider mb-2">Dialektik-Kurve</h4>
+                                            <div className="flex items-end gap-1 h-16">
+                                                {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(cost => {
+                                                    const count = manaCurve[cost] || 0;
+                                                    const height = count > 0 ? Math.max((count / maxManaCount) * 100, 10) : 0;
+                                                    return (
+                                                        <div key={cost} className="flex flex-col items-center flex-1">
+                                                            <div
+                                                                className="w-full bg-blue-500/80 rounded-t transition-all"
+                                                                style={{ height: `${height}%` }}
+                                                                title={`${count} Karte(n) mit Kosten ${cost}${cost === 10 ? '+' : ''}`}
+                                                            />
+                                                            <span className="text-[10px] text-gray-500 mt-1">{cost}{cost === 10 ? '+' : ''}</span>
+                                                        </div>
+                                                    );
+                                                })}
+                                            </div>
+                                        </div>
+
+                                        {/* School Distribution */}
+                                        <div>
+                                            <h4 className="text-xs text-gray-400 uppercase tracking-wider mb-2">Schulen</h4>
+                                            <div className="flex flex-wrap gap-1.5">
+                                                {sortedSchools.map(([school, count]) => (
+                                                    <div key={school} className={`${getSchoolColor(school)} text-white text-xs px-2 py-1 rounded-full flex items-center gap-1`}>
+                                                        <span className="font-bold">{count}</span>
+                                                        <span>{school}</span>
+                                                    </div>
+                                                ))}
+                                                {sortedSchools.length === 0 && (
+                                                    <span className="text-gray-500 text-xs italic">Keine Schulen im Deck</span>
+                                                )}
+                                            </div>
+                                        </div>
+                                    </div>
+                                );
+                            })()}
                         </div>
 
                         {/* Deck Cards List */}
@@ -510,8 +658,8 @@ export const DeckEditor: React.FC<DeckEditorProps> = ({ isOpen, onClose }) => {
                             <CardComponent card={previewCard} />
                         </div>
 
-                        {/* Tooltip Panel */}
-                        <div className="w-[400px] bg-slate-900/95 border border-slate-600 rounded-xl p-4 text-white shadow-2xl flex flex-col gap-3">
+                        {/* Tooltip Panel - Fixed height to match scaled card (200px * 1.5 = 300px) */}
+                        <div className="w-[400px] h-[300px] bg-slate-900/95 border border-slate-600 rounded-xl p-4 text-white shadow-2xl flex flex-col gap-3 overflow-y-auto">
                             <h3 className="text-xl font-bold text-amber-400 border-b border-slate-700 pb-2">{previewCard.name}</h3>
 
                             {/* Schools */}
