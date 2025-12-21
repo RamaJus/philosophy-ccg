@@ -170,7 +170,7 @@ export const GameArea: React.FC<GameAreaProps> = ({ mode, isDebugMode, customDec
 
     const handleOpponentMinionClick = (minionId: string) => {
         if (!viewIsPlayerTurn) return;
-        if (!selectedMinions?.length && targetMode !== 'gottesbeweis_target' && targetMode !== 'nietzsche_target' && targetMode !== 'van_inwagen_target') return;
+        if (!selectedMinions?.length && targetMode !== 'gottesbeweis_target' && targetMode !== 'nietzsche_target' && targetMode !== 'van_inwagen_target' && targetMode !== 'eros_target') return;
 
         if (targetMode === 'gottesbeweis_target') {
             const action: import('../types').GameAction = { type: 'GOTTESBEWEIS_TARGET', minionId };
@@ -186,6 +186,12 @@ export const GameArea: React.FC<GameAreaProps> = ({ mode, isDebugMode, customDec
 
         if (targetMode === 'van_inwagen_target') {
             const action: import('../types').GameAction = { type: 'VAN_INWAGEN_TARGET', minionId };
+            if (isClient) multiplayer.sendAction(action); else dispatch(action);
+            return;
+        }
+
+        if (targetMode === 'eros_target') {
+            const action: import('../types').GameAction = { type: 'EROS_TARGET', minionId };
             if (isClient) multiplayer.sendAction(action); else dispatch(action);
             return;
         }

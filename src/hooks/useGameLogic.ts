@@ -54,8 +54,26 @@ export const useGameLogic = (gameMode: 'single' | 'host' | 'client', isDebugMode
             }
         };
 
+        // Handle Handshake from Client (Host receives client's custom deck)
+        const handleHandshake = (deckIds: string[]) => {
+            if (isHost && deckIds && deckIds.length > 0) {
+                console.log('[useGameLogic] Host received client deck IDs:', deckIds.length);
+                dispatch({ type: 'SET_OPPONENT_DECK', deckIds });
+            }
+        };
+
         multiplayer.onAction(handleAction);
         multiplayer.onState(handleState);
+
+        // Set up handshake callback for host
+        if (isHost) {
+            multiplayer.setCallbacks(
+                handleState,
+                handleAction,
+                () => { },
+                handleHandshake
+            );
+        }
 
         return () => {
             // Cleanup listeners if MultiplayerManager supported removal

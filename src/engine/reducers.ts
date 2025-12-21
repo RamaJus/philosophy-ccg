@@ -382,7 +382,7 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
                 const target = enemyPlayer.board[targetIndex];
 
                 // Kant Check
-                if ((activePlayer.minionAttackBlockTurns || 0) > 0) {
+                if ((enemyPlayer.minionAttackBlockTurns || 0) > 0) {
                     currentLog = appendLog(currentLog, `Angriff blockiert durch Kants Kategorischen Imperativ.`);
                     return { ...state, log: currentLog };
                 }
@@ -439,6 +439,17 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
                 log: currentLog,
                 selectedMinions: [] // Clear selection after attack
             };
+
+            // Death check after attack
+            if (updatedEnemyPlayer.health <= 0) {
+                newState.gameOver = true;
+                newState.winner = state.activePlayer;
+                newState.log = appendLog(newState.log, `${updatedEnemyPlayer.name} wurde besiegt!`);
+            } else if (updatedActivePlayer.health <= 0) {
+                newState.gameOver = true;
+                newState.winner = state.activePlayer === 'player' ? 'opponent' : 'player';
+                newState.log = appendLog(newState.log, `${updatedActivePlayer.name} wurde besiegt!`);
+            }
             break;
         }
 
