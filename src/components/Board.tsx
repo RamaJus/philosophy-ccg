@@ -135,6 +135,11 @@ export const Board: React.FC<BoardProps> = ({
                                                     ⏳
                                                 </div>
                                             )}
+                                            {minion.untargetableUntilTurn && minion.untargetableUntilTurn > currentTurn && (
+                                                <div className="absolute bottom-0 left-0 bg-blue-900/90 text-white text-[10px] px-1 rounded-tr border border-blue-500" title={`Geschützt für ${minion.untargetableUntilTurn - currentTurn} Runde(n) (Diogenes)`}>
+                                                    🛡️{minion.untargetableUntilTurn - currentTurn}
+                                                </div>
+                                            )}
 
                                         </div>
                                     </motion.div>

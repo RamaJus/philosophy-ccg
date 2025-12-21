@@ -22,10 +22,10 @@ export const processEffect = (
             const damage = effect.value || 0;
             if (effect.target === 'ENEMY') {
                 newEnemyPlayer.health -= damage;
-                logUpdates.push(`${activePlayer.name} dealt ${damage} damage to ${enemyPlayer.name}!`);
+                logUpdates.push(`${activePlayer.name} fügte ${enemyPlayer.name} ${damage} Schaden zu!`);
             } else if (effect.target === 'SELF') {
                 newActivePlayer.health -= damage; // e.g. Schopenhauer
-                logUpdates.push(`${activePlayer.name} took ${damage} damage!`);
+                logUpdates.push(`${activePlayer.name} erlitt ${damage} Schaden!`);
             }
             break;
         }
@@ -33,7 +33,7 @@ export const processEffect = (
             const heal = effect.value || 0;
             if (effect.target === 'SELF') {
                 newActivePlayer.health = Math.min(newActivePlayer.health + heal, newActivePlayer.maxHealth);
-                logUpdates.push(`${activePlayer.name} healed for ${heal}.`);
+                logUpdates.push(`${activePlayer.name} regenerierte ${heal} Glaubwürdigkeit.`);
             }
             break;
         }
@@ -53,7 +53,7 @@ export const processEffect = (
                         newActivePlayer.deck = newActivePlayer.deck.slice(1);
                     }
                 }
-                logUpdates.push(`${activePlayer.name} drew ${count} card(s).`);
+                logUpdates.push(`${activePlayer.name} zog ${count} Karte(n).`);
             }
             break;
         }
@@ -63,11 +63,11 @@ export const processEffect = (
                 // Add temporary mana
                 newActivePlayer.mana += amount;
                 newActivePlayer.currentTurnBonusMana = (newActivePlayer.currentTurnBonusMana || 0) + amount;
-                logUpdates.push(`${activePlayer.name} gained ${amount} Mana.`);
+                logUpdates.push(`${activePlayer.name} erhielt ${amount} Dialektik.`);
             } else if (effect.target === 'ENEMY') {
                 // Lock enemy mana. Convention: value > 0 means LOCK amount.
                 newEnemyPlayer.lockedMana = (newEnemyPlayer.lockedMana || 0) + amount;
-                logUpdates.push(`${activePlayer.name} locked ${amount} of opponent's Mana!`);
+                logUpdates.push(`${activePlayer.name} sperrte ${amount} gegnerische Dialektik!`);
             }
             break;
         }
@@ -75,7 +75,7 @@ export const processEffect = (
             const duration = effect.duration || 1;
             if (effect.target === 'ENEMY') {
                 newEnemyPlayer.synergyBlockTurns = (newEnemyPlayer.synergyBlockTurns || 0) + duration;
-                logUpdates.push(`${activePlayer.name} blocked opponent synergies for ${duration} turn(s)!`);
+                logUpdates.push(`${activePlayer.name} blockierte gegnerische Synergien für ${duration} Runde(n)!`);
             }
             break;
         }
@@ -92,8 +92,8 @@ export const processEffect = (
                     return { ...m, silencedUntilTurn: state.turn + duration };
                 });
 
-                const conditionText = effect.condition === 'MALE' ? 'male ' : '';
-                logUpdates.push(`${activePlayer.name} silenced all enemy ${conditionText}philosophers for ${duration} turn(s)!`);
+                const conditionText = effect.condition === 'MALE' ? 'männlichen ' : '';
+                logUpdates.push(`${activePlayer.name} verstummte alle ${conditionText}gegnerischen Philosophen für ${duration} Runde(n)!`);
             }
             break;
         }
@@ -101,7 +101,7 @@ export const processEffect = (
             const amount = effect.value || 3;
             if (effect.target === 'SELF') {
                 if (newActivePlayer.deck.length === 0) {
-                    logUpdates.push('Deck is empty, cannot discover.');
+                    logUpdates.push('Deck ist leer, Entdeckung nicht möglich.');
                     break;
                 }
                 const revealed = newActivePlayer.deck.slice(0, amount);
@@ -169,14 +169,14 @@ export const processEffect = (
                 const philosophers = graveyard.filter(c => c.type === 'Philosoph');
 
                 if (philosophers.length === 0) {
-                    logUpdates.push(`${activePlayer.name} has no philosophers in graveyard.`);
+                    logUpdates.push(`${activePlayer.name} hat keine Philosophen im Friedhof.`);
                     break;
                 }
 
                 return {
                     player: state.activePlayer === 'player' ? newActivePlayer : newEnemyPlayer,
                     opponent: state.activePlayer === 'player' ? newEnemyPlayer : newActivePlayer,
-                    log: [...state.log, ...logUpdates, `${activePlayer.name} invokes Eternal Recurrence.`],
+                    log: [...state.log, ...logUpdates, `${activePlayer.name} beschwört die Ewige Wiederkunft.`],
                     recurrenceCards: philosophers,
                     targetMode: 'recurrence_select',
                     targetModeOwner: state.activePlayer
@@ -194,7 +194,7 @@ export const processEffect = (
                 newEnemyPlayer.board = [];
                 newEnemyPlayer.graveyard = enemyGraveyard;
 
-                logUpdates.push(`${activePlayer.name} cleared the board!`);
+                logUpdates.push(`${activePlayer.name} leerte das Schlachtfeld!`);
             }
             break;
         }
@@ -203,7 +203,7 @@ export const processEffect = (
                 const tempHealth = newActivePlayer.health;
                 newActivePlayer.health = newEnemyPlayer.health;
                 newEnemyPlayer.health = tempHealth;
-                logUpdates.push(`${activePlayer.name} swapped health with opponent!`);
+                logUpdates.push(`${activePlayer.name} tauschte Glaubwürdigkeit mit dem Gegner!`);
             }
             break;
         }
@@ -228,7 +228,7 @@ export const processEffect = (
                     };
 
                     newActivePlayer.board = [...newActivePlayer.board, stolenMinion];
-                    logUpdates.push(`${activePlayer.name} stole ${stolen.name} permanently!`);
+                    logUpdates.push(`${activePlayer.name} stahl ${stolen.name} dauerhaft!`);
                 }
             }
             break;
@@ -238,7 +238,7 @@ export const processEffect = (
             if (effect.target === 'ENEMY') {
                 // Kant: Block enemy from attacking minions for X turns
                 newEnemyPlayer.minionAttackBlockTurns = (newEnemyPlayer.minionAttackBlockTurns || 0) + duration;
-                logUpdates.push(`${activePlayer.name} invoked the Categorical Imperative! Enemy cannot attack philosophers for ${duration} turn(s).`);
+                logUpdates.push(`${activePlayer.name} rief das Kategorische Imperativ an! Gegner kann ${duration} Runde(n) keine Philosophen angreifen.`);
             }
             break;
         }
@@ -250,7 +250,7 @@ export const processEffect = (
                     ...m,
                     health: Math.min(m.health + healAmount, m.maxHealth)
                 }));
-                logUpdates.push(`${activePlayer.name} healed all philosophers by ${healAmount}!`);
+                logUpdates.push(`${activePlayer.name} heilte alle Philosophen um ${healAmount}!`);
             }
             break;
         }

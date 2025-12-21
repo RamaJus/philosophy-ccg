@@ -243,7 +243,7 @@ describe('gameReducer', () => {
 
                 // Attack should be blocked - target health unchanged
                 expect(newState.opponent.board[0].health).toBe(3);
-                expect(newState.log.some(msg => msg.includes('categorical imperative'))).toBe(true);
+                expect(newState.log.some(msg => msg.includes('Kategorischen Imperativ'))).toBe(true);
             });
 
             it('should block attacks on Diogenes while in barrel', () => {
@@ -287,7 +287,7 @@ describe('gameReducer', () => {
 
                 // Attack should be blocked - Diogenes health unchanged
                 expect(newState.opponent.board[0].health).toBe(1);
-                expect(newState.log.some(msg => msg.includes('barrel'))).toBe(true);
+                expect(newState.log.some(msg => msg.includes('Tonne'))).toBe(true);
             });
         });
     });

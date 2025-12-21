@@ -520,15 +520,12 @@ export const GameArea: React.FC<GameAreaProps> = ({ mode, isDebugMode }) => {
                                 )}
                                 activeWork={viewOpponent.activeWork}
                                 isSpecialTargeting={(() => {
-                                    // 1. Explicit Target Modes (Spells)
+                                    // Only true when explicit Target Mode is active (after clicking Effekt button)
                                     if (targetMode === 'gottesbeweis_target') return !!isMyTargetMode;
                                     if (targetMode === 'trolley_sacrifice') return !!isMyTargetMode;
                                     if (targetMode === 'nietzsche_target') return !!isMyTargetMode;
-
-                                    // 2. Minion Special Ability Trigger (Implicit Mode)
-                                    if (!selectedMinions?.length || selectedMinions.length > 1) return false;
-                                    const m = viewPlayer.board.find(min => (min.instanceId || min.id) === selectedMinions[0]);
-                                    return !!(m?.specialAbility && !m.hasUsedSpecial && !m.hasAttacked);
+                                    if (targetMode === 'van_inwagen_target') return !!isMyTargetMode;
+                                    return false;
                                 })()}
                                 synergiesBlocked={(viewOpponent.synergyBlockTurns || 0) > 0}
                                 attacksBlocked={isClient ? (gameState.player.minionAttackBlockTurns || 0) > 0 : (gameState.opponent.minionAttackBlockTurns || 0) > 0}
