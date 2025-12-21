@@ -70,7 +70,12 @@ export function createPlayer(name: string, isPlayer: boolean, startingHandSize: 
 
 // Helper: Initial State
 export function createInitialState(isDebugMode: boolean, customDeckIds?: string[]): GameState {
-    const player = createPlayer('Player', true, STARTING_HAND_SIZE, isDebugMode, customDeckIds);
+    // Read player name from localStorage (set in Lobby)
+    const playerName = typeof window !== 'undefined'
+        ? localStorage.getItem('philosophy-ccg-player-name') || 'Spieler'
+        : 'Spieler';
+
+    const player = createPlayer(playerName, true, STARTING_HAND_SIZE, isDebugMode, customDeckIds);
     player.mana = 1;
     player.maxMana = 1;
 

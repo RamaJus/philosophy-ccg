@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { multiplayer } from '../network/MultiplayerManager';
-import { Copy, Globe, Cpu, QrCode, Share2, BookOpen } from 'lucide-react';
+import { Copy, Globe, Cpu, QrCode, Share2, BookOpen, User } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
 import { DeckEditor } from './DeckEditor';
 import { useDeck } from '../hooks/useDeck';
@@ -19,6 +19,9 @@ export const Lobby: React.FC<LobbyProps> = ({ onStartGame, isDebugMode, setIsDeb
     const [showQR, setShowQR] = useState(false);
     const [connectionError, setConnectionError] = useState<string | null>(null);
     const [showDeckEditor, setShowDeckEditor] = useState(false);
+    const [playerName, setPlayerName] = useState(() => {
+        return localStorage.getItem('philosophy-ccg-player-name') || 'Spieler';
+    });
 
     const { cardCount, isValid, isCustom, DECK_SIZE } = useDeck();
 
@@ -31,6 +34,12 @@ export const Lobby: React.FC<LobbyProps> = ({ onStartGame, isDebugMode, setIsDeb
             // Optional: Auto-join could be triggered here, but better to let user confirm
         }
     }, []);
+
+    // Save player name to localStorage whenever it changes
+    const handlePlayerNameChange = (name: string) => {
+        setPlayerName(name);
+        localStorage.setItem('philosophy-ccg-player-name', name);
+    };
 
     const initializeHost = async () => {
         // Try to get a random 6-digit ID
@@ -166,6 +175,24 @@ export const Lobby: React.FC<LobbyProps> = ({ onStartGame, isDebugMode, setIsDeb
                                 >
                                     {isDebugMode ? '🛠️ DEBUG AKTIV' : 'Debug Modus'}
                                 </button>
+                            </div>
+                        </div>
+
+                        {/* Player Name Input */}
+                        <div className="flex items-center gap-4 p-4 rounded-xl border border-slate-600/40 bg-slate-800/40">
+                            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-600/30 to-blue-700/30 border border-blue-600/40 flex items-center justify-center">
+                                <User className="text-blue-300" size={20} />
+                            </div>
+                            <div className="flex-1">
+                                <label className="text-xs text-gray-400 uppercase tracking-wider">Dein Name</label>
+                                <input
+                                    type="text"
+                                    value={playerName}
+                                    onChange={(e) => handlePlayerNameChange(e.target.value)}
+                                    placeholder="Spielername eingeben..."
+                                    maxLength={20}
+                                    className="w-full bg-transparent border-none outline-none text-lg font-semibold text-white placeholder-gray-500"
+                                />
                             </div>
                         </div>
 
