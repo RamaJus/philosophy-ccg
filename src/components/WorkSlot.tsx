@@ -8,10 +8,12 @@ interface WorkSlotProps {
 
 export const WorkSlot: React.FC<WorkSlotProps> = ({ card }) => {
     return (
-        <div className={`relative flex flex-col items-center justify-center p-2 rounded-xl border-2 border-dashed transition-all duration-500 ${card
+        <div className={`relative flex flex-col items-center justify-center p-1 rounded-lg border-2 border-dashed transition-all duration-500 ${card
             ? 'border-amber-500/50 bg-amber-950/20 shadow-[0_0_15px_rgba(245,158,11,0.2)]'
             : 'border-slate-700/30 bg-slate-900/20'
-            } w-32 h-44 md:w-40 md:h-56`}>
+            }`}
+            style={{ width: 'fit-content', height: 'fit-content' }}
+        >
 
 
 

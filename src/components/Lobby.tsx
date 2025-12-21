@@ -190,7 +190,7 @@ export const Lobby: React.FC<LobbyProps> = ({ onStartGame, isDebugMode, setIsDeb
                                     value={playerName}
                                     onChange={(e) => handlePlayerNameChange(e.target.value)}
                                     placeholder="Spielername eingeben..."
-                                    maxLength={20}
+                                    maxLength={10}
                                     className="w-full bg-transparent border-none outline-none text-lg font-semibold text-white placeholder-gray-500"
                                 />
                             </div>
