@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { BoardMinion, Card as CardType } from '../types';
 import { Card } from './Card';
-import { ChevronLeft, ChevronRight, Shield, Clock } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Shield, Clock, VolumeX } from 'lucide-react';
 
 interface BoardProps {
     minions: BoardMinion[];
@@ -126,8 +126,9 @@ export const Board: React.FC<BoardProps> = ({
                                                 `}
                                             />
                                             {isSilenced && (
-                                                <div className="absolute top-0 right-0 bg-red-900/90 text-white text-[10px] px-1 rounded-bl border border-red-500" title="Stummgeschaltet (Diotima)">
-                                                    🔇
+                                                <div className="absolute bottom-11 right-1 flex items-center gap-1 bg-black/70 rounded-full px-1.5 py-0.5" title={`Verstummt für ${(minion.silencedUntilTurn || 0) - currentTurn} Runde(n) (Diotima)`}>
+                                                    <VolumeX size={10} className="text-red-400" />
+                                                    <span className="text-[10px] font-bold text-white">{Math.max(0, (minion.silencedUntilTurn || 0) - currentTurn)}</span>
                                                 </div>
                                             )}
                                             {isPendingTransform && minion.pendingTransformation && minion.turnPlayed !== undefined && (
