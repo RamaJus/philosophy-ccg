@@ -255,12 +255,27 @@ export const processEffect = (
             break;
         }
     }
+    // Check for death
+    let gameOver = false;
+    let winner: 'player' | 'opponent' | undefined = undefined;
+
+    if (newActivePlayer.health <= 0) {
+        gameOver = true;
+        winner = state.activePlayer === 'player' ? 'opponent' : 'player';
+        logUpdates.push(`${activePlayer.name} wurde besiegt!`);
+    }
+    if (newEnemyPlayer.health <= 0) {
+        gameOver = true;
+        winner = state.activePlayer === 'player' ? 'player' : 'opponent';
+        logUpdates.push(`${enemyPlayer.name} wurde besiegt!`);
+    }
 
     // Reconstruct state with updated players
     // We must be careful to assign them back to the correct keys
     return {
         player: state.activePlayer === 'player' ? newActivePlayer : newEnemyPlayer,
         opponent: state.activePlayer === 'player' ? newEnemyPlayer : newActivePlayer,
-        log: [...state.log, ...logUpdates]
+        log: [...state.log, ...logUpdates],
+        ...(gameOver && { gameOver, winner })
     };
 };

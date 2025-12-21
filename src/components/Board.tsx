@@ -130,10 +130,10 @@ export const Board: React.FC<BoardProps> = ({
                                                     🔇
                                                 </div>
                                             )}
-                                            {isPendingTransform && minion.pendingTransformation && (
-                                                <div className="absolute bottom-11 right-1 flex items-center gap-1 bg-black/70 rounded-full px-1.5 py-0.5" title={`Transformation in ${Math.max(0, minion.pendingTransformation.turnTrigger - currentTurn)} Runde(n) (Sartre)`}>
+                                            {isPendingTransform && minion.pendingTransformation && minion.turnPlayed !== undefined && (
+                                                <div className="absolute bottom-11 right-1 flex items-center gap-1 bg-black/70 rounded-full px-1.5 py-0.5" title={`Transformation in ${Math.max(0, (minion.turnPlayed + 2) - currentTurn)} Runde(n) (Sartre)`}>
                                                     <Clock size={10} className="text-blue-400" />
-                                                    <span className="text-[10px] font-bold text-white">{Math.max(0, minion.pendingTransformation.turnTrigger - currentTurn)}</span>
+                                                    <span className="text-[10px] font-bold text-white">{Math.max(0, (minion.turnPlayed + 2) - currentTurn)}</span>
                                                 </div>
                                             )}
                                             {minion.untargetableUntilTurn && minion.untargetableUntilTurn > currentTurn && (
