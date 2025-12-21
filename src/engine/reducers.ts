@@ -259,6 +259,11 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
                     newState = { ...newState, ...partialState };
                 });
                 newState.log = appendLog(newState.log, `${updatedPlayer.name} spielte ${card.name}.`);
+                // Set flash card for visual effect
+                if (card.type === 'Zauber') {
+                    newState.lastPlayedCard = card;
+                    newState.lastPlayedCardPlayerId = state.activePlayer;
+                }
             }
 
             // Handle card type placement (runs for ALL cards, regardless of effects)
@@ -493,7 +498,7 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
                 ...state,
                 [state.activePlayer]: updatedPlayer,
                 targetMode: undefined, // Close search view
-                log: appendLog(state.log, `${activePlayer.name} wählte ${card.name} aus dem Deck.`)
+                log: appendLog(state.log, `${activePlayer.name} wählte eine Karte aus dem Deck.`)
             };
             break;
         }
@@ -975,46 +980,58 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
         }
 
         case 'SET_OPPONENT_DECK': {
-            const { deckIds } = action;
-            if (!deckIds || deckIds.length === 0) return state;
+            const { deckIds, playerName } = action;
 
-            // Generate custom deck for opponent
-            const customCards = deckIds
-                .map(id => cardDatabase.find(c => c.id === id))
-                .filter((c): c is typeof cardDatabase[0] => c !== undefined)
-                .map(card => ({
-                    ...card,
-                    instanceId: `${card.id}-opponent-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
-                }));
+            // Create updated opponent with playerName if provided
+            let updatedOpponent = { ...state.opponent };
 
-            if (customCards.length === 0) return state;
+            if (playerName) {
+                updatedOpponent.name = playerName;
+            }
 
-            const shuffledDeck = customCards.sort(() => Math.random() - 0.5);
-            let hand = shuffledDeck.slice(0, STARTING_HAND_SIZE);
-            let deck = shuffledDeck.slice(STARTING_HAND_SIZE);
+            // If deckIds provided, rebuild deck
+            if (deckIds && deckIds.length > 0) {
+                const customCards = deckIds
+                    .map(id => cardDatabase.find(c => c.id === id))
+                    .filter((c): c is typeof cardDatabase[0] => c !== undefined)
+                    .map(card => ({
+                        ...card,
+                        instanceId: `${card.id}-opponent-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
+                    }));
 
-            // Ensure 1-cost card
-            const hasOneCostCard = hand.some(c => c.cost === 1);
-            if (!hasOneCostCard) {
-                const oneCostIndex = deck.findIndex(c => c.cost === 1);
-                if (oneCostIndex !== -1) {
-                    const swapIndex = Math.floor(Math.random() * hand.length);
-                    const cardToSwap = hand[swapIndex];
-                    hand[swapIndex] = deck[oneCostIndex];
-                    deck[oneCostIndex] = cardToSwap;
+                if (customCards.length > 0) {
+                    const shuffledDeck = customCards.sort(() => Math.random() - 0.5);
+                    let hand = shuffledDeck.slice(0, STARTING_HAND_SIZE);
+                    let deck = shuffledDeck.slice(STARTING_HAND_SIZE);
+
+                    // Ensure 1-cost card
+                    const hasOneCostCard = hand.some(c => c.cost === 1);
+                    if (!hasOneCostCard) {
+                        const oneCostIndex = deck.findIndex(c => c.cost === 1);
+                        if (oneCostIndex !== -1) {
+                            const swapIndex = Math.floor(Math.random() * hand.length);
+                            const cardToSwap = hand[swapIndex];
+                            hand[swapIndex] = deck[oneCostIndex];
+                            deck[oneCostIndex] = cardToSwap;
+                        }
+                    }
+
+                    updatedOpponent = {
+                        ...updatedOpponent,
+                        deck,
+                        hand
+                    };
                 }
             }
 
-            const updatedOpponent = {
-                ...state.opponent,
-                deck,
-                hand
-            };
+            const logMessage = deckIds && deckIds.length > 0
+                ? `${updatedOpponent.name} hat ein Custom-Deck ausgewählt!`
+                : `${updatedOpponent.name} ist dem Spiel beigetreten!`;
 
             newState = {
                 ...state,
                 opponent: updatedOpponent,
-                log: appendLog(state.log, 'Gegner hat ein Custom-Deck ausgewählt!')
+                log: appendLog(state.log, logMessage)
             };
             break;
         }

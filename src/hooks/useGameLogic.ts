@@ -35,11 +35,12 @@ export const useGameLogic = (gameMode: 'single' | 'host' | 'client', isDebugMode
         }
     }, [gameState, isHost]);
 
-    // 3.5 Check for pending opponent deck IDs (race condition fix)
+    // 3.5 Check for pending opponent handshake data (race condition fix)
     useEffect(() => {
-        if (isHost && multiplayer.receivedOpponentDeckIds && multiplayer.receivedOpponentDeckIds.length > 0) {
-            console.log('[useGameLogic] Found pending opponent deck IDs:', multiplayer.receivedOpponentDeckIds.length);
-            dispatch({ type: 'SET_OPPONENT_DECK', deckIds: multiplayer.receivedOpponentDeckIds });
+        if (isHost && multiplayer.receivedOpponentDeckIds) {
+            const { deckIds, playerName } = multiplayer.receivedOpponentDeckIds;
+            console.log('[useGameLogic] Found pending opponent data:', { deckIds: deckIds?.length, playerName });
+            dispatch({ type: 'SET_OPPONENT_DECK', deckIds, playerName });
             multiplayer.receivedOpponentDeckIds = null; // Clear after processing
         }
     }, [isHost]); // Run once on mount when host
@@ -63,11 +64,11 @@ export const useGameLogic = (gameMode: 'single' | 'host' | 'client', isDebugMode
             }
         };
 
-        // Handle Handshake from Client (Host receives client's custom deck)
-        const handleHandshake = (deckIds: string[]) => {
-            if (isHost && deckIds && deckIds.length > 0) {
-                console.log('[useGameLogic] Host received client deck IDs:', deckIds.length);
-                dispatch({ type: 'SET_OPPONENT_DECK', deckIds });
+        // Handle Handshake from Client (Host receives client's data)
+        const handleHandshake = (data: { deckIds?: string[]; playerName?: string }) => {
+            if (isHost && data) {
+                console.log('[useGameLogic] Host received handshake:', data);
+                dispatch({ type: 'SET_OPPONENT_DECK', deckIds: data.deckIds, playerName: data.playerName });
             }
         };
 

@@ -112,7 +112,7 @@ export const processEffect = (
                 return {
                     player: state.activePlayer === 'player' ? newActivePlayer : newEnemyPlayer,
                     opponent: state.activePlayer === 'player' ? newEnemyPlayer : newActivePlayer,
-                    log: [...state.log, ...logUpdates, `${activePlayer.name} looks at top ${amount} cards.`],
+                    log: [...state.log, ...logUpdates, `${activePlayer.name} schaut sich die obersten ${amount} Karten an.`],
                     discoveryCards: revealed,
                     targetMode: 'discover',
                     targetModeOwner: state.activePlayer
@@ -125,7 +125,7 @@ export const processEffect = (
                 return {
                     player: state.activePlayer === 'player' ? newActivePlayer : newEnemyPlayer,
                     opponent: state.activePlayer === 'player' ? newEnemyPlayer : newActivePlayer,
-                    log: [...state.log, `${activePlayer.name} searches their deck.`],
+                    log: [...state.log, `${activePlayer.name} durchsucht das Deck.`],
                     targetMode: 'search',
                     targetModeOwner: state.activePlayer
                 };

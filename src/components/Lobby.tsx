@@ -190,12 +190,11 @@ export const Lobby: React.FC<LobbyProps> = ({ onStartGame, isDebugMode, setIsDeb
             () => { },
             () => {
                 clearTimeout(timeoutId);
-                if (isCustom && isValid) {
-                    const deckIds = JSON.parse(localStorage.getItem('philosophy-ccg-deck') || '{}').cardIds;
-                    if (deckIds) {
-                        multiplayer.sendHandshake(deckIds);
-                    }
-                }
+                // Always send handshake with player name, and deck IDs if custom
+                const deckIds = (isCustom && isValid)
+                    ? JSON.parse(localStorage.getItem('philosophy-ccg-deck') || '{}').cardIds
+                    : undefined;
+                multiplayer.sendHandshake(deckIds, playerName);
                 onStartGame('multiplayer_client');
             }
         );

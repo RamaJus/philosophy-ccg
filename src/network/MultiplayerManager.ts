@@ -13,14 +13,14 @@ export class MultiplayerManager {
     private conn: DataConnection | null = null;
     private onStateUpdate: ((state: GameState) => void) | null = null;
     private onActionReceived: ((action: GameAction) => void) | null = null;
-    private onHandshakeReceived: ((deckIds: string[]) => void) | null = null;
+    private onHandshakeReceived: ((data: { deckIds?: string[]; playerName?: string }) => void) | null = null;
     private onConnect: (() => void) | null = null;
     private onDisconnect: (() => void) | null = null;
     private onError: ((error: string) => void) | null = null;
 
     public isHost: boolean = false;
     public myId: string = '';
-    public receivedOpponentDeckIds: string[] | null = null; // Store handshake data for late pickup
+    public receivedOpponentDeckIds: { deckIds?: string[]; playerName?: string } | null = null; // Store handshake data for late pickup
 
     constructor() {
         // Initialize PeerJS
@@ -99,17 +99,17 @@ export class MultiplayerManager {
                 if (this.onActionReceived) this.onActionReceived(msg.payload);
                 break;
             case 'HANDSHAKE':
-                // Always store the deck IDs so they can be picked up later if callback isn't set yet
-                this.receivedOpponentDeckIds = msg.payload;
-                console.log('[MultiplayerManager] Received handshake with deck IDs:', msg.payload?.length);
+                // Always store handshake data so it can be picked up later if callback isn't set yet
+                this.receivedOpponentDeckIds = msg.payload; // Now an object { deckIds?, playerName? }
+                console.log('[MultiplayerManager] Received handshake:', msg.payload);
                 if (this.onHandshakeReceived) this.onHandshakeReceived(msg.payload);
                 break;
         }
     }
 
-    public sendHandshake(deckIds: string[]) {
+    public sendHandshake(deckIds?: string[], playerName?: string) {
         if (this.conn && this.conn.open) {
-            this.conn.send({ type: 'HANDSHAKE', payload: deckIds });
+            this.conn.send({ type: 'HANDSHAKE', payload: { deckIds, playerName } });
         }
     }
 
@@ -129,7 +129,7 @@ export class MultiplayerManager {
         onStateUpdate: (state: GameState) => void,
         onActionReceived: (action: GameAction) => void,
         onConnect: () => void,
-        onHandshakeReceived?: (deckIds: string[]) => void
+        onHandshakeReceived?: (data: { deckIds?: string[]; playerName?: string }) => void
     ) {
         this.onStateUpdate = onStateUpdate;
         this.onActionReceived = onActionReceived;
