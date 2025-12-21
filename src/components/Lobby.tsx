@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { multiplayer } from '../network/MultiplayerManager';
 import { Copy, Globe, Cpu, QrCode, Share2, BookOpen, User } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
