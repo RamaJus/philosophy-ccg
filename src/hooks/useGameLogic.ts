@@ -1,13 +1,30 @@
-import { useReducer, useEffect, useCallback } from 'react'; // Removed useState
+import { useReducer, useEffect, useCallback, useRef } from 'react';
 import { GameState, GameAction } from '../types';
 import { gameReducer, createInitialState } from '../engine/reducers';
 import { multiplayer } from '../network/MultiplayerManager';
 
 export const useGameLogic = (gameMode: 'single' | 'host' | 'client', isDebugMode: boolean = false, customDeckIds?: string[]) => {
-    // 1. Initialize Reducer with lazy initialization to capture isDebugMode and customDeckIds correctly
-    const [gameState, dispatch] = useReducer(gameReducer, { isDebugMode, customDeckIds }, (args) => createInitialState(args.isDebugMode, args.customDeckIds));
+    // Track if we've initialized with the correct deck
+    const initializedRef = useRef(false);
 
-    // 2. Multiplayer Helpers
+    console.log('[useGameLogic] Called with customDeckIds:', customDeckIds?.length, 'cards');
+
+    // 1. Initialize Reducer - start with empty state, will dispatch START_GAME with correct deck
+    const [gameState, dispatch] = useReducer(gameReducer, { isDebugMode, customDeckIds }, (args) => {
+        console.log('[useGameLogic] Initializer called with:', args.customDeckIds?.length, 'cards');
+        return createInitialState(args.isDebugMode, args.customDeckIds);
+    });
+
+    // 2. Re-initialize if customDeckIds wasn't available at mount
+    useEffect(() => {
+        if (customDeckIds && customDeckIds.length > 0 && !initializedRef.current) {
+            console.log('[useGameLogic] Dispatching START_GAME with custom deck:', customDeckIds.length, 'cards');
+            dispatch({ type: 'START_GAME', isDebugMode, customDeckIds });
+            initializedRef.current = true;
+        }
+    }, [customDeckIds, isDebugMode]);
+
+    // 3. Multiplayer Helpers
     const isHost = gameMode === 'host';
     const isClient = gameMode === 'client';
 
