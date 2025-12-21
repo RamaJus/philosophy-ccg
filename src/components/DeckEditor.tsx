@@ -708,24 +708,6 @@ export const DeckEditor: React.FC<DeckEditorProps> = ({ isOpen, onClose }) => {
                                 </div>
                             )}
 
-                            {/* Stats for Philosophers */}
-                            {previewCard.type === 'Philosoph' && previewCard.attack !== undefined && previewCard.health !== undefined && (
-                                <div className="flex gap-4 mt-2">
-                                    <div className="flex items-center gap-2">
-                                        <span className="text-lg">⚔️</span>
-                                        <span className="text-xl font-bold text-red-400">{previewCard.attack}</span>
-                                    </div>
-                                    <div className="flex items-center gap-2">
-                                        <span className="text-lg">❤️</span>
-                                        <span className="text-xl font-bold text-green-400">{previewCard.health}</span>
-                                    </div>
-                                    <div className="flex items-center gap-2">
-                                        <span className="text-lg">💧</span>
-                                        <span className="text-xl font-bold text-blue-400">{previewCard.cost}</span>
-                                    </div>
-                                </div>
-                            )}
-
                             {/* Type */}
                             <div className="space-y-1 mt-auto pt-2 border-t border-slate-700">
                                 <span className="text-xs text-gray-400 uppercase tracking-wider">Typ</span>
