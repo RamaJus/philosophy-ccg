@@ -59,7 +59,7 @@ export function createInitialState(isDebugMode: boolean): GameState {
         turn: 1,
         activePlayer: 'player',
         player,
-        opponent: createPlayer('Gegner', false, STARTING_HAND_SIZE + 1, false),
+        opponent: createPlayer('Gegner', false, STARTING_HAND_SIZE + 1, isDebugMode),
         gameOver: false,
         log: ['Spiel gestartet! Möge der beste Philosoph gewinnen.'],
     };
