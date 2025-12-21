@@ -107,12 +107,12 @@ export const GameArea: React.FC<GameAreaProps> = ({ mode, isDebugMode, customDec
         return () => clearTimeout(timer);
     }, [gameState.lastPlayedCard, gameState.lastPlayedCardPlayerId]); // Trigger when card changes
 
-    // Auto-start the game on mount (only for single player or host)
-    useEffect(() => {
-        if (mode !== 'multiplayer_client') {
-            dispatch({ type: 'START_GAME', isDebugMode });
-        }
-    }, []);
+    // Auto-start handled by useGameLogic now to prevent race conditions with custom deck loading
+    // useEffect(() => {
+    //     if (mode !== 'multiplayer_client') {
+    //         dispatch({ type: 'START_GAME', isDebugMode });
+    //     }
+    // }, []);
 
     // Multiplayer: Set up disconnect detection
     useEffect(() => {
@@ -315,7 +315,7 @@ export const GameArea: React.FC<GameAreaProps> = ({ mode, isDebugMode, customDec
     };
 
     const handleNewGame = () => {
-        dispatch({ type: 'START_GAME', isDebugMode });
+        dispatch({ type: 'START_GAME', isDebugMode, customDeckIds });
     };
 
     return (

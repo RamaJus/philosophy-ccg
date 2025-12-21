@@ -947,6 +947,51 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
             break;
         }
 
+        case 'SET_OPPONENT_DECK': {
+            const { deckIds } = action;
+            if (!deckIds || deckIds.length === 0) return state;
+
+            // Generate custom deck for opponent
+            const customCards = deckIds
+                .map(id => cardDatabase.find(c => c.id === id))
+                .filter((c): c is typeof cardDatabase[0] => c !== undefined)
+                .map(card => ({
+                    ...card,
+                    instanceId: `${card.id}-opponent-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
+                }));
+
+            if (customCards.length === 0) return state;
+
+            const shuffledDeck = customCards.sort(() => Math.random() - 0.5);
+            let hand = shuffledDeck.slice(0, STARTING_HAND_SIZE);
+            let deck = shuffledDeck.slice(STARTING_HAND_SIZE);
+
+            // Ensure 1-cost card
+            const hasOneCostCard = hand.some(c => c.cost === 1);
+            if (!hasOneCostCard) {
+                const oneCostIndex = deck.findIndex(c => c.cost === 1);
+                if (oneCostIndex !== -1) {
+                    const swapIndex = Math.floor(Math.random() * hand.length);
+                    const cardToSwap = hand[swapIndex];
+                    hand[swapIndex] = deck[oneCostIndex];
+                    deck[oneCostIndex] = cardToSwap;
+                }
+            }
+
+            const updatedOpponent = {
+                ...state.opponent,
+                deck,
+                hand
+            };
+
+            newState = {
+                ...state,
+                opponent: updatedOpponent,
+                log: appendLog(state.log, 'Gegner hat ein Custom-Deck ausgewählt!')
+            };
+            break;
+        }
+
         case 'CANCEL_CAST': {
             // Return pending card to hand if cancel is triggered during targeting
             const activePlayer = state.activePlayer === 'player' ? state.player : state.opponent;

@@ -93,10 +93,19 @@ export const Lobby: React.FC<LobbyProps> = ({ onStartGame, isDebugMode, setIsDeb
 
         multiplayer.connectToPeer(peerIdInput);
         multiplayer.setCallbacks(
-            () => { },
-            () => { },
-            () => {
+            () => { }, // onState
+            () => { }, // onAction
+            () => { // onConnect
                 clearTimeout(timeoutId);
+                // Send handshake with deck IDs immediately after connection
+                if (isCustom && isValid) {
+                    const deckIds = JSON.parse(localStorage.getItem('philosophy-ccg-deck') || '{}').cardIds;
+                    if (deckIds) {
+                        console.log('[Lobby] Sending Handshake with deck:', deckIds.length);
+                        multiplayer.sendHandshake(deckIds);
+                    }
+                }
+
                 onStartGame('multiplayer_client');
             }
         );
@@ -164,18 +173,18 @@ export const Lobby: React.FC<LobbyProps> = ({ onStartGame, isDebugMode, setIsDeb
                         <button
                             onClick={() => setShowDeckEditor(true)}
                             className={`w-full p-4 rounded-xl border-2 transition-all duration-300 flex items-center justify-between gap-4 ${isCustom && isValid
-                                    ? 'border-green-600/60 bg-gradient-to-br from-green-900/30 to-slate-900/60 hover:border-green-500/80'
-                                    : isCustom && !isValid
-                                        ? 'border-red-600/60 bg-gradient-to-br from-red-900/30 to-slate-900/60 hover:border-red-500/80'
-                                        : 'border-purple-700/40 bg-gradient-to-br from-slate-800/60 to-slate-900/60 hover:border-purple-500/60'
+                                ? 'border-green-600/60 bg-gradient-to-br from-green-900/30 to-slate-900/60 hover:border-green-500/80'
+                                : isCustom && !isValid
+                                    ? 'border-red-600/60 bg-gradient-to-br from-red-900/30 to-slate-900/60 hover:border-red-500/80'
+                                    : 'border-purple-700/40 bg-gradient-to-br from-slate-800/60 to-slate-900/60 hover:border-purple-500/60'
                                 }`}
                         >
                             <div className="flex items-center gap-4">
                                 <div className={`w-12 h-12 rounded-full flex items-center justify-center border ${isCustom && isValid
-                                        ? 'bg-gradient-to-br from-green-600/30 to-green-700/30 border-green-600/40'
-                                        : isCustom && !isValid
-                                            ? 'bg-gradient-to-br from-red-600/30 to-red-700/30 border-red-600/40'
-                                            : 'bg-gradient-to-br from-purple-600/30 to-purple-700/30 border-purple-600/40'
+                                    ? 'bg-gradient-to-br from-green-600/30 to-green-700/30 border-green-600/40'
+                                    : isCustom && !isValid
+                                        ? 'bg-gradient-to-br from-red-600/30 to-red-700/30 border-red-600/40'
+                                        : 'bg-gradient-to-br from-purple-600/30 to-purple-700/30 border-purple-600/40'
                                     }`}>
                                     <BookOpen className={isCustom && isValid ? 'text-green-300' : isCustom && !isValid ? 'text-red-300' : 'text-purple-300'} size={24} />
                                 </div>
@@ -192,10 +201,10 @@ export const Lobby: React.FC<LobbyProps> = ({ onStartGame, isDebugMode, setIsDeb
                                 </div>
                             </div>
                             <div className={`px-3 py-1.5 rounded-full text-sm font-bold ${isCustom && isValid
-                                    ? 'bg-green-900/50 text-green-300 border border-green-600'
-                                    : isCustom && !isValid
-                                        ? 'bg-red-900/50 text-red-300 border border-red-600'
-                                        : 'bg-slate-700/50 text-slate-300 border border-slate-600'
+                                ? 'bg-green-900/50 text-green-300 border border-green-600'
+                                : isCustom && !isValid
+                                    ? 'bg-red-900/50 text-red-300 border border-red-600'
+                                    : 'bg-slate-700/50 text-slate-300 border border-slate-600'
                                 }`}>
                                 {isCustom && isValid ? '✓ Bereit' : isCustom && !isValid ? '⚠ Unvollständig' : 'Standard'}
                             </div>

@@ -13,6 +13,7 @@ export class MultiplayerManager {
     private conn: DataConnection | null = null;
     private onStateUpdate: ((state: GameState) => void) | null = null;
     private onActionReceived: ((action: GameAction) => void) | null = null;
+    private onHandshakeReceived: ((deckIds: string[]) => void) | null = null;
     private onConnect: (() => void) | null = null;
     private onDisconnect: (() => void) | null = null;
     private onError: ((error: string) => void) | null = null;
@@ -96,6 +97,15 @@ export class MultiplayerManager {
             case 'ACTION':
                 if (this.onActionReceived) this.onActionReceived(msg.payload);
                 break;
+            case 'HANDSHAKE':
+                if (this.onHandshakeReceived) this.onHandshakeReceived(msg.payload);
+                break;
+        }
+    }
+
+    public sendHandshake(deckIds: string[]) {
+        if (this.conn && this.conn.open) {
+            this.conn.send({ type: 'HANDSHAKE', payload: deckIds });
         }
     }
 
@@ -114,11 +124,13 @@ export class MultiplayerManager {
     public setCallbacks(
         onStateUpdate: (state: GameState) => void,
         onActionReceived: (action: GameAction) => void,
-        onConnect: () => void
+        onConnect: () => void,
+        onHandshakeReceived?: (deckIds: string[]) => void
     ) {
         this.onStateUpdate = onStateUpdate;
         this.onActionReceived = onActionReceived;
         this.onConnect = onConnect;
+        if (onHandshakeReceived) this.onHandshakeReceived = onHandshakeReceived;
     }
 
     public get isConnected(): boolean {
@@ -146,6 +158,7 @@ export class MultiplayerManager {
         this.onActionReceived = null;
         this.onDisconnect = null;
         this.onError = null;
+        this.onHandshakeReceived = null;
     }
 
     public cleanup() {
