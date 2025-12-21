@@ -772,56 +772,126 @@ export const cardDatabase: Card[] = [
         image: '/images/cards/popper.png',
     },
 
-    // Permanent Works
+    // Permanent Works - All give +1 Leben to matching school
     {
         id: 'tractatus',
         name: 'Tractatus Logico-Philosophicus',
         type: 'Werk',
-        cost: 4,
-        description: 'Die Welt ist alles, was der Fall ist. +2 Schaden für Logik.',
+        cost: 5,
+        description: 'Die Welt ist alles, was der Fall ist. +1 Leben für Logik.',
         rarity: 'Legendär',
         image: '/images/cards/tractatus.png',
-        workBonus: { school: 'Logik', damage: 2 }
+        workBonus: { school: 'Logik', health: 1 }
     },
     {
         id: 'zarathustra',
         name: 'Also sprach Zarathustra',
         type: 'Werk',
         cost: 5,
-        description: 'Ich lehre euch den Übermenschen. +2 Schaden für Existentialismus.',
+        description: 'Ich lehre euch den Übermenschen. +1 Leben für Existentialismus.',
         rarity: 'Legendär',
         image: '/images/cards/zarathustra.png',
-        workBonus: { school: 'Existentialismus', damage: 2 }
+        workBonus: { school: 'Existentialismus', health: 1 }
     },
     {
         id: 'kritik',
         name: 'Kritik der reinen Vernunft',
         type: 'Werk',
         cost: 5,
-        description: 'Gedanken ohne Inhalt sind leer. +2 Schaden für Idealismus.',
+        description: 'Gedanken ohne Inhalt sind leer. +1 Leben für Idealismus.',
         rarity: 'Legendär',
         image: '/images/cards/kritik.png',
-        workBonus: { school: 'Idealismus', damage: 2 }
+        workBonus: { school: 'Idealismus', health: 1 }
     },
     {
         id: 'wille',
         name: 'Die Welt als Wille und Vorstellung',
         type: 'Werk',
-        cost: 4,
-        description: 'Die Welt ist meine Vorstellung. +2 Schaden für Metaphysik.',
+        cost: 5,
+        description: 'Die Welt ist meine Vorstellung. +1 Leben für Metaphysik.',
         rarity: 'Legendär',
         image: '/images/cards/wille.png',
-        workBonus: { school: 'Metaphysik', damage: 2 }
+        workBonus: { school: 'Metaphysik', health: 1 }
     },
     {
         id: 'politeia',
         name: 'Politeia',
         type: 'Werk',
         cost: 5,
-        description: 'Der Staat und die Gerechtigkeit. +2 Schaden für Politik.',
+        description: 'Der Staat und die Gerechtigkeit. +1 Leben für Politik.',
         rarity: 'Legendär',
         image: '/images/cards/politeia.png',
-        workBonus: { school: 'Politik', damage: 2 }
+        workBonus: { school: 'Politik', health: 1 }
+    },
+    {
+        id: 'de_civitate_dei',
+        name: 'De Civitate Dei',
+        type: 'Werk',
+        cost: 5,
+        description: 'Vom Gottesstaat. +1 Leben für Religion.',
+        rarity: 'Legendär',
+        image: '/images/cards/de_civitate_dei.png',
+        workBonus: { school: 'Religion', health: 1 }
+    },
+    {
+        id: 'mythos_sisyphos',
+        name: 'Der Mythos des Sisyphos',
+        type: 'Werk',
+        cost: 5,
+        description: 'Wir müssen uns Sisyphos als glücklichen Menschen vorstellen. +1 Leben für Existentialismus.',
+        rarity: 'Legendär',
+        image: '/images/cards/mythos_sisyphos.png',
+        workBonus: { school: 'Existentialismus', health: 1 }
+    },
+    {
+        id: 'leviathan',
+        name: 'Leviathan',
+        type: 'Werk',
+        cost: 5,
+        description: 'Der sterbliche Gott. +1 Leben für Politik.',
+        rarity: 'Legendär',
+        image: '/images/cards/leviathan.png',
+        workBonus: { school: 'Politik', health: 1 }
+    },
+    {
+        id: 'meditationen',
+        name: 'Meditationen über die Erste Philosophie',
+        type: 'Werk',
+        cost: 5,
+        description: 'Cogito ergo sum. +1 Leben für Rationalismus.',
+        rarity: 'Legendär',
+        image: '/images/cards/meditationen.png',
+        workBonus: { school: 'Rationalismus', health: 1 }
+    },
+    {
+        id: 'nikomachische_ethik',
+        name: 'Nikomachische Ethik',
+        type: 'Werk',
+        cost: 5,
+        description: 'Die Tugend als Mitte. +1 Leben für Moralphilosophie.',
+        rarity: 'Legendär',
+        image: '/images/cards/nikomachische_ethik.png',
+        workBonus: { school: 'Moralphilosophie', health: 1 }
+    },
+    {
+        id: 'objektive_erkenntnis',
+        name: 'Objektive Erkenntnis',
+        type: 'Werk',
+        cost: 5,
+        description: 'Wissenschaft als Falsifikation. +1 Leben für Empirismus.',
+        rarity: 'Legendär',
+        image: '/images/cards/objektive_erkenntnis.png',
+        workBonus: { school: 'Empirismus', health: 1 }
+    },
+    {
+        id: 'traktat_menschliche_natur',
+        name: 'Traktat über die Menschliche Natur',
+        type: 'Werk',
+        cost: 5,
+        description: 'Die Vernunft ist Sklavin der Leidenschaften. +1 Leben für Skeptizismus.',
+        rarity: 'Legendär',
+        image: '/images/cards/traktat_menschliche_natur.png',
+        workBonus: { school: 'Skeptizismus', health: 1 }
     },
 
     // New Spells

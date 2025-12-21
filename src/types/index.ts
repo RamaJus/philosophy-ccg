@@ -17,7 +17,7 @@ export interface Card {
     image?: string;
     rarity: 'Gewöhnlich' | 'Selten' | 'Legendär';
     school?: string[]; // e.g. 'rationalism', 'empiricism', 'religion'
-    workBonus?: { school: string; damage: number }; // For 'work' cards
+    workBonus?: { school: string; health: number }; // For 'work' cards - gives +health to matching school
     specialAbility?: 'transform'; // Special abilities for certain cards
     special?: { name: string; description: string }; // Named special abilities like Marx
     effects?: Effect[]; // New Rule Engine effects

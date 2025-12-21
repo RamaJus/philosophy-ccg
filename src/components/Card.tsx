@@ -153,7 +153,7 @@ export const Card: React.FC<CardProps> = ({
                                         <p className="text-sm font-medium text-purple-200">{card.special.name}: {card.special.description}</p>
                                     )}
                                     {card.workBonus && (
-                                        <p className="text-sm font-medium text-amber-200">Bonus: +{card.workBonus.damage} Angriff für {card.workBonus.school}</p>
+                                        <p className="text-sm font-medium text-green-200">Bonus: +{card.workBonus.health} Leben für {card.workBonus.school}</p>
                                     )}
                                 </div>
                             )}

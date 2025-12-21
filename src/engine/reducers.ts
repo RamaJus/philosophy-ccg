@@ -339,9 +339,7 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
                 }
 
                 let damage = attacker.attack;
-                if (activePlayer.activeWork?.workBonus && attacker.school?.includes(activePlayer.activeWork.workBonus.school)) {
-                    damage += activePlayer.activeWork.workBonus.damage;
-                }
+                // Work bonus is now health-based, not attack-based
                 totalDamage += damage;
                 attackerNames.push(attacker.name);
             }

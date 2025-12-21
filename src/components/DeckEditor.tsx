@@ -547,7 +547,7 @@ export const DeckEditor: React.FC<DeckEditorProps> = ({ isOpen, onClose }) => {
                                         <p className="text-sm font-medium text-purple-200">{previewCard.special.name}: {previewCard.special.description}</p>
                                     )}
                                     {previewCard.workBonus && (
-                                        <p className="text-sm font-medium text-amber-200">Bonus: +{previewCard.workBonus.damage} Angriff für {previewCard.workBonus.school}</p>
+                                        <p className="text-sm font-medium text-green-200">Bonus: +{previewCard.workBonus.health} Leben für {previewCard.workBonus.school}</p>
                                     )}
                                 </div>
                             )}

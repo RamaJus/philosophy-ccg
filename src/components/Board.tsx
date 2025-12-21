@@ -87,10 +87,10 @@ export const Board: React.FC<BoardProps> = ({
 
                                 const isTargetable = canTarget && !isBlocked;
 
-                                // Calculate Work Bonus
-                                let bonusDamage = 0;
+                                // Calculate Work Bonus (Health)
+                                let bonusHealth = 0;
                                 if (activeWork?.workBonus && minion.school?.includes(activeWork.workBonus.school)) {
-                                    bonusDamage = activeWork.workBonus.damage;
+                                    bonusHealth = activeWork.workBonus.health;
                                 }
 
                                 // Status Effects
@@ -113,7 +113,7 @@ export const Board: React.FC<BoardProps> = ({
                                                 isSelected={selectedMinionIds.includes(minion.instanceId || minion.id)}
                                                 isPlayable={(canAttack && !isSilenced) || isTargetable}
                                                 showHealth={true}
-                                                bonusDamage={bonusDamage}
+                                                bonusDamage={bonusHealth}
                                                 className={`
                                                     ${canAttack && !isSilenced ? 'ring-2 ring-green-400' : ''}
                                                     ${isTargetable && !isSpecialTargeting ? 'ring-2 ring-red-400 cursor-attack' : ''}
