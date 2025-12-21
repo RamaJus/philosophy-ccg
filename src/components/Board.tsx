@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { BoardMinion, Card as CardType } from '../types';
 import { Card } from './Card';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Shield, Clock } from 'lucide-react';
 
 interface BoardProps {
     minions: BoardMinion[];
@@ -130,16 +130,16 @@ export const Board: React.FC<BoardProps> = ({
                                                     🔇
                                                 </div>
                                             )}
-                                            {isPendingTransform && (
-                                                <div className="absolute bottom-11 right-1 flex items-center gap-0.5 text-blue-400" title={`Transformation in ${minion.pendingTransformation?.turnTrigger ? minion.pendingTransformation.turnTrigger - currentTurn : '?'} Runde(n) (Sartre)`}>
-                                                    <span className="text-[12px]">⏳</span>
-                                                    <span className="text-[10px] font-bold">{minion.pendingTransformation?.turnTrigger ? minion.pendingTransformation.turnTrigger - currentTurn : '?'}</span>
+                                            {isPendingTransform && minion.pendingTransformation && (
+                                                <div className="absolute bottom-11 right-1 flex items-center gap-1 bg-black/70 rounded-full px-1.5 py-0.5" title={`Transformation in ${Math.max(0, minion.pendingTransformation.turnTrigger - currentTurn)} Runde(n) (Sartre)`}>
+                                                    <Clock size={10} className="text-blue-400" />
+                                                    <span className="text-[10px] font-bold text-white">{Math.max(0, minion.pendingTransformation.turnTrigger - currentTurn)}</span>
                                                 </div>
                                             )}
                                             {minion.untargetableUntilTurn && minion.untargetableUntilTurn > currentTurn && (
-                                                <div className="absolute bottom-11 right-1 flex items-center gap-0.5 text-blue-400" title={`Geschützt für ${minion.untargetableUntilTurn - currentTurn} Runde(n) (Diogenes)`}>
-                                                    <span className="text-[12px]">🛡️</span>
-                                                    <span className="text-[10px] font-bold">{minion.untargetableUntilTurn - currentTurn}</span>
+                                                <div className="absolute bottom-11 right-1 flex items-center gap-1 bg-black/70 rounded-full px-1.5 py-0.5" title={`Geschützt für ${minion.untargetableUntilTurn - currentTurn} Runde(n) (Diogenes)`}>
+                                                    <Shield size={10} className="text-blue-400" />
+                                                    <span className="text-[10px] font-bold text-white">{minion.untargetableUntilTurn - currentTurn}</span>
                                                 </div>
                                             )}
 
