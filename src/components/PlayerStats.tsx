@@ -66,10 +66,23 @@ export const PlayerStats: React.FC<PlayerStatsProps> = ({ player, isOpponent = f
 
                     {/* Info Section */}
                     <div className="flex-1 min-w-0 flex flex-col justify-between">
-                        {/* Name */}
-                        <h2 className="text-sm font-bold text-white/90 truncate tracking-wide">
-                            {player.name}
-                        </h2>
+                        {/* Name Row with Deck Count for Opponent */}
+                        <div className="flex items-center gap-2">
+                            <h2 className="text-sm font-bold text-white/90 truncate tracking-wide">
+                                {player.name}
+                            </h2>
+                            {isOpponent && (
+                                <div className="flex items-center gap-1 opacity-70" title={`${player.deck.length} Karten im Deck`}>
+                                    <svg className="w-3.5 h-3.5 text-purple-400" viewBox="0 0 24 24" fill="currentColor">
+                                        <path d="M4 6H2v14c0 1.1.9 2 2 2h14v-2H4V6z" />
+                                        <path d="M20 2H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H8V4h12v12z" />
+                                    </svg>
+                                    <span className="text-xs font-bold tabular-nums text-purple-300">
+                                        {player.deck.length}
+                                    </span>
+                                </div>
+                            )}
+                        </div>
 
                         {/* Stats Row */}
                         <div className="flex items-center gap-4 mt-1">
@@ -134,32 +147,15 @@ export const PlayerStats: React.FC<PlayerStatsProps> = ({ player, isOpponent = f
 
                                 {/* Bonus indicator */}
                                 {(player.currentTurnBonusMana || 0) > 0 && (isActive || !isOpponent) && (
-                                    <motion.div
+                                    <motion.span
                                         initial={{ scale: 0 }}
                                         animate={{ scale: 1 }}
-                                        className="flex items-center text-yellow-400"
+                                        className="text-xs font-bold text-yellow-400"
                                         title={`+${player.currentTurnBonusMana} zusätzliche Dialektik`}
                                     >
-                                        <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor">
-                                            <path d="M12 2L9.19 8.63 2 9.24l5.46 4.73L5.82 21 12 17.27 18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2z" />
-                                        </svg>
-                                        <span className="text-xs font-bold ml-0.5">
-                                            +{player.currentTurnBonusMana}
-                                        </span>
-                                    </motion.div>
+                                        +{player.currentTurnBonusMana}
+                                    </motion.span>
                                 )}
-                            </div>
-
-                            {/* Deck Count */}
-                            <div className="flex items-center gap-1" title={`${player.deck.length} Karten im Deck`}>
-                                {/* Card stack icon */}
-                                <svg className="w-4 h-4 text-purple-400/70" viewBox="0 0 24 24" fill="currentColor">
-                                    <path d="M4 6H2v14c0 1.1.9 2 2 2h14v-2H4V6z" />
-                                    <path d="M20 2H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H8V4h12v12z" />
-                                </svg>
-                                <span className="text-xs font-bold tabular-nums text-purple-300/70">
-                                    {player.deck.length}
-                                </span>
                             </div>
                         </div>
                     </div>

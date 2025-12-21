@@ -6,23 +6,25 @@ interface WorkSlotProps {
     card?: Card;
 }
 
+// Fixed dimensions: card is ~120x168, slot is 1mm (~4px) larger
+const SLOT_WIDTH = 128;  // 120 + 8px buffer
+const SLOT_HEIGHT = 176; // 168 + 8px buffer
+
 export const WorkSlot: React.FC<WorkSlotProps> = ({ card }) => {
     return (
-        <div className={`relative flex flex-col items-center justify-center p-1 rounded-lg border-2 border-dashed transition-all duration-500 ${card
-            ? 'border-amber-500/50 bg-amber-950/20 shadow-[0_0_15px_rgba(245,158,11,0.2)]'
-            : 'border-slate-700/30 bg-slate-900/20'
-            }`}
-            style={{ width: 'fit-content', height: 'fit-content' }}
+        <div
+            className={`relative flex items-center justify-center rounded-lg border-2 border-dashed transition-all duration-500 ${card
+                ? 'border-amber-500/50 bg-amber-950/20 shadow-[0_0_15px_rgba(245,158,11,0.2)]'
+                : 'border-slate-700/30 bg-slate-900/20'
+                }`}
+            style={{ width: `${SLOT_WIDTH}px`, height: `${SLOT_HEIGHT}px` }}
         >
-
-
-
             {card ? (
-                <div className="transform scale-90 hover:scale-100 transition-transform duration-300">
+                <div className="transform scale-90 hover:scale-95 transition-transform duration-300">
                     <CardComponent card={card} isPlayable={false} />
                 </div>
             ) : (
-                <div className="text-center p-4 opacity-30">
+                <div className="text-center opacity-30">
                     <div className="text-xs text-gray-500 italic">Werk</div>
                 </div>
             )}

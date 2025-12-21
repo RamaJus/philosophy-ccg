@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ScrollText, X } from 'lucide-react';
 
@@ -36,63 +36,38 @@ const getMessageStyle = (msg: string): string => {
 
 export const GameLog: React.FC<GameLogProps> = ({ messages }) => {
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const [lastSeenCount, setLastSeenCount] = useState(messages.length);
     const modalRef = useRef<HTMLDivElement>(null);
 
-    // Auto-scroll modal to bottom when opened or new messages arrive
-    useEffect(() => {
-        if (isModalOpen && modalRef.current) {
-            modalRef.current.scrollTop = modalRef.current.scrollHeight;
-        }
-    }, [isModalOpen, messages.length]);
-
-    // Track new messages for highlight effect
-    const hasNewMessages = messages.length > lastSeenCount;
-
-    // Get last 3 messages for mini-feed (reversed to show newest first, then reverse back)
+    // Get last 3 messages for mini-feed
     const recentMessages = messages.slice(-3);
 
     return (
         <>
-            {/* Mini-Feed Section */}
-            <div className="glass-panel p-2 space-y-2">
+            {/* Mini-Feed Section - anchored bottom left */}
+            <div className="bg-slate-900/80 border border-slate-700/50 rounded-lg p-2 space-y-1.5 backdrop-blur-sm">
                 {/* Header with expand button */}
                 <button
-                    onClick={() => {
-                        setIsModalOpen(true);
-                        setLastSeenCount(messages.length);
-                    }}
-                    className={`w-full flex items-center justify-between p-2 rounded-lg transition-all hover:bg-slate-700/30 ${hasNewMessages ? 'bg-amber-900/20' : ''}`}
+                    onClick={() => setIsModalOpen(true)}
+                    className="w-full flex items-center justify-between px-2 py-1 rounded transition-all hover:bg-slate-700/30"
                 >
                     <div className="flex items-center gap-2">
-                        <ScrollText size={14} className={`${hasNewMessages ? 'text-amber-400 animate-pulse' : 'text-amber-500/70'}`} />
-                        <span className="text-xs font-medium text-gray-400">Protokoll</span>
-                        {hasNewMessages && (
-                            <span className="text-[10px] px-1.5 py-0.5 bg-amber-500/20 text-amber-400 rounded-full">
-                                +{messages.length - lastSeenCount}
-                            </span>
-                        )}
+                        <ScrollText size={12} className="text-amber-500/60" />
+                        <span className="text-[10px] font-medium text-gray-500">Protokoll</span>
                     </div>
-                    <span className="text-[10px] text-gray-500">{messages.length}</span>
+                    <span className="text-[10px] text-gray-600">{messages.length}</span>
                 </button>
 
                 {/* Recent Messages Mini-Feed */}
-                <div className="space-y-1 px-1">
-                    <AnimatePresence mode="popLayout">
-                        {recentMessages.map((msg, idx) => (
-                            <motion.p
-                                key={`${messages.length - 3 + idx}-${msg.substring(0, 20)}`}
-                                initial={{ opacity: 0, y: -10, height: 0 }}
-                                animate={{ opacity: 1, y: 0, height: 'auto' }}
-                                exit={{ opacity: 0, height: 0 }}
-                                transition={{ duration: 0.2 }}
-                                className={`text-[10px] leading-tight truncate ${getMessageStyle(msg)}`}
-                                title={msg}
-                            >
-                                {msg}
-                            </motion.p>
-                        ))}
-                    </AnimatePresence>
+                <div className="space-y-0.5 px-1">
+                    {recentMessages.map((msg, idx) => (
+                        <p
+                            key={`${messages.length - 3 + idx}-${msg.substring(0, 20)}`}
+                            className={`text-[10px] leading-tight truncate ${getMessageStyle(msg)}`}
+                            title={msg}
+                        >
+                            {msg}
+                        </p>
+                    ))}
                 </div>
             </div>
 
@@ -139,7 +114,7 @@ export const GameLog: React.FC<GameLogProps> = ({ messages }) => {
                                     {messages.map((msg, idx) => (
                                         <div
                                             key={idx}
-                                            className={`text-sm leading-relaxed ${getMessageStyle(msg)} ${idx > lastSeenCount - 4 ? 'bg-slate-800/50 rounded px-2 py-1 -mx-2' : ''}`}
+                                            className={`text-sm leading-relaxed ${getMessageStyle(msg)}`}
                                         >
                                             <span className="text-gray-600 text-xs mr-2">#{idx + 1}</span>
                                             {msg}
