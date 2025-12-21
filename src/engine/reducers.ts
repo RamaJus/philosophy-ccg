@@ -233,7 +233,7 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
                     // Merge partial state
                     newState = { ...newState, ...partialState };
                 });
-                newState.log = appendLog(newState.log, `${updatedPlayer.name} played ${card.name}.`);
+                newState.log = appendLog(newState.log, `${updatedPlayer.name} spielte ${card.name}.`);
             }
 
             // Handle card type placement (runs for ALL cards, regardless of effects)
@@ -287,7 +287,7 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
                         ...p,
                         board: [...p.board, minion]
                     },
-                    log: appendLog(newState.log, `${p.name} summoned ${card.name}.`)
+                    log: appendLog(newState.log, `${p.name} beschwörte ${card.name}.`)
                 };
             }
             break;
@@ -314,7 +314,7 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
             for (const attacker of attackers) {
                 // Check Diotima Silence
                 if (attacker.gender === 'male' && attacker.silencedUntilTurn && attacker.silencedUntilTurn > state.turn) {
-                    currentLog = appendLog(currentLog, `${attacker.name} is silenced and cannot attack!`);
+                    currentLog = appendLog(currentLog, `${attacker.name} ist verstummt und kann nicht angreifen!`);
                     continue;
                 }
 
@@ -333,7 +333,7 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
             if (!targetId) {
                 // Attack Player
                 updatedEnemyPlayer.health -= totalDamage;
-                currentLog = appendLog(currentLog, `${attackerNamesStr} attacked ${enemyPlayer.name} for ${totalDamage} damage!`);
+                currentLog = appendLog(currentLog, `${attackerNamesStr} griff ${enemyPlayer.name} für ${totalDamage} Schaden an!`);
 
                 // Mark as attacked
                 updatedActivePlayer.board = activePlayer.board.map(m =>
@@ -388,10 +388,10 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
                 if (targetHealth <= 0) {
                     updatedEnemyPlayer.board = updatedEnemyPlayer.board.filter((_, i) => i !== targetIndex);
                     updatedEnemyPlayer.graveyard = [...updatedEnemyPlayer.graveyard, target];
-                    currentLog = appendLog(currentLog, `${attackerNamesStr} destroyed ${target.name}!`);
+                    currentLog = appendLog(currentLog, `${attackerNamesStr} zerstörte ${target.name}!`);
                 } else {
                     updatedEnemyPlayer.board[targetIndex] = { ...target, health: targetHealth };
-                    currentLog = appendLog(currentLog, `${attackerNamesStr} attacked ${target.name}.`);
+                    currentLog = appendLog(currentLog, `${attackerNamesStr} griff ${target.name} an.`);
                 }
             }
 
@@ -838,7 +838,7 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
                     targetModeOwner: undefined,
                     selectedCard: undefined,
                     selectedMinions: [],
-                    log: appendLog(state.log, `${activePlayer.name} cancelled the spell.`)
+                    log: appendLog(state.log, `${activePlayer.name} brach den Zauber ab.`)
                 };
             } else {
                 newState = {

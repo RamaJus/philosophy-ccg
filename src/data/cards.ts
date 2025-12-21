@@ -64,14 +64,13 @@ export const cardDatabase: Card[] = [
         attack: 9,
         health: 7,
         description: 'Gott ist tot!',
-        effect: 'Der letzte Mensch: Wähle einen Philosophen und vernichte dessen Willen.',
         rarity: 'Legendär',
         school: ['Existentialismus', 'Nihilismus'],
         gender: 'male',
         image: '/images/cards/nietzsche.jpg',
         specialAbility: 'transform',
         special: {
-            name: 'Der letzte Mensch',
+            name: 'Sklavenmoral',
             description: 'Verwandle einen gegnerischen Philosophen in den letzten Menschen (Werte -3/-3).'
         }
     },

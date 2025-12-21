@@ -131,13 +131,13 @@ export const Board: React.FC<BoardProps> = ({
                                                 </div>
                                             )}
                                             {isPendingTransform && (
-                                                <div className="absolute top-0 left-0 bg-purple-900/90 text-white text-[10px] px-1 rounded-br border border-purple-500" title="Transformation ausstehend (Sartre)">
+                                                <div className="absolute bottom-8 right-1 text-[14px] opacity-90" title="Transformation ausstehend (Sartre)">
                                                     ⏳
                                                 </div>
                                             )}
                                             {minion.untargetableUntilTurn && minion.untargetableUntilTurn > currentTurn && (
-                                                <div className="absolute bottom-0 left-0 bg-blue-900/90 text-white text-[10px] px-1 rounded-tr border border-blue-500" title={`Geschützt für ${minion.untargetableUntilTurn - currentTurn} Runde(n) (Diogenes)`}>
-                                                    🛡️{minion.untargetableUntilTurn - currentTurn}
+                                                <div className="absolute bottom-8 right-1 text-[14px] opacity-90" title={`Geschützt für ${minion.untargetableUntilTurn - currentTurn} Runde(n) (Diogenes)`}>
+                                                    🛡️<span className="text-[10px]">{minion.untargetableUntilTurn - currentTurn}</span>
                                                 </div>
                                             )}
 
