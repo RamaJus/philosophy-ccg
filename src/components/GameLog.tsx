@@ -37,7 +37,7 @@ export const GameLog: React.FC<GameLogProps> = ({ messages }) => {
     return (
         <>
             {/* Mini-Feed Section - Fixed bottom left */}
-            <div className="fixed bottom-2 left-2 z-30 w-64 bg-slate-900/50 border border-slate-700/30 rounded-lg p-2 space-y-1.5 backdrop-blur-sm">
+            <div className="fixed bottom-2 left-2 z-30 w-52 bg-slate-900/50 border border-slate-700/30 rounded-lg p-2 space-y-1.5 backdrop-blur-sm">
                 {/* Header with expand button */}
                 <button
                     onClick={() => setIsModalOpen(true)}
