@@ -508,7 +508,6 @@ export const GameArea: React.FC<GameAreaProps> = ({ mode, isDebugMode, customDec
                         <PlayerStats player={viewOpponent} isOpponent={true} />
                         <WorkSlot card={viewOpponent.activeWork} />
                         <Graveyard cards={viewOpponent.graveyard} title="Gegner" />
-                        <GameLog messages={log} />
                     </div>
 
                     {/* Center: Board (8 cols) */}
@@ -705,6 +704,9 @@ export const GameArea: React.FC<GameAreaProps> = ({ mode, isDebugMode, customDec
                     />
                 </div>
             </div>
+
+            {/* Game Log - Fixed Bottom Left */}
+            <GameLog messages={log} />
 
             {/* Disconnect Modal */}
             {isDisconnected && (

@@ -47,6 +47,19 @@ export const PlayerStats: React.FC<PlayerStatsProps> = ({ player, isOpponent = f
                 {/* Subtle decorative border accent */}
                 <div className={`absolute inset-x-0 top-0 h-0.5 ${isOpponent ? 'bg-gradient-to-r from-transparent via-red-500/50 to-transparent' : 'bg-gradient-to-r from-transparent via-blue-500/50 to-transparent'}`} />
 
+                {/* Opponent Deck Count - Top Right Corner */}
+                {isOpponent && (
+                    <div className="absolute top-1 right-2 flex items-center gap-1 opacity-80" title={`${player.deck.length} Karten im Deck`}>
+                        <svg className="w-3.5 h-3.5 text-purple-400" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M4 6H2v14c0 1.1.9 2 2 2h14v-2H4V6z" />
+                            <path d="M20 2H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H8V4h12v12z" />
+                        </svg>
+                        <span className="text-xs font-bold tabular-nums text-purple-300">
+                            {player.deck.length}
+                        </span>
+                    </div>
+                )}
+
                 <div className="p-3 flex gap-3">
                     {/* Avatar */}
                     <button
@@ -66,23 +79,10 @@ export const PlayerStats: React.FC<PlayerStatsProps> = ({ player, isOpponent = f
 
                     {/* Info Section */}
                     <div className="flex-1 min-w-0 flex flex-col justify-between">
-                        {/* Name Row with Deck Count for Opponent */}
-                        <div className="flex items-center gap-2">
-                            <h2 className="text-sm font-bold text-white/90 truncate tracking-wide">
-                                {player.name}
-                            </h2>
-                            {isOpponent && (
-                                <div className="flex items-center gap-1 opacity-70" title={`${player.deck.length} Karten im Deck`}>
-                                    <svg className="w-3.5 h-3.5 text-purple-400" viewBox="0 0 24 24" fill="currentColor">
-                                        <path d="M4 6H2v14c0 1.1.9 2 2 2h14v-2H4V6z" />
-                                        <path d="M20 2H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H8V4h12v12z" />
-                                    </svg>
-                                    <span className="text-xs font-bold tabular-nums text-purple-300">
-                                        {player.deck.length}
-                                    </span>
-                                </div>
-                            )}
-                        </div>
+                        {/* Name */}
+                        <h2 className="text-sm font-bold text-white/90 truncate tracking-wide">
+                            {player.name}
+                        </h2>
 
                         {/* Stats Row */}
                         <div className="flex items-center gap-4 mt-1">

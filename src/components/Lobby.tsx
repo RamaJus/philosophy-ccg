@@ -1,9 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { multiplayer } from '../network/MultiplayerManager';
 import { Copy, Globe, Cpu, QrCode, Share2, BookOpen, User } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
 import { DeckEditor } from './DeckEditor';
 import { useDeck } from '../hooks/useDeck';
+import { cardDatabase } from '../data/cards';
 
 interface LobbyProps {
     onStartGame: (mode: 'single' | 'multiplayer_host' | 'multiplayer_client') => void;
@@ -24,6 +25,13 @@ export const Lobby: React.FC<LobbyProps> = ({ onStartGame, isDebugMode, setIsDeb
     });
 
     const { cardCount, isValid, isCustom, DECK_SIZE } = useDeck();
+
+    // Get two random philosophers for the portrait display
+    const [leftPhilosopher, rightPhilosopher] = useMemo(() => {
+        const philosophers = cardDatabase.filter(c => c.type === 'Philosoph' && c.image);
+        const shuffled = [...philosophers].sort(() => Math.random() - 0.5);
+        return [shuffled[0], shuffled[1]];
+    }, []);
 
     useEffect(() => {
         const params = new URLSearchParams(window.location.search);
@@ -132,10 +140,44 @@ export const Lobby: React.FC<LobbyProps> = ({ onStartGame, isDebugMode, setIsDeb
                 />
                 <div className="absolute inset-0 bg-gradient-to-br from-slate-900/95 via-slate-800/90 to-amber-900/85" />
 
-                {/* Content Container - more compact */}
+                {/* Left Philosopher Portrait */}
+                {leftPhilosopher && (
+                    <div className="absolute left-0 top-0 bottom-0 w-64 pointer-events-none hidden lg:block">
+                        <div
+                            className="absolute inset-0 bg-cover bg-center opacity-30"
+                            style={{
+                                backgroundImage: `url(${leftPhilosopher.image})`,
+                                maskImage: 'linear-gradient(to right, black 50%, transparent 100%)',
+                                WebkitMaskImage: 'linear-gradient(to right, black 50%, transparent 100%)'
+                            }}
+                        />
+                        <div className="absolute bottom-8 left-4 text-white/50 text-sm font-serif italic">
+                            {leftPhilosopher.name}
+                        </div>
+                    </div>
+                )}
+
+                {/* Right Philosopher Portrait */}
+                {rightPhilosopher && (
+                    <div className="absolute right-0 top-0 bottom-0 w-64 pointer-events-none hidden lg:block">
+                        <div
+                            className="absolute inset-0 bg-cover bg-center opacity-30"
+                            style={{
+                                backgroundImage: `url(${rightPhilosopher.image})`,
+                                maskImage: 'linear-gradient(to left, black 50%, transparent 100%)',
+                                WebkitMaskImage: 'linear-gradient(to left, black 50%, transparent 100%)'
+                            }}
+                        />
+                        <div className="absolute bottom-8 right-4 text-white/50 text-sm font-serif italic text-right">
+                            {rightPhilosopher.name}
+                        </div>
+                    </div>
+                )}
+
+                {/* Content Container */}
                 <div className="relative z-10 w-full max-w-3xl">
                     <div className="glass-panel p-6 max-w-3xl w-full space-y-4 border-2 border-amber-700/30 shadow-2xl backdrop-blur-xl bg-gradient-to-br from-slate-900/80 to-slate-800/70">
-                        {/* Title - smaller */}
+                        {/* Title */}
                         <div className="text-center relative pb-2">
                             <h1 className="text-4xl font-bold" style={{
                                 background: 'linear-gradient(135deg, #fbbf24 0%, #f59e0b 25%, #d97706 50%, #b45309 75%, #92400e 100%)',
@@ -159,7 +201,7 @@ export const Lobby: React.FC<LobbyProps> = ({ onStartGame, isDebugMode, setIsDeb
                             </div>
                         </div>
 
-                        {/* Deck Editor Button - compact */}
+                        {/* Deck Editor Button */}
                         <button
                             onClick={() => setShowDeckEditor(true)}
                             className={`w-full p-3 rounded-lg border-2 transition-all duration-300 flex items-center justify-between gap-3 ${isCustom && isValid
@@ -197,7 +239,7 @@ export const Lobby: React.FC<LobbyProps> = ({ onStartGame, isDebugMode, setIsDeb
                             </div>
                         </button>
 
-                        {/* Profile & Game Mode Row - compact */}
+                        {/* Profile & Game Mode Row */}
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                             {/* Player Profile Section */}
                             <div className="p-3 rounded-lg border border-slate-600/40 bg-gradient-to-br from-slate-800/60 to-slate-900/60 space-y-2">
@@ -240,7 +282,7 @@ export const Lobby: React.FC<LobbyProps> = ({ onStartGame, isDebugMode, setIsDeb
                             </button>
                         </div>
 
-                        {/* Multiplayer - compact */}
+                        {/* Multiplayer */}
                         <div className="p-4 rounded-lg border-2 border-amber-700/40 bg-gradient-to-br from-slate-800/60 to-slate-900/60 space-y-3">
                             <div className="flex items-center gap-3">
                                 <div className="bg-gradient-to-br from-emerald-600/30 to-emerald-700/30 w-10 h-10 rounded-full flex items-center justify-center border border-emerald-600/40">
