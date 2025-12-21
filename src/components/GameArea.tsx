@@ -190,6 +190,12 @@ export const GameArea: React.FC<GameAreaProps> = ({ mode, isDebugMode, customDec
             return;
         }
 
+        if (targetMode === 'arete_target') {
+            const action: import('../types').GameAction = { type: 'ARETE_TARGET', minionId };
+            if (isClient) multiplayer.sendAction(action); else dispatch(action);
+            return;
+        }
+
         if (targetMode === 'eros_target') {
             const action: import('../types').GameAction = { type: 'EROS_TARGET', minionId };
             if (isClient) multiplayer.sendAction(action); else dispatch(action);

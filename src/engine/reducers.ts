@@ -382,7 +382,7 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
                 const target = enemyPlayer.board[targetIndex];
 
                 // Kant Check
-                if ((enemyPlayer.minionAttackBlockTurns || 0) > 0) {
+                if ((activePlayer.minionAttackBlockTurns || 0) > 0) {
                     currentLog = appendLog(currentLog, `Angriff blockiert durch Kants Kategorischen Imperativ.`);
                     return { ...state, log: currentLog };
                 }
