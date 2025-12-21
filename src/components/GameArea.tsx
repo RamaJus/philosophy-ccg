@@ -528,7 +528,7 @@ export const GameArea: React.FC<GameAreaProps> = ({ mode, isDebugMode, customDec
                         <div className="flex-1">
                             <Board
                                 minions={viewOpponent.board}
-                                onMinionClick={viewIsPlayerTurn && (selectedMinions?.length || targetMode === 'gottesbeweis_target' || targetMode === 'nietzsche_target') ? handleOpponentMinionClick : undefined}
+                                onMinionClick={viewIsPlayerTurn && (selectedMinions?.length || targetMode === 'gottesbeweis_target' || targetMode === 'nietzsche_target' || targetMode === 'eros_target' || targetMode === 'arete_target') ? handleOpponentMinionClick : undefined}
                                 selectedMinionIds={selectedMinions || []}
                                 canTarget={viewIsPlayerTurn && (
                                     (!!selectedMinions?.length && (() => {
@@ -541,7 +541,9 @@ export const GameArea: React.FC<GameAreaProps> = ({ mode, isDebugMode, customDec
                                         return true;
                                     })()) ||
                                     targetMode === 'gottesbeweis_target' ||
-                                    targetMode === 'nietzsche_target'
+                                    targetMode === 'nietzsche_target' ||
+                                    targetMode === 'eros_target' ||
+                                    targetMode === 'arete_target'
                                 )}
                                 activeWork={viewOpponent.activeWork}
                                 isSpecialTargeting={(() => {
@@ -550,6 +552,8 @@ export const GameArea: React.FC<GameAreaProps> = ({ mode, isDebugMode, customDec
                                     if (targetMode === 'trolley_sacrifice') return !!isMyTargetMode;
                                     if (targetMode === 'nietzsche_target') return !!isMyTargetMode;
                                     if (targetMode === 'van_inwagen_target') return !!isMyTargetMode;
+                                    if (targetMode === 'eros_target') return !!isMyTargetMode;
+                                    if (targetMode === 'arete_target') return !!isMyTargetMode;
                                     return false;
                                 })()}
                                 synergiesBlocked={(viewOpponent.synergyBlockTurns || 0) > 0}
@@ -584,6 +588,48 @@ export const GameArea: React.FC<GameAreaProps> = ({ mode, isDebugMode, customDec
                                     <>
                                         <div className="px-4 py-2 bg-amber-500/20 text-amber-400 rounded-lg border border-amber-500/50 animate-pulse">
                                             <p className="text-sm font-bold">Wähle einen Philosophen für den Gottesbeweis</p>
+                                        </div>
+                                        <button
+                                            onClick={handleCancelCast}
+                                            className="px-3 py-1 bg-red-800 hover:bg-red-700 text-white rounded border border-red-500 text-sm"
+                                        >
+                                            Zauber abbrechen
+                                        </button>
+                                    </>
+                                )}
+
+                                {targetMode === 'eros_target' && isMyTargetMode && (
+                                    <>
+                                        <div className="px-4 py-2 bg-pink-500/20 text-pink-400 rounded-lg border border-pink-500/50 animate-pulse">
+                                            <p className="text-sm font-bold">Wähle einen gegnerischen Philosophen für Eros</p>
+                                        </div>
+                                        <button
+                                            onClick={handleCancelCast}
+                                            className="px-3 py-1 bg-red-800 hover:bg-red-700 text-white rounded border border-red-500 text-sm"
+                                        >
+                                            Zauber abbrechen
+                                        </button>
+                                    </>
+                                )}
+
+                                {targetMode === 'arete_target' && isMyTargetMode && (
+                                    <>
+                                        <div className="px-4 py-2 bg-green-500/20 text-green-400 rounded-lg border border-green-500/50 animate-pulse">
+                                            <p className="text-sm font-bold">Wähle einen Philosophen zum Heilen (Arete)</p>
+                                        </div>
+                                        <button
+                                            onClick={handleCancelCast}
+                                            className="px-3 py-1 bg-red-800 hover:bg-red-700 text-white rounded border border-red-500 text-sm"
+                                        >
+                                            Zauber abbrechen
+                                        </button>
+                                    </>
+                                )}
+
+                                {targetMode === 'cave_ascent_target' && isMyTargetMode && (
+                                    <>
+                                        <div className="px-4 py-2 bg-yellow-500/20 text-yellow-400 rounded-lg border border-yellow-500/50 animate-pulse">
+                                            <p className="text-sm font-bold">Wähle einen eigenen Philosophen (Aufstieg aus der Höhle)</p>
                                         </div>
                                         <button
                                             onClick={handleCancelCast}
@@ -651,8 +697,8 @@ export const GameArea: React.FC<GameAreaProps> = ({ mode, isDebugMode, customDec
                                 selectedMinionIds={selectedMinions || []}
                                 isPlayerBoard={true}
                                 activeWork={viewPlayer.activeWork}
-                                canTarget={(targetMode === 'gottesbeweis_target' || targetMode === 'trolley_sacrifice') && !!isMyTargetMode}
-                                isSpecialTargeting={(targetMode === 'gottesbeweis_target' || targetMode === 'trolley_sacrifice') && !!isMyTargetMode}
+                                canTarget={(targetMode === 'gottesbeweis_target' || targetMode === 'trolley_sacrifice' || targetMode === 'arete_target' || targetMode === 'cave_ascent_target') && !!isMyTargetMode}
+                                isSpecialTargeting={(targetMode === 'gottesbeweis_target' || targetMode === 'trolley_sacrifice' || targetMode === 'arete_target' || targetMode === 'cave_ascent_target') && !!isMyTargetMode}
                                 synergiesBlocked={(viewPlayer.synergyBlockTurns || 0) > 0}
                                 attacksBlocked={isClient ? (gameState.opponent.minionAttackBlockTurns || 0) > 0 : (gameState.player.minionAttackBlockTurns || 0) > 0}
                                 currentTurn={gameState.turn}

@@ -669,7 +669,7 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
                 [state.activePlayer]: updatedPlayer,
                 discoveryCards: undefined,
                 targetMode: undefined,
-                log: appendLog(state.log, `${activePlayer.name} wählte ${selectedCard.name}.`)
+                log: appendLog(state.log, `${activePlayer.name} wählte eine Karte.`)
             };
             break;
         }
