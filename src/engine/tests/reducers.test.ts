@@ -204,8 +204,8 @@ describe('gameReducer', () => {
             it('should block attacks when Kant protection is active', () => {
                 let state = createInitialState(false);
 
-                // Setup: Give opponent minion attack block (Kant effect)
-                state.opponent.minionAttackBlockTurns = 1;
+                // Setup: Give player minion attack block (Kant effect)
+                state.player.minionAttackBlockTurns = 1;
 
                 const playerMinion = {
                     id: 'attacker',
