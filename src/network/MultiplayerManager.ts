@@ -20,6 +20,7 @@ export class MultiplayerManager {
 
     public isHost: boolean = false;
     public myId: string = '';
+    public receivedOpponentDeckIds: string[] | null = null; // Store handshake data for late pickup
 
     constructor() {
         // Initialize PeerJS
@@ -98,6 +99,9 @@ export class MultiplayerManager {
                 if (this.onActionReceived) this.onActionReceived(msg.payload);
                 break;
             case 'HANDSHAKE':
+                // Always store the deck IDs so they can be picked up later if callback isn't set yet
+                this.receivedOpponentDeckIds = msg.payload;
+                console.log('[MultiplayerManager] Received handshake with deck IDs:', msg.payload?.length);
                 if (this.onHandshakeReceived) this.onHandshakeReceived(msg.payload);
                 break;
         }

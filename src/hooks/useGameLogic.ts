@@ -35,6 +35,15 @@ export const useGameLogic = (gameMode: 'single' | 'host' | 'client', isDebugMode
         }
     }, [gameState, isHost]);
 
+    // 3.5 Check for pending opponent deck IDs (race condition fix)
+    useEffect(() => {
+        if (isHost && multiplayer.receivedOpponentDeckIds && multiplayer.receivedOpponentDeckIds.length > 0) {
+            console.log('[useGameLogic] Found pending opponent deck IDs:', multiplayer.receivedOpponentDeckIds.length);
+            dispatch({ type: 'SET_OPPONENT_DECK', deckIds: multiplayer.receivedOpponentDeckIds });
+            multiplayer.receivedOpponentDeckIds = null; // Clear after processing
+        }
+    }, [isHost]); // Run once on mount when host
+
     // 4. Handle Incoming Data
     useEffect(() => {
         // Handle Actions from Peer (Host receives actions from Client)
