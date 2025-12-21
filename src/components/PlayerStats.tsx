@@ -149,6 +149,18 @@ export const PlayerStats: React.FC<PlayerStatsProps> = ({ player, isOpponent = f
                                     </motion.div>
                                 )}
                             </div>
+
+                            {/* Deck Count */}
+                            <div className="flex items-center gap-1" title={`${player.deck.length} Karten im Deck`}>
+                                {/* Card stack icon */}
+                                <svg className="w-4 h-4 text-purple-400/70" viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M4 6H2v14c0 1.1.9 2 2 2h14v-2H4V6z" />
+                                    <path d="M20 2H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H8V4h12v12z" />
+                                </svg>
+                                <span className="text-xs font-bold tabular-nums text-purple-300/70">
+                                    {player.deck.length}
+                                </span>
+                            </div>
                         </div>
                     </div>
                 </div>
