@@ -1000,6 +1000,34 @@ export const cardDatabase: Card[] = [
         rarity: 'Legendär',
         image: '/images/cards/hermeneutics.png',
     },
+
+    // New Philosophers (December 2025)
+    {
+        id: 'hobbes',
+        name: 'Thomas Hobbes',
+        type: 'Philosoph',
+        cost: 5,
+        attack: 6,
+        health: 3,
+        description: 'Der Mensch ist dem Menschen ein Wolf.',
+        rarity: 'Gewöhnlich',
+        school: ['Politik', 'Moralphilosophie'],
+        gender: 'male',
+        image: '/images/cards/hobbes.png',
+    },
+    {
+        id: 'adorno',
+        name: 'Theodor W. Adorno',
+        type: 'Philosoph',
+        cost: 7,
+        attack: 5,
+        health: 8,
+        description: 'Wahr sind nur die Gedanken, die sich selber nicht verstehen.',
+        rarity: 'Gewöhnlich',
+        school: ['Skeptizismus', 'Rationalismus'],
+        gender: 'male',
+        image: '/images/cards/adorno.png',
+    },
 ];
 
 
