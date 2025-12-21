@@ -154,6 +154,13 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
                 };
             }
 
+            // 2. Decrement synergy block for the player whose turn just ended
+            // This ensures effects like 'Methodischer Zweifel' last through the attack phase
+            currentActivePlayer = {
+                ...currentActivePlayer,
+                synergyBlockTurns: Math.max(0, (currentActivePlayer.synergyBlockTurns || 0) - 1)
+            };
+
             // State update for players before switching context
             state = {
                 ...state,
@@ -210,7 +217,7 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
                     silencedUntilTurn: m.silencedUntilTurn && m.silencedUntilTurn <= nextTurn ? undefined : m.silencedUntilTurn // Clear silence if expired
                 })),
                 minionAttackBlockTurns: Math.max(0, (nextActivePlayer.minionAttackBlockTurns || 0) - 1),
-                synergyBlockTurns: Math.max(0, (nextActivePlayer.synergyBlockTurns || 0) - 1),
+                // Note: synergyBlockTurns is now decremented at turn END, not turn START
             };
 
             // Draw Card
@@ -1154,8 +1161,22 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
             break;
         }
 
-        case 'SYNC_STATE':
-            return action.newState;
+        case 'SYNC_STATE': {
+            const incomingState = action.newState;
+            // Prevent double-flash: if client already displayed this spell, clear it
+            const currentFlashId = state.lastPlayedCard?.instanceId;
+            const incomingFlashId = incomingState.lastPlayedCard?.instanceId;
+
+            if (currentFlashId && currentFlashId === incomingFlashId) {
+                // Same card already flashed locally, clear to prevent re-flash
+                return {
+                    ...incomingState,
+                    lastPlayedCard: undefined,
+                    lastPlayedCardPlayerId: undefined
+                };
+            }
+            return incomingState;
+        }
 
         default:
             // Do not return state here, break to allow synergy calc
