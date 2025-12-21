@@ -19,12 +19,14 @@ const MAX_BOARD_SIZE = 7;
 interface GameAreaProps {
     mode: 'single' | 'multiplayer_host' | 'multiplayer_client';
     isDebugMode: boolean;
+    customDeckIds?: string[];
 }
 
-export const GameArea: React.FC<GameAreaProps> = ({ mode, isDebugMode }) => {
+export const GameArea: React.FC<GameAreaProps> = ({ mode, isDebugMode, customDeckIds }) => {
     const { gameState, dispatch, endTurn: endTurnMultiplayer, attack: attackMultiplayer, playCard: playCardMultiplayer } = useGameLogic(
         mode === 'multiplayer_host' ? 'host' : mode === 'multiplayer_client' ? 'client' : 'single',
-        isDebugMode
+        isDebugMode,
+        customDeckIds
     );
     const { player, opponent, activePlayer, selectedCard, selectedMinions, gameOver, winner, log, targetMode, targetModeOwner, foucaultRevealCards, recurrenceCards, discoveryCards } = gameState;
 

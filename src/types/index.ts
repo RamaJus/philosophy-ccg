@@ -88,7 +88,7 @@ export interface GameState {
 }
 
 export type GameAction =
-    | { type: 'START_GAME'; isDebugMode?: boolean }
+    | { type: 'START_GAME'; isDebugMode?: boolean; customDeckIds?: string[] }
     | { type: 'END_TURN' }
     | { type: 'PLAY_CARD'; cardId: string } // Uses instanceId
     | { type: 'ATTACK'; attackerIds: string[]; targetId?: string } // Uses instanceIds

@@ -8,8 +8,24 @@ const STARTING_HAND_SIZE = 4;
 const MAX_HAND_SIZE = 10;
 
 // Helper: Create Player
-export function createPlayer(name: string, isPlayer: boolean, startingHandSize: number = STARTING_HAND_SIZE, isDebugMode: boolean = false): Player {
-    const deck = generateDeck();
+export function createPlayer(name: string, isPlayer: boolean, startingHandSize: number = STARTING_HAND_SIZE, isDebugMode: boolean = false, customDeckIds?: string[]): Player {
+    // Generate deck from custom IDs if provided, otherwise use all cards
+    let deck;
+    if (customDeckIds && customDeckIds.length > 0) {
+        // Create deck from custom card IDs
+        const customCards = customDeckIds
+            .map(id => cardDatabase.find(c => c.id === id))
+            .filter((c): c is typeof cardDatabase[0] => c !== undefined)
+            .map(card => ({
+                ...card,
+                instanceId: `${card.id}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
+            }));
+        // Shuffle custom deck
+        deck = customCards.sort(() => Math.random() - 0.5);
+    } else {
+        deck = generateDeck();
+    }
+
     let hand = deck.slice(0, startingHandSize);
     let remainingDeck = deck.slice(startingHandSize);
 
@@ -50,18 +66,19 @@ export function createPlayer(name: string, isPlayer: boolean, startingHandSize: 
 }
 
 // Helper: Initial State
-export function createInitialState(isDebugMode: boolean): GameState {
-    const player = createPlayer('Player', true, STARTING_HAND_SIZE, isDebugMode);
+export function createInitialState(isDebugMode: boolean, customDeckIds?: string[]): GameState {
+    const player = createPlayer('Player', true, STARTING_HAND_SIZE, isDebugMode, customDeckIds);
     player.mana = 1;
     player.maxMana = 1;
 
+    // Opponent always uses all cards (no custom deck)
     return {
         turn: 1,
         activePlayer: 'player',
         player,
         opponent: createPlayer('Gegner', false, STARTING_HAND_SIZE + 1, isDebugMode),
         gameOver: false,
-        log: ['Spiel gestartet! Möge der beste Philosoph gewinnen.'],
+        log: [customDeckIds ? 'Spiel mit Custom-Deck gestartet!' : 'Spiel gestartet! Möge der beste Philosoph gewinnen.'],
     };
 }
 
@@ -91,7 +108,7 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
 
     switch (action.type) {
         case 'START_GAME':
-            return createInitialState(action.isDebugMode || false);
+            return createInitialState(action.isDebugMode || false, action.customDeckIds);
 
         case 'END_TURN': {
             // Logic for ending turn (Switch active player, Draw card, Reset Mana)

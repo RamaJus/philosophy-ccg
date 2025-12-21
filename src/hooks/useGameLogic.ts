@@ -3,9 +3,9 @@ import { GameState, GameAction } from '../types';
 import { gameReducer, createInitialState } from '../engine/reducers';
 import { multiplayer } from '../network/MultiplayerManager';
 
-export const useGameLogic = (gameMode: 'single' | 'host' | 'client', isDebugMode: boolean = false) => {
-    // 1. Initialize Reducer with lazy initialization to capture isDebugMode correctly
-    const [gameState, dispatch] = useReducer(gameReducer, isDebugMode, (debugMode) => createInitialState(debugMode));
+export const useGameLogic = (gameMode: 'single' | 'host' | 'client', isDebugMode: boolean = false, customDeckIds?: string[]) => {
+    // 1. Initialize Reducer with lazy initialization to capture isDebugMode and customDeckIds correctly
+    const [gameState, dispatch] = useReducer(gameReducer, { isDebugMode, customDeckIds }, (args) => createInitialState(args.isDebugMode, args.customDeckIds));
 
     // 2. Multiplayer Helpers
     const isHost = gameMode === 'host';
