@@ -519,15 +519,17 @@ export const DeckEditor: React.FC<DeckEditorProps> = ({ isOpen, onClose }) => {
                                 // Average cost
                                 const avgCost = allDeckCards.reduce((sum, c) => sum + c.cost, 0) / allDeckCards.length;
 
-                                // Rarity distribution
+                                // Rarity distribution (only 2 categories now)
                                 const rarityCount = {
                                     'Gewöhnlich': allDeckCards.filter(c => c.rarity === 'Gewöhnlich').length,
-                                    'Selten': allDeckCards.filter(c => c.rarity === 'Selten').length,
                                     'Legendär': allDeckCards.filter(c => c.rarity === 'Legendär').length,
                                 };
 
+                                // Get max school count for bar chart scaling
+                                const maxSchoolCount = sortedSchools.length > 0 ? Math.max(...sortedSchools.map(([, count]) => count)) : 1;
+
                                 return (
-                                    <div className="mt-2 bg-slate-800/60 rounded-lg p-3 space-y-4 border border-slate-600/50">
+                                    <div className="mt-2 bg-slate-800/60 rounded-lg p-3 space-y-4 border border-slate-600/50 max-h-80 overflow-y-auto">
                                         {/* Card Type Distribution */}
                                         <div>
                                             <h4 className="text-xs text-gray-400 uppercase tracking-wider mb-2">Karten nach Typ</h4>
@@ -559,10 +561,6 @@ export const DeckEditor: React.FC<DeckEditorProps> = ({ isOpen, onClose }) => {
                                                     <span className="text-gray-400 text-xs">Gewöhnlich</span>
                                                 </div>
                                                 <div className="flex items-center gap-1">
-                                                    <span className="text-blue-300 font-bold">{rarityCount['Selten']}</span>
-                                                    <span className="text-gray-400 text-xs">Selten</span>
-                                                </div>
-                                                <div className="flex items-center gap-1">
                                                     <span className="text-yellow-400 font-bold">{rarityCount['Legendär']}</span>
                                                     <span className="text-gray-400 text-xs">Legendär</span>
                                                 </div>
@@ -578,18 +576,18 @@ export const DeckEditor: React.FC<DeckEditorProps> = ({ isOpen, onClose }) => {
                                             </div>
                                         </div>
 
-                                        {/* Mana Curve */}
+                                        {/* Mana Curve - Fixed with explicit pixel heights */}
                                         <div>
                                             <h4 className="text-xs text-gray-400 uppercase tracking-wider mb-2">Dialektik-Kurve</h4>
-                                            <div className="flex items-end gap-1 h-16">
+                                            <div className="flex items-end gap-1" style={{ height: '64px' }}>
                                                 {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(cost => {
                                                     const count = manaCurve[cost] || 0;
-                                                    const height = count > 0 ? Math.max((count / maxManaCount) * 100, 10) : 0;
+                                                    const heightPx = count > 0 ? Math.max((count / maxManaCount) * 48, 4) : 0;
                                                     return (
                                                         <div key={cost} className="flex flex-col items-center flex-1">
                                                             <div
-                                                                className="w-full bg-blue-500/80 rounded-t transition-all"
-                                                                style={{ height: `${height}%` }}
+                                                                className="w-full bg-blue-500 rounded-t"
+                                                                style={{ height: `${heightPx}px`, minWidth: '8px' }}
                                                                 title={`${count} Karte(n) mit Kosten ${cost}${cost === 10 ? '+' : ''}`}
                                                             />
                                                             <span className="text-[10px] text-gray-500 mt-1">{cost}{cost === 10 ? '+' : ''}</span>
@@ -599,20 +597,30 @@ export const DeckEditor: React.FC<DeckEditorProps> = ({ isOpen, onClose }) => {
                                             </div>
                                         </div>
 
-                                        {/* School Distribution */}
+                                        {/* School Distribution - Bar Chart */}
                                         <div>
                                             <h4 className="text-xs text-gray-400 uppercase tracking-wider mb-2">Schulen</h4>
-                                            <div className="flex flex-wrap gap-1.5">
-                                                {sortedSchools.map(([school, count]) => (
-                                                    <div key={school} className={`${getSchoolColor(school)} text-white text-xs px-2 py-1 rounded-full flex items-center gap-1`}>
-                                                        <span className="font-bold">{count}</span>
-                                                        <span>{school}</span>
-                                                    </div>
-                                                ))}
-                                                {sortedSchools.length === 0 && (
-                                                    <span className="text-gray-500 text-xs italic">Keine Schulen im Deck</span>
-                                                )}
-                                            </div>
+                                            {sortedSchools.length > 0 ? (
+                                                <div className="space-y-1">
+                                                    {sortedSchools.map(([school, count]) => {
+                                                        const widthPercent = (count / maxSchoolCount) * 100;
+                                                        return (
+                                                            <div key={school} className="flex items-center gap-2">
+                                                                <span className="text-xs text-gray-300 w-24 truncate">{school}</span>
+                                                                <div className="flex-1 bg-slate-700 rounded h-4 overflow-hidden">
+                                                                    <div
+                                                                        className={`h-full ${getSchoolColor(school)} transition-all`}
+                                                                        style={{ width: `${widthPercent}%` }}
+                                                                    />
+                                                                </div>
+                                                                <span className="text-xs text-white font-bold w-6 text-right">{count}</span>
+                                                            </div>
+                                                        );
+                                                    })}
+                                                </div>
+                                            ) : (
+                                                <span className="text-gray-500 text-xs italic">Keine Schulen im Deck</span>
+                                            )}
                                         </div>
                                     </div>
                                 );
