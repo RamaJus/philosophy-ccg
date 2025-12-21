@@ -173,7 +173,7 @@ export const Lobby: React.FC<LobbyProps> = ({ onStartGame, isDebugMode, setIsDeb
                                         : 'bg-slate-800/50 border-slate-700 text-slate-500'
                                         }`}
                                 >
-                                    {isDebugMode ? 'ðŸ› ï¸ DEBUG AKTIV' : 'Debug Modus'}
+                                    {isDebugMode ? '🛠️ DEBUG AKTIV' : 'Debug Modus'}
                                 </button>
                             </div>
                         </div>
@@ -215,7 +215,7 @@ export const Lobby: React.FC<LobbyProps> = ({ onStartGame, isDebugMode, setIsDeb
                                     ? 'bg-red-900/50 text-red-300 border border-red-600'
                                     : 'bg-slate-700/50 text-slate-300 border border-slate-600'
                                 }`}>
-                                {isCustom && isValid ? 'âœ“ Bereit' : isCustom && !isValid ? 'âš  UnvollstÃ¤ndig' : 'Standard'}
+                                {isCustom && isValid ? '✓ Bereit' : isCustom && !isValid ? '⚠ Unvollständig' : 'Standard'}
                             </div>
                         </button>
 
@@ -232,9 +232,9 @@ export const Lobby: React.FC<LobbyProps> = ({ onStartGame, isDebugMode, setIsDeb
                                 <div className="flex items-center gap-4">
                                     <button
                                         className="w-16 h-16 rounded-xl bg-gradient-to-br from-slate-700 to-slate-800 border-2 border-slate-500/50 hover:border-blue-500/60 transition-all flex items-center justify-center group"
-                                        title="Avatar auswÃ¤hlen (bald verfÃ¼gbar)"
+                                        title="Avatar auswählen (bald verfügbar)"
                                     >
-                                        <span className="text-3xl opacity-60 group-hover:opacity-80 transition-opacity">ðŸ‘¤</span>
+                                        <span className="text-3xl opacity-60 group-hover:opacity-80 transition-opacity">👤</span>
                                     </button>
                                     <div className="flex-1 space-y-1">
                                         <label className="text-xs text-gray-400 uppercase tracking-wider">Spielername</label>
@@ -249,7 +249,7 @@ export const Lobby: React.FC<LobbyProps> = ({ onStartGame, isDebugMode, setIsDeb
                                     </div>
                                 </div>
 
-                                <p className="text-xs text-gray-500 italic">Klicke auf den Avatar um ein Bild auszuwÃ¤hlen (bald)</p>
+                                <p className="text-xs text-gray-500 italic">Klicke auf den Avatar um ein Bild auszuwählen (bald)</p>
                             </div>
 
                             {/* Single Player Button - Compact */}
@@ -264,7 +264,7 @@ export const Lobby: React.FC<LobbyProps> = ({ onStartGame, isDebugMode, setIsDeb
                                     </div>
                                     <div>
                                         <h3 className="text-xl font-bold text-amber-100">Gegen KI spielen</h3>
-                                        <p className="text-sm text-amber-200/60">Ãœbe gegen den Computer</p>
+                                        <p className="text-sm text-amber-200/60">Übe gegen den Computer</p>
                                     </div>
                                 </div>
                             </button>
@@ -385,7 +385,6 @@ export const Lobby: React.FC<LobbyProps> = ({ onStartGame, isDebugMode, setIsDeb
                     </div>
                 </div>
             </div>
-        </div>
 
             {/* Deck Editor Modal */}
             <DeckEditor isOpen={showDeckEditor} onClose={() => setShowDeckEditor(false)} />
