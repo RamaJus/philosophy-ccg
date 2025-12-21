@@ -11,6 +11,7 @@ const MAX_HAND_SIZE = 10;
 export function createPlayer(name: string, isPlayer: boolean, startingHandSize: number = STARTING_HAND_SIZE, isDebugMode: boolean = false, customDeckIds?: string[]): Player {
     // Generate deck from custom IDs if provided, otherwise use all cards
     let deck;
+    console.log('[createPlayer]', name, 'customDeckIds:', customDeckIds?.length || 0);
     if (customDeckIds && customDeckIds.length > 0) {
         // Create deck from custom card IDs
         const customCards = customDeckIds
@@ -20,9 +21,11 @@ export function createPlayer(name: string, isPlayer: boolean, startingHandSize: 
                 ...card,
                 instanceId: `${card.id}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
             }));
+        console.log('[createPlayer] Created custom deck with', customCards.length, 'cards');
         // Shuffle custom deck
         deck = customCards.sort(() => Math.random() - 0.5);
     } else {
+        console.log('[createPlayer] Using default deck (all cards)');
         deck = generateDeck();
     }
 

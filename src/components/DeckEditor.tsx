@@ -498,15 +498,86 @@ export const DeckEditor: React.FC<DeckEditorProps> = ({ isOpen, onClose }) => {
                 </div>
             </div>
 
-            {/* Card Preview Modal */}
+            {/* Card Preview Modal - Same as game right-click */}
             {previewCard && (
                 <div
-                    className="fixed inset-0 bg-black/70 flex items-center justify-center z-[60]"
+                    className="fixed inset-0 z-[60] flex items-center justify-center bg-black/80 backdrop-blur-sm"
                     onClick={() => setPreviewCard(null)}
                 >
-                    <div className="transform scale-150" onClick={e => e.stopPropagation()}>
-                        <CardComponent card={previewCard} />
+                    <div className="flex gap-8 items-center" onClick={e => e.stopPropagation()}>
+                        {/* Card */}
+                        <div className="transform scale-150 shadow-2xl">
+                            <CardComponent card={previewCard} />
+                        </div>
+
+                        {/* Tooltip Panel */}
+                        <div className="w-[400px] bg-slate-900/95 border border-slate-600 rounded-xl p-4 text-white shadow-2xl flex flex-col gap-3">
+                            <h3 className="text-xl font-bold text-amber-400 border-b border-slate-700 pb-2">{previewCard.name}</h3>
+
+                            {/* Schools */}
+                            {previewCard.school && previewCard.school.length > 0 && previewCard.type === 'Philosoph' && (
+                                <div className="space-y-1">
+                                    <span className="text-xs text-gray-400 uppercase tracking-wider">Schulen</span>
+                                    <div className="flex flex-wrap gap-1">
+                                        {previewCard.school.map(s => (
+                                            <span key={s} className={`text-xs px-2 py-1 ${getSchoolColor(s)} rounded-full text-white font-medium`}>
+                                                {s}
+                                            </span>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Description */}
+                            {previewCard.description && (
+                                <div className="space-y-1">
+                                    <span className="text-xs text-gray-400 uppercase tracking-wider">Beschreibung</span>
+                                    <p className="text-sm text-gray-200 italic">"{previewCard.description}"</p>
+                                </div>
+                            )}
+
+                            {/* Effect / Special Ability */}
+                            {(previewCard.effect || previewCard.special || previewCard.workBonus) && (
+                                <div className="space-y-1 bg-purple-900/30 border border-purple-700/50 rounded-lg p-2">
+                                    <span className="text-xs text-purple-400 uppercase tracking-wider">⚡ Effekt</span>
+                                    {previewCard.effect && (
+                                        <p className="text-sm font-medium text-purple-200">{previewCard.effect}</p>
+                                    )}
+                                    {previewCard.special && (
+                                        <p className="text-sm font-medium text-purple-200">{previewCard.special.name}: {previewCard.special.description}</p>
+                                    )}
+                                    {previewCard.workBonus && (
+                                        <p className="text-sm font-medium text-amber-200">Bonus: +{previewCard.workBonus.damage} Angriff für {previewCard.workBonus.school}</p>
+                                    )}
+                                </div>
+                            )}
+
+                            {/* Stats for Philosophers */}
+                            {previewCard.type === 'Philosoph' && previewCard.attack !== undefined && previewCard.health !== undefined && (
+                                <div className="flex gap-4 mt-2">
+                                    <div className="flex items-center gap-2">
+                                        <span className="text-lg">⚔️</span>
+                                        <span className="text-xl font-bold text-red-400">{previewCard.attack}</span>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                        <span className="text-lg">❤️</span>
+                                        <span className="text-xl font-bold text-green-400">{previewCard.health}</span>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                        <span className="text-lg">💧</span>
+                                        <span className="text-xl font-bold text-blue-400">{previewCard.cost}</span>
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Type */}
+                            <div className="space-y-1 mt-auto pt-2 border-t border-slate-700">
+                                <span className="text-xs text-gray-400 uppercase tracking-wider">Typ</span>
+                                <p className="text-sm font-medium">{previewCard.type} • {previewCard.rarity}</p>
+                            </div>
+                        </div>
                     </div>
+
                     <button
                         onClick={() => setPreviewCard(null)}
                         className="absolute top-4 right-4 p-3 bg-slate-800 hover:bg-slate-700 rounded-full"
