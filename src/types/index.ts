@@ -44,6 +44,8 @@ export interface BoardMinion extends Card {
     silencedUntilTurn?: number; // Turn until the minion is silenced (cannot attack)
     pendingTransformation?: { turnTrigger: number; newStats: { attack: number; health: number; } }; // For Sartre
     untargetableUntilTurn?: number; // Diogenes: Cannot be targeted until this turn
+    caveAscentRevertTurn?: number; // Turn when cave ascent effect reverts
+    caveAscentOriginalStats?: { attack: number; health: number }; // Original stats before cave ascent
 }
 
 export interface Player {
@@ -75,7 +77,7 @@ export interface GameState {
     selectedCard?: string; // Card instanceId in hand
     pendingPlayedCard?: Card; // Card currently being cast (for cancellation refund checks)
     selectedMinions?: string[]; // Minion instanceIds on board for attacking (multi-select)
-    targetMode?: 'attack' | 'spell' | 'search' | 'transform' | 'friendly_minion_transform' | 'trolley_sacrifice' | 'special' | 'foucault_reveal' | 'gottesbeweis_target' | 'nietzsche_target' | 'van_inwagen_target' | 'recurrence_select' | 'discover'; // What we're targeting for
+    targetMode?: 'attack' | 'spell' | 'search' | 'transform' | 'friendly_minion_transform' | 'trolley_sacrifice' | 'special' | 'foucault_reveal' | 'gottesbeweis_target' | 'nietzsche_target' | 'van_inwagen_target' | 'arete_target' | 'cave_ascent_target' | 'recurrence_select' | 'discover'; // What we're targeting for
     targetModeOwner?: 'player' | 'opponent'; // Who initiated the targetMode (for multiplayer modal visibility)
     discoveryCards?: Card[]; // Generic storage for DISCOVER/Search effects
     recurrenceCards?: Card[]; // Cards in graveyard available for 'Ewige Wiederkunft'
@@ -103,6 +105,8 @@ export type GameAction =
     | { type: 'GOTTESBEWEIS_TARGET'; minionId: string } // Uses instanceId
     | { type: 'NIETZSCHE_TARGET'; minionId: string } // Uses instanceId
     | { type: 'VAN_INWAGEN_TARGET'; minionId: string } // Uses instanceId
+    | { type: 'ARETE_TARGET'; minionId: string } // Full heal target
+    | { type: 'CAVE_ASCENT_TARGET'; minionId: string } // +2 atk/-2 hp for 1 round
     | { type: 'RECURRENCE_SELECT'; cardId: string } // Uses instanceId
     | { type: 'CANCEL_CAST' }
     | { type: 'SYNC_STATE'; newState: GameState };

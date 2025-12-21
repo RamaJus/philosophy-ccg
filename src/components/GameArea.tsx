@@ -150,6 +150,18 @@ export const GameArea: React.FC<GameAreaProps> = ({ mode, isDebugMode }) => {
             return;
         }
 
+        if (targetMode === 'arete_target') {
+            const action: import('../types').GameAction = { type: 'ARETE_TARGET', minionId };
+            if (isClient) multiplayer.sendAction(action); else dispatch(action);
+            return;
+        }
+
+        if (targetMode === 'cave_ascent_target') {
+            const action: import('../types').GameAction = { type: 'CAVE_ASCENT_TARGET', minionId };
+            if (isClient) multiplayer.sendAction(action); else dispatch(action);
+            return;
+        }
+
         // Toggle selection (add/remove from array) - Local UI only
         dispatch({ type: 'SELECT_MINION', minionId, toggle: true });
     };

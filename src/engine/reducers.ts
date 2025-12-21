@@ -802,6 +802,112 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
             break;
         }
 
+        case 'ARETE_TARGET': {
+            // Arete: Fully heal a selected philosopher
+            const { minionId } = action;
+            const activePlayer = state.activePlayer === 'player' ? state.player : state.opponent;
+            const enemyPlayer = state.activePlayer === 'player' ? state.opponent : state.player;
+
+            // Can target both friendly and enemy minions
+            const isOnActive = activePlayer.board.some(m => (m.instanceId || m.id) === minionId);
+            const targetBoard = isOnActive ? activePlayer.board : enemyPlayer.board;
+            const targetMinion = targetBoard.find(m => (m.instanceId || m.id) === minionId);
+
+            if (!targetMinion) return state;
+
+            const healedMinion: BoardMinion = {
+                ...targetMinion,
+                health: targetMinion.maxHealth || targetMinion.health
+            };
+
+            let log = appendLog(state.log, `${targetMinion.name} wurde durch Arete vollständig geheilt!`);
+
+            // Update board
+            const updateBoard = (board: BoardMinion[]) =>
+                board.map(m => (m.instanceId || m.id) === minionId ? healedMinion : m);
+
+            let updatedActive = isOnActive ? { ...activePlayer, board: updateBoard(activePlayer.board) } : activePlayer;
+            let updatedEnemy = !isOnActive ? { ...enemyPlayer, board: updateBoard(enemyPlayer.board) } : enemyPlayer;
+
+            // Add spell to graveyard
+            if (state.pendingPlayedCard) {
+                updatedActive.graveyard = [...updatedActive.graveyard, state.pendingPlayedCard];
+            }
+
+            newState = {
+                ...state,
+                [state.activePlayer]: updatedActive,
+                [state.activePlayer === 'player' ? 'opponent' : 'player']: updatedEnemy,
+                log,
+                targetMode: undefined,
+                pendingPlayedCard: undefined
+            };
+            break;
+        }
+
+        case 'CAVE_ASCENT_TARGET': {
+            // Aufstieg aus der Höhle: +2 Attack, -2 Health for 1 round. Dies if health < 3
+            const { minionId } = action;
+            const activePlayer = state.activePlayer === 'player' ? state.player : state.opponent;
+
+            // Only target own minions
+            const targetMinion = activePlayer.board.find(m => (m.instanceId || m.id) === minionId);
+            if (!targetMinion) return state;
+
+            let log = state.log;
+
+            // Check if minion will die (health < 3)
+            if (targetMinion.health < 3) {
+                log = appendLog(log, `${targetMinion.name} konnte das Licht nicht ertragen und starb!`);
+
+                const updatedBoard = activePlayer.board.filter(m => (m.instanceId || m.id) !== minionId);
+                const updatedGraveyard = [...activePlayer.graveyard, targetMinion];
+
+                let updatedActive = { ...activePlayer, board: updatedBoard, graveyard: updatedGraveyard };
+
+                // Add spell to graveyard
+                if (state.pendingPlayedCard) {
+                    updatedActive.graveyard = [...updatedActive.graveyard, state.pendingPlayedCard];
+                }
+
+                newState = {
+                    ...state,
+                    [state.activePlayer]: updatedActive,
+                    log,
+                    targetMode: undefined,
+                    pendingPlayedCard: undefined
+                };
+            } else {
+                // Apply +2 attack, -2 health temporarily (revert at turn end)
+                const transformedMinion: BoardMinion = {
+                    ...targetMinion,
+                    attack: targetMinion.attack + 2,
+                    health: targetMinion.health - 2,
+                    caveAscentRevertTurn: state.turn + 2, // Revert after own next turn
+                    caveAscentOriginalStats: { attack: targetMinion.attack, health: targetMinion.health }
+                };
+
+                log = appendLog(log, `${targetMinion.name} stieg aus der Höhle auf! (+2 Angriff, -2 Leben)`);
+
+                const updatedBoard = activePlayer.board.map(m => (m.instanceId || m.id) === minionId ? transformedMinion : m);
+                let updatedActive = { ...activePlayer, board: updatedBoard };
+
+                // Add spell to graveyard
+                if (state.pendingPlayedCard) {
+                    updatedActive.graveyard = [...updatedActive.graveyard, state.pendingPlayedCard];
+                }
+
+                newState = {
+                    ...state,
+                    [state.activePlayer]: updatedActive,
+                    log,
+                    targetMode: undefined,
+                    pendingPlayedCard: undefined
+                };
+            }
+            break;
+        }
+
         case 'RECURRENCE_SELECT': {
             const activePlayer = state.activePlayer === 'player' ? state.player : state.opponent;
             const card = state.recurrenceCards?.find(c => c.instanceId === action.cardId || c.id === action.cardId);

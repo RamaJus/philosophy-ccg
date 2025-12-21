@@ -135,6 +135,18 @@ export const useGameLogic = (gameMode: 'single' | 'host' | 'client', isDebugMode
         else dispatch(action);
     }, [isClient]);
 
+    const resolveArete = useCallback((minionId: string) => {
+        const action: GameAction = { type: 'ARETE_TARGET', minionId };
+        if (isClient) multiplayer.sendAction(action);
+        else dispatch(action);
+    }, [isClient]);
+
+    const resolveCaveAscent = useCallback((minionId: string) => {
+        const action: GameAction = { type: 'CAVE_ASCENT_TARGET', minionId };
+        if (isClient) multiplayer.sendAction(action);
+        else dispatch(action);
+    }, [isClient]);
+
     const resolveRecurrence = useCallback((cardId: string) => {
         const action: GameAction = { type: 'RECURRENCE_SELECT', cardId };
         if (isClient) multiplayer.sendAction(action);
@@ -168,6 +180,8 @@ export const useGameLogic = (gameMode: 'single' | 'host' | 'client', isDebugMode
         resolveGottesbeweis,
         resolveNietzsche,
         resolveVanInwagen,
+        resolveArete,
+        resolveCaveAscent,
         resolveRecurrence,
         searchDeck
     };
