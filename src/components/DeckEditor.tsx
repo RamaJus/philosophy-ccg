@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { X, Download, Upload, Trash2, Wand2, Plus, Minus, ChevronDown, BookOpen, Sparkles, ArrowUpDown, Eye } from 'lucide-react';
+import { X, Download, Upload, Trash2, Wand2, Plus, Minus, ChevronDown, BookOpen, Sparkles, Eye } from 'lucide-react';
 import { cardDatabase as cards } from '../data/cards';
 import { Card } from '../types';
 import { useDeck } from '../hooks/useDeck';
@@ -210,8 +210,8 @@ export const DeckEditor: React.FC<DeckEditorProps> = ({ isOpen, onClose }) => {
         return (
             <div
                 className={`flex items-center gap-2 p-2.5 rounded-lg cursor-pointer transition-all group ${isInDeck
-                        ? 'bg-green-900/30 hover:bg-red-900/40 border border-green-700/50'
-                        : 'bg-slate-700/40 hover:bg-green-900/30 border border-slate-600/30'
+                    ? 'bg-green-900/30 hover:bg-red-900/40 border border-green-700/50'
+                    : 'bg-slate-700/40 hover:bg-green-900/30 border border-slate-600/30'
                     }`}
             >
                 {/* Cost */}
@@ -257,8 +257,8 @@ export const DeckEditor: React.FC<DeckEditorProps> = ({ isOpen, onClose }) => {
                 <div
                     onClick={onClick}
                     className={`w-6 h-6 flex items-center justify-center rounded-full transition-all flex-shrink-0 ${isInDeck
-                            ? 'bg-red-700/50 group-hover:bg-red-600'
-                            : 'bg-green-700/50 opacity-0 group-hover:opacity-100'
+                        ? 'bg-red-700/50 group-hover:bg-red-600'
+                        : 'bg-green-700/50 opacity-0 group-hover:opacity-100'
                         }`}
                 >
                     {isInDeck ? <Minus size={14} className="text-white" /> : <Plus size={14} className="text-white" />}
@@ -295,8 +295,8 @@ export const DeckEditor: React.FC<DeckEditorProps> = ({ isOpen, onClose }) => {
                             <h2 className="text-2xl font-bold text-amber-400">Deck Editor</h2>
                         </div>
                         <div className={`px-3 py-1.5 rounded-full text-sm font-bold ${isValid
-                                ? 'bg-green-900/60 text-green-300 border-2 border-green-500'
-                                : 'bg-red-900/60 text-red-300 border-2 border-red-500'
+                            ? 'bg-green-900/60 text-green-300 border-2 border-green-500'
+                            : 'bg-red-900/60 text-red-300 border-2 border-red-500'
                             }`}>
                             {cardCount}/{DECK_SIZE}
                         </div>
@@ -505,7 +505,7 @@ export const DeckEditor: React.FC<DeckEditorProps> = ({ isOpen, onClose }) => {
                     onClick={() => setPreviewCard(null)}
                 >
                     <div className="transform scale-150" onClick={e => e.stopPropagation()}>
-                        <CardComponent card={previewCard} isInHand={false} />
+                        <CardComponent card={previewCard} />
                     </div>
                     <button
                         onClick={() => setPreviewCard(null)}
