@@ -109,4 +109,5 @@ export type GameAction =
     | { type: 'CAVE_ASCENT_TARGET'; minionId: string } // +2 atk/-2 hp for 1 round
     | { type: 'RECURRENCE_SELECT'; cardId: string } // Uses instanceId
     | { type: 'CANCEL_CAST' }
-    | { type: 'SYNC_STATE'; newState: GameState };
+    | { type: 'SYNC_STATE'; newState: GameState }
+    | { type: 'SET_OPPONENT_DECK'; deckIds: string[] };
