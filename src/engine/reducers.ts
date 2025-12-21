@@ -221,7 +221,9 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
                 turn: nextTurn,
                 activePlayer: nextActiveId as 'player' | 'opponent',
                 [nextActiveId]: updatedNextPlayer,
-                log: appendLog(state.log, `Runde ${nextTurn}: ${updatedNextPlayer.name} ist am Zug.`)
+                log: appendLog(state.log, `Runde ${nextTurn}: ${updatedNextPlayer.name} ist am Zug.`),
+                lastPlayedCard: undefined, // Clear to prevent re-flash on state sync
+                lastPlayedCardPlayerId: undefined
             };
             break;
         }
@@ -498,7 +500,9 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
                 ...state,
                 [state.activePlayer]: updatedPlayer,
                 targetMode: undefined, // Close search view
-                log: appendLog(state.log, `${activePlayer.name} wählte eine Karte aus dem Deck.`)
+                log: appendLog(state.log, `${activePlayer.name} wählte eine Karte aus dem Deck.`),
+                lastPlayedCard: undefined, // Clear to prevent double-flash
+                lastPlayedCardPlayerId: undefined
             };
             break;
         }
@@ -674,7 +678,9 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
                 [state.activePlayer]: updatedPlayer,
                 discoveryCards: undefined,
                 targetMode: undefined,
-                log: appendLog(state.log, `${activePlayer.name} wählte eine Karte.`)
+                log: appendLog(state.log, `${activePlayer.name} wählte eine Karte.`),
+                lastPlayedCard: undefined, // Clear to prevent double-flash
+                lastPlayedCardPlayerId: undefined
             };
             break;
         }
@@ -1102,6 +1108,48 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
                 targetMode: undefined,
                 pendingPlayedCard: undefined,
                 log: appendLog(state.log, `Eros! ${targetMinion.name} ist verliebt und kann 2 Runden nicht angreifen.`)
+            };
+            break;
+        }
+
+        case 'SET_DISCARD_MODE': {
+            if (action.active) {
+                newState = {
+                    ...state,
+                    targetMode: 'discard',
+                    targetModeOwner: state.activePlayer
+                };
+            } else {
+                newState = {
+                    ...state,
+                    targetMode: undefined,
+                    targetModeOwner: undefined
+                };
+            }
+            break;
+        }
+
+        case 'DISCARD_CARD': {
+            const activePlayer = state.activePlayer === 'player' ? state.player : state.opponent;
+            const cardIndex = activePlayer.hand.findIndex(c => c.instanceId === action.cardId);
+
+            if (cardIndex === -1) return state;
+
+            const card = activePlayer.hand[cardIndex];
+            const updatedHand = activePlayer.hand.filter((_, i) => i !== cardIndex);
+
+            const updatedPlayer = {
+                ...activePlayer,
+                hand: updatedHand,
+                graveyard: [...activePlayer.graveyard, card]
+            };
+
+            newState = {
+                ...state,
+                [state.activePlayer]: updatedPlayer,
+                targetMode: undefined,
+                targetModeOwner: undefined,
+                log: appendLog(state.log, `${activePlayer.name} warf eine Karte ab.`)
             };
             break;
         }

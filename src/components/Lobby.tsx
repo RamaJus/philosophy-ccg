@@ -387,6 +387,7 @@ export const Lobby: React.FC<LobbyProps> = ({ onStartGame, isDebugMode, setIsDeb
                                         <input
                                             value={peerIdInput}
                                             onChange={(e) => setPeerIdInput(e.target.value)}
+                                            onKeyDown={(e) => { if (e.key === 'Enter' && peerIdInput.length >= 6) handleJoin(); }}
                                             placeholder="6-stelliger Code"
                                             className="bg-slate-900/60 border border-amber-700/40 rounded px-3 py-2 text-sm flex-1 text-amber-100 placeholder-amber-800/60 outline-none font-mono text-center tracking-widest"
                                             maxLength={6}

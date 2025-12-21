@@ -129,6 +129,13 @@ export const GameArea: React.FC<GameAreaProps> = ({ mode, isDebugMode, customDec
     const handleCardClick = (cardId: string) => {
         if (!viewIsPlayerTurn) return;
 
+        // Handle discard mode - clicking a card discards it
+        if (targetMode === 'discard' && isMyTargetMode) {
+            const action: import('../types').GameAction = { type: 'DISCARD_CARD', cardId };
+            if (isClient) multiplayer.sendAction(action); else dispatch(action);
+            return;
+        }
+
         if (selectedCard === cardId) {
             dispatch({ type: 'SELECT_CARD', cardId: undefined });
         } else {
@@ -678,13 +685,49 @@ export const GameArea: React.FC<GameAreaProps> = ({ mode, isDebugMode, customDec
                                 )}
 
                                 {viewIsPlayerTurn && (
-                                    <button
-                                        onClick={handleEndTurn}
-                                        className="btn-primary flex items-center gap-2 py-1 text-sm"
-                                    >
-                                        <SkipForward size={16} />
-                                        Zug beenden
-                                    </button>
+                                    <>
+                                        {/* Discard mode indicator */}
+                                        {targetMode === 'discard' && isMyTargetMode && (
+                                            <>
+                                                <div className="px-4 py-2 bg-red-500/20 text-red-400 rounded-lg border border-red-500/50 animate-pulse">
+                                                    <p className="text-sm font-bold">Wähle eine Karte zum Abwerfen</p>
+                                                </div>
+                                                <button
+                                                    onClick={() => {
+                                                        const action: import('../types').GameAction = { type: 'SET_DISCARD_MODE', active: false };
+                                                        if (isClient) multiplayer.sendAction(action); else dispatch(action);
+                                                    }}
+                                                    className="px-3 py-1 bg-gray-600 hover:bg-gray-500 text-white rounded border border-gray-500 text-sm"
+                                                >
+                                                    Abbrechen
+                                                </button>
+                                            </>
+                                        )}
+
+                                        {/* Hand full warning + discard button */}
+                                        {viewPlayer.hand.length >= 10 && targetMode !== 'discard' && (
+                                            <button
+                                                onClick={() => {
+                                                    const action: import('../types').GameAction = { type: 'SET_DISCARD_MODE', active: true };
+                                                    if (isClient) multiplayer.sendAction(action); else dispatch(action);
+                                                }}
+                                                className="px-3 py-1 bg-red-700 hover:bg-red-600 text-white rounded border border-red-500 text-sm flex items-center gap-1"
+                                            >
+                                                Karte abwerfen
+                                            </button>
+                                        )}
+
+                                        {/* End turn button - disabled if hand full and not in discard mode */}
+                                        <button
+                                            onClick={handleEndTurn}
+                                            disabled={viewPlayer.hand.length >= 10}
+                                            className={`btn-primary flex items-center gap-2 py-1 text-sm ${viewPlayer.hand.length >= 10 ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                            title={viewPlayer.hand.length >= 10 ? 'Hand voll! Wirf erst eine Karte ab.' : ''}
+                                        >
+                                            <SkipForward size={16} />
+                                            Zug beenden
+                                        </button>
+                                    </>
                                 )}
                             </div>
                         </div>
