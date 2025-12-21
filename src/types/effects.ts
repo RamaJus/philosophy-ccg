@@ -16,7 +16,8 @@ export type EffectType =
     | 'SWAP_STATS' // Camus
     | 'RECURRENCE' // Ewige Wiederkunft
     | 'PROTECT' // Diogenes/Kant
-    | 'HEAL_ALL_MINIONS'; // Idee des Guten
+    | 'HEAL_ALL_MINIONS' // Idee des Guten
+    | 'RANDOMIZE_NEXT_MINION'; // Non Sequitur
 
 export interface Effect {
     type: EffectType;

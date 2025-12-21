@@ -254,6 +254,13 @@ export const processEffect = (
             }
             break;
         }
+        case 'RANDOMIZE_NEXT_MINION': {
+            if (effect.target === 'SELF') {
+                newActivePlayer.randomizeNextMinion = true;
+                logUpdates.push(`${activePlayer.name} wirkte Non Sequitur! Der nächste Philosoph erhält zufällige Werte.`);
+            }
+            break;
+        }
     }
     // Check for death
     let gameOver = false;

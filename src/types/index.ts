@@ -65,6 +65,7 @@ export interface Player {
     activeWork?: Card; // Currently active philosophical work
     synergyBlockTurns?: number; // Number of turns synergy bonuses are disabled
     minionAttackBlockTurns?: number; // Number of turns opponent minions cannot attack (Kant)
+    randomizeNextMinion?: boolean; // Non Sequitur: next philosopher played gets random stats
 }
 
 export interface GameState {

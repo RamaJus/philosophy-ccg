@@ -1098,6 +1098,29 @@ export const cardDatabase: Card[] = [
         gender: 'male',
         image: '/images/cards/adorno.png',
     },
+    {
+        id: 'tabula_rasa',
+        name: 'Tabula Rasa',
+        type: 'Zauber',
+        cost: 10,
+        description: 'Der menschliche Geist ist ein unbeschriebenes Blatt.',
+        effect: 'Entfernt alle Philosophen vom Spielfeld (eigene und gegnerische).',
+        effects: [{ type: 'BOARD_CLEAR', target: 'ALL' }],
+        rarity: 'Legendär',
+        image: '/images/cards/tabula_rasa.png',
+    },
+    {
+        id: 'non_sequitur',
+        name: 'Non Sequitur',
+        type: 'Zauber',
+        cost: 5,
+        description: 'Die Schlussfolgerung folgt nicht aus den Prämissen.',
+        effect: 'Der nächste Philosoph, den du spielst, erhält zufällige Werte (1-10/1-10).',
+        effects: [{ type: 'RANDOMIZE_NEXT_MINION', target: 'SELF' }],
+        rarity: 'Selten',
+        school: ['Logik'],
+        image: '/images/cards/non_sequitur.png',
+    },
 ];
 
 

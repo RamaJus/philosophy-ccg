@@ -288,26 +288,39 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
                 };
             } else if (card.type === 'Philosoph') {
                 // Summon minion to board
+                const p = newState[state.activePlayer];
+                let minionAttack = card.attack || 0;
+                let minionHealth = card.health || 0;
+                let logMessage = `${p.name} beschwörte ${card.name}.`;
+
+                // Non Sequitur effect: randomize stats if flag is set
+                if (p.randomizeNextMinion) {
+                    minionAttack = Math.floor(Math.random() * 10) + 1; // 1-10
+                    minionHealth = Math.floor(Math.random() * 10) + 1; // 1-10
+                    logMessage = `Non Sequitur! ${card.name} erschien mit zufälligen Werten (${minionAttack}/${minionHealth})!`;
+                }
+
                 const minion: BoardMinion = {
                     ...card,
                     type: 'Philosoph',
-                    attack: card.attack || 0,
-                    health: card.health || 0,
-                    maxHealth: card.health || 0,
+                    attack: minionAttack,
+                    health: minionHealth,
+                    maxHealth: minionHealth,
                     canAttack: false,
                     hasAttacked: false,
                     hasUsedSpecial: false,
                     turnPlayed: state.turn,
                     untargetableUntilTurn: card.untargetableForTurns ? state.turn + card.untargetableForTurns : undefined
                 };
-                const p = newState[state.activePlayer];
+
                 newState = {
                     ...newState,
                     [state.activePlayer]: {
                         ...p,
-                        board: [...p.board, minion]
+                        board: [...p.board, minion],
+                        randomizeNextMinion: false // Clear the flag
                     },
-                    log: appendLog(newState.log, `${p.name} beschwörte ${card.name}.`)
+                    log: appendLog(newState.log, logMessage)
                 };
             }
             break;
