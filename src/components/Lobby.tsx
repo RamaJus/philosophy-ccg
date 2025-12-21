@@ -163,19 +163,41 @@ export const Lobby: React.FC<LobbyProps> = ({ onStartGame, isDebugMode, setIsDeb
                         {/* Deck Editor Button */}
                         <button
                             onClick={() => setShowDeckEditor(true)}
-                            className="w-full p-4 rounded-xl border-2 border-purple-700/40 hover:border-purple-500/60 transition-all duration-300 bg-gradient-to-br from-slate-800/60 to-slate-900/60 hover:from-purple-900/30 hover:to-slate-900/50 flex items-center justify-center gap-4"
+                            className={`w-full p-4 rounded-xl border-2 transition-all duration-300 flex items-center justify-between gap-4 ${isCustom && isValid
+                                    ? 'border-green-600/60 bg-gradient-to-br from-green-900/30 to-slate-900/60 hover:border-green-500/80'
+                                    : isCustom && !isValid
+                                        ? 'border-red-600/60 bg-gradient-to-br from-red-900/30 to-slate-900/60 hover:border-red-500/80'
+                                        : 'border-purple-700/40 bg-gradient-to-br from-slate-800/60 to-slate-900/60 hover:border-purple-500/60'
+                                }`}
                         >
-                            <div className="bg-gradient-to-br from-purple-600/30 to-purple-700/30 w-12 h-12 rounded-full flex items-center justify-center border border-purple-600/40">
-                                <BookOpen className="text-purple-300" size={24} />
+                            <div className="flex items-center gap-4">
+                                <div className={`w-12 h-12 rounded-full flex items-center justify-center border ${isCustom && isValid
+                                        ? 'bg-gradient-to-br from-green-600/30 to-green-700/30 border-green-600/40'
+                                        : isCustom && !isValid
+                                            ? 'bg-gradient-to-br from-red-600/30 to-red-700/30 border-red-600/40'
+                                            : 'bg-gradient-to-br from-purple-600/30 to-purple-700/30 border-purple-600/40'
+                                    }`}>
+                                    <BookOpen className={isCustom && isValid ? 'text-green-300' : isCustom && !isValid ? 'text-red-300' : 'text-purple-300'} size={24} />
+                                </div>
+                                <div className="text-left">
+                                    <h3 className={`text-xl font-bold ${isCustom && isValid ? 'text-green-100' : isCustom && !isValid ? 'text-red-100' : 'text-purple-100'}`}>
+                                        {isCustom ? 'Custom-Deck' : 'Standard-Deck'}
+                                    </h3>
+                                    <p className={`text-sm ${isCustom && isValid ? 'text-green-200/80' : isCustom && !isValid ? 'text-red-200/80' : 'text-purple-200/60'}`}>
+                                        {isCustom
+                                            ? `${cardCount}/${DECK_SIZE} Karten`
+                                            : 'Alle Karten (kein Limit)'
+                                        }
+                                    </p>
+                                </div>
                             </div>
-                            <div className="text-left">
-                                <h3 className="text-xl font-bold text-purple-100">Deck bearbeiten</h3>
-                                <p className="text-sm text-purple-200/60">
-                                    {isCustom
-                                        ? `${cardCount}/${DECK_SIZE} Karten ${isValid ? '✓' : '(unvollständig)'}`
-                                        : 'Standard-Deck (alle Karten)'
-                                    }
-                                </p>
+                            <div className={`px-3 py-1.5 rounded-full text-sm font-bold ${isCustom && isValid
+                                    ? 'bg-green-900/50 text-green-300 border border-green-600'
+                                    : isCustom && !isValid
+                                        ? 'bg-red-900/50 text-red-300 border border-red-600'
+                                        : 'bg-slate-700/50 text-slate-300 border border-slate-600'
+                                }`}>
+                                {isCustom && isValid ? '✓ Bereit' : isCustom && !isValid ? '⚠ Unvollständig' : 'Standard'}
                             </div>
                         </button>
 
