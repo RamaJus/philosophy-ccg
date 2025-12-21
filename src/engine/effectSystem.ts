@@ -261,6 +261,25 @@ export const processEffect = (
             }
             break;
         }
+        case 'BALANCE_HEALTH': {
+            // Mesotes: Take 5 from higher health player, give 5 to lower (respecting maxHealth)
+            const amount = effect.value || 5;
+            if (newActivePlayer.health > newEnemyPlayer.health) {
+                // Active player has more health - lose some, enemy gains some
+                newActivePlayer.health -= amount;
+                newEnemyPlayer.health = Math.min(newEnemyPlayer.health + amount, newEnemyPlayer.maxHealth);
+                logUpdates.push(`Mesotes! ${activePlayer.name} verlor ${amount} Glaubwürdigkeit, ${enemyPlayer.name} gewann ${amount}.`);
+            } else if (newEnemyPlayer.health > newActivePlayer.health) {
+                // Enemy has more health - enemy loses some, active gains some  
+                newEnemyPlayer.health -= amount;
+                newActivePlayer.health = Math.min(newActivePlayer.health + amount, newActivePlayer.maxHealth);
+                logUpdates.push(`Mesotes! ${enemyPlayer.name} verlor ${amount} Glaubwürdigkeit, ${activePlayer.name} gewann ${amount}.`);
+            } else {
+                // Equal health - no change
+                logUpdates.push(`Mesotes wirkungslos - beide Spieler haben gleiche Glaubwürdigkeit!`);
+            }
+            break;
+        }
     }
     // Check for death
     let gameOver = false;

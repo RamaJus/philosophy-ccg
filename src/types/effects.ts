@@ -17,7 +17,8 @@ export type EffectType =
     | 'RECURRENCE' // Ewige Wiederkunft
     | 'PROTECT' // Diogenes/Kant
     | 'HEAL_ALL_MINIONS' // Idee des Guten
-    | 'RANDOMIZE_NEXT_MINION'; // Non Sequitur
+    | 'RANDOMIZE_NEXT_MINION' // Non Sequitur
+    | 'BALANCE_HEALTH'; // Mesotes
 
 export interface Effect {
     type: EffectType;

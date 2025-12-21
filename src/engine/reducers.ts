@@ -1034,6 +1034,45 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
             break;
         }
 
+        case 'EROS_TARGET': {
+            // Eros: Silence a targeted enemy philosopher for 2 turns (they can't attack)
+            const enemyPlayerId = state.activePlayer === 'player' ? 'opponent' : 'player';
+            const enemyPlayer = state[enemyPlayerId];
+            const { minionId } = action;
+
+            const targetMinion = enemyPlayer.board.find(m => (m.instanceId || m.id) === minionId);
+            if (!targetMinion) return state;
+
+            // Apply silence for 2 turns
+            const silencedMinion = {
+                ...targetMinion,
+                silencedUntilTurn: state.turn + 3 // Silenced for next 2 attacking rounds
+            };
+
+            const updatedBoard = enemyPlayer.board.map(m =>
+                (m.instanceId || m.id) === minionId ? silencedMinion : m
+            );
+
+            let updatedEnemy = { ...enemyPlayer, board: updatedBoard };
+            const activePlayer = state[state.activePlayer];
+
+            // Add spell to graveyard
+            let updatedActive = { ...activePlayer };
+            if (state.pendingPlayedCard) {
+                updatedActive.graveyard = [...updatedActive.graveyard, state.pendingPlayedCard];
+            }
+
+            newState = {
+                ...state,
+                [state.activePlayer]: updatedActive,
+                [enemyPlayerId]: updatedEnemy,
+                targetMode: undefined,
+                pendingPlayedCard: undefined,
+                log: appendLog(state.log, `Eros! ${targetMinion.name} ist verliebt und kann 2 Runden nicht angreifen.`)
+            };
+            break;
+        }
+
         case 'SYNC_STATE':
             return action.newState;
 

@@ -1121,6 +1121,30 @@ export const cardDatabase: Card[] = [
         school: ['Logik'],
         image: '/images/cards/non_sequitur.png',
     },
+    {
+        id: 'eros',
+        name: 'Eros',
+        type: 'Zauber',
+        cost: 6,
+        description: 'Liebe tilgt jeden Eigennutz.',
+        effect: 'Wähle einen gegnerischen Philosophen. Er ist für 2 Runden verliebt und kann nicht angreifen.',
+        effects: [{ type: 'TARGET_MODE', target: 'SELF', mode: 'eros_target' }],
+        rarity: 'Selten',
+        school: ['Moralphilosophie'],
+        image: '/images/cards/eros.png',
+    },
+    {
+        id: 'mesotes',
+        name: 'Mesotes',
+        type: 'Zauber',
+        cost: 6,
+        description: 'Denn zwischen zwei Extremen liegt das rechte Maß.',
+        effect: 'Der Spieler mit mehr Glaubwürdigkeit verliert 5, der andere gewinnt 5 (max. Wert).',
+        effects: [{ type: 'BALANCE_HEALTH', target: 'ALL', value: 5 }],
+        rarity: 'Selten',
+        school: ['Moralphilosophie'],
+        image: '/images/cards/mesotes.png',
+    },
 ];
 
 
