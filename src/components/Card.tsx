@@ -172,18 +172,17 @@ export const Card: React.FC<CardProps> = ({
 
             <motion.div
                 layout
-                className={baseClasses}
+                className={`${baseClasses} ${isAttacking ? 'animate-attack-swing' : ''}`}
                 onContextMenu={handleContextMenu}
                 style={{ width: '140px', height: '200px', backgroundColor: '#fef3c7' }}
                 initial={false}
                 animate={{
                     scale: isSelected ? 1.1 : 1,
                     x: isDamaged ? [-5, 5, -5, 5, 0] : 0,
-                    y: isAttacking ? [-30, 0] : 0,
                     boxShadow: isHealed
                         ? "0 0 20px #4ade80"
                         : isSynergyTriggered
-                            ? "0 0 40px #d8b4fe, 0 0 20px #a855f7" // Stronger glow
+                            ? "0 0 40px #d8b4fe, 0 0 20px #a855f7"
                             : isSelected
                                 ? "0 0 0 4px #fbbf24"
                                 : "0 25px 50px -12px rgba(0, 0, 0, 0.25)"
@@ -197,8 +196,7 @@ export const Card: React.FC<CardProps> = ({
                 transition={{
                     type: "spring",
                     stiffness: 400,
-                    damping: 25,
-                    y: isAttacking ? { duration: 0.2, ease: "easeOut" } : { type: "spring", stiffness: 300, damping: 20 }
+                    damping: 25
                 }}
             >
                 {/* Transparent clickable overlay - captures ALL clicks */}

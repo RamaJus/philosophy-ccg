@@ -212,12 +212,24 @@ export const GameArea: React.FC<GameAreaProps> = ({ mode, isDebugMode, customDec
 
         if (!selectedMinions?.length) return;
 
-        // Trigger attack animation
-        setAttackingMinionIds(selectedMinions);
-        setTimeout(() => setAttackingMinionIds([]), 400);
+        // Staggered animation for multiple attackers, then dispatch attack after all animations complete
+        const ANIM_DURATION = 300;
+        const STAGGER_DELAY = 150;
 
-        // Multi-attack: use all selected minions
-        attackMultiplayer(selectedMinions, minionId); // Use multiplayer-aware function
+        selectedMinions.forEach((attackerId, index) => {
+            setTimeout(() => {
+                setAttackingMinionIds(prev => [...prev, attackerId]);
+                setTimeout(() => {
+                    setAttackingMinionIds(prev => prev.filter(id => id !== attackerId));
+                }, ANIM_DURATION);
+            }, index * STAGGER_DELAY);
+        });
+
+        // Dispatch attack after all animations complete
+        const totalAnimTime = (selectedMinions.length - 1) * STAGGER_DELAY + ANIM_DURATION;
+        setTimeout(() => {
+            attackMultiplayer(selectedMinions, minionId);
+        }, totalAnimTime);
     };
 
     const handleSpecialClick = (minionId: string) => {
@@ -230,11 +242,24 @@ export const GameArea: React.FC<GameAreaProps> = ({ mode, isDebugMode, customDec
     const handleAttackPlayer = () => {
         if (!viewIsPlayerTurn || !selectedMinions?.length) return;
 
-        // Trigger attack animation
-        setAttackingMinionIds(selectedMinions);
-        setTimeout(() => setAttackingMinionIds([]), 400);
+        // Staggered animation for multiple attackers, then dispatch attack after all animations complete
+        const ANIM_DURATION = 300;
+        const STAGGER_DELAY = 150;
 
-        attackMultiplayer(selectedMinions); // Use multiplayer-aware function
+        selectedMinions.forEach((minionId, index) => {
+            setTimeout(() => {
+                setAttackingMinionIds(prev => [...prev, minionId]);
+                setTimeout(() => {
+                    setAttackingMinionIds(prev => prev.filter(id => id !== minionId));
+                }, ANIM_DURATION);
+            }, index * STAGGER_DELAY);
+        });
+
+        // Dispatch attack after all animations complete
+        const totalAnimTime = (selectedMinions.length - 1) * STAGGER_DELAY + ANIM_DURATION;
+        setTimeout(() => {
+            attackMultiplayer(selectedMinions);
+        }, totalAnimTime);
     };
 
     const handleEndTurn = () => {

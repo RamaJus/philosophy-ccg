@@ -145,4 +145,24 @@
       box-shadow: 0 0 0 rgba(74, 222, 128, 0);
     }
   }
+
+  /* Attack swing animation - card swings toward opponent */
+  .animate-attack-swing {
+    animation: attackSwing 0.3s ease-out;
+  }
+
+  @keyframes attackSwing {
+    0% {
+      transform: translateY(0) scale(1);
+    }
+
+    40% {
+      transform: translateY(-40px) scale(1.1);
+      box-shadow: 0 20px 40px rgba(239, 68, 68, 0.5);
+    }
+
+    100% {
+      transform: translateY(0) scale(1);
+    }
+  }
 }

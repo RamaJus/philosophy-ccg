@@ -67,14 +67,14 @@ export const Board: React.FC<BoardProps> = ({
                     </button>
                 )}
 
-                <div className="flex gap-3 justify-center overflow-x-hidden overflow-y-visible px-8 min-h-[220px] relative z-10">
+                <div className="flex gap-3 justify-center overflow-visible px-8 pt-4 min-h-[220px] relative z-10">
                     <AnimatePresence mode="popLayout">
                         {minions.length === 0 ? (
                             <motion.div
                                 initial={{ opacity: 0 }}
                                 animate={{ opacity: 1 }}
                                 exit={{ opacity: 0 }}
-                                className="flex items-center justify-center h-48 text-gray-500 italic w-full absolute"
+                                className="flex items-center justify-center h-48 text-gray-500 italic w-full"
                             >
                                 Keine Philosophen auf dem Schlachtfeld
                             </motion.div>
