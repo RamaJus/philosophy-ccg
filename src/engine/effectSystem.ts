@@ -25,7 +25,11 @@ export const processEffect = (
                 logUpdates.push(`${activePlayer.name} fügte ${enemyPlayer.name} ${damage} Schaden zu!`);
             } else if (effect.target === 'SELF') {
                 newActivePlayer.health -= damage; // e.g. Schopenhauer
-                logUpdates.push(`${activePlayer.name} erlitt ${damage} Schaden!`);
+                if (damage === 5) {
+                    logUpdates.push(`Die Welt ist Wille und Vorstellung... und Schmerz. Aua.`);
+                } else {
+                    logUpdates.push(`${activePlayer.name} erlitt ${damage} Schaden!`);
+                }
             }
             break;
         }
@@ -93,7 +97,11 @@ export const processEffect = (
                 });
 
                 const conditionText = effect.condition === 'MALE' ? 'männlichen ' : '';
-                logUpdates.push(`${activePlayer.name} verstummte alle ${conditionText}gegnerischen Philosophen für ${duration} Runde(n)!`);
+                if (effect.condition === 'MALE') {
+                    logUpdates.push(`Diotima erklärt die Liebe. Die Männer hören endlich mal zu (und schweigen).`);
+                } else {
+                    logUpdates.push(`${activePlayer.name} verstummte alle ${conditionText}gegnerischen Philosophen für ${duration} Runde(n)!`);
+                }
             }
             break;
         }
@@ -153,7 +161,7 @@ export const processEffect = (
                 return {
                     player: state.activePlayer === 'player' ? newActivePlayer : newEnemyPlayer,
                     opponent: state.activePlayer === 'player' ? newEnemyPlayer : newActivePlayer,
-                    log: [...state.log, ...logUpdates, `${activePlayer.name} reveals top ${count} cards of opponent's deck.`],
+                    log: [...state.log, ...logUpdates, `Panoptismus! Foucault sieht alles, auch deine Karten.`],
                     foucaultRevealCards: topCards,
                     targetMode: 'foucault_reveal',
                     targetModeOwner: state.activePlayer
@@ -194,7 +202,7 @@ export const processEffect = (
                 newEnemyPlayer.board = [];
                 newEnemyPlayer.graveyard = enemyGraveyard;
 
-                logUpdates.push(`${activePlayer.name} leerte das Schlachtfeld!`);
+                logUpdates.push(`Alle Probleme sind nur Sprachverwirrung. Wittgenstein räumt auf: Stille.`);
             }
             break;
         }
@@ -203,7 +211,7 @@ export const processEffect = (
                 const tempHealth = newActivePlayer.health;
                 newActivePlayer.health = newEnemyPlayer.health;
                 newEnemyPlayer.health = tempHealth;
-                logUpdates.push(`${activePlayer.name} tauschte Glaubwürdigkeit mit dem Gegner!`);
+                logUpdates.push(`Das Leben ist absurd. Warum sollte ich sterben und nicht du? (HP getauscht)`);
             }
             break;
         }
@@ -228,7 +236,7 @@ export const processEffect = (
                     };
 
                     newActivePlayer.board = [...newActivePlayer.board, stolenMinion];
-                    logUpdates.push(`${activePlayer.name} stahl ${stolen.name} dauerhaft!`);
+                    logUpdates.push(`Enteignet! ${stolen.name} gehört jetzt dem Volk (also mir).`);
                 }
             }
             break;
@@ -238,7 +246,7 @@ export const processEffect = (
             if (effect.target === 'ENEMY') {
                 // Kant: Block enemy from attacking minions for X turns
                 newEnemyPlayer.minionAttackBlockTurns = (newEnemyPlayer.minionAttackBlockTurns || 0) + duration;
-                logUpdates.push(`${activePlayer.name} rief das Kategorische Imperativ an! Gegner kann ${duration} Runde(n) keine Philosophen angreifen.`);
+                logUpdates.push(`Das ist unmoralisch! Kant verbietet, Philosophen als bloße Mittel zum Angriff zu benutzen.`);
             }
             break;
         }

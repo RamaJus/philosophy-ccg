@@ -317,6 +317,8 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
                     minionAttack = Math.floor(Math.random() * 10) + 1; // 1-10
                     minionHealth = Math.floor(Math.random() * 10) + 1; // 1-10
                     logMessage = `Non Sequitur! ${card.name} erschien mit zufälligen Werten (${minionAttack}/${minionHealth})!`;
+                } else if (card.id === 'sartre') {
+                    logMessage = `Sartre ist zur Freiheit verurteilt... und zur Macht im nächsten Zug.`;
                 }
 
                 const minion: BoardMinion = {
@@ -403,7 +405,7 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
 
                 // Diogenes Check (Untargetable)
                 if (target.untargetableUntilTurn && target.untargetableUntilTurn > state.turn) {
-                    currentLog = appendLog(currentLog, `${target.name} versteckt sich in seiner Tonne und kann noch nicht angegriffen werden!`);
+                    currentLog = appendLog(currentLog, `Geh mir aus der Sonne! ${target.name} bleibt in der Tonne.`);
                     return { ...state, log: currentLog };
                 }
 
@@ -797,7 +799,7 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
                     hasUsedSpecial: false,
                     specialAbility: undefined
                 };
-                log = appendLog(log, `${targetMinion.name} wurde zum letzten Menschen!`);
+                log = appendLog(log, `Gott ist tot, doch ${targetMinion.name} verbleibt als letzter Mensch in seiner Sklavenmoral.`);
             }
 
             // Update Boards
@@ -851,7 +853,7 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
                 image: '/images/cards/chair_matter.png',
             };
 
-            let log = appendLog(state.log, `${targetMinion.name} wurde in stuhlartige Materie verwandelt!`);
+            let log = appendLog(state.log, `Logisch betrachtet existiert ${targetMinion.name} gar nicht. Nur Atome, die stuhlartig angeordnet sind.`);
 
             const updatedEnemyBoard = enemyPlayer.board.map(m => (m.instanceId || m.id) === minionId ? chairMatter : m);
             const updatedActiveBoard = activePlayer.board.map(m => (m.instanceId || m.id) === vanInwagenId ? { ...m, hasUsedSpecial: true, hasAttacked: true, specialExhausted: true } : m);
