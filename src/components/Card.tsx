@@ -171,15 +171,12 @@ export const Card: React.FC<CardProps> = ({
             )}
 
             <motion.div
-                className={`${baseClasses}`}
+                className={`${baseClasses} ${isAttacking ? 'animate-attack-swing' : ''}`}
                 onContextMenu={handleContextMenu}
                 style={{ width: '140px', height: '200px', backgroundColor: '#fef3c7' }}
                 initial={false}
                 animate={{
                     scale: isSelected ? 1.1 : 1,
-                    // Use keyframes for attack: Start at 0, go up, return to 0
-                    // Using values relative to current position
-                    y: isAttacking ? [0, -40, 0] : 0,
                     x: isDamaged ? [-5, 5, -5, 5, 0] : 0,
                     boxShadow: isHealed
                         ? "0 0 20px #4ade80"
@@ -194,19 +191,12 @@ export const Card: React.FC<CardProps> = ({
                     zIndex: 10,
                     boxShadow: "0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)"
                 }}
-                // Removed whileTap to ensure instant selection response without conflict
+                whileTap={{ scale: 0.95 }}
                 transition={{
-                    // Default spring for layout/scale
                     type: "spring",
                     stiffness: 500,
                     damping: 30,
-                    mass: 0.8,
-                    // Specific override for attack animation to ensure it plays through
-                    y: {
-                        duration: 0.4,
-                        times: [0, 0.5, 1], // Timing of keyframes
-                        ease: "easeOut"
-                    }
+                    mass: 0.8
                 }}
             >
                 {/* Transparent clickable overlay - captures ALL clicks */}
