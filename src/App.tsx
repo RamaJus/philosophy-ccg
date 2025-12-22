@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { GameArea } from './components/GameArea';
 import { Lobby } from './components/Lobby';
 import { BackgroundMusic } from './components/BackgroundMusic';
+import { SettingsProvider } from './hooks/useSettings';
 
 // Read custom deck from localStorage
 const getCustomDeckIds = (): string[] | undefined => {
@@ -37,21 +38,22 @@ export const App: React.FC = () => {
 
     if (!gameMode) {
         return (
-            <>
+            <SettingsProvider>
                 <BackgroundMusic />
                 <Lobby
                     onStartGame={handleStartGame}
                     isDebugMode={isDebugMode}
                     setIsDebugMode={setIsDebugMode}
                 />
-            </>
+            </SettingsProvider>
         );
     }
 
     return (
-        <>
+        <SettingsProvider>
             <BackgroundMusic />
             <GameArea mode={gameMode} isDebugMode={isDebugMode} customDeckIds={customDeckIds} />
-        </>
+        </SettingsProvider>
     );
 };
+

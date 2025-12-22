@@ -214,7 +214,7 @@ export const GameArea: React.FC<GameAreaProps> = ({ mode, isDebugMode, customDec
 
         // Trigger attack animation
         setAttackingMinionIds(selectedMinions);
-        setTimeout(() => setAttackingMinionIds([]), 300);
+        setTimeout(() => setAttackingMinionIds([]), 400);
 
         // Multi-attack: use all selected minions
         attackMultiplayer(selectedMinions, minionId); // Use multiplayer-aware function
@@ -232,7 +232,7 @@ export const GameArea: React.FC<GameAreaProps> = ({ mode, isDebugMode, customDec
 
         // Trigger attack animation
         setAttackingMinionIds(selectedMinions);
-        setTimeout(() => setAttackingMinionIds([]), 300);
+        setTimeout(() => setAttackingMinionIds([]), 400);
 
         attackMultiplayer(selectedMinions); // Use multiplayer-aware function
     };

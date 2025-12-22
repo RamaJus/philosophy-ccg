@@ -196,8 +196,9 @@ export const Card: React.FC<CardProps> = ({
                 whileTap={{ scale: 0.95 }}
                 transition={{
                     type: "spring",
-                    stiffness: 300,
-                    damping: 20
+                    stiffness: 400,
+                    damping: 25,
+                    y: isAttacking ? { duration: 0.2, ease: "easeOut" } : { type: "spring", stiffness: 300, damping: 20 }
                 }}
             >
                 {/* Transparent clickable overlay - captures ALL clicks */}
