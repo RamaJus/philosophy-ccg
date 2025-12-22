@@ -1,9 +1,11 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { multiplayer } from '../network/MultiplayerManager';
-import { Copy, Globe, Cpu, QrCode, Share2, BookOpen, User } from 'lucide-react';
+import { Copy, Globe, Cpu, QrCode, Share2, BookOpen, User, Settings } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
 import { DeckEditor } from './DeckEditor';
+import { SettingsModal } from './SettingsModal';
 import { useDeck } from '../hooks/useDeck';
+import { useSettings } from '../hooks/useSettings';
 import { cardDatabase } from '../data/cards';
 
 interface LobbyProps {
@@ -20,11 +22,18 @@ export const Lobby: React.FC<LobbyProps> = ({ onStartGame, isDebugMode, setIsDeb
     const [showQR, setShowQR] = useState(false);
     const [connectionError, setConnectionError] = useState<string | null>(null);
     const [showDeckEditor, setShowDeckEditor] = useState(false);
+    const [showSettings, setShowSettings] = useState(false);
     const [playerName, setPlayerName] = useState(() => {
         return localStorage.getItem('philosophy-ccg-player-name') || 'Spieler';
     });
 
     const { cardCount, isValid, isCustom, DECK_SIZE, refreshDeck } = useDeck();
+    const { settings, saveSettings, resetToDefaults } = useSettings();
+
+    // Sync debug mode from settings
+    useEffect(() => {
+        setIsDebugMode(settings.debugMode);
+    }, [settings.debugMode, setIsDebugMode]);
 
     // Portrait orientation mapping: which direction the philosopher faces
     // 'right' = faces right (good for left side), 'left' = faces left (good for right side), 'center' = faces forward (either side)
@@ -463,6 +472,23 @@ export const Lobby: React.FC<LobbyProps> = ({ onStartGame, isDebugMode, setIsDeb
             </div>
 
             <DeckEditor isOpen={showDeckEditor} onClose={() => { refreshDeck(); setShowDeckEditor(false); }} />
+
+            <SettingsModal
+                isOpen={showSettings}
+                onClose={() => setShowSettings(false)}
+                settings={settings}
+                onSettingChange={(key, value) => saveSettings({ [key]: value })}
+                onReset={resetToDefaults}
+            />
+
+            {/* Settings Button - Fixed at bottom */}
+            <button
+                onClick={() => setShowSettings(true)}
+                className="fixed bottom-4 left-1/2 -translate-x-1/2 flex items-center gap-2 px-4 py-2 bg-slate-800/90 hover:bg-slate-700 border border-slate-600 rounded-lg text-gray-300 hover:text-white transition-all shadow-lg z-40"
+            >
+                <Settings size={18} />
+                Einstellungen
+            </button>
         </>
     );
 };

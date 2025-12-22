@@ -46,11 +46,13 @@ export const Board: React.FC<BoardProps> = ({
 
     return (
         <div className={`glass-panel p-4 min-h-[300px] transition-all duration-500 ${isPlayerBoard ? 'bg-blue-500/5' : 'bg-red-500/5'} ${isSpecialTargeting ? 'cursor-magic ring-2 ring-purple-500/50' : ''} ${isPlayerBoard && isMyTurn ? 'ring-2 ring-emerald-500/50 shadow-lg shadow-emerald-500/20' : ''}`}>
-            <h3 className="text-sm font-semibold mb-2 text-center text-gray-300">
-                {isPlayerBoard ? 'Deine Philosophen' : 'Gegnerische Philosophen'}
-                {synergiesBlocked && <span className="block text-xs text-red-400 font-bold animate-pulse mt-1">⚠ SCHUL-SYNERGIEN BLOCKIERT</span>}
-                {attacksBlocked && <span className="block text-xs text-red-400 font-bold animate-pulse mt-1">⚠ ANGRIFFE AUF PHILOSOPHEN BLOCKIERT (KANT)</span>}
-            </h3>
+            {/* Status warnings */}
+            {(synergiesBlocked || attacksBlocked) && (
+                <div className="text-center mb-2">
+                    {synergiesBlocked && <span className="block text-xs text-red-400 font-bold animate-pulse">⚠ SCHUL-SYNERGIEN BLOCKIERT</span>}
+                    {attacksBlocked && <span className="block text-xs text-red-400 font-bold animate-pulse">⚠ ANGRIFFE AUF PHILOSOPHEN BLOCKIERT (KANT)</span>}
+                </div>
+            )}
 
             <div className="relative flex items-center justify-center">
                 {/* Left Arrow */}

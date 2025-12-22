@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { Volume2, VolumeX, SkipForward } from 'lucide-react';
+import { useSettings } from '../hooks/useSettings';
 
 const TRACKS = [
     '/music/background1.mp3',
@@ -10,19 +11,16 @@ const TRACKS = [
     '/music/background6.mp3',
 ];
 
-interface BackgroundMusicProps {
-    volume?: number;
-}
-
-export const BackgroundMusic: React.FC<BackgroundMusicProps> = ({
-    volume = 0.5
-}) => {
-    const [isMuted, setIsMuted] = useState(false);
+export const BackgroundMusic: React.FC = () => {
+    const { settings, setMusicMuted } = useSettings();
     const [isPlaying, setIsPlaying] = useState(false);
     const [currentTrackIndex, setCurrentTrackIndex] = useState(() =>
         Math.floor(Math.random() * TRACKS.length)
     );
     const audioRef = useRef<HTMLAudioElement>(null);
+
+    // Compute actual volume (0-1 scale)
+    const actualVolume = settings.musicMuted ? 0 : settings.musicVolume / 100;
 
     // Get a random different track
     const getNextTrackIndex = useCallback(() => {
@@ -43,12 +41,18 @@ export const BackgroundMusic: React.FC<BackgroundMusicProps> = ({
         skipTrack();
     }, [skipTrack]);
 
+    // Sync volume changes from settings
+    useEffect(() => {
+        if (audioRef.current) {
+            audioRef.current.volume = actualVolume;
+        }
+    }, [actualVolume]);
+
     // Try to play on first user interaction (bypass autoplay restrictions)
     useEffect(() => {
         const startPlayback = async () => {
             if (audioRef.current && !isPlaying) {
-                audioRef.current.volume = volume;
-                audioRef.current.muted = isMuted;
+                audioRef.current.volume = actualVolume;
                 try {
                     await audioRef.current.play();
                     setIsPlaying(true);
@@ -75,16 +79,15 @@ export const BackgroundMusic: React.FC<BackgroundMusicProps> = ({
             document.removeEventListener('click', handleInteraction);
             document.removeEventListener('keydown', handleInteraction);
         };
-    }, [volume, isMuted, isPlaying]);
+    }, [actualVolume, isPlaying]);
 
     // Play audio when track changes (for skip functionality)
     useEffect(() => {
         if (isPlaying && audioRef.current) {
-            audioRef.current.volume = volume;
-            audioRef.current.muted = isMuted;
+            audioRef.current.volume = actualVolume;
             audioRef.current.play().catch(() => { });
         }
-    }, [currentTrackIndex, volume, isMuted, isPlaying]);
+    }, [currentTrackIndex, actualVolume, isPlaying]);
 
     const toggleMute = () => {
         if (audioRef.current) {
@@ -92,8 +95,7 @@ export const BackgroundMusic: React.FC<BackgroundMusicProps> = ({
                 audioRef.current.play();
                 setIsPlaying(true);
             }
-            audioRef.current.muted = !isMuted;
-            setIsMuted(!isMuted);
+            setMusicMuted(!settings.musicMuted);
         }
     };
 
@@ -124,9 +126,9 @@ export const BackgroundMusic: React.FC<BackgroundMusicProps> = ({
                 <button
                     onClick={toggleMute}
                     className="bg-slate-800/80 hover:bg-slate-700/80 backdrop-blur-sm rounded-full p-1.5 text-white shadow-lg transition-all duration-200 hover:scale-110"
-                    title={isMuted ? 'Musik einschalten' : 'Musik ausschalten'}
+                    title={settings.musicMuted ? 'Musik einschalten' : 'Musik ausschalten'}
                 >
-                    {isMuted ? (
+                    {settings.musicMuted ? (
                         <VolumeX size={20} />
                     ) : (
                         <Volume2 size={20} />

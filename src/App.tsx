@@ -38,7 +38,7 @@ export const App: React.FC = () => {
     if (!gameMode) {
         return (
             <>
-                <BackgroundMusic volume={0.5} />
+                <BackgroundMusic />
                 <Lobby
                     onStartGame={handleStartGame}
                     isDebugMode={isDebugMode}
@@ -50,7 +50,7 @@ export const App: React.FC = () => {
 
     return (
         <>
-            <BackgroundMusic volume={0.5} />
+            <BackgroundMusic />
             <GameArea mode={gameMode} isDebugMode={isDebugMode} customDeckIds={customDeckIds} />
         </>
     );
