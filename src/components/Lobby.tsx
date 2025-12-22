@@ -235,11 +235,20 @@ export const Lobby: React.FC<LobbyProps> = ({ onStartGame, isDebugMode, setIsDeb
                         backgroundPosition: 'center',
                     }}
                 />
-                {/* Center overlay - fades towards sides to let philosopher portraits show */}
+                {/* Main overlay */}
+                <div className="absolute inset-0 bg-gradient-to-br from-slate-900/95 via-slate-800/90 to-amber-900/85" />
+                {/* Left side fade - darkens the background pattern near left philosopher */}
                 <div
-                    className="absolute inset-0"
+                    className="absolute left-0 top-0 bottom-0 w-80 hidden lg:block"
                     style={{
-                        background: 'radial-gradient(ellipse 70% 100% at 50% 50%, rgba(15,23,42,0.95) 0%, rgba(15,23,42,0.85) 40%, rgba(15,23,42,0.4) 70%, transparent 100%)',
+                        background: 'linear-gradient(to right, rgba(15,23,42,0.95) 0%, rgba(15,23,42,0.7) 50%, transparent 100%)',
+                    }}
+                />
+                {/* Right side fade - darkens the background pattern near right philosopher */}
+                <div
+                    className="absolute right-0 top-0 bottom-0 w-80 hidden lg:block"
+                    style={{
+                        background: 'linear-gradient(to left, rgba(15,23,42,0.95) 0%, rgba(15,23,42,0.7) 50%, transparent 100%)',
                     }}
                 />
 
