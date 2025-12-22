@@ -40,6 +40,7 @@ export const GameArea: React.FC<GameAreaProps> = ({ mode, isDebugMode, customDec
     const [philosophicalQuote, setPhilosophicalQuote] = useState<string>('');
     const [isDeckViewOpen, setIsDeckViewOpen] = useState(false);
     const [isDisconnected, setIsDisconnected] = useState(false);
+    const [attackingMinionIds, setAttackingMinionIds] = useState<string[]>([]);
 
     useEffect(() => {
         if (gameOver && winner) {
@@ -211,6 +212,10 @@ export const GameArea: React.FC<GameAreaProps> = ({ mode, isDebugMode, customDec
 
         if (!selectedMinions?.length) return;
 
+        // Trigger attack animation
+        setAttackingMinionIds(selectedMinions);
+        setTimeout(() => setAttackingMinionIds([]), 300);
+
         // Multi-attack: use all selected minions
         attackMultiplayer(selectedMinions, minionId); // Use multiplayer-aware function
     };
@@ -224,6 +229,11 @@ export const GameArea: React.FC<GameAreaProps> = ({ mode, isDebugMode, customDec
 
     const handleAttackPlayer = () => {
         if (!viewIsPlayerTurn || !selectedMinions?.length) return;
+
+        // Trigger attack animation
+        setAttackingMinionIds(selectedMinions);
+        setTimeout(() => setAttackingMinionIds([]), 300);
+
         attackMultiplayer(selectedMinions); // Use multiplayer-aware function
     };
 
@@ -746,6 +756,7 @@ export const GameArea: React.FC<GameAreaProps> = ({ mode, isDebugMode, customDec
                                 attacksBlocked={isClient ? (gameState.opponent.minionAttackBlockTurns || 0) > 0 : (gameState.player.minionAttackBlockTurns || 0) > 0}
                                 currentTurn={gameState.turn}
                                 isMyTurn={viewIsPlayerTurn}
+                                attackingMinionIds={attackingMinionIds}
                             />
                         </div>
                     </div>
