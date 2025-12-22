@@ -67,7 +67,7 @@ export const Board: React.FC<BoardProps> = ({
                     </button>
                 )}
 
-                <div className="flex gap-3 justify-center overflow-visible px-8 pt-4 min-h-[220px] relative z-10">
+                <div className="flex gap-5 justify-center overflow-visible px-8 pt-4 min-h-[220px] relative z-10">
                     <AnimatePresence mode="popLayout">
                         {minions.length === 0 ? (
                             <motion.div

@@ -171,7 +171,6 @@ export const Card: React.FC<CardProps> = ({
             )}
 
             <motion.div
-                layout
                 className={`${baseClasses} ${isAttacking ? 'animate-attack-swing' : ''}`}
                 onContextMenu={handleContextMenu}
                 style={{ width: '140px', height: '200px', backgroundColor: '#fef3c7' }}
@@ -195,8 +194,9 @@ export const Card: React.FC<CardProps> = ({
                 whileTap={{ scale: 0.95 }}
                 transition={{
                     type: "spring",
-                    stiffness: 400,
-                    damping: 25
+                    stiffness: 500,
+                    damping: 30,
+                    mass: 0.8
                 }}
             >
                 {/* Transparent clickable overlay - captures ALL clicks */}
