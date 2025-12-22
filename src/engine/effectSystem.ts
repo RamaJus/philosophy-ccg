@@ -1,4 +1,5 @@
 import { GameState, Effect } from '../types';
+import { playVoiceline } from '../audio/voicelines';
 
 // Helper to get players safely based on active turn perspective
 export const getActivePlayers = (state: GameState) => {
@@ -26,7 +27,8 @@ export const processEffect = (
             } else if (effect.target === 'SELF') {
                 newActivePlayer.health -= damage; // e.g. Schopenhauer
                 if (damage === 5) {
-                    logUpdates.push(`Die Welt ist Wille und Vorstellung... und Schmerz. Aua.`);
+                    playVoiceline('schopenhauer');
+                    logUpdates.push(`${activePlayer.name} erlitt ${damage} Selbstschaden.`);
                 } else {
                     logUpdates.push(`${activePlayer.name} erlitt ${damage} Schaden!`);
                 }
@@ -98,7 +100,8 @@ export const processEffect = (
 
                 const conditionText = effect.condition === 'MALE' ? 'männlichen ' : '';
                 if (effect.condition === 'MALE') {
-                    logUpdates.push(`Diotima erklärt die Liebe. Die Männer hören endlich mal zu (und schweigen).`);
+                    playVoiceline('diotima');
+                    logUpdates.push(`${activePlayer.name} verstummte alle männlichen Philosophen.`);
                 } else {
                     logUpdates.push(`${activePlayer.name} verstummte alle ${conditionText}gegnerischen Philosophen für ${duration} Runde(n)!`);
                 }
@@ -158,10 +161,11 @@ export const processEffect = (
             const count = effect.value || 3;
             const topCards = newEnemyPlayer.deck.slice(0, count);
             if (topCards.length > 0) {
+                playVoiceline('foucault');
                 return {
                     player: state.activePlayer === 'player' ? newActivePlayer : newEnemyPlayer,
                     opponent: state.activePlayer === 'player' ? newEnemyPlayer : newActivePlayer,
-                    log: [...state.log, ...logUpdates, `Panoptismus! Foucault sieht alles, auch deine Karten.`],
+                    log: [...state.log, ...logUpdates, `${activePlayer.name} sieht die Karten des Gegners.`],
                     foucaultRevealCards: topCards,
                     targetMode: 'foucault_reveal',
                     targetModeOwner: state.activePlayer
@@ -211,7 +215,8 @@ export const processEffect = (
                 const tempHealth = newActivePlayer.health;
                 newActivePlayer.health = newEnemyPlayer.health;
                 newEnemyPlayer.health = tempHealth;
-                logUpdates.push(`Wir müssen uns den Verlierer als glücklichen Menschen vorstellen!`);
+                playVoiceline('camus');
+                logUpdates.push(`Die Lebenspunkte wurden getauscht!`);
             }
             break;
         }
@@ -236,7 +241,8 @@ export const processEffect = (
                     };
 
                     newActivePlayer.board = [...newActivePlayer.board, stolenMinion];
-                    logUpdates.push(`Enteignet! ${stolen.name} gehört jetzt dem Volk (also mir).`);
+                    playVoiceline('marx');
+                    logUpdates.push(`${stolen.name} wurde enteignet!`);
                 }
             }
             break;
@@ -246,7 +252,8 @@ export const processEffect = (
             if (effect.target === 'ENEMY') {
                 // Kant: Block enemy from attacking minions for X turns
                 newEnemyPlayer.minionAttackBlockTurns = (newEnemyPlayer.minionAttackBlockTurns || 0) + duration;
-                logUpdates.push(`Das ist unmoralisch! Kant verbietet, Philosophen als bloße Mittel zum Angriff zu benutzen.`);
+                playVoiceline('kant');
+                logUpdates.push(`Angriffe auf Philosophen sind blockiert.`);
             }
             break;
         }

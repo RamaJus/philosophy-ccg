@@ -2,6 +2,7 @@ import { GameState, Player, GameAction, BoardMinion } from '../types';
 import { generateDeck, cardDatabase } from '../data/cards';
 import { processEffect } from './effectSystem';
 import { calculateSynergies } from './synergies';
+import { playVoiceline } from '../audio/voicelines';
 
 // Constants
 const STARTING_HAND_SIZE = 4;
@@ -318,9 +319,11 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
                     minionHealth = Math.floor(Math.random() * 10) + 1; // 1-10
                     logMessage = `Non Sequitur! ${card.name} erschien mit zufälligen Werten (${minionAttack}/${minionHealth})!`;
                 } else if (card.id === 'sartre') {
-                    logMessage = `Sartre ist zur Freiheit verurteilt... und zur Macht im nächsten Zug.`;
+                    playVoiceline('sartre');
+                    logMessage = `${p.name} beschwörte ${card.name}.`;
                 } else if (card.id === 'wittgenstein') {
-                    logMessage = `Alle Probleme sind nur Sprachverwirrung. Wittgenstein räumt auf: Stille.`;
+                    playVoiceline('wittgenstein');
+                    logMessage = `${p.name} beschwörte ${card.name}.`;
                 }
 
                 const minion: BoardMinion = {
@@ -407,7 +410,8 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
 
                 // Diogenes Check (Untargetable)
                 if (target.untargetableUntilTurn && target.untargetableUntilTurn > state.turn) {
-                    currentLog = appendLog(currentLog, `Geh mir aus der Sonne! ${target.name} bleibt in der Tonne.`);
+                    playVoiceline('diogenes');
+                    currentLog = appendLog(currentLog, `${target.name} kann noch nicht angegriffen werden.`);
                     return { ...state, log: currentLog };
                 }
 
@@ -801,7 +805,8 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
                     hasUsedSpecial: false,
                     specialAbility: undefined
                 };
-                log = appendLog(log, `Gott ist tot, doch ${targetMinion.name} verbleibt als letzter Mensch in seiner Sklavenmoral.`);
+                playVoiceline('nietzsche');
+                log = appendLog(log, `${targetMinion.name} wurde zum letzten Menschen.`);
             }
 
             // Update Boards
@@ -855,7 +860,8 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
                 image: '/images/cards/chair_matter.png',
             };
 
-            let log = appendLog(state.log, `Logisch betrachtet existiert ${targetMinion.name} gar nicht. Nur Atome, die stuhlartig angeordnet sind.`);
+            playVoiceline('van_inwagen');
+            let log = appendLog(state.log, `${targetMinion.name} wurde zu stuhlartiger Materie.`);
 
             const updatedEnemyBoard = enemyPlayer.board.map(m => (m.instanceId || m.id) === minionId ? chairMatter : m);
             const updatedActiveBoard = activePlayer.board.map(m => (m.instanceId || m.id) === vanInwagenId ? { ...m, hasUsedSpecial: true, hasAttacked: true, specialExhausted: true } : m);
