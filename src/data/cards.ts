@@ -49,12 +49,15 @@ export const cardDatabase: Card[] = [
         attack: 5,
         health: 5,
         description: 'Gedanken ohne Inhalt sind leer, Anschauungen ohne Begriffe sind blind.',
-        effect: 'Das Instrumentalisierungsverbot: Im nächsten Zug kann der Gegner keine Philosophen angreifen.',
         effects: [{ type: 'PROTECT', target: 'ENEMY', duration: 2 }],
         rarity: 'Legendär',
         school: ['Idealismus', 'Rationalismus', 'Moralphilosophie'],
         gender: 'male',
         image: '/images/cards/kant.png',
+        special: {
+            name: 'Instrumentalisierungsverbot',
+            description: 'Im nächsten Zug kann der Gegner keine Philosophen angreifen.'
+        }
     },
     {
         id: 'nietzsche',
@@ -110,7 +113,7 @@ export const cardDatabase: Card[] = [
         attack: 2,
         health: 8,
         description: 'Das Tao, das gesagt werden kann, ist nicht das ewige Tao.',
-        rarity: 'Legendär',
+        rarity: 'Gewöhnlich',
         school: ['Metaphysik'],
         gender: 'male',
         image: '/images/cards/laozi.png',
@@ -124,7 +127,7 @@ export const cardDatabase: Card[] = [
         attack: 4,
         health: 7,
         description: 'Der Erleuchtete. Der mittlere Weg zum Nirvana.',
-        rarity: 'Legendär',
+        rarity: 'Gewöhnlich',
         school: ['Religion', 'Metaphysik', 'Moralphilosophie'],
         gender: 'male',
         image: '/images/cards/buddha.png',
@@ -332,7 +335,7 @@ export const cardDatabase: Card[] = [
         attack: 5,
         health: 6,
         description: 'Der Meister der Dialektik. These, Antithese, Synthese.',
-        rarity: 'Legendär',
+        rarity: 'Gewöhnlich',
         school: ['Idealismus', 'Logik'],
         gender: 'male',
         image: '/images/cards/hegel.png',
@@ -565,7 +568,6 @@ export const cardDatabase: Card[] = [
         attack: 1,
         health: 1,
         description: 'Die Existenz geht der Essenz voraus. Wir sind zur Freiheit verurteilt.',
-        effect: 'Nach einer Runde: Verwandelt sich in eine 8/6 Version seiner selbst.',
         rarity: 'Legendär',
         school: ['Existentialismus', 'Politik'],
         gender: 'male',
@@ -573,7 +575,7 @@ export const cardDatabase: Card[] = [
         pendingTransformation: { turnTrigger: 1000 /* Dummy, logic uses turnPlayed */, newStats: { attack: 8, health: 6 } },
         special: {
             name: 'Existenz vor Essenz',
-            description: 'Startet als 1/1 und wird erst in der nächsten eigenen Angriffsrunde zu einem mächtigen 8/6 Philosophen.'
+            description: 'Startet als 1/1 und wird in der nächsten eigenen Angriffsrunde zu einem mächtigen 8/6 Philosophen.'
         }
     },
     {
@@ -584,7 +586,7 @@ export const cardDatabase: Card[] = [
         attack: 4,
         health: 6,
         description: 'Das Dasein ist das Seiende, dem es in seinem Sein um dieses Sein selbst geht.',
-        rarity: 'Legendär',
+        rarity: 'Gewöhnlich',
         school: ['Existentialismus', 'Metaphysik'],
         gender: 'male',
         image: '/images/cards/heidegger.png',
@@ -980,12 +982,15 @@ export const cardDatabase: Card[] = [
         attack: 2,
         health: 3,
         description: 'Lehrerin des Sokrates über die Liebe.',
-        effect: 'Alle männlichen Philosophen schweigen für eine Runde (können nicht angreifen).',
         effects: [{ type: 'SILENCE', target: 'ENEMY', condition: 'MALE', duration: 2 }],
         rarity: 'Legendär',
         school: ['Metaphysik', 'Moralphilosophie'],
         gender: 'female',
         image: '/images/cards/diotima.png',
+        special: {
+            name: 'Belehrung',
+            description: 'Alle männlichen Philosophen können für eine Runde nicht angreifen.'
+        }
     },
     {
         id: 'camus',
@@ -995,14 +1000,13 @@ export const cardDatabase: Card[] = [
         attack: 1,
         health: 1,
         description: 'Wir müssen uns den Verlierer als glücklichen Menschen vorstellen.',
-        effect: 'Tauscht verbliebene Glaubwürdigkeit mit der des Gegners.',
         rarity: 'Legendär',
         school: ['Existentialismus'],
         gender: 'male',
         image: '/images/cards/camus.png',
         effects: [{ type: 'SWAP_STATS', target: 'ENEMY' }],
         special: {
-            name: 'Absurder Tausch',
+            name: 'Absurdität des Lebens',
             description: 'Tauscht beim Ausspielen die Lebenspunkte der Spieler.'
         }
     },

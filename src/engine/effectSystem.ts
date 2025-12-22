@@ -202,7 +202,7 @@ export const processEffect = (
                 newEnemyPlayer.board = [];
                 newEnemyPlayer.graveyard = enemyGraveyard;
 
-                logUpdates.push(`Alle Probleme sind nur Sprachverwirrung. Wittgenstein räumt auf: Stille.`);
+                logUpdates.push(`Das Spielfeld wurde vollständig geleert!`);
             }
             break;
         }
@@ -211,7 +211,7 @@ export const processEffect = (
                 const tempHealth = newActivePlayer.health;
                 newActivePlayer.health = newEnemyPlayer.health;
                 newEnemyPlayer.health = tempHealth;
-                logUpdates.push(`Das Leben ist absurd. Warum sollte ich sterben und nicht du? (HP getauscht)`);
+                logUpdates.push(`Wir müssen uns den Verlierer als glücklichen Menschen vorstellen!`);
             }
             break;
         }

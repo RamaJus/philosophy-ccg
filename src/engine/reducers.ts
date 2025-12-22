@@ -319,6 +319,8 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
                     logMessage = `Non Sequitur! ${card.name} erschien mit zufälligen Werten (${minionAttack}/${minionHealth})!`;
                 } else if (card.id === 'sartre') {
                     logMessage = `Sartre ist zur Freiheit verurteilt... und zur Macht im nächsten Zug.`;
+                } else if (card.id === 'wittgenstein') {
+                    logMessage = `Alle Probleme sind nur Sprachverwirrung. Wittgenstein räumt auf: Stille.`;
                 }
 
                 const minion: BoardMinion = {
