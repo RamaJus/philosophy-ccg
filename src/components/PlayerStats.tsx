@@ -25,8 +25,10 @@ export const PlayerStats: React.FC<PlayerStatsProps> = ({ player, isOpponent = f
                 setIsDamaged(false);
                 setDamageAmount(null);
             }, 800);
+            prevHealth.current = player.health;
             return () => clearTimeout(timer);
         }
+        // Always update ref for accurate next comparison
         prevHealth.current = player.health;
     }, [player.health]);
 
@@ -48,7 +50,6 @@ export const PlayerStats: React.FC<PlayerStatsProps> = ({ player, isOpponent = f
                         : 'bg-gradient-to-br from-slate-900/95 via-blue-950/30 to-slate-900/95 border-blue-900/50'
                     }
                     ${isDamaged ? 'animate-shake ring-2 ring-red-500 bg-red-900/30' : ''}
-                    ${isActive && !isDamaged ? (isOpponent ? 'ring-2 ring-red-500/40 shadow-lg shadow-red-500/20' : 'ring-2 ring-blue-500/40 shadow-lg shadow-blue-500/20') : ''}
                     backdrop-blur-sm shadow-xl
                 `}
             >

@@ -745,6 +745,7 @@ export const GameArea: React.FC<GameAreaProps> = ({ mode, isDebugMode, customDec
                                 synergiesBlocked={(viewPlayer.synergyBlockTurns || 0) > 0}
                                 attacksBlocked={isClient ? (gameState.opponent.minionAttackBlockTurns || 0) > 0 : (gameState.player.minionAttackBlockTurns || 0) > 0}
                                 currentTurn={gameState.turn}
+                                isMyTurn={viewIsPlayerTurn}
                             />
                         </div>
                     </div>

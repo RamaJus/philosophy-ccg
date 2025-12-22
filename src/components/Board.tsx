@@ -15,6 +15,7 @@ interface BoardProps {
     synergiesBlocked?: boolean;
     attacksBlocked?: boolean;
     currentTurn?: number;
+    isMyTurn?: boolean;
 }
 
 export const Board: React.FC<BoardProps> = ({
@@ -27,7 +28,8 @@ export const Board: React.FC<BoardProps> = ({
     isSpecialTargeting = false,
     synergiesBlocked = false,
     attacksBlocked = false,
-    currentTurn = 0
+    currentTurn = 0,
+    isMyTurn = false
 }) => {
     const [startIndex, setStartIndex] = useState(0);
     const VISIBLE_COUNT = 6;
@@ -43,7 +45,7 @@ export const Board: React.FC<BoardProps> = ({
     const visibleMinions = minions.slice(startIndex, startIndex + VISIBLE_COUNT);
 
     return (
-        <div className={`glass-panel p-4 min-h-[300px] ${isPlayerBoard ? 'bg-blue-500/5' : 'bg-red-500/5'} ${isSpecialTargeting ? 'cursor-magic ring-2 ring-purple-500/50' : ''}`}>
+        <div className={`glass-panel p-4 min-h-[300px] transition-all duration-500 ${isPlayerBoard ? 'bg-blue-500/5' : 'bg-red-500/5'} ${isSpecialTargeting ? 'cursor-magic ring-2 ring-purple-500/50' : ''} ${isPlayerBoard && isMyTurn ? 'ring-2 ring-emerald-500/50 shadow-lg shadow-emerald-500/20' : ''}`}>
             <h3 className="text-sm font-semibold mb-2 text-center text-gray-300">
                 {isPlayerBoard ? 'Deine Philosophen' : 'Gegnerische Philosophen'}
                 {synergiesBlocked && <span className="block text-xs text-red-400 font-bold animate-pulse mt-1">⚠ SCHUL-SYNERGIEN BLOCKIERT</span>}
