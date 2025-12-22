@@ -1003,13 +1003,16 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
         }
 
         case 'SET_OPPONENT_DECK': {
-            const { deckIds, playerName } = action;
+            const { deckIds, playerName, avatarId } = action;
 
-            // Create updated opponent with playerName if provided
+            // Create updated opponent with playerName and avatarId if provided
             let updatedOpponent = { ...state.opponent };
 
             if (playerName) {
                 updatedOpponent.name = playerName;
+            }
+            if (avatarId) {
+                updatedOpponent.avatarId = avatarId;
             }
 
             // If deckIds provided, rebuild deck

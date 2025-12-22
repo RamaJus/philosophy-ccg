@@ -38,9 +38,9 @@ export const useGameLogic = (gameMode: 'single' | 'host' | 'client', isDebugMode
     // 3.5 Check for pending opponent handshake data (race condition fix)
     useEffect(() => {
         if (isHost && multiplayer.receivedOpponentDeckIds) {
-            const { deckIds, playerName } = multiplayer.receivedOpponentDeckIds;
-            console.log('[useGameLogic] Found pending opponent data:', { deckIds: deckIds?.length, playerName });
-            dispatch({ type: 'SET_OPPONENT_DECK', deckIds, playerName });
+            const { deckIds, playerName, avatarId } = multiplayer.receivedOpponentDeckIds;
+            console.log('[useGameLogic] Found pending opponent data:', { deckIds: deckIds?.length, playerName, avatarId });
+            dispatch({ type: 'SET_OPPONENT_DECK', deckIds, playerName, avatarId });
             multiplayer.receivedOpponentDeckIds = null; // Clear after processing
         }
     }, [isHost]); // Run once on mount when host
@@ -64,26 +64,35 @@ export const useGameLogic = (gameMode: 'single' | 'host' | 'client', isDebugMode
             }
         };
 
-        // Handle Handshake from Client (Host receives client's data)
-        const handleHandshake = (data: { deckIds?: string[]; playerName?: string }) => {
-            if (isHost && data) {
-                console.log('[useGameLogic] Host received handshake:', data);
-                dispatch({ type: 'SET_OPPONENT_DECK', deckIds: data.deckIds, playerName: data.playerName });
+        // Handle Handshake from peer
+        const handleHandshake = (data: { deckIds?: string[]; playerName?: string; avatarId?: string }) => {
+            if (data) {
+                console.log('[useGameLogic] Received handshake:', data, 'isHost:', isHost);
+                dispatch({ type: 'SET_OPPONENT_DECK', deckIds: data.deckIds, playerName: data.playerName, avatarId: data.avatarId });
+
+                // If we are the host and just received client's data, send our data back
+                if (isHost) {
+                    const playerName = localStorage.getItem('philosophy-ccg-player-name') || 'Spieler';
+                    const settingsStr = localStorage.getItem('philosophy-ccg-settings');
+                    const avatarId = settingsStr ? JSON.parse(settingsStr).avatarId : 'novice';
+                    const deckStr = localStorage.getItem('philosophy-ccg-deck');
+                    const deckIds = deckStr ? JSON.parse(deckStr).cardIds : undefined;
+                    console.log('[useGameLogic] Host sending handshake response:', { playerName, avatarId });
+                    multiplayer.sendHandshake(deckIds, playerName, avatarId);
+                }
             }
         };
 
         multiplayer.onAction(handleAction);
         multiplayer.onState(handleState);
 
-        // Set up handshake callback for host
-        if (isHost) {
-            multiplayer.setCallbacks(
-                handleState,
-                handleAction,
-                () => { },
-                handleHandshake
-            );
-        }
+        // Set up handshake callback for both host and client
+        multiplayer.setCallbacks(
+            handleState,
+            handleAction,
+            () => { },
+            handleHandshake
+        );
 
         return () => {
             // Cleanup listeners if MultiplayerManager supported removal

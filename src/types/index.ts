@@ -66,6 +66,7 @@ export interface Player {
     synergyBlockTurns?: number; // Number of turns synergy bonuses are disabled
     minionAttackBlockTurns?: number; // Number of turns opponent minions cannot attack (Kant)
     randomizeNextMinion?: boolean; // Non Sequitur: next philosopher played gets random stats
+    avatarId?: string; // Player's selected avatar
 }
 
 export interface GameState {
@@ -111,7 +112,7 @@ export type GameAction =
     | { type: 'RECURRENCE_SELECT'; cardId: string } // Uses instanceId
     | { type: 'CANCEL_CAST' }
     | { type: 'SYNC_STATE'; newState: GameState }
-    | { type: 'SET_OPPONENT_DECK'; deckIds?: string[]; playerName?: string }
+    | { type: 'SET_OPPONENT_DECK'; deckIds?: string[]; playerName?: string; avatarId?: string }
     | { type: 'EROS_TARGET'; minionId: string }
     | { type: 'SET_DISCARD_MODE'; active: boolean } // Enter/exit discard mode
     | { type: 'DISCARD_CARD'; cardId: string }; // Discard card from hand

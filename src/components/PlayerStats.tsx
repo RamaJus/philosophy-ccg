@@ -76,10 +76,11 @@ export const PlayerStats: React.FC<PlayerStatsProps> = ({ player, isOpponent = f
                         className="relative flex-shrink-0 w-14 h-14 rounded-lg overflow-visible border-2 border-slate-600/50 hover:border-amber-500/70 transition-all hover:scale-105 cursor-pointer group"
                         title="Klicken für Großansicht"
                     >
-                        {/* Placeholder Avatar */}
-                        <div className="w-full h-full bg-gradient-to-br from-slate-700 to-slate-800 flex items-center justify-center rounded-lg overflow-hidden">
-                            <span className="text-2xl opacity-60">👤</span>
-                        </div>
+                        {/* Avatar Image */}
+                        <div
+                            className="w-full h-full bg-cover bg-center rounded-lg overflow-hidden"
+                            style={{ backgroundImage: `url(${player.avatarId ? `/images/avatars/${player.avatarId}.png` : '/images/avatars/novice.png'})` }}
+                        />
                         {/* Hover overlay */}
                         <div className="absolute inset-0 bg-amber-500/0 group-hover:bg-amber-500/10 transition-colors flex items-center justify-center rounded-lg">
                             <span className="text-white opacity-0 group-hover:opacity-70 text-xs">🔍</span>
@@ -208,9 +209,10 @@ export const PlayerStats: React.FC<PlayerStatsProps> = ({ player, isOpponent = f
                             onClick={e => e.stopPropagation()}
                         >
                             {/* Large Avatar Display */}
-                            <div className="w-64 h-64 rounded-2xl overflow-hidden border-4 border-amber-500/50 shadow-2xl bg-gradient-to-br from-slate-700 to-slate-800 flex items-center justify-center">
-                                <span className="text-8xl opacity-60">👤</span>
-                            </div>
+                            <div
+                                className="w-64 h-64 rounded-2xl overflow-hidden border-4 border-amber-500/50 shadow-2xl bg-cover bg-center"
+                                style={{ backgroundImage: `url(${player.avatarId ? `/images/avatars/${player.avatarId}.png` : '/images/avatars/novice.png'})` }}
+                            />
 
                             {/* Player Name */}
                             <div className="mt-4 text-center">

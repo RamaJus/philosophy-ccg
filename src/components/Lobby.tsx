@@ -207,7 +207,7 @@ export const Lobby: React.FC<LobbyProps> = ({ onStartGame, isDebugMode, setIsDeb
                 const deckIds = (isCustom && isValid)
                     ? JSON.parse(localStorage.getItem('philosophy-ccg-deck') || '{}').cardIds
                     : undefined;
-                multiplayer.sendHandshake(deckIds, playerName);
+                multiplayer.sendHandshake(deckIds, playerName, settings.avatarId);
                 onStartGame('multiplayer_client');
             }
         );
