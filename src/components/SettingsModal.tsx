@@ -99,6 +99,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                             Audio
                         </h3>
                         <div className="space-y-3 bg-slate-800/50 rounded-lg p-3">
+                            {/* Music Volume */}
                             <div className="flex items-center justify-between">
                                 <span className="text-white font-medium">Musik-Lautstärke</span>
                                 <button
@@ -121,6 +122,34 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                                 <span className="text-sm text-gray-400 w-10 text-right">
                                     {settings.musicMuted ? '0%' : `${settings.musicVolume}%`}
                                 </span>
+                            </div>
+
+                            {/* Voiceline Volume */}
+                            <div className="border-t border-slate-600 pt-3 mt-3">
+                                <div className="flex items-center justify-between">
+                                    <span className="text-white font-medium">Voicelines</span>
+                                    <button
+                                        onClick={() => onSettingChange('voicelineMuted', !settings.voicelineMuted)}
+                                        className={`p-2 rounded-lg transition-colors ${settings.voicelineMuted ? 'bg-red-500/20 text-red-400' : 'bg-slate-700 text-gray-300'}`}
+                                    >
+                                        {settings.voicelineMuted ? <VolumeX size={18} /> : <Volume2 size={18} />}
+                                    </button>
+                                </div>
+                                <p className="text-xs text-gray-400 mb-2">Sprachausgabe der legendären Philosophen</p>
+                                <div className="flex items-center gap-3">
+                                    <input
+                                        type="range"
+                                        min="0"
+                                        max="100"
+                                        value={settings.voicelineMuted ? 0 : settings.voicelineVolume}
+                                        onChange={(e) => onSettingChange('voicelineVolume', parseInt(e.target.value))}
+                                        disabled={settings.voicelineMuted}
+                                        className="flex-1 h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-purple-500 disabled:opacity-50"
+                                    />
+                                    <span className="text-sm text-gray-400 w-10 text-right">
+                                        {settings.voicelineMuted ? '0%' : `${settings.voicelineVolume}%`}
+                                    </span>
+                                </div>
                             </div>
                         </div>
                     </div>

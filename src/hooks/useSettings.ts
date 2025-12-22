@@ -9,6 +9,8 @@ export interface GameSettings {
     cardPreviewAnimation: boolean;
     musicVolume: number;
     musicMuted: boolean;
+    voicelineVolume: number;
+    voicelineMuted: boolean;
     debugMode: boolean;
 }
 
@@ -19,6 +21,8 @@ const DEFAULT_SETTINGS: GameSettings = {
     cardPreviewAnimation: true,
     musicVolume: 50,
     musicMuted: false,
+    voicelineVolume: 70,
+    voicelineMuted: false,
     debugMode: false,
 };
 
@@ -31,6 +35,8 @@ interface SettingsContextType {
     setCardPreviewAnimation: (value: boolean) => void;
     setMusicVolume: (value: number) => void;
     setMusicMuted: (value: boolean) => void;
+    setVoicelineVolume: (value: number) => void;
+    setVoicelineMuted: (value: boolean) => void;
     setDebugMode: (value: boolean) => void;
     resetToDefaults: () => void;
 }
@@ -68,6 +74,8 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({ children }
     const setCardPreviewAnimation = useCallback((v: boolean) => saveSettings({ cardPreviewAnimation: v }), [saveSettings]);
     const setMusicVolume = useCallback((v: number) => saveSettings({ musicVolume: v }), [saveSettings]);
     const setMusicMuted = useCallback((v: boolean) => saveSettings({ musicMuted: v }), [saveSettings]);
+    const setVoicelineVolume = useCallback((v: number) => saveSettings({ voicelineVolume: v }), [saveSettings]);
+    const setVoicelineMuted = useCallback((v: boolean) => saveSettings({ voicelineMuted: v }), [saveSettings]);
     const setDebugMode = useCallback((v: boolean) => saveSettings({ debugMode: v }), [saveSettings]);
 
     const resetToDefaults = useCallback(() => {
@@ -84,6 +92,8 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({ children }
         setCardPreviewAnimation,
         setMusicVolume,
         setMusicMuted,
+        setVoicelineVolume,
+        setVoicelineMuted,
         setDebugMode,
         resetToDefaults,
     };

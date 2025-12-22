@@ -18,14 +18,40 @@ export const VOICELINES: Record<string, string> = {
 // Global audio instance to prevent overlapping
 let currentVoiceline: HTMLAudioElement | null = null;
 
+const SETTINGS_KEY = 'philosophy-ccg-settings';
+
+/**
+ * Get voiceline settings from localStorage
+ */
+function getVoicelineSettings(): { muted: boolean; volume: number } {
+    try {
+        const stored = localStorage.getItem(SETTINGS_KEY);
+        if (stored) {
+            const settings = JSON.parse(stored);
+            return {
+                muted: settings.voicelineMuted ?? false,
+                volume: (settings.voicelineVolume ?? 70) / 100, // Convert 0-100 to 0-1
+            };
+        }
+    } catch (e) {
+        console.warn('Failed to read voiceline settings:', e);
+    }
+    return { muted: false, volume: 0.7 };
+}
+
 /**
  * Play a voiceline for a legendary philosopher
  * @param philosopherId - The card id (e.g. 'kant', 'nietzsche')
- * @param volume - Volume level (0.0 to 1.0), default 0.7
  */
-export function playVoiceline(philosopherId: string, volume: number = 0.7): void {
+export function playVoiceline(philosopherId: string): void {
     // Skip in non-browser environments (Node.js tests)
     if (typeof window === 'undefined' || typeof Audio === 'undefined') {
+        return;
+    }
+
+    // Check settings
+    const { muted, volume } = getVoicelineSettings();
+    if (muted || volume === 0) {
         return;
     }
 
