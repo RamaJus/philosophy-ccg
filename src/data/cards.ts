@@ -970,7 +970,7 @@ export const cardDatabase: Card[] = [
         effect: 'Wähle einen eigenen Philosophen. Er erhält +2 Angriff und -2 Leben für eine Runde. Stirbt, falls Leben unter 3.',
         effects: [{ type: 'TARGET_MODE', target: 'SELF', mode: 'cave_ascent_target' }],
         rarity: 'Gewöhnlich',
-        image: '/images/cards/aufstieg_aus_der_hoehle.png',
+        image: '/images/cards/cave_ascent.png',
     },
     {
         id: 'diotima',
