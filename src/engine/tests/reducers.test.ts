@@ -287,7 +287,7 @@ describe('gameReducer', () => {
 
                 // Attack should be blocked - Diogenes health unchanged
                 expect(newState.opponent.board[0].health).toBe(1);
-                expect(newState.log.some(msg => msg.includes('Tonne'))).toBe(true);
+                expect(newState.log.some(msg => msg.includes('nicht angegriffen werden'))).toBe(true);
             });
         });
     });

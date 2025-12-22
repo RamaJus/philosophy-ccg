@@ -24,6 +24,11 @@ let currentVoiceline: HTMLAudioElement | null = null;
  * @param volume - Volume level (0.0 to 1.0), default 0.7
  */
 export function playVoiceline(philosopherId: string, volume: number = 0.7): void {
+    // Skip in non-browser environments (Node.js tests)
+    if (typeof window === 'undefined' || typeof Audio === 'undefined') {
+        return;
+    }
+
     const voicelinePath = VOICELINES[philosopherId.toLowerCase()];
 
     if (!voicelinePath) {
