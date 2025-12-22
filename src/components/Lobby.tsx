@@ -235,7 +235,13 @@ export const Lobby: React.FC<LobbyProps> = ({ onStartGame, isDebugMode, setIsDeb
                         backgroundPosition: 'center',
                     }}
                 />
-                <div className="absolute inset-0 bg-gradient-to-br from-slate-900/95 via-slate-800/90 to-amber-900/85" />
+                {/* Center overlay - fades towards sides to let philosopher portraits show */}
+                <div
+                    className="absolute inset-0"
+                    style={{
+                        background: 'radial-gradient(ellipse 70% 100% at 50% 50%, rgba(15,23,42,0.95) 0%, rgba(15,23,42,0.85) 40%, rgba(15,23,42,0.4) 70%, transparent 100%)',
+                    }}
+                />
 
                 {/* Left Philosopher Portrait */}
                 {leftPhilosopher && (
