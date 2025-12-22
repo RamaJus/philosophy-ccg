@@ -57,6 +57,7 @@ export const Lobby: React.FC<LobbyProps> = ({ onStartGame, isDebugMode, setIsDeb
         'schopenhauer': 'left',
         'thales_von_milet': 'left',
         'zhuangzi': 'left',
+        'adorno': 'left',
 
         // Facing RIGHT (should appear on LEFT side of menu)
         'anaximenes': 'right',
