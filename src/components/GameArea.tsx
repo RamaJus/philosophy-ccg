@@ -195,6 +195,13 @@ export const GameArea: React.FC<GameAreaProps> = ({ mode, isDebugMode, customDec
             return;
         }
 
+        // DEDUKTION and INDUKTION - these use SELECT_MINION but need to be networked
+        if (targetMode === 'deduktion_target' || targetMode === 'induktion_target') {
+            const action: import('../types').GameAction = { type: 'SELECT_MINION', minionId, toggle: true };
+            if (isClient) multiplayer.sendAction(action); else dispatch(action);
+            return;
+        }
+
         // Toggle selection (add/remove from array) - Local UI only
         dispatch({ type: 'SELECT_MINION', minionId, toggle: true });
     };
@@ -695,6 +702,34 @@ export const GameArea: React.FC<GameAreaProps> = ({ mode, isDebugMode, customDec
                                     <>
                                         <div className="px-4 py-2 bg-yellow-500/20 text-yellow-400 rounded-lg border border-yellow-500/50 animate-pulse">
                                             <p className="text-sm font-bold">Wähle einen eigenen Philosophen (Aufstieg aus der Höhle)</p>
+                                        </div>
+                                        <button
+                                            onClick={handleCancelCast}
+                                            className="px-3 py-1 bg-red-800 hover:bg-red-700 text-white rounded border border-red-500 text-sm"
+                                        >
+                                            Zauber abbrechen
+                                        </button>
+                                    </>
+                                )}
+
+                                {targetMode === 'deduktion_target' && isMyTargetMode && (
+                                    <>
+                                        <div className="px-4 py-2 bg-blue-500/20 text-blue-400 rounded-lg border border-blue-500/50 animate-pulse">
+                                            <p className="text-sm font-bold">Deduktion: Wähle 3 Philosophen ({selectedMinions?.length || 0}/3)</p>
+                                        </div>
+                                        <button
+                                            onClick={handleCancelCast}
+                                            className="px-3 py-1 bg-red-800 hover:bg-red-700 text-white rounded border border-red-500 text-sm"
+                                        >
+                                            Zauber abbrechen
+                                        </button>
+                                    </>
+                                )}
+
+                                {targetMode === 'induktion_target' && isMyTargetMode && (
+                                    <>
+                                        <div className="px-4 py-2 bg-purple-500/20 text-purple-400 rounded-lg border border-purple-500/50 animate-pulse">
+                                            <p className="text-sm font-bold">Induktion: Wähle einen Philosophen</p>
                                         </div>
                                         <button
                                             onClick={handleCancelCast}

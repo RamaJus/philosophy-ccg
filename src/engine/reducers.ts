@@ -255,6 +255,28 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
                 hand: activePlayer.hand.filter(c => c.instanceId !== action.cardId)
             };
 
+            // EPIPHANIE Logic (Draw random legendary)
+            if (card.id === 'epiphanie') {
+                const legendaryCards = updatedPlayer.deck.filter(c => c.rarity === 'Legendär');
+                if (legendaryCards.length > 0) {
+                    const randomIndex = Math.floor(Math.random() * legendaryCards.length);
+                    const chosenCard = legendaryCards[randomIndex];
+
+                    // Remove from deck
+                    updatedPlayer.deck = updatedPlayer.deck.filter(c => c.instanceId !== chosenCard.instanceId);
+
+                    // Add to hand (if space)
+                    if (updatedPlayer.hand.length < 10) {
+                        updatedPlayer.hand = [...updatedPlayer.hand, chosenCard];
+                    } else {
+                        // Hand full - burn card (add to graveyard) - Optional rule, but standard TCG. Or just leave in deck?
+                        // "Ziehe" implies card leaves deck. If hand full, usually burned.
+                        // Let's assume standard draw behavior: drawn to full hand => graveyard.
+                        updatedPlayer.graveyard = [...updatedPlayer.graveyard, chosenCard];
+                    }
+                }
+            }
+
             // Apply to state
             newState = {
                 ...state,
@@ -480,6 +502,96 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
 
         case 'SELECT_MINION': {
             const { minionId, toggle } = action;
+
+            // Handle DEDUKTION (3 targets) and INDUKTION (1 target)
+            if (state.targetMode === 'deduktion_target') {
+                const activePlayer = state.activePlayer === 'player' ? state.player : state.opponent;
+                // Only friendly minions
+                if (!activePlayer.board.some(m => (m.instanceId || m.id) === minionId)) return state;
+
+                let newSelected = state.selectedMinions || [];
+                // Simply add the ID, allowing duplicates as per "3 choices" interpretation (or unique?)
+                // "Wähle 3 Philosophen" -> If we want to allow same, we just push.
+                // But toggle UI usually handles distinct selection.
+                // Let's assume unique targets for now as it's cleaner UI.
+                // If user clicks same, nothing happens or deselect?
+                // Let's stick to unique for simplicity first.
+                if (newSelected.includes(minionId)) {
+                    // Deselect if already selected
+                    newSelected = newSelected.filter(id => id !== minionId);
+                } else {
+                    if (newSelected.length < 3) {
+                        newSelected = [...newSelected, minionId];
+                    }
+                }
+
+                // If 3 selected, execute
+                if (newSelected.length === 3) {
+                    let updatedPlayer = { ...activePlayer };
+                    // Apply +1/+1 to all selected
+                    updatedPlayer.board = updatedPlayer.board.map(m => {
+                        if (newSelected.includes(m.instanceId || m.id)) {
+                            return {
+                                ...m,
+                                attack: m.attack + 1,
+                                health: m.health + 1,
+                                maxHealth: m.maxHealth + 1
+                            };
+                        }
+                        return m;
+                    });
+
+                    // Move pending card to graveyard
+                    if (state.pendingPlayedCard) {
+                        updatedPlayer.graveyard = [...updatedPlayer.graveyard, state.pendingPlayedCard];
+                    }
+
+                    return {
+                        ...state,
+                        [state.activePlayer]: updatedPlayer,
+                        selectedMinions: [],
+                        targetMode: undefined,
+                        pendingPlayedCard: undefined,
+                        log: appendLog(state.log, `${activePlayer.name} nutzte Deduktion: +1/+1 für 3 Philosophen.`)
+                    };
+                }
+
+                return { ...state, selectedMinions: newSelected };
+
+            } else if (state.targetMode === 'induktion_target') {
+                const activePlayer = state.activePlayer === 'player' ? state.player : state.opponent;
+                const minionIndex = activePlayer.board.findIndex(m => (m.instanceId || m.id) === minionId);
+
+                if (minionIndex === -1) return state; // Must be friendly
+
+                let updatedPlayer = { ...activePlayer };
+                const minion = updatedPlayer.board[minionIndex];
+
+                // Apple +3/+3
+                const updatedMinion = {
+                    ...minion,
+                    attack: minion.attack + 3,
+                    health: minion.health + 3,
+                    maxHealth: minion.maxHealth + 3
+                };
+
+                updatedPlayer.board = updatedPlayer.board.map((m, i) => i === minionIndex ? updatedMinion : m);
+
+                // Move pending card to graveyard
+                if (state.pendingPlayedCard) {
+                    updatedPlayer.graveyard = [...updatedPlayer.graveyard, state.pendingPlayedCard];
+                }
+
+                return {
+                    ...state,
+                    [state.activePlayer]: updatedPlayer,
+                    selectedMinions: [],
+                    targetMode: undefined,
+                    pendingPlayedCard: undefined,
+                    log: appendLog(state.log, `${activePlayer.name} nutzte Induktion auf ${minion.name}: +3/+3.`)
+                };
+            }
+
             let newSelected = state.selectedMinions || [];
             if (toggle) {
                 if (newSelected.includes(minionId)) {

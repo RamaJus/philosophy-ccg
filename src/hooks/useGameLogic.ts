@@ -138,8 +138,19 @@ export const useGameLogic = (gameMode: 'single' | 'host' | 'client', isDebugMode
     }, []);
 
     const selectMinion = useCallback((minionId: string, toggle: boolean = false) => {
-        dispatch({ type: 'SELECT_MINION', minionId, toggle });
-    }, []);
+        // If we are targeting for Deduktion/Induktion, this selection IS the game action
+        if (gameState.targetMode === 'deduktion_target' || gameState.targetMode === 'induktion_target') {
+            const action: GameAction = { type: 'SELECT_MINION', minionId, toggle };
+            if (isClient) {
+                multiplayer.sendAction(action);
+            } else {
+                dispatch(action);
+            }
+        } else {
+            // Otherwise just local selection (e.g. for attacking)
+            dispatch({ type: 'SELECT_MINION', minionId, toggle });
+        }
+    }, [isClient, gameState.targetMode]);
 
     const useSpecial = useCallback((minionId: string, targetId?: string) => {
         const action: GameAction = { type: 'USE_SPECIAL', minionId, targetId };

@@ -79,7 +79,7 @@ export interface GameState {
     selectedCard?: string; // Card instanceId in hand
     pendingPlayedCard?: Card; // Card currently being cast (for cancellation refund checks)
     selectedMinions?: string[]; // Minion instanceIds on board for attacking (multi-select)
-    targetMode?: 'attack' | 'spell' | 'search' | 'transform' | 'friendly_minion_transform' | 'trolley_sacrifice' | 'special' | 'foucault_reveal' | 'gottesbeweis_target' | 'nietzsche_target' | 'van_inwagen_target' | 'arete_target' | 'cave_ascent_target' | 'recurrence_select' | 'discover' | 'eros_target' | 'discard'; // What we're targeting for
+    targetMode?: 'attack' | 'spell' | 'search' | 'transform' | 'friendly_minion_transform' | 'trolley_sacrifice' | 'special' | 'foucault_reveal' | 'gottesbeweis_target' | 'nietzsche_target' | 'van_inwagen_target' | 'arete_target' | 'cave_ascent_target' | 'recurrence_select' | 'discover' | 'eros_target' | 'discard' | 'deduktion_target' | 'induktion_target'; // What we're targeting for
     targetModeOwner?: 'player' | 'opponent'; // Who initiated the targetMode (for multiplayer modal visibility)
     discoveryCards?: Card[]; // Generic storage for DISCOVER/Search effects
     recurrenceCards?: Card[]; // Cards in graveyard available for 'Ewige Wiederkunft'
