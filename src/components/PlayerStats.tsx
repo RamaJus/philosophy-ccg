@@ -11,13 +11,20 @@ interface PlayerStatsProps {
 
 export const PlayerStats: React.FC<PlayerStatsProps> = ({ player, isOpponent = false, isActive = true }) => {
     const [isDamaged, setIsDamaged] = useState(false);
+    const [damageAmount, setDamageAmount] = useState<number | null>(null);
     const [showAvatarModal, setShowAvatarModal] = useState(false);
     const prevHealth = useRef(player.health);
 
     useEffect(() => {
-        if (player.health < prevHealth.current) {
+        const diff = prevHealth.current - player.health;
+        if (diff > 0) {
+            // Took damage
             setIsDamaged(true);
-            const timer = setTimeout(() => setIsDamaged(false), 500);
+            setDamageAmount(diff);
+            const timer = setTimeout(() => {
+                setIsDamaged(false);
+                setDamageAmount(null);
+            }, 800);
             return () => clearTimeout(timer);
         }
         prevHealth.current = player.health;
@@ -41,6 +48,7 @@ export const PlayerStats: React.FC<PlayerStatsProps> = ({ player, isOpponent = f
                         : 'bg-gradient-to-br from-slate-900/95 via-blue-950/30 to-slate-900/95 border-blue-900/50'
                     }
                     ${isDamaged ? 'animate-shake ring-2 ring-red-500 bg-red-900/30' : ''}
+                    ${isActive && !isDamaged ? (isOpponent ? 'ring-2 ring-red-500/40 shadow-lg shadow-red-500/20' : 'ring-2 ring-blue-500/40 shadow-lg shadow-blue-500/20') : ''}
                     backdrop-blur-sm shadow-xl
                 `}
             >
@@ -64,17 +72,33 @@ export const PlayerStats: React.FC<PlayerStatsProps> = ({ player, isOpponent = f
                     {/* Avatar */}
                     <button
                         onClick={() => setShowAvatarModal(true)}
-                        className="relative flex-shrink-0 w-14 h-14 rounded-lg overflow-hidden border-2 border-slate-600/50 hover:border-amber-500/70 transition-all hover:scale-105 cursor-pointer group"
+                        className="relative flex-shrink-0 w-14 h-14 rounded-lg overflow-visible border-2 border-slate-600/50 hover:border-amber-500/70 transition-all hover:scale-105 cursor-pointer group"
                         title="Klicken für Großansicht"
                     >
                         {/* Placeholder Avatar */}
-                        <div className="w-full h-full bg-gradient-to-br from-slate-700 to-slate-800 flex items-center justify-center">
+                        <div className="w-full h-full bg-gradient-to-br from-slate-700 to-slate-800 flex items-center justify-center rounded-lg overflow-hidden">
                             <span className="text-2xl opacity-60">👤</span>
                         </div>
                         {/* Hover overlay */}
-                        <div className="absolute inset-0 bg-amber-500/0 group-hover:bg-amber-500/10 transition-colors flex items-center justify-center">
+                        <div className="absolute inset-0 bg-amber-500/0 group-hover:bg-amber-500/10 transition-colors flex items-center justify-center rounded-lg">
                             <span className="text-white opacity-0 group-hover:opacity-70 text-xs">🔍</span>
                         </div>
+                        {/* Damage popup */}
+                        <AnimatePresence>
+                            {damageAmount && (
+                                <motion.div
+                                    initial={{ opacity: 0, scale: 0.5, y: 0 }}
+                                    animate={{ opacity: 1, scale: 1.2, y: -10 }}
+                                    exit={{ opacity: 0, y: -30, scale: 0.8 }}
+                                    transition={{ duration: 0.4, ease: "easeOut" }}
+                                    className="absolute inset-0 flex items-center justify-center pointer-events-none z-20"
+                                >
+                                    <span className="text-2xl font-black text-red-500 drop-shadow-[0_0_8px_rgba(239,68,68,0.8)] text-outline">
+                                        -{damageAmount}
+                                    </span>
+                                </motion.div>
+                            )}
+                        </AnimatePresence>
                     </button>
 
                     {/* Info Section */}

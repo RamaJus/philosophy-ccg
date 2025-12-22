@@ -12,6 +12,7 @@ interface CardProps {
     showHealth?: boolean;
     className?: string;
     bonusDamage?: number;
+    isAttacking?: boolean;
 }
 
 
@@ -24,7 +25,8 @@ export const Card: React.FC<CardProps> = ({
     isPlayable,
     showHealth = false,
     className = '',
-    bonusDamage = 0
+    bonusDamage = 0,
+    isAttacking = false
 }) => {
     const isMinion = card.type === 'Philosoph';
     const boardMinion = showHealth ? (card as BoardMinion) : null;
@@ -177,6 +179,7 @@ export const Card: React.FC<CardProps> = ({
                 animate={{
                     scale: isSelected ? 1.1 : 1,
                     x: isDamaged ? [-5, 5, -5, 5, 0] : 0,
+                    y: isAttacking ? [-30, 0] : 0,
                     boxShadow: isHealed
                         ? "0 0 20px #4ade80"
                         : isSynergyTriggered
