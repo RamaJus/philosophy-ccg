@@ -1,6 +1,6 @@
 import React from 'react';
 import { X } from 'lucide-react';
-import { AVATARS, Avatar } from '../data/avatars';
+import { AVATARS } from '../data/avatars';
 
 interface AvatarSelectionModalProps {
     isOpen: boolean;
