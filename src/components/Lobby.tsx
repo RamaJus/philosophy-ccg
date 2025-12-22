@@ -24,7 +24,7 @@ export const Lobby: React.FC<LobbyProps> = ({ onStartGame, isDebugMode, setIsDeb
         return localStorage.getItem('philosophy-ccg-player-name') || 'Spieler';
     });
 
-    const { cardCount, isValid, isCustom, DECK_SIZE } = useDeck();
+    const { cardCount, isValid, isCustom, DECK_SIZE, refreshDeck } = useDeck();
 
     // Portrait orientation mapping: which direction the philosopher faces
     // 'right' = faces right (good for left side), 'left' = faces left (good for right side), 'center' = faces forward (either side)
@@ -462,7 +462,7 @@ export const Lobby: React.FC<LobbyProps> = ({ onStartGame, isDebugMode, setIsDeb
                 </div>
             </div>
 
-            <DeckEditor isOpen={showDeckEditor} onClose={() => setShowDeckEditor(false)} />
+            <DeckEditor isOpen={showDeckEditor} onClose={() => { refreshDeck(); setShowDeckEditor(false); }} />
         </>
     );
 };

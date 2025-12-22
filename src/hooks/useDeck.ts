@@ -242,6 +242,30 @@ export const useDeck = () => {
         .map(id => cards.find(c => c.id === id))
         .filter((c): c is Card => c !== undefined);
 
+    // Manually refresh from localStorage (e.g., after DeckEditor closes)
+    const refreshDeck = useCallback(() => {
+        try {
+            const stored = localStorage.getItem(STORAGE_KEY);
+            if (stored) {
+                const parsed: StoredDeck = JSON.parse(stored);
+                if (parsed.version === 1 && Array.isArray(parsed.cardIds)) {
+                    const validIds = parsed.cardIds.filter(id =>
+                        cards.some(c => c.id === id)
+                    );
+                    setDeck({
+                        cardIds: validIds,
+                        isCustom: parsed.isCustom ?? true
+                    });
+                    return;
+                }
+            }
+            // If nothing stored or invalid, reset to default
+            setDeck(getDefaultDeck());
+        } catch (e) {
+            console.error('Failed to refresh deck from storage:', e);
+        }
+    }, []);
+
     return {
         deck,
         deckCards,
@@ -256,6 +280,7 @@ export const useDeck = () => {
         autoFill,
         exportDeck,
         importDeck,
+        refreshDeck,
         DECK_SIZE
     };
 };

@@ -987,7 +987,7 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
                 [state.activePlayer]: { ...activePlayer, hand: newHand, graveyard: newGraveyard },
                 recurrenceCards: undefined,
                 targetMode: undefined,
-                log: appendLog(state.log, `${activePlayer.name} holte ${card.name} zurück!`)
+                log: appendLog(state.log, `${activePlayer.name} holte eine Karte vom Friedhof zurück.`)
             };
             break;
         }
