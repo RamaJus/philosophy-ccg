@@ -41,7 +41,7 @@ export const Hand: React.FC<HandProps> = ({ cards, onCardClick, selectedCardId, 
                             // 2. Geometric correction: offset * 2
                             //    - Counteracts the natural drop of the top-left corner when rotating left.
                             // 3. Global lift: -40px (1cm) to raise the entire fan
-                            const yOffset = (Math.abs(offset) * 5) + (offset * 2) - 40;
+                            const yOffset = (Math.abs(offset) * 5) + (offset * 2) - 36;
 
                             return (
                                 <motion.div
@@ -62,7 +62,14 @@ export const Hand: React.FC<HandProps> = ({ cards, onCardClick, selectedCardId, 
                                         damping: 20,
                                         duration: 0.5
                                     }}
-                                    exit={{ opacity: 0, y: -100, scale: 0.5, transition: { duration: 0.2 } }}
+                                    exit={{
+                                        opacity: 0,
+                                        y: -200,
+                                        x: 0,
+                                        scale: 0.3,
+                                        rotate: 0,
+                                        transition: { duration: 0.3, ease: "easeIn" }
+                                    }}
                                     whileHover={{
                                         y: -80,
                                         scale: 1.2,
