@@ -11,6 +11,7 @@ export interface GameSettings {
     musicMuted: boolean;
     voicelineVolume: number;
     voicelineMuted: boolean;
+    avatarId: string;
     debugMode: boolean;
 }
 
@@ -23,6 +24,7 @@ const DEFAULT_SETTINGS: GameSettings = {
     musicMuted: false,
     voicelineVolume: 70,
     voicelineMuted: false,
+    avatarId: 'novice',
     debugMode: false,
 };
 
@@ -37,6 +39,7 @@ interface SettingsContextType {
     setMusicMuted: (value: boolean) => void;
     setVoicelineVolume: (value: number) => void;
     setVoicelineMuted: (value: boolean) => void;
+    setAvatarId: (value: string) => void;
     setDebugMode: (value: boolean) => void;
     resetToDefaults: () => void;
 }
@@ -76,6 +79,7 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({ children }
     const setMusicMuted = useCallback((v: boolean) => saveSettings({ musicMuted: v }), [saveSettings]);
     const setVoicelineVolume = useCallback((v: number) => saveSettings({ voicelineVolume: v }), [saveSettings]);
     const setVoicelineMuted = useCallback((v: boolean) => saveSettings({ voicelineMuted: v }), [saveSettings]);
+    const setAvatarId = useCallback((v: string) => saveSettings({ avatarId: v }), [saveSettings]);
     const setDebugMode = useCallback((v: boolean) => saveSettings({ debugMode: v }), [saveSettings]);
 
     const resetToDefaults = useCallback(() => {
@@ -94,6 +98,7 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({ children }
         setMusicMuted,
         setVoicelineVolume,
         setVoicelineMuted,
+        setAvatarId,
         setDebugMode,
         resetToDefaults,
     };

@@ -7,6 +7,8 @@ import { SettingsModal } from './SettingsModal';
 import { useDeck } from '../hooks/useDeck';
 import { useSettings } from '../hooks/useSettings';
 import { cardDatabase } from '../data/cards';
+import { AvatarSelectionModal } from './AvatarSelectionModal';
+import { getAvatarById, DEFAULT_AVATAR_ID } from '../data/avatars';
 
 interface LobbyProps {
     onStartGame: (mode: 'single' | 'multiplayer_host' | 'multiplayer_client') => void;
@@ -23,12 +25,13 @@ export const Lobby: React.FC<LobbyProps> = ({ onStartGame, isDebugMode, setIsDeb
     const [connectionError, setConnectionError] = useState<string | null>(null);
     const [showDeckEditor, setShowDeckEditor] = useState(false);
     const [showSettings, setShowSettings] = useState(false);
+    const [showAvatarSelection, setShowAvatarSelection] = useState(false);
     const [playerName, setPlayerName] = useState(() => {
         return localStorage.getItem('philosophy-ccg-player-name') || 'Spieler';
     });
 
     const { cardCount, isValid, isCustom, DECK_SIZE, refreshDeck } = useDeck();
-    const { settings, saveSettings, resetToDefaults } = useSettings();
+    const { settings, saveSettings, resetToDefaults, setAvatarId } = useSettings();
 
     // Sync debug mode from settings
     useEffect(() => {
@@ -361,10 +364,12 @@ export const Lobby: React.FC<LobbyProps> = ({ onStartGame, isDebugMode, setIsDeb
                                 </h3>
                                 <div className="flex items-center gap-3">
                                     <button
-                                        className="w-12 h-12 rounded-lg bg-gradient-to-br from-slate-700 to-slate-800 border border-slate-500/50 flex items-center justify-center"
-                                        title="Avatar (bald)"
+                                        onClick={() => setShowAvatarSelection(true)}
+                                        className="w-12 h-12 rounded-lg bg-cover bg-center border border-amber-500/50 hover:border-amber-400 transition-colors shadow-lg relative group overflow-hidden"
+                                        style={{ backgroundImage: `url(${getAvatarById(settings.avatarId)?.image || getAvatarById(DEFAULT_AVATAR_ID)!.image})` }}
+                                        title="Avatar ändern"
                                     >
-                                        <span className="text-2xl opacity-60">👤</span>
+                                        <div className="absolute inset-0 bg-black/30 group-hover:bg-transparent transition-colors" />
                                     </button>
                                     <div className="flex-1">
                                         <input
@@ -505,6 +510,13 @@ export const Lobby: React.FC<LobbyProps> = ({ onStartGame, isDebugMode, setIsDeb
                 <Settings size={18} />
                 Einstellungen
             </button>
+            {/* Avatars Modal */}
+            <AvatarSelectionModal
+                isOpen={showAvatarSelection}
+                onClose={() => setShowAvatarSelection(false)}
+                currentAvatarId={settings.avatarId}
+                onSelectAvatar={setAvatarId}
+            />
         </>
     );
 };
