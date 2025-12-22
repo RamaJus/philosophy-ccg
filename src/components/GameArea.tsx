@@ -41,6 +41,29 @@ export const GameArea: React.FC<GameAreaProps> = ({ mode, isDebugMode, customDec
     const [isDeckViewOpen, setIsDeckViewOpen] = useState(false);
     const [isDisconnected, setIsDisconnected] = useState(false);
     const [attackingMinionIds, setAttackingMinionIds] = useState<string[]>([]);
+    const [deckPosition, setDeckPosition] = useState<{ x: number, y: number } | null>(null);
+    const deckRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        const updateDeckPosition = () => {
+            if (deckRef.current) {
+                const rect = deckRef.current.getBoundingClientRect();
+                // Store center of the deck
+                setDeckPosition({
+                    x: rect.left + rect.width / 2,
+                    y: rect.top + rect.height / 2
+                });
+            }
+        };
+
+        // Initial update
+        updateDeckPosition();
+        // Update after a short delay to ensure layout is stable
+        setTimeout(updateDeckPosition, 100);
+
+        window.addEventListener('resize', updateDeckPosition);
+        return () => window.removeEventListener('resize', updateDeckPosition);
+    }, []);
 
     useEffect(() => {
         if (gameOver && winner) {
@@ -796,6 +819,7 @@ export const GameArea: React.FC<GameAreaProps> = ({ mode, isDebugMode, customDec
 
                 {/* Visual Deck Pile (Bottom Right) */}
                 <div
+                    ref={deckRef}
                     className="absolute bottom-6 right-6 z-50 cursor-pointer group"
                     onClick={() => setIsDeckViewOpen(true)}
                 >
@@ -839,6 +863,7 @@ export const GameArea: React.FC<GameAreaProps> = ({ mode, isDebugMode, customDec
                         onCardClick={handleCardClick}
                         selectedCardId={selectedCard}
                         currentMana={viewPlayer.mana}
+                        deckPosition={deckPosition}
                     />
                 </div>
             </div>
