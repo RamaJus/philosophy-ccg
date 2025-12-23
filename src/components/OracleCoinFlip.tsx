@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 interface OracleCoinFlipProps {
@@ -14,28 +14,32 @@ export const OracleCoinFlip: React.FC<OracleCoinFlipProps> = ({
     winnerId,
     onComplete
 }) => {
-    const [phase, setPhase] = useState<'smoke' | 'flip' | 'reveal' | 'done'>('smoke');
+    const [phase, setPhase] = useState<'enter' | 'flip' | 'reveal' | 'done'>('enter');
     const winnerName = winnerId === 'player' ? playerName : opponentName;
 
     useEffect(() => {
-        // Phase timing
+        // Phase timing - slower, more elegant
         const timers = [
-            setTimeout(() => setPhase('flip'), 800),
-            setTimeout(() => setPhase('reveal'), 3000),
-            setTimeout(() => setPhase('done'), 4500),
-            setTimeout(() => onComplete(), 5000),
+            setTimeout(() => setPhase('flip'), 600),
+            setTimeout(() => setPhase('reveal'), 3500),
+            setTimeout(() => setPhase('done'), 5500),
+            setTimeout(() => onComplete(), 6000),
         ];
         return () => timers.forEach(clearTimeout);
     }, [onComplete]);
 
-    // Smoke particles configuration
-    const smokeParticles = Array.from({ length: 12 }, (_, i) => ({
-        id: i,
-        x: Math.random() * 100 - 50,
-        y: Math.random() * 50,
-        size: 80 + Math.random() * 120,
-        delay: Math.random() * 0.5,
-    }));
+    // Golden dust particles - stable configuration
+    const dustParticles = useMemo(() =>
+        Array.from({ length: 40 }, (_, i) => ({
+            id: i,
+            x: Math.random() * 100,
+            y: Math.random() * 100,
+            size: 2 + Math.random() * 4,
+            delay: Math.random() * 3,
+            duration: 3 + Math.random() * 4,
+            opacity: 0.3 + Math.random() * 0.5,
+        }))
+        , []);
 
     return (
         <AnimatePresence>
@@ -45,139 +49,154 @@ export const OracleCoinFlip: React.FC<OracleCoinFlipProps> = ({
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
-                    transition={{ duration: 0.5 }}
+                    transition={{ duration: 0.8 }}
                 >
-                    {/* Dark overlay */}
+                    {/* Dark overlay with vignette */}
                     <motion.div
-                        className="absolute inset-0 bg-black/80"
+                        className="absolute inset-0"
+                        style={{
+                            background: 'radial-gradient(ellipse at center, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.95) 100%)',
+                        }}
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
-                        transition={{ duration: 0.8 }}
+                        transition={{ duration: 1 }}
                     />
 
-                    {/* Smoke particles */}
+                    {/* Golden dust particles */}
                     <div className="absolute inset-0 pointer-events-none overflow-hidden">
-                        {smokeParticles.map((particle) => (
+                        {dustParticles.map((particle) => (
                             <motion.div
                                 key={particle.id}
                                 className="absolute rounded-full"
                                 style={{
                                     width: particle.size,
                                     height: particle.size,
-                                    left: `calc(50% + ${particle.x}px)`,
-                                    bottom: -particle.size,
-                                    background: 'radial-gradient(circle, rgba(147,112,219,0.4) 0%, rgba(75,0,130,0.2) 50%, transparent 70%)',
-                                    filter: 'blur(30px)',
+                                    left: `${particle.x}%`,
+                                    top: `${particle.y}%`,
+                                    background: 'radial-gradient(circle, rgba(255,215,0,1) 0%, rgba(218,165,32,0.8) 50%, transparent 100%)',
+                                    boxShadow: '0 0 6px rgba(255,215,0,0.6)',
                                 }}
-                                initial={{ y: 0, opacity: 0, scale: 0.5 }}
                                 animate={{
-                                    y: [-100, -400 - particle.y],
-                                    opacity: [0, 0.6, 0.4, 0],
-                                    scale: [0.5, 1.2, 1.5],
-                                    x: [0, particle.x * 2],
+                                    y: [0, -30, 0],
+                                    opacity: [0, particle.opacity, particle.opacity * 0.5, 0],
+                                    scale: [0.5, 1, 0.8],
                                 }}
                                 transition={{
-                                    duration: 4,
+                                    duration: particle.duration,
                                     delay: particle.delay,
-                                    ease: 'easeOut',
+                                    ease: 'easeInOut',
                                     repeat: Infinity,
-                                    repeatDelay: 0.5,
                                 }}
                             />
                         ))}
                     </div>
 
+                    {/* Ambient glow from above */}
+                    <motion.div
+                        className="absolute top-0 left-1/2 -translate-x-1/2 w-96 h-64"
+                        style={{
+                            background: 'radial-gradient(ellipse at top, rgba(255,200,100,0.15) 0%, transparent 70%)',
+                            filter: 'blur(40px)',
+                        }}
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ duration: 1.5 }}
+                    />
+
                     {/* Coin container */}
-                    <div className="relative z-10" style={{ perspective: '1000px' }}>
+                    <div className="relative z-10" style={{ perspective: '1200px' }}>
                         {/* Coin */}
                         <motion.div
-                            className="relative w-40 h-40"
+                            className="relative w-48 h-48"
                             style={{ transformStyle: 'preserve-3d' }}
-                            initial={{ rotateY: 0, scale: 0 }}
+                            initial={{ rotateY: 0, scale: 0.3, opacity: 0 }}
                             animate={
-                                phase === 'smoke'
-                                    ? { rotateY: 0, scale: 0 }
+                                phase === 'enter'
+                                    ? { rotateY: 0, scale: 0.3, opacity: 0 }
                                     : phase === 'flip'
                                         ? {
-                                            rotateY: [0, 1800 + (winnerId === 'player' ? 0 : 180)],
-                                            scale: 1
+                                            rotateY: [0, 1440 + (winnerId === 'player' ? 0 : 180)],
+                                            scale: 1,
+                                            opacity: 1
                                         }
                                         : {
-                                            rotateY: winnerId === 'player' ? 1800 : 1980,
-                                            scale: 1
+                                            rotateY: winnerId === 'player' ? 1440 : 1620,
+                                            scale: 1,
+                                            opacity: 1
                                         }
                             }
                             transition={
                                 phase === 'flip'
                                     ? {
-                                        rotateY: { duration: 2.2, ease: [0.4, 0, 0.2, 1] },
-                                        scale: { duration: 0.3, ease: 'easeOut' }
+                                        rotateY: { duration: 2.8, ease: [0.25, 0.1, 0.25, 1] },
+                                        scale: { duration: 0.5, ease: 'easeOut' },
+                                        opacity: { duration: 0.3 }
                                     }
-                                    : { duration: 0.3 }
+                                    : { duration: 0.5 }
                             }
                         >
-                            {/* Front side - Owl (Player) */}
+                            {/* Front side - Owl (Player wins) */}
                             <div
-                                className="absolute inset-0 rounded-full flex items-center justify-center"
+                                className="absolute inset-0 rounded-full overflow-hidden"
                                 style={{
                                     backfaceVisibility: 'hidden',
-                                    background: 'linear-gradient(145deg, #ffd700, #b8860b, #daa520)',
-                                    boxShadow: '0 0 40px rgba(255, 215, 0, 0.5), inset 0 2px 10px rgba(255,255,255,0.3), inset 0 -2px 10px rgba(0,0,0,0.3)',
-                                    border: '4px solid #b8860b',
+                                    boxShadow: '0 0 60px rgba(218,165,32,0.4), 0 4px 20px rgba(0,0,0,0.5)',
                                 }}
                             >
-                                <span className="text-7xl" style={{ filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.5))' }}>
-                                    🦉
-                                </span>
+                                <img
+                                    src="/images/coin-owl.jpg"
+                                    alt="Owl"
+                                    className="w-full h-full object-cover"
+                                />
                             </div>
 
-                            {/* Back side - Temple (Opponent) */}
+                            {/* Back side - Temple (Opponent wins) */}
                             <div
-                                className="absolute inset-0 rounded-full flex items-center justify-center"
+                                className="absolute inset-0 rounded-full overflow-hidden"
                                 style={{
                                     backfaceVisibility: 'hidden',
                                     transform: 'rotateY(180deg)',
-                                    background: 'linear-gradient(145deg, #c0c0c0, #808080, #a9a9a9)',
-                                    boxShadow: '0 0 40px rgba(192, 192, 192, 0.5), inset 0 2px 10px rgba(255,255,255,0.3), inset 0 -2px 10px rgba(0,0,0,0.3)',
-                                    border: '4px solid #808080',
+                                    boxShadow: '0 0 60px rgba(218,165,32,0.4), 0 4px 20px rgba(0,0,0,0.5)',
                                 }}
                             >
-                                <span className="text-7xl" style={{ filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.5))' }}>
-                                    🏛️
-                                </span>
+                                <img
+                                    src="/images/coin-temple.jpg"
+                                    alt="Temple"
+                                    className="w-full h-full object-cover"
+                                />
                             </div>
 
-                            {/* Shine effect */}
+                            {/* Subtle shine sweep during rotation */}
                             <motion.div
                                 className="absolute inset-0 rounded-full pointer-events-none"
                                 style={{
-                                    background: 'linear-gradient(105deg, transparent 40%, rgba(255,255,255,0.4) 50%, transparent 60%)',
+                                    background: 'linear-gradient(105deg, transparent 30%, rgba(255,255,255,0.2) 50%, transparent 70%)',
                                 }}
                                 animate={{
-                                    opacity: phase === 'flip' ? [0, 1, 0] : 0,
+                                    opacity: phase === 'flip' ? [0, 0.8, 0] : 0,
                                 }}
                                 transition={{
-                                    duration: 0.3,
-                                    repeat: phase === 'flip' ? 7 : 0,
-                                    repeatDelay: 0.1,
+                                    duration: 0.4,
+                                    repeat: phase === 'flip' ? 6 : 0,
+                                    repeatDelay: 0.05,
                                 }}
                             />
                         </motion.div>
 
-                        {/* Glow effect */}
+                        {/* Golden glow behind coin */}
                         <motion.div
                             className="absolute inset-0 rounded-full -z-10"
                             style={{
-                                background: 'radial-gradient(circle, rgba(255,215,0,0.3) 0%, transparent 70%)',
-                                filter: 'blur(20px)',
+                                background: 'radial-gradient(circle, rgba(218,165,32,0.3) 0%, rgba(255,200,100,0.1) 40%, transparent 70%)',
+                                filter: 'blur(25px)',
                             }}
                             initial={{ scale: 0, opacity: 0 }}
                             animate={
-                                phase !== 'smoke'
-                                    ? { scale: 2, opacity: 1 }
+                                phase !== 'enter'
+                                    ? { scale: 2.5, opacity: 1 }
                                     : { scale: 0, opacity: 0 }
                             }
-                            transition={{ duration: 0.5 }}
+                            transition={{ duration: 0.8, ease: 'easeOut' }}
                         />
                     </div>
 
@@ -186,32 +205,35 @@ export const OracleCoinFlip: React.FC<OracleCoinFlipProps> = ({
                         {phase === 'reveal' && (
                             <motion.div
                                 className="absolute bottom-1/4 text-center z-20"
-                                initial={{ opacity: 0, y: 30, scale: 0.9 }}
+                                initial={{ opacity: 0, y: 40, scale: 0.95 }}
                                 animate={{ opacity: 1, y: 0, scale: 1 }}
-                                exit={{ opacity: 0, y: -20 }}
-                                transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+                                exit={{ opacity: 0, y: -30 }}
+                                transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
                             >
                                 <motion.p
-                                    className="text-lg text-purple-300 mb-2 tracking-widest uppercase"
-                                    initial={{ opacity: 0 }}
-                                    animate={{ opacity: 1 }}
-                                    transition={{ delay: 0.2 }}
+                                    className="text-lg mb-3 tracking-[0.3em] uppercase"
+                                    style={{
+                                        color: 'rgba(218,165,32,0.8)',
+                                        textShadow: '0 0 20px rgba(218,165,32,0.3)',
+                                    }}
+                                    initial={{ opacity: 0, y: 10 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    transition={{ delay: 0.3, duration: 0.6 }}
                                 >
                                     Die Pythia verkündet
                                 </motion.p>
                                 <motion.h2
-                                    className="text-4xl font-bold"
+                                    className="text-5xl font-bold"
                                     style={{
-                                        fontFamily: 'Cinzel, serif',
-                                        background: 'linear-gradient(180deg, #ffd700 0%, #ff8c00 100%)',
+                                        fontFamily: 'Cinzel, Georgia, serif',
+                                        background: 'linear-gradient(180deg, #ffd700 0%, #daa520 50%, #b8860b 100%)',
                                         WebkitBackgroundClip: 'text',
                                         WebkitTextFillColor: 'transparent',
-                                        textShadow: '0 0 30px rgba(255, 215, 0, 0.5)',
-                                        filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.8))',
+                                        filter: 'drop-shadow(0 4px 12px rgba(0,0,0,0.8))',
                                     }}
-                                    initial={{ scale: 1.1 }}
-                                    animate={{ scale: 1 }}
-                                    transition={{ duration: 0.4, ease: 'easeOut' }}
+                                    initial={{ scale: 1.15, opacity: 0 }}
+                                    animate={{ scale: 1, opacity: 1 }}
+                                    transition={{ delay: 0.5, duration: 0.6, ease: 'easeOut' }}
                                 >
                                     {winnerName} beginnt!
                                 </motion.h2>
