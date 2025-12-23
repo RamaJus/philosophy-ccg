@@ -144,7 +144,7 @@ export const OracleCoinFlip: React.FC<OracleCoinFlipProps> = ({
                                 }}
                             >
                                 <img
-                                    src="/images/coin-owl.jpg"
+                                    src="/images/coin-owl-s.png"
                                     alt="Owl"
                                     className="w-full h-full object-cover"
                                 />
