@@ -1286,6 +1286,44 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
             break;
         }
 
+        case 'CONFIRM_DEDUKTION': {
+            // Allow confirming Deduktion with less than 3 targets
+            if (state.targetMode !== 'deduktion_target') return state;
+            const selected = state.selectedMinions || [];
+            if (selected.length === 0) return state;
+
+            const activePlayer = state.activePlayer === 'player' ? state.player : state.opponent;
+            let updatedPlayer = { ...activePlayer };
+
+            // Apply +1/+1 to all selected
+            updatedPlayer.board = updatedPlayer.board.map(m => {
+                if (selected.includes(m.instanceId || m.id)) {
+                    return {
+                        ...m,
+                        attack: m.attack + 1,
+                        health: m.health + 1,
+                        maxHealth: m.maxHealth + 1
+                    };
+                }
+                return m;
+            });
+
+            // Move pending card to graveyard
+            if (state.pendingPlayedCard) {
+                updatedPlayer.graveyard = [...updatedPlayer.graveyard, state.pendingPlayedCard];
+            }
+
+            newState = {
+                ...state,
+                [state.activePlayer]: updatedPlayer,
+                selectedMinions: [],
+                targetMode: undefined,
+                pendingPlayedCard: undefined,
+                log: appendLog(state.log, `${activePlayer.name} nutzte Deduktion: +1/+1 für ${selected.length} Philosophen.`)
+            };
+            break;
+        }
+
         case 'SYNC_STATE': {
             const incomingState = action.newState;
             // Prevent double-flash: if client already displayed this spell, clear it

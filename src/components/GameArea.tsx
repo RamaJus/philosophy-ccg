@@ -351,12 +351,99 @@ export const GameArea: React.FC<GameAreaProps> = ({ mode, isDebugMode, customDec
                 return;
             }
 
-            // AI Target Logic (for Gottesbeweis etc.)
+            // === AI TARGET MODE HANDLERS ===
+            // Handle all targeting modes that AI might trigger
+
             if (currentState.targetMode === 'gottesbeweis_target') {
                 const targetPool = humanPlayer.board.length > 0 ? humanPlayer.board : aiPlayer.board;
                 if (targetPool.length > 0) {
                     const randomTarget = targetPool[Math.floor(Math.random() * targetPool.length)];
                     dispatch({ type: 'GOTTESBEWEIS_TARGET', minionId: randomTarget.instanceId || randomTarget.id });
+                    setTimeout(() => aiTurn(), 800);
+                    return;
+                } else {
+                    dispatch({ type: 'CANCEL_CAST' });
+                    setTimeout(() => aiTurn(), 800);
+                    return;
+                }
+            }
+
+            // FIX Bug 2: Handle cave_ascent_target (Aufstieg aus der Höhle)
+            if (currentState.targetMode === 'cave_ascent_target') {
+                if (aiPlayer.board.length > 0) {
+                    // Pick a random friendly philosopher
+                    const randomMinion = aiPlayer.board[Math.floor(Math.random() * aiPlayer.board.length)];
+                    dispatch({ type: 'CAVE_ASCENT_TARGET', minionId: randomMinion.instanceId || randomMinion.id });
+                    setTimeout(() => aiTurn(), 800);
+                    return;
+                } else {
+                    dispatch({ type: 'CANCEL_CAST' });
+                    setTimeout(() => aiTurn(), 800);
+                    return;
+                }
+            }
+
+            // Handle arete_target
+            if (currentState.targetMode === 'arete_target') {
+                // Prefer low-health friendly minions for healing
+                const allMinions = [...aiPlayer.board, ...humanPlayer.board];
+                if (allMinions.length > 0) {
+                    // Prefer own minions, then lowest health
+                    const target = aiPlayer.board.length > 0
+                        ? aiPlayer.board.reduce((a, b) => (a.health < b.health ? a : b))
+                        : allMinions[0];
+                    dispatch({ type: 'ARETE_TARGET', minionId: target.instanceId || target.id });
+                    setTimeout(() => aiTurn(), 800);
+                    return;
+                } else {
+                    dispatch({ type: 'CANCEL_CAST' });
+                    setTimeout(() => aiTurn(), 800);
+                    return;
+                }
+            }
+
+            // Handle deduktion_target (select 3 friendly philosophers)
+            if (currentState.targetMode === 'deduktion_target') {
+                if (aiPlayer.board.length > 0) {
+                    // Select up to 3 random friendly philosophers
+                    const targets = aiPlayer.board.slice(0, Math.min(3, aiPlayer.board.length));
+                    for (const target of targets) {
+                        dispatch({ type: 'SELECT_MINION', minionId: target.instanceId || target.id, toggle: true });
+                    }
+                    // If less than 3, we need to confirm manually (handled by reducer)
+                    if (targets.length < 3) {
+                        dispatch({ type: 'CONFIRM_DEDUKTION' });
+                    }
+                    setTimeout(() => aiTurn(), 800);
+                    return;
+                } else {
+                    dispatch({ type: 'CANCEL_CAST' });
+                    setTimeout(() => aiTurn(), 800);
+                    return;
+                }
+            }
+
+            // Handle induktion_target (select 1 friendly philosopher)
+            if (currentState.targetMode === 'induktion_target') {
+                if (aiPlayer.board.length > 0) {
+                    // Pick the strongest friendly philosopher
+                    const target = aiPlayer.board.reduce((a, b) => ((a.attack || 0) > (b.attack || 0) ? a : b));
+                    dispatch({ type: 'SELECT_MINION', minionId: target.instanceId || target.id, toggle: true });
+                    setTimeout(() => aiTurn(), 800);
+                    return;
+                } else {
+                    dispatch({ type: 'CANCEL_CAST' });
+                    setTimeout(() => aiTurn(), 800);
+                    return;
+                }
+            }
+
+            // Handle trolley_sacrifice
+            if (currentState.targetMode === 'trolley_sacrifice') {
+                if (aiPlayer.board.length > 0) {
+                    // Sacrifice weakest minion
+                    const weakest = aiPlayer.board.reduce((a, b) => ((a.attack || 0) + (a.health || 0) < (b.attack || 0) + (b.health || 0) ? a : b));
+                    dispatch({ type: 'TROLLEY_SACRIFICE', minionId: weakest.instanceId || weakest.id });
                     setTimeout(() => aiTurn(), 800);
                     return;
                 } else {
@@ -376,9 +463,35 @@ export const GameArea: React.FC<GameAreaProps> = ({ mode, isDebugMode, customDec
             const humanBoardStrength = calcBoardStrength(humanPlayer.board);
             const isAheadOnBoard = aiBoardStrength > humanBoardStrength + 5;
 
+            // Helper: Check if a spell is safe to play
+            const isSpellSafeToPlay = (spell: typeof aiPlayer.hand[0]): boolean => {
+                // FIX Bug 1: Don't play Gottesbeweis if no philosophers on board
+                if (spell.id === 'gottesbeweis') {
+                    return aiPlayer.board.length > 0 || humanPlayer.board.length > 0;
+                }
+                // Don't play cave_ascent without friendly minions
+                if (spell.id === 'cave_ascent') {
+                    return aiPlayer.board.length > 0;
+                }
+                // Don't play trolley_problem without own philosopher to sacrifice
+                if (spell.id === 'trolley_problem') {
+                    return aiPlayer.board.length > 0 && humanPlayer.board.length > 0;
+                }
+                // Don't play deduktion/induktion without friendly minions
+                if (spell.id === 'deduktion' || spell.id === 'induktion') {
+                    return aiPlayer.board.length > 0;
+                }
+                // Don't play arete without any minions
+                if (spell.id === 'arete') {
+                    return aiPlayer.board.length > 0 || humanPlayer.board.length > 0;
+                }
+                return true;
+            };
+
             // 1. Play cards - prioritize higher cost cards (stronger)
             const playableCards = aiPlayer.hand
                 .filter(c => c.cost <= aiPlayer.mana)
+                .filter(c => c.type !== 'Zauber' || isSpellSafeToPlay(c)) // Filter unsafe spells
                 .sort((a, b) => b.cost - a.cost); // Sort by cost descending
 
             if (playableCards.length > 0 && aiPlayer.board.length < MAX_BOARD_SIZE) {
@@ -805,13 +918,24 @@ export const GameArea: React.FC<GameAreaProps> = ({ mode, isDebugMode, customDec
                                 {targetMode === 'deduktion_target' && isMyTargetMode && (
                                     <>
                                         <div className="px-4 py-2 bg-blue-500/20 text-blue-400 rounded-lg border border-blue-500/50 animate-pulse">
-                                            <p className="text-sm font-bold">Deduktion: Wähle 3 Philosophen ({selectedMinions?.length || 0}/3)</p>
+                                            <p className="text-sm font-bold">Deduktion: Wähle bis zu 3 Philosophen ({selectedMinions?.length || 0}/3)</p>
                                         </div>
+                                        {(selectedMinions?.length || 0) > 0 && (selectedMinions?.length || 0) < 3 && (
+                                            <button
+                                                onClick={() => {
+                                                    const action: import('../types').GameAction = { type: 'CONFIRM_DEDUKTION' };
+                                                    if (isClient) multiplayer.sendAction(action); else dispatch(action);
+                                                }}
+                                                className="px-3 py-1 bg-blue-600 hover:bg-blue-500 text-white rounded border border-blue-400 text-sm"
+                                            >
+                                                Bestätigen ({selectedMinions?.length})
+                                            </button>
+                                        )}
                                         <button
                                             onClick={handleCancelCast}
                                             className="px-3 py-1 bg-red-800 hover:bg-red-700 text-white rounded border border-red-500 text-sm"
                                         >
-                                            Zauber abbrechen
+                                            Abbrechen
                                         </button>
                                     </>
                                 )}
@@ -923,8 +1047,8 @@ export const GameArea: React.FC<GameAreaProps> = ({ mode, isDebugMode, customDec
                                 selectedMinionIds={selectedMinions || []}
                                 isPlayerBoard={true}
                                 activeWork={viewPlayer.activeWork}
-                                canTarget={(targetMode === 'gottesbeweis_target' || targetMode === 'trolley_sacrifice' || targetMode === 'arete_target' || targetMode === 'cave_ascent_target') && !!isMyTargetMode}
-                                isSpecialTargeting={(targetMode === 'gottesbeweis_target' || targetMode === 'trolley_sacrifice' || targetMode === 'arete_target' || targetMode === 'cave_ascent_target') && !!isMyTargetMode}
+                                canTarget={(targetMode === 'gottesbeweis_target' || targetMode === 'trolley_sacrifice' || targetMode === 'arete_target' || targetMode === 'cave_ascent_target' || targetMode === 'deduktion_target' || targetMode === 'induktion_target') && !!isMyTargetMode}
+                                isSpecialTargeting={(targetMode === 'gottesbeweis_target' || targetMode === 'trolley_sacrifice' || targetMode === 'arete_target' || targetMode === 'cave_ascent_target' || targetMode === 'deduktion_target' || targetMode === 'induktion_target') && !!isMyTargetMode}
                                 synergiesBlocked={(viewPlayer.synergyBlockTurns || 0) > 0}
                                 attacksBlocked={isClient ? (gameState.opponent.minionAttackBlockTurns || 0) > 0 : (gameState.player.minionAttackBlockTurns || 0) > 0}
                                 currentTurn={gameState.turn}
