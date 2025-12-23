@@ -105,7 +105,7 @@ export const OracleCoinFlip: React.FC<OracleCoinFlipProps> = ({
 
                     {/* Pythia Left */}
                     <motion.div
-                        className="absolute left-0 bottom-0 h-[90%] w-auto pointer-events-none"
+                        className="absolute left-0 bottom-0 h-[72%] w-auto pointer-events-none"
                         initial={{ opacity: 0, x: -50 }}
                         animate={{
                             opacity: phase !== 'enter' ? 0.7 : 0,
@@ -114,20 +114,20 @@ export const OracleCoinFlip: React.FC<OracleCoinFlipProps> = ({
                         transition={{ duration: 1.2, ease: 'easeOut' }}
                     >
                         <img
-                            src="/images/pythia-left.png"
+                            src="/images/pythia-right.png"
                             alt=""
                             className="h-full w-auto object-contain object-left-bottom"
                             style={{
                                 filter: 'brightness(0.6)',
-                                maskImage: 'linear-gradient(to right, black 60%, transparent 100%)',
-                                WebkitMaskImage: 'linear-gradient(to right, black 60%, transparent 100%)',
+                                maskImage: 'linear-gradient(to right, black 40%, transparent 100%)',
+                                WebkitMaskImage: 'linear-gradient(to right, black 40%, transparent 100%)',
                             }}
                         />
                     </motion.div>
 
                     {/* Pythia Right */}
                     <motion.div
-                        className="absolute right-0 bottom-0 h-[90%] w-auto pointer-events-none"
+                        className="absolute right-0 bottom-0 h-[72%] w-auto pointer-events-none"
                         initial={{ opacity: 0, x: 50 }}
                         animate={{
                             opacity: phase !== 'enter' ? 0.7 : 0,
@@ -136,13 +136,13 @@ export const OracleCoinFlip: React.FC<OracleCoinFlipProps> = ({
                         transition={{ duration: 1.2, ease: 'easeOut', delay: 0.2 }}
                     >
                         <img
-                            src="/images/pythia-right.png"
+                            src="/images/pythia-left.png"
                             alt=""
                             className="h-full w-auto object-contain object-right-bottom"
                             style={{
                                 filter: 'brightness(0.6)',
-                                maskImage: 'linear-gradient(to left, black 60%, transparent 100%)',
-                                WebkitMaskImage: 'linear-gradient(to left, black 60%, transparent 100%)',
+                                maskImage: 'linear-gradient(to left, black 40%, transparent 100%)',
+                                WebkitMaskImage: 'linear-gradient(to left, black 40%, transparent 100%)',
                             }}
                         />
                     </motion.div>
