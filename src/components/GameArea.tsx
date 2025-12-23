@@ -70,7 +70,13 @@ export const GameArea: React.FC<GameAreaProps> = ({ mode, isDebugMode, customDec
         if (mode !== 'multiplayer_client') {
             const action: import('../types').GameAction = { type: 'SET_STARTING_PLAYER', startingPlayer: oracleWinner };
             dispatch(action);
-            // In multiplayer host mode, sync state will propagate this to client
+
+            // If AI wins coin flip in single player mode, trigger AI turn
+            if (mode === 'single' && oracleWinner === 'opponent') {
+                setTimeout(() => {
+                    aiTurn();
+                }, 500);
+            }
         }
     };
 

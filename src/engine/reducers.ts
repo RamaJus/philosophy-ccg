@@ -122,12 +122,12 @@ export function createInitialState(isDebugMode: boolean, customDeckIds?: string[
     player.mana = 1;
     player.maxMana = 1;
 
-    // Opponent always uses all cards (no custom deck)
+    // Opponent also gets standard hand size (extra card is given by SET_STARTING_PLAYER based on coin flip)
     return {
         turn: 1,
         activePlayer: 'player',
         player,
-        opponent: createPlayer('Gegner', false, STARTING_HAND_SIZE + 1, isDebugMode),
+        opponent: createPlayer('Gegner', false, STARTING_HAND_SIZE, isDebugMode),
         gameOver: false,
         log: [customDeckIds ? 'Spiel mit Custom-Deck gestartet!' : 'Spiel gestartet! Möge der beste Philosoph gewinnen.'],
     };
@@ -1370,19 +1370,30 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
             // Set who starts after coin flip (used after Oracle animation)
             const { startingPlayer } = action;
 
-            // If opponent starts, they get mana and player doesn't
-            // If player starts, player has mana (default from createInitialState)
             let updatedPlayer = { ...state.player };
             let updatedOpponent = { ...state.opponent };
 
             if (startingPlayer === 'opponent') {
-                // Give opponent 1 mana, remove from player
+                // Opponent starts: they get 1 mana, player gets 0 mana but extra card
                 updatedOpponent.mana = 1;
                 updatedOpponent.maxMana = 1;
                 updatedPlayer.mana = 0;
                 updatedPlayer.maxMana = 0;
+                // Player (goes second) draws extra card
+                if (updatedPlayer.deck.length > 0) {
+                    const drawnCard = updatedPlayer.deck[0];
+                    updatedPlayer.hand = [...updatedPlayer.hand, drawnCard];
+                    updatedPlayer.deck = updatedPlayer.deck.slice(1);
+                }
+            } else {
+                // Player starts: player has 1 mana (already set), opponent gets extra card
+                // Opponent (goes second) draws extra card
+                if (updatedOpponent.deck.length > 0) {
+                    const drawnCard = updatedOpponent.deck[0];
+                    updatedOpponent.hand = [...updatedOpponent.hand, drawnCard];
+                    updatedOpponent.deck = updatedOpponent.deck.slice(1);
+                }
             }
-            // If player starts, default state is already correct
 
             newState = {
                 ...state,
