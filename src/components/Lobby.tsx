@@ -233,7 +233,7 @@ export const Lobby: React.FC<LobbyProps> = ({ onStartGame, isDebugMode, setIsDeb
                 <div
                     className="absolute inset-0"
                     style={{
-                        backgroundImage: 'url(/images/menu-background.png)',
+                        backgroundImage: 'url(/images/menu-background_orig.jpg)',
                         backgroundSize: 'cover',
                         backgroundPosition: 'center',
                     }}

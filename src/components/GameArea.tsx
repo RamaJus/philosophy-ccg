@@ -353,7 +353,6 @@ export const GameArea: React.FC<GameAreaProps> = ({ mode, isDebugMode, customDec
 
             // AI Target Logic (for Gottesbeweis etc.)
             if (currentState.targetMode === 'gottesbeweis_target') {
-                // Determine target (prioritize human board, fallback to self)
                 const targetPool = humanPlayer.board.length > 0 ? humanPlayer.board : aiPlayer.board;
                 if (targetPool.length > 0) {
                     const randomTarget = targetPool[Math.floor(Math.random() * targetPool.length)];
@@ -361,37 +360,128 @@ export const GameArea: React.FC<GameAreaProps> = ({ mode, isDebugMode, customDec
                     setTimeout(() => aiTurn(), 800);
                     return;
                 } else {
-                    // No targets? limit case
                     dispatch({ type: 'CANCEL_CAST' });
                     setTimeout(() => aiTurn(), 800);
                     return;
                 }
             }
 
-            const playableCards = aiPlayer.hand.filter(c => c.cost <= aiPlayer.mana);
+            // === PHASE 1 AI IMPROVEMENTS ===
+
+            // Helper: Calculate board strength (sum of attack + health)
+            const calcBoardStrength = (board: typeof aiPlayer.board) =>
+                board.reduce((sum, m) => sum + (m.attack || 0) + (m.health || 0), 0);
+
+            const aiBoardStrength = calcBoardStrength(aiPlayer.board);
+            const humanBoardStrength = calcBoardStrength(humanPlayer.board);
+            const isAheadOnBoard = aiBoardStrength > humanBoardStrength + 5;
+
+            // 1. Play cards - prioritize higher cost cards (stronger)
+            const playableCards = aiPlayer.hand
+                .filter(c => c.cost <= aiPlayer.mana)
+                .sort((a, b) => b.cost - a.cost); // Sort by cost descending
+
             if (playableCards.length > 0 && aiPlayer.board.length < MAX_BOARD_SIZE) {
-                const randomCard = playableCards[Math.floor(Math.random() * playableCards.length)];
-                dispatch({ type: 'PLAY_CARD', cardId: randomCard.instanceId || randomCard.id });
+                // Prioritize Philosophers over Spells for board presence
+                const philosophers = playableCards.filter(c => c.type === 'Philosoph');
+                const spells = playableCards.filter(c => c.type === 'Zauber' || c.type === 'Werk');
 
-                setTimeout(() => aiTurn(), 800);
-                return;
-            }
-
-            const attackableMinions = aiPlayer.board.filter(m => m.canAttack && !m.hasAttacked);
-            if (attackableMinions.length > 0) {
-                const attacker = attackableMinions[Math.floor(Math.random() * attackableMinions.length)];
-
-                if (humanPlayer.board.length > 0 && Math.random() > 0.5) {
-                    const target = humanPlayer.board[Math.floor(Math.random() * humanPlayer.board.length)];
-                    dispatch({ type: 'ATTACK', attackerIds: [attacker.instanceId || attacker.id], targetId: target.instanceId || target.id });
-                } else {
-                    dispatch({ type: 'ATTACK', attackerIds: [attacker.instanceId || attacker.id] });
+                // Play a spell if enemy has strong minions (removal value)
+                if (spells.length > 0 && humanPlayer.board.some(m => (m.attack || 0) >= 4)) {
+                    const spell = spells[0];
+                    dispatch({ type: 'PLAY_CARD', cardId: spell.instanceId || spell.id });
+                    setTimeout(() => aiTurn(), 800);
+                    return;
                 }
 
+                // Otherwise play a philosopher
+                if (philosophers.length > 0) {
+                    const card = philosophers[0]; // Highest cost philosopher
+                    dispatch({ type: 'PLAY_CARD', cardId: card.instanceId || card.id });
+                    setTimeout(() => aiTurn(), 800);
+                    return;
+                }
+
+                // Fallback: play any card
+                const card = playableCards[0];
+                dispatch({ type: 'PLAY_CARD', cardId: card.instanceId || card.id });
                 setTimeout(() => aiTurn(), 800);
                 return;
             }
 
+            // 2. Attack phase - FIX: Check silencedUntilTurn to prevent Diotima hang
+            const attackableMinions = aiPlayer.board.filter(m =>
+                m.canAttack &&
+                !m.hasAttacked &&
+                !(m.silencedUntilTurn && m.silencedUntilTurn > currentState.turn) &&
+                !(m.gender === 'male' && m.silencedUntilTurn && m.silencedUntilTurn > currentState.turn)
+            );
+
+            if (attackableMinions.length > 0) {
+                // Sort attackers by attack power (use strongest first)
+                const sortedAttackers = [...attackableMinions].sort((a, b) => (b.attack || 0) - (a.attack || 0));
+                const attacker = sortedAttackers[0];
+                const attackerPower = attacker.attack || 0;
+                const attackerHealth = attacker.health || 0;
+
+                // If ahead on board, go face more often
+                if (isAheadOnBoard && Math.random() > 0.3) {
+                    dispatch({ type: 'ATTACK', attackerIds: [attacker.instanceId || attacker.id] });
+                    setTimeout(() => aiTurn(), 800);
+                    return;
+                }
+
+                // Look for efficient trades on enemy board
+                if (humanPlayer.board.length > 0) {
+                    // Sort enemy minions by threat (attack power)
+                    const enemyMinions = [...humanPlayer.board].sort((a, b) => (b.attack || 0) - (a.attack || 0));
+
+                    // Find a good trade: can kill without dying, or at least trade evenly
+                    let bestTarget = null;
+                    for (const enemy of enemyMinions) {
+                        const enemyHealth = enemy.health || 0;
+                        const enemyAttack = enemy.attack || 0;
+
+                        // Can we kill it?
+                        if (attackerPower >= enemyHealth) {
+                            // Will we survive?
+                            if (attackerHealth > enemyAttack) {
+                                // Great trade - we kill and survive
+                                bestTarget = enemy;
+                                break;
+                            } else if (attackerHealth === enemyAttack ||
+                                (enemyAttack >= 4 && attackerPower >= enemyHealth)) {
+                                // Even trade or removing a threat - acceptable
+                                bestTarget = enemy;
+                                break;
+                            }
+                        }
+                    }
+
+                    // If no good trade found but enemy has high attack minions, trade anyway
+                    if (!bestTarget && enemyMinions.some(m => (m.attack || 0) >= 4)) {
+                        // Attack the highest threat even if not efficient
+                        bestTarget = enemyMinions[0];
+                    }
+
+                    if (bestTarget) {
+                        dispatch({
+                            type: 'ATTACK',
+                            attackerIds: [attacker.instanceId || attacker.id],
+                            targetId: bestTarget.instanceId || bestTarget.id
+                        });
+                        setTimeout(() => aiTurn(), 800);
+                        return;
+                    }
+                }
+
+                // No good trades - go face
+                dispatch({ type: 'ATTACK', attackerIds: [attacker.instanceId || attacker.id] });
+                setTimeout(() => aiTurn(), 800);
+                return;
+            }
+
+            // End turn
             setTimeout(() => {
                 dispatch({ type: 'END_TURN' });
             }, 500);
@@ -408,7 +498,7 @@ export const GameArea: React.FC<GameAreaProps> = ({ mode, isDebugMode, customDec
             <div
                 className="absolute inset-0"
                 style={{
-                    backgroundImage: 'url(/images/menu-background.jpg)',
+                    backgroundImage: 'url(/images/menu-background_orig.jpg)',
                     backgroundSize: 'cover',
                     backgroundPosition: 'center',
                 }}
