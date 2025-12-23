@@ -12,6 +12,7 @@ import { Card as CardComponent } from './Card';
 import { WorkSlot } from './WorkSlot';
 import { Swords, SkipForward, RotateCcw, Trophy, Zap } from 'lucide-react';
 import { getRandomQuote } from '../data/quotes';
+import { OracleCoinFlip } from './OracleCoinFlip';
 import { multiplayer } from '../network/MultiplayerManager';
 
 const MAX_BOARD_SIZE = 7;
@@ -43,6 +44,28 @@ export const GameArea: React.FC<GameAreaProps> = ({ mode, isDebugMode, customDec
     const [attackingMinionIds, setAttackingMinionIds] = useState<string[]>([]);
     const [deckPosition, setDeckPosition] = useState<{ x: number, y: number } | null>(null);
     const deckRef = useRef<HTMLDivElement>(null);
+
+    // Oracle coin flip state
+    const [showOracle, setShowOracle] = useState(false);
+    const [oracleWinner, setOracleWinner] = useState<'player' | 'opponent'>('player');
+    const [oracleComplete, setOracleComplete] = useState(false);
+
+    // Determine coin flip winner once at game start
+    useEffect(() => {
+        if (gameState.turn === 1 && !oracleComplete && !gameOver) {
+            // Host determines the winner randomly, client will receive it via sync
+            if (mode !== 'multiplayer_client') {
+                const winner = Math.random() < 0.5 ? 'player' : 'opponent';
+                setOracleWinner(winner);
+            }
+            setShowOracle(true);
+        }
+    }, [gameState.turn, oracleComplete, gameOver, mode]);
+
+    const handleOracleComplete = () => {
+        setShowOracle(false);
+        setOracleComplete(true);
+    };
 
     useEffect(() => {
         const updateDeckPosition = () => {
@@ -607,6 +630,15 @@ export const GameArea: React.FC<GameAreaProps> = ({ mode, isDebugMode, customDec
 
     return (
         <div className="h-screen w-full overflow-hidden relative">
+            {/* Oracle Coin Flip Animation */}
+            {showOracle && (
+                <OracleCoinFlip
+                    playerName={viewPlayer.name}
+                    opponentName={viewOpponent.name}
+                    winnerId={isClient ? (oracleWinner === 'player' ? 'opponent' : 'player') : oracleWinner}
+                    onComplete={handleOracleComplete}
+                />
+            )}
             {/* Background */}
             <div
                 className="absolute inset-0"

@@ -33,17 +33,59 @@ export function createPlayer(name: string, isPlayer: boolean, startingHandSize: 
     let hand = deck.slice(0, startingHandSize);
     let remainingDeck = deck.slice(startingHandSize);
 
-    // Guarantee at least one 1-cost card in starting hand
-    const hasOneCostCard = hand.some(c => c.cost === 1);
-    if (!hasOneCostCard) {
-        const oneCostIndex = remainingDeck.findIndex(c => c.cost === 1);
-        if (oneCostIndex !== -1) {
-            const swapIndex = Math.floor(Math.random() * hand.length);
-            const cardToSwap = hand[swapIndex];
-            hand[swapIndex] = remainingDeck[oneCostIndex];
-            remainingDeck[oneCostIndex] = cardToSwap;
+    // Guarantee starting hand has certain philosophers for playable early game
+    // 1) Guarantee one 1-cost Philosopher (fallback: 2-cost Philosopher)
+    // 2) Guarantee one 2-cost Philosopher (fallback: 3-cost Philosopher)
+
+    const findPhilosopherByCost = (cards: typeof deck, costs: number[]) => {
+        for (const cost of costs) {
+            const index = cards.findIndex(c => c.type === 'Philosoph' && c.cost === cost);
+            if (index !== -1) return index;
         }
-    }
+        return -1;
+    };
+
+    const swapCardIntoHand = (targetCosts: number[], avoidInstanceIds: string[]) => {
+        // Check if hand already has a Philosopher with one of the target costs
+        const hasTarget = hand.some(c =>
+            c.type === 'Philosoph' &&
+            targetCosts.includes(c.cost) &&
+            !avoidInstanceIds.includes(c.instanceId || c.id)
+        );
+
+        if (!hasTarget) {
+            // Find one in deck
+            const deckIndex = findPhilosopherByCost(remainingDeck, targetCosts);
+            if (deckIndex !== -1) {
+                // Find a non-essential card to swap out
+                const swapIndex = hand.findIndex(c =>
+                    !avoidInstanceIds.includes(c.instanceId || c.id)
+                );
+                if (swapIndex !== -1) {
+                    const cardToSwap = hand[swapIndex];
+                    const cardToAdd = remainingDeck[deckIndex];
+                    hand[swapIndex] = cardToAdd;
+                    remainingDeck[deckIndex] = cardToSwap;
+                    return cardToAdd.instanceId || cardToAdd.id;
+                }
+            }
+        } else {
+            // Return the ID of the card we're keeping
+            const existing = hand.find(c =>
+                c.type === 'Philosoph' &&
+                targetCosts.includes(c.cost) &&
+                !avoidInstanceIds.includes(c.instanceId || c.id)
+            );
+            return existing?.instanceId || existing?.id || '';
+        }
+        return '';
+    };
+
+    // First: guarantee 1-cost Philosopher (fallback to 2-cost if no 1-cost exists)
+    const keptId1 = swapCardIntoHand([1, 2], []);
+
+    // Second: guarantee 2-cost Philosopher (fallback to 3-cost), avoiding the first kept card
+    swapCardIntoHand([2, 3], keptId1 ? [keptId1] : []);
 
     if (isDebugMode) {
         const debugCard = cardDatabase.find(c => c.id === 'debug_search');
