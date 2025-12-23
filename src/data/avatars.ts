@@ -60,9 +60,9 @@ export const AVATARS: Avatar[] = [
     },
     {
         id: 'visionary',
-        name: 'Die Seherin (Coming Soon)',
+        name: 'Die Seherin',
         description: 'Ein mysteriöser Blick in die Zukunft.',
-        image: '/images/avatars/placeholder.png',
+        image: '/images/avatars/visionary.png',
         gender: 'female'
     }
 ];
