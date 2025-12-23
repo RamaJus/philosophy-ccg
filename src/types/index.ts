@@ -116,4 +116,5 @@ export type GameAction =
     | { type: 'EROS_TARGET'; minionId: string }
     | { type: 'SET_DISCARD_MODE'; active: boolean } // Enter/exit discard mode
     | { type: 'DISCARD_CARD'; cardId: string } // Discard card from hand
-    | { type: 'CONFIRM_DEDUKTION' }; // Confirm Deduktion with less than 3 targets
+    | { type: 'CONFIRM_DEDUKTION' } // Confirm Deduktion with less than 3 targets
+    | { type: 'SET_STARTING_PLAYER'; startingPlayer: 'player' | 'opponent' }; // Set who starts after coin flip

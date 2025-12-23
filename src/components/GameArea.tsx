@@ -65,6 +65,13 @@ export const GameArea: React.FC<GameAreaProps> = ({ mode, isDebugMode, customDec
     const handleOracleComplete = () => {
         setShowOracle(false);
         setOracleComplete(true);
+
+        // Dispatch action to set who starts (only host does this, client gets it via sync)
+        if (mode !== 'multiplayer_client') {
+            const action: import('../types').GameAction = { type: 'SET_STARTING_PLAYER', startingPlayer: oracleWinner };
+            dispatch(action);
+            // In multiplayer host mode, sync state will propagate this to client
+        }
     };
 
     useEffect(() => {

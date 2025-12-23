@@ -1366,6 +1366,34 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
             break;
         }
 
+        case 'SET_STARTING_PLAYER': {
+            // Set who starts after coin flip (used after Oracle animation)
+            const { startingPlayer } = action;
+
+            // If opponent starts, they get mana and player doesn't
+            // If player starts, player has mana (default from createInitialState)
+            let updatedPlayer = { ...state.player };
+            let updatedOpponent = { ...state.opponent };
+
+            if (startingPlayer === 'opponent') {
+                // Give opponent 1 mana, remove from player
+                updatedOpponent.mana = 1;
+                updatedOpponent.maxMana = 1;
+                updatedPlayer.mana = 0;
+                updatedPlayer.maxMana = 0;
+            }
+            // If player starts, default state is already correct
+
+            newState = {
+                ...state,
+                activePlayer: startingPlayer,
+                player: updatedPlayer,
+                opponent: updatedOpponent,
+                log: appendLog(state.log, `${startingPlayer === 'player' ? updatedPlayer.name : updatedOpponent.name} beginnt das Spiel.`)
+            };
+            break;
+        }
+
         case 'SYNC_STATE': {
             const incomingState = action.newState;
             // Prevent double-flash: if client already displayed this spell, clear it
