@@ -114,7 +114,7 @@ export const OracleCoinFlip: React.FC<OracleCoinFlipProps> = ({
                         transition={{ duration: 1.2, ease: 'easeOut' }}
                     >
                         <img
-                            src="/images/pythia-right.png"
+                            src="/images/pythia-right-dark.png"
                             alt=""
                             className="h-full w-auto object-contain object-left-bottom"
                             style={{
@@ -136,7 +136,7 @@ export const OracleCoinFlip: React.FC<OracleCoinFlipProps> = ({
                         transition={{ duration: 1.2, ease: 'easeOut', delay: 0.2 }}
                     >
                         <img
-                            src="/images/pythia-left.png"
+                            src="/images/pythia-left-dark.png"
                             alt=""
                             className="h-full w-auto object-contain object-right-bottom"
                             style={{
