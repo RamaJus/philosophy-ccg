@@ -12,6 +12,7 @@ interface CardProps {
     showHealth?: boolean;
     className?: string;
     bonusDamage?: number;
+    bonusHealth?: number;
     isAttacking?: boolean;
 }
 
@@ -26,6 +27,7 @@ export const Card: React.FC<CardProps> = ({
     showHealth = false,
     className = '',
     bonusDamage = 0,
+    bonusHealth = 0,
     isAttacking = false
 }) => {
     const isMinion = card.type === 'Philosoph';
@@ -300,12 +302,14 @@ export const Card: React.FC<CardProps> = ({
                         </div>
 
                         {boardMinion ? (
-                            <div className={`flex items-center gap-1 stat-badge ${boardMinion.health < boardMinion.maxHealth
-                                ? 'from-orange-500 to-red-600'
-                                : 'from-green-500 to-green-600'
+                            <div className={`flex items-center gap-1 stat-badge ${bonusHealth > 0
+                                ? 'from-cyan-400 to-cyan-600'
+                                : boardMinion.health < boardMinion.maxHealth
+                                    ? 'from-orange-500 to-red-600'
+                                    : 'from-green-500 to-green-600'
                                 }`}>
                                 <Heart size={12} />
-                                <span>{boardMinion.health}</span>
+                                <span>{boardMinion.health + bonusHealth}</span>
                             </div>
                         ) : (
                             <div className="flex items-center gap-1 stat-badge from-green-500 to-green-600">

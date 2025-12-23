@@ -1,5 +1,4 @@
 import { GameState, Effect } from '../types';
-import { playVoiceline } from '../audio/voicelines';
 
 // Helper to get players safely based on active turn perspective
 export const getActivePlayers = (state: GameState) => {
@@ -17,6 +16,7 @@ export const processEffect = (
     let newActivePlayer = { ...activePlayer };
     let newEnemyPlayer = { ...enemyPlayer };
     let logUpdates: string[] = [];
+    let pendingVoiceline: string | undefined = undefined;
 
     switch (effect.type) {
         case 'DAMAGE': {
@@ -27,7 +27,7 @@ export const processEffect = (
             } else if (effect.target === 'SELF') {
                 newActivePlayer.health -= damage; // e.g. Schopenhauer
                 if (damage === 5) {
-                    playVoiceline('schopenhauer');
+                    pendingVoiceline = 'schopenhauer';
                     logUpdates.push(`${activePlayer.name} erlitt ${damage} Selbstschaden.`);
                 } else {
                     logUpdates.push(`${activePlayer.name} erlitt ${damage} Schaden!`);
@@ -100,7 +100,7 @@ export const processEffect = (
 
                 const conditionText = effect.condition === 'MALE' ? 'männlichen ' : '';
                 if (effect.condition === 'MALE') {
-                    playVoiceline('diotima');
+                    pendingVoiceline = 'diotima';
                     logUpdates.push(`${activePlayer.name} verstummte alle männlichen Philosophen.`);
                 } else {
                     logUpdates.push(`${activePlayer.name} verstummte alle ${conditionText}gegnerischen Philosophen für ${duration} Runde(n)!`);
@@ -161,14 +161,14 @@ export const processEffect = (
             const count = effect.value || 3;
             const topCards = newEnemyPlayer.deck.slice(0, count);
             if (topCards.length > 0) {
-                playVoiceline('foucault');
                 return {
                     player: state.activePlayer === 'player' ? newActivePlayer : newEnemyPlayer,
                     opponent: state.activePlayer === 'player' ? newEnemyPlayer : newActivePlayer,
                     log: [...state.log, ...logUpdates, `${activePlayer.name} sieht die Karten des Gegners.`],
                     foucaultRevealCards: topCards,
                     targetMode: 'foucault_reveal',
-                    targetModeOwner: state.activePlayer
+                    targetModeOwner: state.activePlayer,
+                    pendingVoiceline: 'foucault'
                 };
             }
             break;
@@ -215,7 +215,7 @@ export const processEffect = (
                 const tempHealth = newActivePlayer.health;
                 newActivePlayer.health = newEnemyPlayer.health;
                 newEnemyPlayer.health = tempHealth;
-                playVoiceline('camus');
+                pendingVoiceline = 'camus';
                 logUpdates.push(`Die Lebenspunkte wurden getauscht!`);
             }
             break;
@@ -241,7 +241,7 @@ export const processEffect = (
                     };
 
                     newActivePlayer.board = [...newActivePlayer.board, stolenMinion];
-                    playVoiceline('marx');
+                    pendingVoiceline = 'marx';
                     logUpdates.push(`${stolen.name} wurde enteignet!`);
                 }
             }
@@ -252,7 +252,7 @@ export const processEffect = (
             if (effect.target === 'ENEMY') {
                 // Kant: Block enemy from attacking minions for X turns
                 newEnemyPlayer.minionAttackBlockTurns = (newEnemyPlayer.minionAttackBlockTurns || 0) + duration;
-                playVoiceline('kant');
+                pendingVoiceline = 'kant';
                 logUpdates.push(`Angriffe auf Philosophen sind blockiert.`);
             }
             break;
@@ -317,6 +317,7 @@ export const processEffect = (
         player: state.activePlayer === 'player' ? newActivePlayer : newEnemyPlayer,
         opponent: state.activePlayer === 'player' ? newEnemyPlayer : newActivePlayer,
         log: [...state.log, ...logUpdates],
-        ...(gameOver && { gameOver, winner })
+        ...(gameOver && { gameOver, winner }),
+        ...(pendingVoiceline && { pendingVoiceline })
     };
 };

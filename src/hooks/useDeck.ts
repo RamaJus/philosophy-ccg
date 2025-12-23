@@ -3,7 +3,7 @@ import { cardDatabase as cards } from '../data/cards';
 import { Card } from '../types';
 
 const STORAGE_KEY = 'philosophy-ccg-deck';
-const DECK_SIZE = 40;
+const DECK_SIZE = 60;
 
 export interface DeckState {
     cardIds: string[];

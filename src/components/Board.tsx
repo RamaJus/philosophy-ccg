@@ -119,7 +119,7 @@ export const Board: React.FC<BoardProps> = ({
                                                 isSelected={selectedMinionIds.includes(minion.instanceId || minion.id)}
                                                 isPlayable={(canAttack && !isSilenced) || isTargetable}
                                                 showHealth={true}
-                                                bonusDamage={bonusHealth}
+                                                bonusHealth={bonusHealth}
                                                 isAttacking={attackingMinionIds.includes(minion.instanceId || minion.id)}
                                                 className={`
                                                     ${canAttack && !isSilenced ? 'ring-2 ring-green-400' : ''}

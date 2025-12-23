@@ -14,6 +14,7 @@ import { Swords, SkipForward, RotateCcw, Trophy, Zap } from 'lucide-react';
 import { getRandomQuote } from '../data/quotes';
 import { OracleCoinFlip } from './OracleCoinFlip';
 import { multiplayer } from '../network/MultiplayerManager';
+import { playVoiceline } from '../audio/voicelines';
 
 const MAX_BOARD_SIZE = 7;
 
@@ -166,6 +167,17 @@ export const GameArea: React.FC<GameAreaProps> = ({ mode, isDebugMode, customDec
         }, 1000); // 1 second duration
         return () => clearTimeout(timer);
     }, [gameState.lastPlayedCard, gameState.lastPlayedCardPlayerId]); // Trigger when card changes
+
+    // Voiceline playback - triggered by pendingVoiceline state (synced from host)
+    const lastVoicelineRef = useRef<string | null>(null);
+    useEffect(() => {
+        if (gameState.pendingVoiceline && gameState.pendingVoiceline !== lastVoicelineRef.current) {
+            lastVoicelineRef.current = gameState.pendingVoiceline;
+            playVoiceline(gameState.pendingVoiceline);
+        } else if (!gameState.pendingVoiceline) {
+            lastVoicelineRef.current = null;
+        }
+    }, [gameState.pendingVoiceline]);
 
     // Auto-start handled by useGameLogic now to prevent race conditions with custom deck loading
     // useEffect(() => {

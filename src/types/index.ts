@@ -87,6 +87,7 @@ export interface GameState {
     log: string[]; // Game log messages
     lastPlayedCard?: Card; // For visual flash effect of performed spells
     lastPlayedCardPlayerId?: 'player' | 'opponent'; // Who played the spell
+    pendingVoiceline?: string; // Voiceline ID to play (synced to client)
 }
 
 export type GameAction =

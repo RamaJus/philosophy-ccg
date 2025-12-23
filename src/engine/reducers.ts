@@ -2,7 +2,6 @@ import { GameState, Player, GameAction, BoardMinion } from '../types';
 import { generateDeck, cardDatabase } from '../data/cards';
 import { processEffect } from './effectSystem';
 import { calculateSynergies } from './synergies';
-import { playVoiceline } from '../audio/voicelines';
 
 // Constants
 const STARTING_HAND_SIZE = 4;
@@ -383,10 +382,10 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
                     minionHealth = Math.floor(Math.random() * 10) + 1; // 1-10
                     logMessage = `Non Sequitur! ${card.name} erschien mit zufälligen Werten (${minionAttack}/${minionHealth})!`;
                 } else if (card.id === 'sartre') {
-                    playVoiceline('sartre');
+                    newState.pendingVoiceline = 'sartre';
                     logMessage = `${p.name} beschwörte ${card.name}.`;
                 } else if (card.id === 'wittgenstein') {
-                    playVoiceline('wittgenstein');
+                    newState.pendingVoiceline = 'wittgenstein';
                     logMessage = `${p.name} beschwörte ${card.name}.`;
                 }
 
@@ -474,9 +473,8 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
 
                 // Diogenes Check (Untargetable)
                 if (target.untargetableUntilTurn && target.untargetableUntilTurn > state.turn) {
-                    playVoiceline('diogenes');
                     currentLog = appendLog(currentLog, `${target.name} kann noch nicht angegriffen werden.`);
-                    return { ...state, log: currentLog };
+                    return { ...state, log: currentLog, pendingVoiceline: 'diogenes' };
                 }
 
                 const targetDamage = target.attack;
@@ -594,7 +592,9 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
                         selectedMinions: [],
                         targetMode: undefined,
                         pendingPlayedCard: undefined,
-                        log: appendLog(state.log, `${activePlayer.name} nutzte Deduktion: +1/+1 für 3 Philosophen.`)
+                        log: appendLog(state.log, `${activePlayer.name} nutzte Deduktion: +1/+1 für 3 Philosophen.`),
+                        lastPlayedCard: undefined,
+                        lastPlayedCardPlayerId: undefined
                     };
                 }
 
@@ -630,7 +630,9 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
                     selectedMinions: [],
                     targetMode: undefined,
                     pendingPlayedCard: undefined,
-                    log: appendLog(state.log, `${activePlayer.name} nutzte Induktion auf ${minion.name}: +3/+3.`)
+                    log: appendLog(state.log, `${activePlayer.name} nutzte Induktion auf ${minion.name}: +3/+3.`),
+                    lastPlayedCard: undefined,
+                    lastPlayedCardPlayerId: undefined
                 };
             }
 
@@ -959,7 +961,6 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
                     hasUsedSpecial: false,
                     specialAbility: undefined
                 };
-                playVoiceline('nietzsche');
                 log = appendLog(log, `${targetMinion.name} wurde zum letzten Menschen.`);
             }
 
@@ -981,7 +982,10 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
                 [state.activePlayer === 'player' ? 'opponent' : 'player']: updatedEnemy,
                 log,
                 targetMode: undefined,
-                selectedMinions: undefined
+                selectedMinions: undefined,
+                lastPlayedCard: undefined,
+                lastPlayedCardPlayerId: undefined,
+                pendingVoiceline: updatedMinion ? 'nietzsche' : undefined
             };
             break;
         }
@@ -1014,7 +1018,6 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
                 image: '/images/cards/chair_matter.png',
             };
 
-            playVoiceline('van_inwagen');
             let log = appendLog(state.log, `${targetMinion.name} wurde zu stuhlartiger Materie.`);
 
             const updatedEnemyBoard = enemyPlayer.board.map(m => (m.instanceId || m.id) === minionId ? chairMatter : m);
@@ -1026,7 +1029,10 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
                 [state.activePlayer === 'player' ? 'opponent' : 'player']: { ...enemyPlayer, board: updatedEnemyBoard },
                 log,
                 targetMode: undefined,
-                selectedMinions: undefined
+                selectedMinions: undefined,
+                lastPlayedCard: undefined,
+                lastPlayedCardPlayerId: undefined,
+                pendingVoiceline: 'van_inwagen'
             };
             break;
         }
@@ -1151,7 +1157,9 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
                 [state.activePlayer]: { ...activePlayer, hand: newHand, graveyard: newGraveyard },
                 recurrenceCards: undefined,
                 targetMode: undefined,
-                log: appendLog(state.log, `${activePlayer.name} holte eine Karte vom Friedhof zurück.`)
+                log: appendLog(state.log, `${activePlayer.name} holte eine Karte vom Friedhof zurück.`),
+                lastPlayedCard: undefined,
+                lastPlayedCardPlayerId: undefined
             };
             break;
         }
@@ -1281,7 +1289,9 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
                 [enemyPlayerId]: updatedEnemy,
                 targetMode: undefined,
                 pendingPlayedCard: undefined,
-                log: appendLog(state.log, `Eros! ${targetMinion.name} ist verliebt und kann 2 Runden nicht angreifen.`)
+                log: appendLog(state.log, `Eros! ${targetMinion.name} ist verliebt und kann 2 Runden nicht angreifen.`),
+                lastPlayedCard: undefined,
+                lastPlayedCardPlayerId: undefined
             };
             break;
         }
@@ -1361,7 +1371,9 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
                 selectedMinions: [],
                 targetMode: undefined,
                 pendingPlayedCard: undefined,
-                log: appendLog(state.log, `${activePlayer.name} nutzte Deduktion: +1/+1 für ${selected.length} Philosophen.`)
+                log: appendLog(state.log, `${activePlayer.name} nutzte Deduktion: +1/+1 für ${selected.length} Philosophen.`),
+                lastPlayedCard: undefined,
+                lastPlayedCardPlayerId: undefined
             };
             break;
         }
