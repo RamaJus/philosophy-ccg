@@ -256,8 +256,8 @@ export const GameArea: React.FC<GameAreaProps> = ({ mode, isDebugMode, customDec
             return;
         }
 
-        // DEDUKTION and INDUKTION - these use SELECT_MINION but need to be networked
-        if (targetMode === 'deduktion_target' || targetMode === 'induktion_target') {
+        // DEDUKTION, INDUKTION, and PHILOSOPHENHERRSCHAFT - these use SELECT_MINION but need to be networked
+        if (targetMode === 'deduktion_target' || targetMode === 'induktion_target' || targetMode === 'philosophenherrschaft_target') {
             const action: import('../types').GameAction = { type: 'SELECT_MINION', minionId, toggle: true };
             if (isClient) multiplayer.sendAction(action); else dispatch(action);
             return;
@@ -1103,6 +1103,20 @@ export const GameArea: React.FC<GameAreaProps> = ({ mode, isDebugMode, customDec
                                     </>
                                 )}
 
+                                {targetMode === 'philosophenherrschaft_target' && isMyTargetMode && (
+                                    <>
+                                        <div className="px-4 py-2 bg-amber-500/20 text-amber-400 rounded-lg border border-amber-500/50 animate-pulse">
+                                            <p className="text-sm font-bold">Philosophenherrschaft: Wähle einen Philosophen für Ansturm</p>
+                                        </div>
+                                        <button
+                                            onClick={handleCancelCast}
+                                            className="px-3 py-1 bg-red-800 hover:bg-red-700 text-white rounded border border-red-500 text-sm"
+                                        >
+                                            Zauber abbrechen
+                                        </button>
+                                    </>
+                                )}
+
                                 {viewIsPlayerTurn && selectedMinions?.length && (
                                     <>
                                         <button
@@ -1196,8 +1210,8 @@ export const GameArea: React.FC<GameAreaProps> = ({ mode, isDebugMode, customDec
                                 selectedMinionIds={selectedMinions || []}
                                 isPlayerBoard={true}
                                 activeWork={viewPlayer.activeWork}
-                                canTarget={(targetMode === 'gottesbeweis_target' || targetMode === 'trolley_sacrifice' || targetMode === 'arete_target' || targetMode === 'cave_ascent_target' || targetMode === 'deduktion_target' || targetMode === 'induktion_target') && !!isMyTargetMode}
-                                isSpecialTargeting={(targetMode === 'gottesbeweis_target' || targetMode === 'trolley_sacrifice' || targetMode === 'arete_target' || targetMode === 'cave_ascent_target' || targetMode === 'deduktion_target' || targetMode === 'induktion_target') && !!isMyTargetMode}
+                                canTarget={(targetMode === 'gottesbeweis_target' || targetMode === 'trolley_sacrifice' || targetMode === 'arete_target' || targetMode === 'cave_ascent_target' || targetMode === 'deduktion_target' || targetMode === 'induktion_target' || targetMode === 'philosophenherrschaft_target') && !!isMyTargetMode}
+                                isSpecialTargeting={(targetMode === 'gottesbeweis_target' || targetMode === 'trolley_sacrifice' || targetMode === 'arete_target' || targetMode === 'cave_ascent_target' || targetMode === 'deduktion_target' || targetMode === 'induktion_target' || targetMode === 'philosophenherrschaft_target') && !!isMyTargetMode}
                                 synergiesBlocked={(viewPlayer.synergyBlockTurns || 0) > 0}
                                 attacksBlocked={isClient ? (gameState.opponent.minionAttackBlockTurns || 0) > 0 : (gameState.player.minionAttackBlockTurns || 0) > 0}
                                 currentTurn={gameState.turn}

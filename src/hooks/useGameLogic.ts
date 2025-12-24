@@ -138,8 +138,8 @@ export const useGameLogic = (gameMode: 'single' | 'host' | 'client', isDebugMode
     }, []);
 
     const selectMinion = useCallback((minionId: string, toggle: boolean = false) => {
-        // If we are targeting for Deduktion/Induktion, this selection IS the game action
-        if (gameState.targetMode === 'deduktion_target' || gameState.targetMode === 'induktion_target') {
+        // If we are targeting for Deduktion/Induktion/Philosophenherrschaft, this selection IS the game action
+        if (gameState.targetMode === 'deduktion_target' || gameState.targetMode === 'induktion_target' || gameState.targetMode === 'philosophenherrschaft_target') {
             const action: GameAction = { type: 'SELECT_MINION', minionId, toggle };
             if (isClient) {
                 multiplayer.sendAction(action);

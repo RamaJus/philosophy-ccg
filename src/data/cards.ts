@@ -1072,6 +1072,17 @@ export const cardDatabase: Card[] = [
         rarity: 'Gewöhnlich',
         image: '/images/cards/ewige-wiederkunft.png',
     },
+    {
+        id: 'philosophenherrschaft',
+        name: 'Philosophenherrschaft',
+        type: 'Zauber',
+        cost: 4,
+        description: 'Ein Philosoph deiner Wahl erhält Ansturm.',
+        effect: 'Ein eigener Philosoph kann sofort angreifen.',
+        effects: [{ type: 'TARGET_MODE', target: 'SELF', mode: 'philosophenherrschaft_target' }],
+        rarity: 'Gewöhnlich',
+        image: '/images/cards/philosophenherrschaft.png',
+    },
 
     // DEBUG CARDS (excluded from normal decks via generateDeck filter)
     {

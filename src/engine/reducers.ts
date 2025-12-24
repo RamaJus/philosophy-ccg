@@ -668,6 +668,39 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
                     lastPlayedCard: undefined,
                     lastPlayedCardPlayerId: undefined
                 };
+            } else if (state.targetMode === 'philosophenherrschaft_target') {
+                const activePlayer = state.activePlayer === 'player' ? state.player : state.opponent;
+                const minionIndex = activePlayer.board.findIndex(m => (m.instanceId || m.id) === minionId);
+
+                if (minionIndex === -1) return state; // Must be friendly
+
+                let updatedPlayer = { ...activePlayer };
+                const minion = updatedPlayer.board[minionIndex];
+
+                // Grant charge (canAttack = true)
+                const updatedMinion = {
+                    ...minion,
+                    canAttack: true,
+                    hasAttacked: false
+                };
+
+                updatedPlayer.board = updatedPlayer.board.map((m, i) => i === minionIndex ? updatedMinion : m);
+
+                // Move pending card to graveyard
+                if (state.pendingPlayedCard) {
+                    updatedPlayer.graveyard = [...updatedPlayer.graveyard, state.pendingPlayedCard];
+                }
+
+                return {
+                    ...state,
+                    [state.activePlayer]: updatedPlayer,
+                    selectedMinions: [],
+                    targetMode: undefined,
+                    pendingPlayedCard: undefined,
+                    log: appendLog(state.log, `${activePlayer.name} gab ${minion.name} Ansturm! Er kann sofort angreifen.`),
+                    lastPlayedCard: undefined,
+                    lastPlayedCardPlayerId: undefined
+                };
             }
 
             let newSelected = state.selectedMinions || [];
