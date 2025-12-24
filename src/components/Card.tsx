@@ -10,6 +10,31 @@ export const CARD_HEIGHT = 200;
 export const PREVIEW_SCALE = 1.5;
 export const TOOLTIP_WIDTH = 792; // 660px * 1.2 = 20% wider
 
+// Extract display name (last name for philosophers, full name for spells/works)
+const getDisplayName = (card: CardType | BoardMinion): string => {
+    // Only extract last name for Philosopher cards
+    if (card.type !== 'Philosoph') {
+        return card.name;
+    }
+
+    const parts = card.name.trim().split(' ');
+
+    // Single name (e.g., "Diogenes", "Sokrates", "Platon")
+    if (parts.length === 1) {
+        return parts[0];
+    }
+
+    // Handle nobility prefixes: "von", "de", "van" should be included with last name
+    const lastPart = parts[parts.length - 1];
+    const secondLastPart = parts.length > 1 ? parts[parts.length - 2].toLowerCase() : '';
+
+    if (['von', 'de', 'van'].includes(secondLastPart)) {
+        return `${parts[parts.length - 2]} ${lastPart}`;
+    }
+
+    return lastPart;
+};
+
 interface CardProps {
     card: CardType | BoardMinion;
     onClick?: () => void;
@@ -232,7 +257,7 @@ export const Card: React.FC<CardProps> = ({
 
                 <div className={`px-2 py-1 rounded-t-xl ${card.rarity === 'Legendär' ? 'bg-gradient-to-r from-yellow-700 via-yellow-600 to-yellow-700' : 'bg-gradient-to-r from-slate-800 to-slate-700'}`} style={{ pointerEvents: 'none' }}>
                     <h3 className="font-bold text-xs text-center text-white truncate">
-                        {card.name}
+                        {getDisplayName(card)}
                     </h3>
                 </div>
 

@@ -64,13 +64,29 @@ export const GameArea: React.FC<GameAreaProps> = ({ mode, isDebugMode, customDec
     const [oracleWinner, setOracleWinner] = useState<'player' | 'opponent'>('player');
     const [oracleComplete, setOracleComplete] = useState(false);
 
+    // Set up coin flip listener for client
+    useEffect(() => {
+        if (mode === 'multiplayer_client') {
+            multiplayer.onCoinFlip((winner) => {
+                // From client's perspective: 'player' in host's message means host wins
+                // So client sees 'opponent' as winner
+                const clientPerspective = winner === 'player' ? 'opponent' : 'player';
+                setOracleWinner(clientPerspective);
+            });
+        }
+    }, [mode]);
+
     // Determine coin flip winner once at game start
     useEffect(() => {
         if (gameState.turn === 1 && !oracleComplete && !gameOver) {
-            // Host determines the winner randomly, client will receive it via sync
+            // Host determines the winner randomly and sends to client
             if (mode !== 'multiplayer_client') {
                 const winner = Math.random() < 0.5 ? 'player' : 'opponent';
                 setOracleWinner(winner);
+                // Send to client in multiplayer
+                if (mode === 'multiplayer_host') {
+                    multiplayer.sendCoinFlip(winner);
+                }
             }
             setShowOracle(true);
         }
@@ -691,7 +707,7 @@ export const GameArea: React.FC<GameAreaProps> = ({ mode, isDebugMode, customDec
                 <OracleCoinFlip
                     playerName={viewPlayer.name}
                     opponentName={viewOpponent.name}
-                    winnerId={isClient ? (oracleWinner === 'player' ? 'opponent' : 'player') : oracleWinner}
+                    winnerId={oracleWinner}
                     onComplete={handleOracleComplete}
                 />
             )}

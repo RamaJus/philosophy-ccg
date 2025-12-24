@@ -1,7 +1,7 @@
 import Peer, { DataConnection } from 'peerjs';
 import { GameAction, GameState } from '../types';
 
-type MessageType = 'HANDSHAKE' | 'GAME_STATE' | 'ACTION' | 'RESTART';
+type MessageType = 'HANDSHAKE' | 'GAME_STATE' | 'ACTION' | 'RESTART' | 'COIN_FLIP';
 
 interface NetworkMessage {
     type: MessageType;
@@ -14,6 +14,7 @@ export class MultiplayerManager {
     private onStateUpdate: ((state: GameState) => void) | null = null;
     private onActionReceived: ((action: GameAction) => void) | null = null;
     private onHandshakeReceived: ((data: { deckIds?: string[]; playerName?: string; avatarId?: string }) => void) | null = null;
+    private onCoinFlipReceived: ((winner: 'player' | 'opponent') => void) | null = null;
     private onConnect: (() => void) | null = null;
     private onDisconnect: (() => void) | null = null;
     private onError: ((error: string) => void) | null = null;
@@ -104,6 +105,10 @@ export class MultiplayerManager {
                 console.log('[MultiplayerManager] Received handshake:', msg.payload);
                 if (this.onHandshakeReceived) this.onHandshakeReceived(msg.payload);
                 break;
+            case 'COIN_FLIP':
+                console.log('[MultiplayerManager] Received coin flip:', msg.payload);
+                if (this.onCoinFlipReceived) this.onCoinFlipReceived(msg.payload);
+                break;
         }
     }
 
@@ -111,6 +116,16 @@ export class MultiplayerManager {
         if (this.conn && this.conn.open) {
             this.conn.send({ type: 'HANDSHAKE', payload: { deckIds, playerName, avatarId } });
         }
+    }
+
+    public sendCoinFlip(winner: 'player' | 'opponent') {
+        if (this.conn && this.conn.open) {
+            this.conn.send({ type: 'COIN_FLIP', payload: winner });
+        }
+    }
+
+    public onCoinFlip(callback: (winner: 'player' | 'opponent') => void) {
+        this.onCoinFlipReceived = callback;
     }
 
     public sendState(state: GameState) {
@@ -163,6 +178,7 @@ export class MultiplayerManager {
         this.onDisconnect = null;
         this.onError = null;
         this.onHandshakeReceived = null;
+        this.onCoinFlipReceived = null;
     }
 
     public cleanup() {
