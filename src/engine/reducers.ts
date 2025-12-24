@@ -1741,31 +1741,9 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
         }
 
         case 'SYNC_STATE': {
-            const incomingState = action.newState;
-            // Prevent double-flash: 
-            // The client's useEffect triggers flash based on lastPlayedCard.
-            // If the incoming state has a card that we've already seen/displayed locally,
-            // clear it to prevent the flash from triggering again.
-            // This handles both cases:
-            // 1. Client played the card (local state already has it)
-            // 2. Host played card twice in quick succession (same instanceId)
-
-            const currentFlashId = state.lastPlayedCard?.instanceId;
-            const incomingFlashId = incomingState.lastPlayedCard?.instanceId;
-
-            // Always clear if same card - we've already displayed it
-            if (currentFlashId && currentFlashId === incomingFlashId) {
-                return {
-                    ...incomingState,
-                    lastPlayedCard: undefined,
-                    lastPlayedCardPlayerId: undefined
-                };
-            }
-
-            // If client (the one receiving SYNC_STATE) previously saw this flash,
-            // the useEffect in GameArea will have already displayed it.
-            // We need to return the incoming state directly - new flashes are fine.
-            return incomingState;
+            // Client receives full state from host
+            // Double-flash prevention is handled by GameArea's seenFlashIds tracking
+            return action.newState;
         }
 
         default:

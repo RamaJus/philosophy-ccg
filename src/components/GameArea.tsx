@@ -176,7 +176,6 @@ export const GameArea: React.FC<GameAreaProps> = ({ mode, isDebugMode, customDec
     // Flash Card Logic
     const [flashCard, setFlashCard] = useState<{ card: Card; position: 'top' | 'bottom' } | null>(null);
 
-    const lastFlashedCardId = useRef<string | null>(null);
     const seenFlashIds = useRef<Set<string>>(new Set());
 
     useEffect(() => {
@@ -199,7 +198,6 @@ export const GameArea: React.FC<GameAreaProps> = ({ mode, isDebugMode, customDec
 
         // Mark as seen for this specific play
         seenFlashIds.current.add(uniqueFlashKey);
-        lastFlashedCardId.current = uniqueFlashKey;
 
         // Determine position based on who played it relative to view
         const isMe = gameState.lastPlayedCardPlayerId === viewPlayer.id;
