@@ -67,12 +67,20 @@ export const GameArea: React.FC<GameAreaProps> = ({ mode, isDebugMode, customDec
     // Set up coin flip listener for client
     useEffect(() => {
         if (mode === 'multiplayer_client') {
-            multiplayer.onCoinFlip((winner) => {
+            const handleCoinFlip = (winner: 'player' | 'opponent') => {
                 // From client's perspective: 'player' in host's message means host wins
                 // So client sees 'opponent' as winner
                 const clientPerspective = winner === 'player' ? 'opponent' : 'player';
                 setOracleWinner(clientPerspective);
-            });
+            };
+
+            multiplayer.onCoinFlip(handleCoinFlip);
+
+            // Check if coin flip was already received before listener was set (race condition fix)
+            if (multiplayer.receivedCoinFlip) {
+                handleCoinFlip(multiplayer.receivedCoinFlip);
+                multiplayer.receivedCoinFlip = null; // Clear after processing
+            }
         }
     }, [mode]);
 

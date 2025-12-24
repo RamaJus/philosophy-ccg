@@ -22,6 +22,7 @@ export class MultiplayerManager {
     public isHost: boolean = false;
     public myId: string = '';
     public receivedOpponentDeckIds: { deckIds?: string[]; playerName?: string; avatarId?: string } | null = null; // Store handshake data for late pickup
+    public receivedCoinFlip: 'player' | 'opponent' | null = null; // Store coin flip for late pickup
 
     constructor() {
         // Initialize PeerJS
@@ -107,6 +108,8 @@ export class MultiplayerManager {
                 break;
             case 'COIN_FLIP':
                 console.log('[MultiplayerManager] Received coin flip:', msg.payload);
+                // Always store for late pickup
+                this.receivedCoinFlip = msg.payload;
                 if (this.onCoinFlipReceived) this.onCoinFlipReceived(msg.payload);
                 break;
         }
