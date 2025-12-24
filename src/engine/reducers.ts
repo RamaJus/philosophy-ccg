@@ -321,17 +321,18 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
                 }
             }
 
-            // BANALITÄT DES BÖSEN Logic (Lowest cost minion can attack twice this turn)
+            // BANALITÄT DES BÖSEN Logic (Lowest cost minion can attack twice this turn - no Charge)
             if (card.id === 'banalitaet_des_boesen') {
                 if (updatedPlayer.board.length > 0) {
-                    // Find the philosopher with the lowest cost
+                    // Find the philosopher with the lowest cost (first one on board if tie)
                     const sorted = [...updatedPlayer.board].sort((a, b) => (a.cost || 0) - (b.cost || 0));
                     const lowestCostMinion = sorted[0];
 
-                    // Reset hasAttacked so it can attack again (or for the first time if it just came down)
+                    // Only reset hasAttacked if the minion can already attack (no Charge effect)
+                    // This means newly placed minions (canAttack: false) won't benefit
                     updatedPlayer.board = updatedPlayer.board.map(m =>
                         (m.instanceId || m.id) === (lowestCostMinion.instanceId || lowestCostMinion.id)
-                            ? { ...m, hasAttacked: false, canAttack: true }
+                            ? { ...m, hasAttacked: false } // Only reset hasAttacked, don't change canAttack
                             : m
                     );
 
@@ -1583,6 +1584,7 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
                     canAttack: true, // Charge!
                     hasAttacked: false,
                     hasUsedSpecial: false,
+                    specialAbility: undefined, // No special ability button (Charge is passive)
                     turnPlayed: state.turn,
                 };
                 updatedPlayer.board = [...updatedPlayer.board, minion];

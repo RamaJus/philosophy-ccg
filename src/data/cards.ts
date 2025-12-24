@@ -1262,7 +1262,7 @@ export const cardDatabase: Card[] = [
         name: 'Deduktion',
         type: 'Zauber',
         cost: 9,
-        description: 'Wähle 3 Philosophen. Sie erhalten jeweils +1 Angriff und +1 Leben.',
+        description: 'Wähle bis zu 3 Philosophen. Sie erhalten jeweils +1 Angriff und +1 Leben.',
         rarity: 'Gewöhnlich',
         school: ['Logik'],
         image: '/images/cards/deduktion.png',
