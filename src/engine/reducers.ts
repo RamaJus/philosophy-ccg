@@ -196,11 +196,12 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
                 };
             }
 
-            // 2. Decrement synergy block for the player whose turn just ended
-            // This ensures effects like 'Methodischer Zweifel' last through the attack phase
+            // 2. Decrement synergy block and minion attack block for the player whose turn just ended
+            // This ensures effects like 'Methodischer Zweifel' and 'Kant' last through the attack phase
             currentActivePlayer = {
                 ...currentActivePlayer,
-                synergyBlockTurns: Math.max(0, (currentActivePlayer.synergyBlockTurns || 0) - 1)
+                synergyBlockTurns: Math.max(0, (currentActivePlayer.synergyBlockTurns || 0) - 1),
+                minionAttackBlockTurns: Math.max(0, (currentActivePlayer.minionAttackBlockTurns || 0) - 1)
             };
 
             // State update for players before switching context
@@ -258,7 +259,7 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
                     hasUsedSpecial: false,
                     silencedUntilTurn: m.silencedUntilTurn && m.silencedUntilTurn <= nextTurn ? undefined : m.silencedUntilTurn // Clear silence if expired
                 })),
-                minionAttackBlockTurns: Math.max(0, (nextActivePlayer.minionAttackBlockTurns || 0) - 1),
+                // minionAttackBlockTurns is now decremented at turn END (above), not at turn START
                 jonasProtectionTurns: Math.max(0, (nextActivePlayer.jonasProtectionTurns || 0) - 1),
                 ueberichBonusTurn: undefined, // Clear Über-Ich bonus at turn end
                 // Note: synergyBlockTurns is now decremented at turn END, not turn START

@@ -49,7 +49,7 @@ export const cardDatabase: Card[] = [
         attack: 5,
         health: 5,
         description: 'Gedanken ohne Inhalt sind leer, Anschauungen ohne Begriffe sind blind.',
-        effects: [{ type: 'PROTECT', target: 'ENEMY', duration: 2 }],
+        effects: [{ type: 'PROTECT', target: 'ENEMY', duration: 1 }],
         rarity: 'Legendär',
         school: ['Idealismus', 'Rationalismus', 'Moralphilosophie'],
         gender: 'male',
