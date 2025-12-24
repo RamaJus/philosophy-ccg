@@ -11,7 +11,7 @@ export const PREVIEW_SCALE = 1.5;
 export const TOOLTIP_WIDTH = 792; // 660px * 1.2 = 20% wider
 
 // Extract display name (last name for philosophers, full name for spells/works)
-const getDisplayName = (card: CardType | BoardMinion): string => {
+export const getDisplayName = (card: CardType | BoardMinion): string => {
     // Only extract last name for Philosopher cards
     if (card.type !== 'Philosoph') {
         return card.name;

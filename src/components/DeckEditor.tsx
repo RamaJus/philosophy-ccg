@@ -3,7 +3,7 @@ import { X, Download, Upload, Trash2, Wand2, Plus, Minus, ChevronDown, ChevronUp
 import { cardDatabase as cards } from '../data/cards';
 import { Card } from '../types';
 import { useDeck } from '../hooks/useDeck';
-import { Card as CardComponent, CARD_HEIGHT, PREVIEW_SCALE, TOOLTIP_WIDTH } from './Card';
+import { Card as CardComponent, CARD_HEIGHT, PREVIEW_SCALE, TOOLTIP_WIDTH, getDisplayName } from './Card';
 
 // Valid schools in the game (only these should be shown)
 const VALID_SCHOOLS = [
@@ -124,8 +124,8 @@ export const DeckEditor: React.FC<DeckEditorProps> = ({ isOpen, onClose }) => {
             switch (sort) {
                 case 'cost-asc': return a.cost - b.cost;
                 case 'cost-desc': return b.cost - a.cost;
-                case 'name-asc': return a.name.localeCompare(b.name);
-                case 'name-desc': return b.name.localeCompare(a.name);
+                case 'name-asc': return getDisplayName(a).localeCompare(getDisplayName(b));
+                case 'name-desc': return getDisplayName(b).localeCompare(getDisplayName(a));
                 case 'type': return a.type.localeCompare(b.type);
                 default: return 0;
             }
