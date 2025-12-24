@@ -127,7 +127,7 @@ export const Card: React.FC<CardProps> = ({
                         <motion.div
                             initial={{ x: 50, opacity: 0 }}
                             animate={{ x: 0, opacity: 1 }}
-                            className="w-[440px] h-[300px] bg-slate-900/95 border border-slate-600 rounded-xl p-4 text-white shadow-2xl flex flex-col gap-3 overflow-y-auto"
+                            className="w-[660px] h-[350px] bg-slate-900/95 border border-slate-600 rounded-xl p-4 text-white shadow-2xl flex flex-col gap-3 overflow-y-auto"
                         >
                             <h3 className="text-lg font-bold text-amber-400 border-b border-slate-700 pb-2">{card.name}</h3>
 
@@ -159,6 +159,14 @@ export const Card: React.FC<CardProps> = ({
                                     {card.workBonus && (
                                         <p className="text-sm font-medium text-green-200">Bonus: +{card.workBonus.health} Leben für {card.workBonus.school}</p>
                                     )}
+                                </div>
+                            )}
+
+                            {/* Show tooltip for philosophers */}
+                            {card.tooltip && (
+                                <div className="space-y-1 bg-amber-900/30 border border-amber-700/50 rounded-lg p-2">
+                                    <span className="text-xs text-amber-400 uppercase tracking-wider">Hintergrund</span>
+                                    <p className="text-sm text-amber-100 leading-relaxed">{card.tooltip}</p>
                                 </div>
                             )}
 
