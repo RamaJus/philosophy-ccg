@@ -18,13 +18,15 @@ export interface Card {
     rarity: 'Gewöhnlich' | 'Legendär';
     school?: string[]; // e.g. 'rationalism', 'empiricism', 'religion'
     workBonus?: { school: string; health: number }; // For 'work' cards - gives +health to matching school
-    specialAbility?: 'transform'; // Special abilities for certain cards
+    specialAbility?: 'transform' | 'ideology' | 'freud_choice'; // Special abilities for certain cards
     special?: { name: string; description: string }; // Named special abilities like Marx
     effects?: Effect[]; // New Rule Engine effects
     gender?: 'male' | 'female'; // For internal logic/synergies
     pendingTransformation?: { turnTrigger: number; newStats: { attack: number; health: number; } }; // For Sartre
     returnToOwnerAtTurnEnd?: string; // ID of original owner for stolen minions
     untargetableForTurns?: number; // Diogenes: Cannot be attacked for X turns after placement
+    hasCharge?: boolean; // Freud Es: Can attack immediately
+    isTransformation?: boolean; // Card is a transformation result (not in deck)
 }
 
 export interface BoardMinion extends Card {
@@ -67,6 +69,8 @@ export interface Player {
     minionAttackBlockTurns?: number; // Number of turns opponent minions cannot attack (Kant)
     randomizeNextMinion?: boolean; // Non Sequitur: next philosopher played gets random stats
     avatarId?: string; // Player's selected avatar
+    jonasProtectionTurns?: number; // Hans Jonas: Minions can't go below 1 health for X enemy turns
+    ueberichBonusTurn?: number; // Freud Über-Ich: All minions get +1 attack this turn
 }
 
 export interface GameState {
@@ -79,7 +83,7 @@ export interface GameState {
     selectedCard?: string; // Card instanceId in hand
     pendingPlayedCard?: Card; // Card currently being cast (for cancellation refund checks)
     selectedMinions?: string[]; // Minion instanceIds on board for attacking (multi-select)
-    targetMode?: 'attack' | 'spell' | 'search' | 'transform' | 'friendly_minion_transform' | 'trolley_sacrifice' | 'special' | 'foucault_reveal' | 'gottesbeweis_target' | 'nietzsche_target' | 'van_inwagen_target' | 'arete_target' | 'cave_ascent_target' | 'recurrence_select' | 'discover' | 'eros_target' | 'discard' | 'deduktion_target' | 'induktion_target'; // What we're targeting for
+    targetMode?: 'attack' | 'spell' | 'search' | 'transform' | 'friendly_minion_transform' | 'trolley_sacrifice' | 'special' | 'foucault_reveal' | 'gottesbeweis_target' | 'nietzsche_target' | 'van_inwagen_target' | 'arete_target' | 'cave_ascent_target' | 'recurrence_select' | 'discover' | 'eros_target' | 'discard' | 'deduktion_target' | 'induktion_target' | 'freud_choice' | 'zizek_ideology'; // What we're targeting for
     targetModeOwner?: 'player' | 'opponent'; // Who initiated the targetMode (for multiplayer modal visibility)
     discoveryCards?: Card[]; // Generic storage for DISCOVER/Search effects
     recurrenceCards?: Card[]; // Cards in graveyard available for 'Ewige Wiederkunft'
@@ -118,4 +122,6 @@ export type GameAction =
     | { type: 'SET_DISCARD_MODE'; active: boolean } // Enter/exit discard mode
     | { type: 'DISCARD_CARD'; cardId: string } // Discard card from hand
     | { type: 'CONFIRM_DEDUKTION' } // Confirm Deduktion with less than 3 targets
-    | { type: 'SET_STARTING_PLAYER'; startingPlayer: 'player' | 'opponent' }; // Set who starts after coin flip
+    | { type: 'FREUD_CHOICE'; choice: 'es' | 'ich' | 'ueberich' }
+    | { type: 'ZIZEK_IDEOLOGY'; school: string }
+    | { type: 'SET_STARTING_PLAYER'; startingPlayer: 'player' | 'opponent' };

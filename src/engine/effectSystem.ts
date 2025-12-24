@@ -295,6 +295,31 @@ export const processEffect = (
             }
             break;
         }
+        case 'JONAS_PROTECTION': {
+            // Hans Jonas: Protect own minions for 1 enemy turn (they can't go below 1 health)
+            newActivePlayer.jonasProtectionTurns = 1;
+            logUpdates.push(`Ökologischer Imperativ! Eigene Philosophen können nicht unter 1 Leben fallen.`);
+            break;
+        }
+        case 'DESTROY_SCHOOL': {
+            // Protagoras: Destroy all enemy minions of a specific school
+            if (effect.target === 'ENEMY' && effect.school) {
+                const school = effect.school;
+                const destroyed = newEnemyPlayer.board.filter(m =>
+                    m.school && m.school.includes(school)
+                );
+                if (destroyed.length > 0) {
+                    newEnemyPlayer.board = newEnemyPlayer.board.filter(m =>
+                        !m.school || !m.school.includes(school)
+                    );
+                    newEnemyPlayer.graveyard = [...newEnemyPlayer.graveyard, ...destroyed];
+                    logUpdates.push(`Homo Mensura! ${destroyed.length} Philosoph(en) der Schule "${school}" wurden zerstört.`);
+                } else {
+                    logUpdates.push(`Homo Mensura! Keine gegnerischen Philosophen der Schule "${school}" gefunden.`);
+                }
+            }
+            break;
+        }
     }
     // Check for death
     let gameOver = false;

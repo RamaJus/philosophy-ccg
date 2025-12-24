@@ -7,6 +7,7 @@ export type EffectType =
     | 'SILENCE'
     | 'TRANSFORM' // Placeholder for complex effects
     | 'DESTROY' // For removing minions
+    | 'DESTROY_SCHOOL' // Protagoras: destroy all enemy minions of a school
     | 'DISCOVER' // For looking at top cards and picking one
     | 'SEARCH' // For searching entire deck
     | 'TARGET_MODE' // For spells that require targeting (sets targetMode)
@@ -18,7 +19,8 @@ export type EffectType =
     | 'PROTECT' // Diogenes/Kant
     | 'HEAL_ALL_MINIONS' // Idee des Guten
     | 'RANDOMIZE_NEXT_MINION' // Non Sequitur
-    | 'BALANCE_HEALTH'; // Mesotes
+    | 'BALANCE_HEALTH' // Mesotes
+    | 'JONAS_PROTECTION'; // Hans Jonas: protect own minions for 1 enemy turn
 
 export interface Effect {
     type: EffectType;
@@ -28,4 +30,5 @@ export interface Effect {
     condition?: string; // Optional condition string (e.g. 'MALE', 'LOWEST_COST')
     mode?: string; // For TARGET_MODE
     transformTo?: Partial<import('./index').BoardMinion>; // For TRANSFORM effect
+    school?: string; // For DESTROY_SCHOOL effect
 }

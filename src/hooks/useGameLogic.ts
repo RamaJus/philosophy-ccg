@@ -218,12 +218,55 @@ export const useGameLogic = (gameMode: 'single' | 'host' | 'client', isDebugMode
         else dispatch(action);
     }, [isClient]);
 
+    const resolveFreudChoice = useCallback((choice: 'es' | 'ich' | 'ueberich') => {
+        const action: GameAction = { type: 'FREUD_CHOICE', choice };
+        if (isClient) multiplayer.sendAction(action);
+        else dispatch(action);
+    }, [isClient]);
+
+    const resolveZizekIdeology = useCallback((school: string) => {
+        const action: GameAction = { type: 'ZIZEK_IDEOLOGY', school };
+        if (isClient) multiplayer.sendAction(action);
+        else dispatch(action);
+    }, [isClient]);
+
+    const resolveEros = useCallback((minionId: string) => {
+        const action: GameAction = { type: 'EROS_TARGET', minionId };
+        if (isClient) multiplayer.sendAction(action);
+        else dispatch(action);
+    }, [isClient]);
+
+    const resolveDiscovery = useCallback((cardId: string) => {
+        const action: GameAction = { type: 'SELECT_DISCOVERY', cardId };
+        if (isClient) multiplayer.sendAction(action);
+        else dispatch(action);
+    }, [isClient]);
+
+    const discardCard = useCallback((cardId: string) => {
+        const action: GameAction = { type: 'DISCARD_CARD', cardId };
+        if (isClient) multiplayer.sendAction(action);
+        else dispatch(action);
+    }, [isClient]);
+
+    const setDiscardMode = useCallback((active: boolean) => {
+        const action: GameAction = { type: 'SET_DISCARD_MODE', active };
+        if (isClient) multiplayer.sendAction(action);
+        else dispatch(action);
+    }, [isClient]);
+
+    const confirmDeduktion = useCallback(() => {
+        const action: GameAction = { type: 'CONFIRM_DEDUKTION' };
+        if (isClient) multiplayer.sendAction(action);
+        else dispatch(action);
+    }, [isClient]);
+
     const searchDeck = useCallback((filter: (c: any) => boolean, amount: number) => {
         // Search Deck is likely initiated by specific cards (Marx)
         // We might trigger this via UI or Effect.
         // For direct call:
         dispatch({ type: 'AUTO_SEARCH_DECK', filter, amount });
     }, []);
+
 
 
     return {
@@ -248,6 +291,13 @@ export const useGameLogic = (gameMode: 'single' | 'host' | 'client', isDebugMode
         resolveArete,
         resolveCaveAscent,
         resolveRecurrence,
+        resolveFreudChoice,
+        resolveZizekIdeology,
+        resolveEros,
+        resolveDiscovery,
+        discardCard,
+        setDiscardMode,
+        confirmDeduktion,
         searchDeck
     };
 };

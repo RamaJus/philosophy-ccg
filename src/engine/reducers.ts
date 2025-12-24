@@ -259,6 +259,8 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
                     silencedUntilTurn: m.silencedUntilTurn && m.silencedUntilTurn <= nextTurn ? undefined : m.silencedUntilTurn // Clear silence if expired
                 })),
                 minionAttackBlockTurns: Math.max(0, (nextActivePlayer.minionAttackBlockTurns || 0) - 1),
+                jonasProtectionTurns: Math.max(0, (nextActivePlayer.jonasProtectionTurns || 0) - 1),
+                ueberichBonusTurn: undefined, // Clear Über-Ich bonus at turn end
                 // Note: synergyBlockTurns is now decremented at turn END, not turn START
             };
 
@@ -389,13 +391,37 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
                     logMessage = `${p.name} beschwörte ${card.name}.`;
                 }
 
+                // FREUD: Special choice modal before placement
+                if (card.specialAbility === 'freud_choice') {
+                    newState = {
+                        ...newState,
+                        targetMode: 'freud_choice' as any,
+                        targetModeOwner: state.activePlayer,
+                        pendingPlayedCard: card,
+                        log: appendLog(newState.log, `${p.name} spielte ${card.name}. Wähle: Es, Ich oder Über-Ich.`)
+                    };
+                    break;
+                }
+
+                // ŽIŽEK: School selection modal before placement
+                if (card.specialAbility === 'ideology') {
+                    newState = {
+                        ...newState,
+                        targetMode: 'zizek_ideology' as any,
+                        targetModeOwner: state.activePlayer,
+                        pendingPlayedCard: card,
+                        log: appendLog(newState.log, `${p.name} spielte ${card.name}. Wähle eine herrschende Ideologie!`)
+                    };
+                    break;
+                }
+
                 const minion: BoardMinion = {
                     ...card,
                     type: 'Philosoph',
                     attack: minionAttack,
                     health: minionHealth,
                     maxHealth: minionHealth,
-                    canAttack: false,
+                    canAttack: card.hasCharge ? true : false, // Freud Es has charge
                     hasAttacked: false,
                     hasUsedSpecial: false,
                     turnPlayed: state.turn,
@@ -482,6 +508,13 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
                 // Combat Logic
                 // 1. Attackers hit Target
                 let targetHealth = target.health - totalDamage;
+
+                // Jonas Protection Check: If defending player has protection, minion can't go below 1 health
+                const defendingPlayer = state.activePlayer === 'player' ? state.opponent : state.player;
+                if ((defendingPlayer.jonasProtectionTurns || 0) > 0 && targetHealth < 1) {
+                    targetHealth = 1;
+                    currentLog = appendLog(currentLog, `Ökologischer Imperativ schützt ${target.name}!`);
+                }
 
                 // 2. Target hits FIRST attacker back
                 let attackersUpdated = [...activePlayer.board];
@@ -1417,20 +1450,188 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
             break;
         }
 
+        case 'FREUD_CHOICE': {
+            // Player selected Es, Ich, or Über-Ich for Freud
+            const { choice } = action as { type: 'FREUD_CHOICE'; choice: 'es' | 'ich' | 'ueberich' };
+            const activePlayer = state.activePlayer === 'player' ? state.player : state.opponent;
+
+            if (!state.pendingPlayedCard || state.pendingPlayedCard.id !== 'freud') {
+                return state;
+            }
+
+            let updatedPlayer = { ...activePlayer };
+            let logMessage = '';
+
+            if (choice === 'es') {
+                // Es: 8/1 with charge
+                const minion: BoardMinion = {
+                    ...state.pendingPlayedCard,
+                    id: 'freud_es',
+                    name: 'Freud: Es',
+                    attack: 8,
+                    health: 1,
+                    maxHealth: 1,
+                    description: 'Das Es kennt keine Moral. Nur Triebe.',
+                    image: '/images/cards/freud_es.png',
+                    type: 'Philosoph',
+                    canAttack: true, // Charge!
+                    hasAttacked: false,
+                    hasUsedSpecial: false,
+                    turnPlayed: state.turn,
+                };
+                updatedPlayer.board = [...updatedPlayer.board, minion];
+                logMessage = `${activePlayer.name} wählte das Es! Freud erscheint als 8/1 mit Ansturm.`;
+            } else if (choice === 'ich') {
+                // Ich: 6/6
+                const minion: BoardMinion = {
+                    ...state.pendingPlayedCard,
+                    id: 'freud_ich',
+                    name: 'Freud: Ich',
+                    attack: 6,
+                    health: 6,
+                    maxHealth: 6,
+                    description: 'Das Ich vermittelt zwischen Es und Über-Ich.',
+                    image: '/images/cards/freud_ich.png',
+                    type: 'Philosoph',
+                    canAttack: false,
+                    hasAttacked: false,
+                    hasUsedSpecial: false,
+                    turnPlayed: state.turn,
+                };
+                updatedPlayer.board = [...updatedPlayer.board, minion];
+                logMessage = `${activePlayer.name} wählte das Ich! Freud erscheint als 6/6.`;
+            } else if (choice === 'ueberich') {
+                // Über-Ich: 0/1, give all friendly minions +1 attack this turn
+                const minion: BoardMinion = {
+                    ...state.pendingPlayedCard,
+                    id: 'freud_ueberich',
+                    name: 'Freud: Über-Ich',
+                    attack: 0,
+                    health: 1,
+                    maxHealth: 1,
+                    description: 'Das Über-Ich ist der moralische Richter.',
+                    image: '/images/cards/freud_ueberich.png',
+                    type: 'Philosoph',
+                    canAttack: false,
+                    hasAttacked: false,
+                    hasUsedSpecial: false,
+                    turnPlayed: state.turn,
+                };
+                updatedPlayer.board = [...updatedPlayer.board, minion];
+                updatedPlayer.ueberichBonusTurn = state.turn;
+                logMessage = `${activePlayer.name} wählte das Über-Ich! Alle Philosophen erhalten +1 Angriff diese Runde.`;
+            }
+
+            newState = {
+                ...state,
+                [state.activePlayer]: updatedPlayer,
+                targetMode: undefined,
+                targetModeOwner: undefined,
+                pendingPlayedCard: undefined,
+                log: appendLog(state.log, logMessage)
+            };
+            break;
+        }
+
+        case 'ZIZEK_IDEOLOGY': {
+            // Žižek: Apply -2/-2 to all minions not of the chosen school
+            const { school } = action as { type: 'ZIZEK_IDEOLOGY'; school: string };
+            const activePlayer = state.activePlayer === 'player' ? state.player : state.opponent;
+            const enemyPlayer = state.activePlayer === 'player' ? state.opponent : state.player;
+            const zizekCard = state.pendingPlayedCard;
+
+            if (!zizekCard || zizekCard.id !== 'zizek') {
+                return state;
+            }
+
+            // Apply debuff to both boards
+            const applyIdeologyDebuff = (board: BoardMinion[]): BoardMinion[] => {
+                return board.map(m => {
+                    const hasSchool = m.school && m.school.includes(school);
+                    if (hasSchool) return m;
+                    // Apply -2/-2
+                    return {
+                        ...m,
+                        attack: Math.max(0, m.attack - 2),
+                        health: m.health - 2
+                    };
+                }).filter(m => m.health > 0);
+            };
+
+            const deadActiveMinions = activePlayer.board.filter(m => {
+                const hasSchool = m.school && m.school.includes(school);
+                return !hasSchool && (m.health - 2) <= 0;
+            });
+            const deadEnemyMinions = enemyPlayer.board.filter(m => {
+                const hasSchool = m.school && m.school.includes(school);
+                return !hasSchool && (m.health - 2) <= 0;
+            });
+
+            let updatedActivePlayer = {
+                ...activePlayer,
+                board: applyIdeologyDebuff(activePlayer.board),
+                graveyard: [...activePlayer.graveyard, ...deadActiveMinions]
+            };
+            let updatedEnemyPlayer = {
+                ...enemyPlayer,
+                board: applyIdeologyDebuff(enemyPlayer.board),
+                graveyard: [...enemyPlayer.graveyard, ...deadEnemyMinions]
+            };
+
+            // Place Žižek on board
+            const minion: BoardMinion = {
+                ...zizekCard,
+                type: 'Philosoph',
+                attack: zizekCard.attack || 0,
+                health: zizekCard.health || 0,
+                maxHealth: zizekCard.health || 0,
+                canAttack: false,
+                hasAttacked: false,
+                hasUsedSpecial: false,
+                turnPlayed: state.turn,
+            };
+            updatedActivePlayer.board = [...updatedActivePlayer.board, minion];
+
+            const totalDebuffed = deadActiveMinions.length + deadEnemyMinions.length;
+            const logMessage = `Herrschende Ideologie: "${school}"! ${totalDebuffed > 0 ? `${totalDebuffed} Philosoph(en) starben.` : 'Alle Andersdenkenden wurden geschwächt.'}`;
+
+            newState = {
+                ...state,
+                [state.activePlayer]: updatedActivePlayer,
+                [state.activePlayer === 'player' ? 'opponent' : 'player']: updatedEnemyPlayer,
+                targetMode: undefined,
+                targetModeOwner: undefined,
+                pendingPlayedCard: undefined,
+                log: appendLog(state.log, logMessage)
+            };
+            break;
+        }
+
         case 'SYNC_STATE': {
             const incomingState = action.newState;
-            // Prevent double-flash: if client already displayed this spell, clear it
+            // Prevent double-flash: 
+            // The client's useEffect triggers flash based on lastPlayedCard.
+            // If the incoming state has a card that we've already seen/displayed locally,
+            // clear it to prevent the flash from triggering again.
+            // This handles both cases:
+            // 1. Client played the card (local state already has it)
+            // 2. Host played card twice in quick succession (same instanceId)
+
             const currentFlashId = state.lastPlayedCard?.instanceId;
             const incomingFlashId = incomingState.lastPlayedCard?.instanceId;
 
+            // Always clear if same card - we've already displayed it
             if (currentFlashId && currentFlashId === incomingFlashId) {
-                // Same card already flashed locally, clear to prevent re-flash
                 return {
                     ...incomingState,
                     lastPlayedCard: undefined,
                     lastPlayedCardPlayerId: undefined
                 };
             }
+
+            // If client (the one receiving SYNC_STATE) previously saw this flash,
+            // the useEffect in GameArea will have already displayed it.
+            // We need to return the incoming state directly - new flashes are fine.
             return incomingState;
         }
 

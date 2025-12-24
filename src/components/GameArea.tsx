@@ -25,7 +25,20 @@ interface GameAreaProps {
 }
 
 export const GameArea: React.FC<GameAreaProps> = ({ mode, isDebugMode, customDeckIds }) => {
-    const { gameState, dispatch, endTurn: endTurnMultiplayer, attack: attackMultiplayer, playCard: playCardMultiplayer } = useGameLogic(
+    const {
+        gameState,
+        dispatch,
+        isClient,
+        endTurn: endTurnMultiplayer,
+        attack: attackMultiplayer,
+        playCard: playCardMultiplayer,
+        cancelCast: cancelCastMultiplayer,
+        resolveFreudChoice,
+        resolveZizekIdeology,
+        resolveDiscovery,
+        resolveRecurrence: resolveRecurrenceMultiplayer,
+        resolveFoucault,
+    } = useGameLogic(
         mode === 'multiplayer_host' ? 'host' : mode === 'multiplayer_client' ? 'client' : 'single',
         isDebugMode,
         customDeckIds
@@ -109,7 +122,7 @@ export const GameArea: React.FC<GameAreaProps> = ({ mode, isDebugMode, customDec
     }, [gameOver, winner]);
 
     // Auto-open deck view when in search mode (only for the owner)
-    const isClient = mode === 'multiplayer_client';
+    // isClient is now provided by useGameLogic hook
 
     // Check if the current player owns the targetMode
     // Host sees 'player' as their own, Client sees 'opponent' as their own
@@ -360,31 +373,27 @@ export const GameArea: React.FC<GameAreaProps> = ({ mode, isDebugMode, customDec
     };
 
     const handleFoucaultClose = () => {
-        const action: import('../types').GameAction = { type: 'FOUCAULT_CLOSE' };
-        if (isClient) multiplayer.sendAction(action); else dispatch(action);
+        resolveFoucault();
     };
 
     const handleCancelCast = () => {
-        const action: import('../types').GameAction = { type: 'CANCEL_CAST' };
-        if (isClient) multiplayer.sendAction(action); else dispatch(action);
+        cancelCastMultiplayer();
     };
 
     const handleRecurrenceSelect = (cardId: string) => {
-        const action: import('../types').GameAction = { type: 'RECURRENCE_SELECT', cardId };
-        if (isClient) {
-            multiplayer.sendAction(action);
-        } else {
-            dispatch(action);
-        }
+        resolveRecurrenceMultiplayer(cardId);
     };
 
     const handleDiscoverySelect = (cardId: string) => {
-        const action: import('../types').GameAction = { type: 'SELECT_DISCOVERY', cardId };
-        if (isClient) {
-            multiplayer.sendAction(action);
-        } else {
-            dispatch(action);
-        }
+        resolveDiscovery(cardId);
+    };
+
+    const handleFreudChoice = (choice: 'es' | 'ich' | 'ueberich') => {
+        resolveFreudChoice(choice);
+    };
+
+    const handleZizekIdeology = (school: string) => {
+        resolveZizekIdeology(school);
     };
 
     const aiTurn = () => {
@@ -401,6 +410,28 @@ export const GameArea: React.FC<GameAreaProps> = ({ mode, isDebugMode, customDec
 
             // === AI TARGET MODE HANDLERS ===
             // Handle all targeting modes that AI might trigger
+
+            // Handle freud_choice (Sigmund Freud: choose Es, Ich, or Über-Ich)
+            if (currentState.targetMode === 'freud_choice') {
+                // AI picks based on board state: 'ueberich' if has minions, else 'ich' or 'es'
+                const choice: 'es' | 'ich' | 'ueberich' = aiPlayer.board.length > 2 ? 'ueberich' : (Math.random() > 0.5 ? 'ich' : 'es');
+                dispatch({ type: 'FREUD_CHOICE', choice });
+                setTimeout(() => aiTurn(), 800);
+                return;
+            }
+
+            // Handle zizek_ideology (Slavoj Žižek: choose school for ideology debuff)
+            if (currentState.targetMode === 'zizek_ideology') {
+                // AI picks a school that benefits them most (matches own minions, doesn't match enemy)
+                const schools = ['Rationalismus', 'Empirismus', 'Idealismus', 'Existentialismus', 'Moralphilosophie', 'Politik', 'Skeptizismus', 'Religion', 'Metaphysik', 'Logik', 'Ästhetik'];
+                // Simple: pick a random school or the most common among own minions
+                const ownSchools: Record<string, number> = {};
+                aiPlayer.board.forEach(m => m.school?.forEach(s => { ownSchools[s] = (ownSchools[s] || 0) + 1; }));
+                const bestSchool = Object.entries(ownSchools).sort((a, b) => b[1] - a[1])[0]?.[0] || schools[Math.floor(Math.random() * schools.length)];
+                dispatch({ type: 'ZIZEK_IDEOLOGY', school: bestSchool });
+                setTimeout(() => aiTurn(), 800);
+                return;
+            }
 
             if (currentState.targetMode === 'gottesbeweis_target') {
                 const targetPool = humanPlayer.board.length > 0 ? humanPlayer.board : aiPlayer.board;
@@ -838,6 +869,67 @@ export const GameArea: React.FC<GameAreaProps> = ({ mode, isDebugMode, customDec
                                         onClick={() => handleRecurrenceSelect(card.instanceId || card.id)}
                                     >
                                         <CardComponent card={card} isPlayable={true} />
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                {/* Freud Choice Modal (Es, Ich, Über-Ich) */}
+                {targetMode === 'freud_choice' && isMyTargetMode && (
+                    <div className="fixed inset-0 bg-black/80 z-50 flex flex-col items-center justify-center p-8 backdrop-blur-sm">
+                        <div className="bg-slate-900 border-2 border-purple-600 rounded-xl p-8 shadow-2xl shadow-purple-900/20">
+                            <h2 className="text-3xl font-serif text-purple-400 mb-2 text-center">Es, Ich, Über-Ich</h2>
+                            <p className="text-purple-200/60 mb-6 font-serif italic text-center">
+                                Wähle eine Form für Sigmund Freud.
+                            </p>
+                            <div className="flex gap-6 justify-center">
+                                <div
+                                    className="bg-red-900/30 border-2 border-red-500 rounded-xl p-6 cursor-pointer hover:bg-red-900/50 hover:scale-105 transition-all text-center w-48"
+                                    onClick={() => handleFreudChoice('es')}
+                                >
+                                    <h3 className="text-2xl font-bold text-red-400 mb-2">Es</h3>
+                                    <p className="text-red-200/80 text-lg mb-2">8/1 mit Ansturm</p>
+                                    <p className="text-red-200/50 text-sm italic">Das Es kennt keine Moral. Nur Triebe.</p>
+                                </div>
+                                <div
+                                    className="bg-blue-900/30 border-2 border-blue-500 rounded-xl p-6 cursor-pointer hover:bg-blue-900/50 hover:scale-105 transition-all text-center w-48"
+                                    onClick={() => handleFreudChoice('ich')}
+                                >
+                                    <h3 className="text-2xl font-bold text-blue-400 mb-2">Ich</h3>
+                                    <p className="text-blue-200/80 text-lg mb-2">6/6</p>
+                                    <p className="text-blue-200/50 text-sm italic">Das Ich vermittelt zwischen Es und Über-Ich.</p>
+                                </div>
+                                <div
+                                    className="bg-amber-900/30 border-2 border-amber-500 rounded-xl p-6 cursor-pointer hover:bg-amber-900/50 hover:scale-105 transition-all text-center w-48"
+                                    onClick={() => handleFreudChoice('ueberich')}
+                                >
+                                    <h3 className="text-2xl font-bold text-amber-400 mb-2">Über-Ich</h3>
+                                    <p className="text-amber-200/80 text-lg mb-2">0/1</p>
+                                    <p className="text-amber-200/50 text-sm italic">+1 Angriff für alle Philosophen diese Runde.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                {/* Žižek Ideology School Selection Modal */}
+                {targetMode === 'zizek_ideology' && isMyTargetMode && (
+                    <div className="fixed inset-0 bg-black/80 z-50 flex flex-col items-center justify-center p-8 backdrop-blur-sm">
+                        <div className="bg-slate-900 border-2 border-red-600 rounded-xl p-8 shadow-2xl shadow-red-900/20 max-w-4xl">
+                            <h2 className="text-3xl font-serif text-red-400 mb-2 text-center">Herrschende Ideologie</h2>
+                            <p className="text-red-200/60 mb-6 font-serif italic text-center">
+                                Wähle eine Schule. Alle Philosophen, die NICHT dieser Schule angehören, erhalten -2/-2.
+                            </p>
+                            <div className="grid grid-cols-4 gap-3">
+                                {['Rationalismus', 'Empirismus', 'Idealismus', 'Existentialismus', 'Moralphilosophie', 'Politik', 'Skeptizismus', 'Religion', 'Metaphysik', 'Logik', 'Ästhetik'].map(school => (
+                                    <div
+                                        key={school}
+                                        className="bg-slate-800/50 border border-red-500/30 rounded-lg p-3 cursor-pointer hover:bg-red-900/30 hover:border-red-500 hover:scale-105 transition-all text-center"
+                                        onClick={() => handleZizekIdeology(school)}
+                                    >
+                                        <span className="text-red-200 font-medium">{school}</span>
                                     </div>
                                 ))}
                             </div>
