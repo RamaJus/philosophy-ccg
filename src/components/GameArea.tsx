@@ -177,6 +177,7 @@ export const GameArea: React.FC<GameAreaProps> = ({ mode, isDebugMode, customDec
     const [flashCard, setFlashCard] = useState<{ card: Card; position: 'top' | 'bottom' } | null>(null);
 
     const lastFlashedCardId = useRef<string | null>(null);
+    const seenFlashIds = useRef<Set<string>>(new Set());
 
     useEffect(() => {
         // Clear flash if no card is pending
@@ -185,11 +186,20 @@ export const GameArea: React.FC<GameAreaProps> = ({ mode, isDebugMode, customDec
             return;
         }
 
-        // Prevent repeat flash for exact same card instance
-        if (lastFlashedCardId.current === (gameState.lastPlayedCard.instanceId || gameState.lastPlayedCard.id)) {
+        // Create unique key: cardId + turn + playerId
+        // This allows same card to flash again if played in different turn (e.g., after Ewige Wiederkunft)
+        // but prevents double-flash from multiple SYNC_STATE calls within the same play
+        const cardId = gameState.lastPlayedCard.instanceId || gameState.lastPlayedCard.id;
+        const uniqueFlashKey = `${cardId}-turn${gameState.turn}-${gameState.lastPlayedCardPlayerId}`;
+
+        // Prevent repeat flash for exact same card play instance
+        if (seenFlashIds.current.has(uniqueFlashKey)) {
             return;
         }
-        lastFlashedCardId.current = gameState.lastPlayedCard.instanceId || gameState.lastPlayedCard.id;
+
+        // Mark as seen for this specific play
+        seenFlashIds.current.add(uniqueFlashKey);
+        lastFlashedCardId.current = uniqueFlashKey;
 
         // Determine position based on who played it relative to view
         const isMe = gameState.lastPlayedCardPlayerId === viewPlayer.id;
@@ -199,11 +209,10 @@ export const GameArea: React.FC<GameAreaProps> = ({ mode, isDebugMode, customDec
 
         const timer = setTimeout(() => {
             setFlashCard(null);
-            // Reset ref after flash completes so same card can flash again if played again
-            lastFlashedCardId.current = null;
+            // Don't clear seenFlashIds - we want to remember all flashed cards to prevent any double-flash
         }, 1000); // 1 second duration
         return () => clearTimeout(timer);
-    }, [gameState.lastPlayedCard, gameState.lastPlayedCardPlayerId]); // Trigger when card changes
+    }, [gameState.lastPlayedCard, gameState.lastPlayedCardPlayerId, gameState.turn]); // Trigger when card changes
 
     // Voiceline playback - triggered by pendingVoiceline state (synced from host)
     const lastVoicelineRef = useRef<string | null>(null);

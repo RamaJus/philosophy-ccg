@@ -49,6 +49,7 @@ export interface BoardMinion extends Card {
     untargetableUntilTurn?: number; // Diogenes: Cannot be targeted until this turn
     caveAscentRevertTurn?: number; // Turn when cave ascent effect reverts
     caveAscentOriginalStats?: { attack: number; health: number }; // Original stats before cave ascent
+    extraAttacksRemaining?: number; // Extra attacks granted this turn (e.g., by Banalität des Bösen)
 }
 
 export interface Player {

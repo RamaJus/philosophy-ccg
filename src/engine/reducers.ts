@@ -257,6 +257,7 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
                     canAttack: true,
                     hasAttacked: false,
                     hasUsedSpecial: false,
+                    extraAttacksRemaining: 0, // Extra attacks don't carry over to next turn
                     silencedUntilTurn: m.silencedUntilTurn && m.silencedUntilTurn <= nextTurn ? undefined : m.silencedUntilTurn // Clear silence if expired
                 })),
                 // minionAttackBlockTurns is now decremented at turn END (above), not at turn START
@@ -328,11 +329,10 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
                     const sorted = [...updatedPlayer.board].sort((a, b) => (a.cost || 0) - (b.cost || 0));
                     const lowestCostMinion = sorted[0];
 
-                    // Only reset hasAttacked if the minion can already attack (no Charge effect)
-                    // This means newly placed minions (canAttack: false) won't benefit
+                    // Grant one extra attack - works whether they've attacked or not (but no Charge)
                     updatedPlayer.board = updatedPlayer.board.map(m =>
                         (m.instanceId || m.id) === (lowestCostMinion.instanceId || lowestCostMinion.id)
-                            ? { ...m, hasAttacked: false } // Only reset hasAttacked, don't change canAttack
+                            ? { ...m, extraAttacksRemaining: 1 }
                             : m
                     );
 
@@ -523,7 +523,7 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
 
             const attackers = attackerIds
                 .map(id => activePlayer.board.find(m => (m.instanceId || m.id) === id))
-                .filter((m): m is BoardMinion => m !== undefined && m.canAttack && !m.hasAttacked);
+                .filter((m): m is BoardMinion => m !== undefined && m.canAttack && (!m.hasAttacked || (m.extraAttacksRemaining || 0) > 0));
 
             if (attackers.length === 0) return state;
 
@@ -541,6 +541,10 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
                 }
 
                 let damage = attacker.attack;
+                // Über-Ich bonus: +1 attack if active this turn
+                if (activePlayer.ueberichBonusTurn === state.turn) {
+                    damage += 1;
+                }
                 // Work bonus is now health-based, not attack-based
                 totalDamage += damage;
                 attackerNames.push(attacker.name);
@@ -555,10 +559,15 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
                 updatedEnemyPlayer.health -= totalDamage;
                 currentLog = appendLog(currentLog, `${attackerNamesStr} griff ${enemyPlayer.name} für ${totalDamage} Schaden an!`);
 
-                // Mark as attacked
-                updatedActivePlayer.board = activePlayer.board.map(m =>
-                    attackerIds.includes(m.instanceId || m.id) ? { ...m, hasAttacked: true } : m
-                );
+                // Mark as attacked (consume extra attacks first)
+                updatedActivePlayer.board = activePlayer.board.map(m => {
+                    if (!attackerIds.includes(m.instanceId || m.id)) return m;
+                    // If has extra attacks, consume one instead of setting hasAttacked
+                    if ((m.extraAttacksRemaining || 0) > 0) {
+                        return { ...m, extraAttacksRemaining: (m.extraAttacksRemaining || 0) - 1 };
+                    }
+                    return { ...m, hasAttacked: true };
+                });
             } else {
                 // Attack Minion
                 const targetIndex = enemyPlayer.board.findIndex(m => (m.instanceId || m.id) === targetId);
@@ -595,17 +604,32 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
                 const firstAttackerIndex = attackersUpdated.findIndex(m => (m.instanceId || m.id) === attackers[0].instanceId || (m.id === attackers[0].id));
 
                 if (firstAttackerIndex !== -1) {
+                    const firstMinion = attackersUpdated[firstAttackerIndex];
+                    // Consume extra attack or mark as attacked
+                    const newExtraAttacks = (firstMinion.extraAttacksRemaining || 0) > 0
+                        ? (firstMinion.extraAttacksRemaining || 0) - 1
+                        : 0;
+                    const newHasAttacked = (firstMinion.extraAttacksRemaining || 0) > 0 ? firstMinion.hasAttacked : true;
+
                     attackersUpdated[firstAttackerIndex] = {
-                        ...attackersUpdated[firstAttackerIndex],
-                        health: attackersUpdated[firstAttackerIndex].health - targetDamage,
-                        hasAttacked: true
+                        ...firstMinion,
+                        health: firstMinion.health - targetDamage,
+                        hasAttacked: newHasAttacked,
+                        extraAttacksRemaining: newExtraAttacks
                     };
                 }
 
-                // Rest of attackers mark as attacked
+                // Rest of attackers mark as attacked (consume extra attacks)
                 attackers.slice(1).forEach(att => {
                     const idx = attackersUpdated.findIndex(m => (m.instanceId || m.id) === att.instanceId);
-                    if (idx !== -1) attackersUpdated[idx] = { ...attackersUpdated[idx], hasAttacked: true };
+                    if (idx !== -1) {
+                        const minion = attackersUpdated[idx];
+                        if ((minion.extraAttacksRemaining || 0) > 0) {
+                            attackersUpdated[idx] = { ...minion, extraAttacksRemaining: (minion.extraAttacksRemaining || 0) - 1 };
+                        } else {
+                            attackersUpdated[idx] = { ...minion, hasAttacked: true };
+                        }
+                    }
                 });
 
                 // Remove dead minions
@@ -1609,20 +1633,21 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
                 updatedPlayer.board = [...updatedPlayer.board, minion];
                 logMessage = `${activePlayer.name} wählte das Ich! Freud erscheint als 6/6.`;
             } else if (choice === 'ueberich') {
-                // Über-Ich: 0/1, give all friendly minions +1 attack this turn
+                // Über-Ich: 2/2, give all friendly minions +1 attack this turn (automatic effect)
                 const minion: BoardMinion = {
                     ...state.pendingPlayedCard,
                     id: 'freud_ueberich',
                     name: 'Freud: Über-Ich',
-                    attack: 0,
-                    health: 1,
-                    maxHealth: 1,
+                    attack: 2,
+                    health: 2,
+                    maxHealth: 2,
                     description: 'Das Über-Ich ist der moralische Richter.',
                     image: '/images/cards/freud_ueberich.png',
                     type: 'Philosoph',
                     canAttack: false,
                     hasAttacked: false,
                     hasUsedSpecial: false,
+                    specialAbility: undefined, // No effect button (automatic effect)
                     turnPlayed: state.turn,
                 };
                 updatedPlayer.board = [...updatedPlayer.board, minion];

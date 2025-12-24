@@ -82,7 +82,7 @@ export const Board: React.FC<BoardProps> = ({
                             visibleMinions.map((minion) => {
                                 // Kant's block only applies to minion-vs-minion attacks, not face attacks.
                                 // So we show minions as attackable, but highlight that minion targets are blocked.
-                                const canAttack = isPlayerBoard && minion.canAttack && !minion.hasAttacked;
+                                const canAttack = isPlayerBoard && minion.canAttack && (!minion.hasAttacked || (minion.extraAttacksRemaining || 0) > 0);
                                 const isDiogenesInBarrel = minion.id.includes('diogenes') && minion.turnPlayed !== undefined && (currentTurn - minion.turnPlayed < 3);
                                 const isAttackMode = selectedMinionIds.length > 0 && !isSpecialTargeting;
                                 // Kant logic: attacksBlocked prevents attacking Philosophers
@@ -125,7 +125,7 @@ export const Board: React.FC<BoardProps> = ({
                                                     ${canAttack && !isSilenced ? 'ring-2 ring-green-400' : ''}
                                                     ${isTargetable && !isSpecialTargeting ? 'ring-2 ring-red-400 cursor-attack' : ''}
                                                     ${isTargetable && isSpecialTargeting ? 'ring-2 ring-purple-400 cursor-magic' : ''}
-                                                    ${minion.hasAttacked || minion.hasUsedSpecial ? 'opacity-50' : ''}
+                                                    ${(minion.hasAttacked && !((minion.extraAttacksRemaining || 0) > 0)) || minion.hasUsedSpecial ? 'opacity-50' : ''}
                                                     ${/* IMPOSSIBLE CURSOR LOGIC */ ''}
                                                     ${!isPlayerBoard && !isTargetable && (selectedMinionIds.length > 0 || isSpecialTargeting) ? 'cursor-impossible' : ''}
                                                     ${/* ADD CURSOR LOGIC - Hovering own minion while another is selected (for multi-select) */ ''}
