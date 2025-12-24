@@ -4,6 +4,12 @@ import { motion } from 'framer-motion';
 import { Card as CardType, BoardMinion } from '../types';
 import { Swords, Heart, Zap, BookOpen } from 'lucide-react';
 
+// Card dimension constants - single source of truth
+export const CARD_WIDTH = 140;
+export const CARD_HEIGHT = 200;
+export const PREVIEW_SCALE = 1.5;
+export const TOOLTIP_WIDTH = 792; // 660px * 1.2 = 20% wider
+
 interface CardProps {
     card: CardType | BoardMinion;
     onClick?: () => void;
@@ -113,7 +119,7 @@ export const Card: React.FC<CardProps> = ({
                     <div className="flex gap-8 items-center pointer-events-auto" onClick={(e) => e.stopPropagation()}>
                         <motion.div
                             initial={{ scale: 0.8, opacity: 0 }}
-                            animate={{ scale: 1.5, opacity: 1 }}
+                            animate={{ scale: PREVIEW_SCALE, opacity: 1 }}
                             className="relative transform shadow-2xl"
                         >
                             <Card
@@ -127,7 +133,11 @@ export const Card: React.FC<CardProps> = ({
                         <motion.div
                             initial={{ x: 50, opacity: 0 }}
                             animate={{ x: 0, opacity: 1 }}
-                            className="w-[660px] h-[350px] bg-slate-900/95 border border-slate-600 rounded-xl p-4 text-white shadow-2xl flex flex-col gap-3 overflow-y-auto"
+                            className="bg-slate-900/95 border border-slate-600 rounded-xl p-4 text-white shadow-2xl flex flex-col gap-3 overflow-y-auto"
+                            style={{
+                                width: `${TOOLTIP_WIDTH}px`,
+                                height: `${CARD_HEIGHT * PREVIEW_SCALE}px`
+                            }}
                         >
                             <h3 className="text-lg font-bold text-amber-400 border-b border-slate-700 pb-2">{card.name}</h3>
 
@@ -183,7 +193,7 @@ export const Card: React.FC<CardProps> = ({
             <motion.div
                 className={`${baseClasses} ${isAttacking ? 'animate-attack-swing' : ''}`}
                 onContextMenu={handleContextMenu}
-                style={{ width: '140px', height: '200px', backgroundColor: '#fef3c7' }}
+                style={{ width: `${CARD_WIDTH}px`, height: `${CARD_HEIGHT}px`, backgroundColor: '#fef3c7' }}
                 initial={false}
                 animate={{
                     scale: isSelected ? 1.1 : 1,

@@ -1,9 +1,9 @@
 import React, { useState, useMemo } from 'react';
-import { X, Download, Upload, Trash2, Wand2, Plus, Minus, ChevronDown, ChevronUp, BookOpen, Sparkles, Eye, BarChart3 } from 'lucide-react';
+import { X, Download, Upload, Trash2, Wand2, Plus, Minus, ChevronDown, ChevronUp, BookOpen, Sparkles, Eye, BarChart3, Save, Edit2, Check } from 'lucide-react';
 import { cardDatabase as cards } from '../data/cards';
 import { Card } from '../types';
 import { useDeck } from '../hooks/useDeck';
-import { Card as CardComponent } from './Card';
+import { Card as CardComponent, CARD_HEIGHT, PREVIEW_SCALE, TOOLTIP_WIDTH } from './Card';
 
 // Valid schools in the game (only these should be shown)
 const VALID_SCHOOLS = [
@@ -79,7 +79,18 @@ export const DeckEditor: React.FC<DeckEditorProps> = ({ isOpen, onClose }) => {
         autoFill,
         exportDeck,
         importDeck,
-        DECK_SIZE
+        DECK_SIZE,
+        // Multi-deck functions
+        savedDecks,
+        activeDeck,
+        activeDeckId,
+        canCreateNewDeck,
+        selectDeck,
+        saveAsNewDeck,
+        saveDeck,
+        renameDeck,
+        deleteDeck,
+        hasUnsavedChanges
     } = useDeck();
 
     // Filter state for available cards
@@ -99,6 +110,11 @@ export const DeckEditor: React.FC<DeckEditorProps> = ({ isOpen, onClose }) => {
 
     // Statistics panel state
     const [showStats, setShowStats] = useState(false);
+
+    // Deck management state
+    const [isEditingName, setIsEditingName] = useState(false);
+    const [editedName, setEditedName] = useState('');
+    const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
     const allSchools = useMemo(() => getAllSchools(), []);
 
@@ -291,22 +307,148 @@ export const DeckEditor: React.FC<DeckEditorProps> = ({ isOpen, onClose }) => {
         <div className="fixed inset-0 bg-black/85 flex items-center justify-center z-50 p-4">
             <div className="bg-gradient-to-br from-slate-800 to-slate-900 rounded-xl border-2 border-amber-600/40 w-full max-w-7xl max-h-[92vh] flex flex-col shadow-2xl">
                 {/* Header */}
-                <div className="flex items-center justify-between p-4 border-b border-slate-700 bg-slate-900/50">
-                    <div className="flex items-center gap-4">
-                        <div className="flex items-center gap-2">
-                            <Sparkles className="text-amber-400" size={24} />
-                            <h2 className="text-2xl font-bold text-amber-400">Deck Editor</h2>
+                <div className="flex flex-col border-b border-slate-700 bg-slate-900/50">
+                    {/* Top Row - Title and Close */}
+                    <div className="flex items-center justify-between p-4 pb-2">
+                        <div className="flex items-center gap-4">
+                            <div className="flex items-center gap-2">
+                                <Sparkles className="text-amber-400" size={24} />
+                                <h2 className="text-2xl font-bold text-amber-400">Deck Editor</h2>
+                            </div>
+                            <div className={`px-3 py-1.5 rounded-full text-sm font-bold ${isValid
+                                ? 'bg-green-900/60 text-green-300 border-2 border-green-500'
+                                : 'bg-red-900/60 text-red-300 border-2 border-red-500'
+                                }`}>
+                                {cardCount}/{DECK_SIZE}
+                            </div>
+                            {hasUnsavedChanges && activeDeck && (
+                                <span className="text-xs text-amber-400 animate-pulse">● Ungespeicherte Änderungen</span>
+                            )}
                         </div>
-                        <div className={`px-3 py-1.5 rounded-full text-sm font-bold ${isValid
-                            ? 'bg-green-900/60 text-green-300 border-2 border-green-500'
-                            : 'bg-red-900/60 text-red-300 border-2 border-red-500'
-                            }`}>
-                            {cardCount}/{DECK_SIZE}
-                        </div>
+                        <button onClick={onClose} className="p-2 hover:bg-slate-700 rounded-lg transition-colors">
+                            <X size={24} className="text-gray-400" />
+                        </button>
                     </div>
-                    <button onClick={onClose} className="p-2 hover:bg-slate-700 rounded-lg transition-colors">
-                        <X size={24} className="text-gray-400" />
-                    </button>
+
+                    {/* Second Row - Deck Management */}
+                    <div className="flex items-center gap-3 px-4 pb-3 flex-wrap">
+                        {/* Deck Selector Dropdown */}
+                        <div className="relative">
+                            <select
+                                value={activeDeckId || 'all'}
+                                onChange={(e) => selectDeck(e.target.value === 'all' ? null : e.target.value)}
+                                className="appearance-none bg-slate-700 text-white px-4 py-2 pr-10 rounded-lg border border-slate-500 focus:border-amber-500 focus:outline-none text-sm font-medium min-w-[180px]"
+                            >
+                                <option value="all">◆ Alle Karten</option>
+                                {savedDecks.map(deck => (
+                                    <option key={deck.id} value={deck.id}>
+                                        {deck.name} ({deck.cardIds.length}/{DECK_SIZE})
+                                    </option>
+                                ))}
+                            </select>
+                            <ChevronDown size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+                        </div>
+
+                        {/* Deck Name Editor (only for custom decks) */}
+                        {activeDeck && (
+                            <div className="flex items-center gap-2">
+                                {isEditingName ? (
+                                    <>
+                                        <input
+                                            type="text"
+                                            value={editedName}
+                                            onChange={(e) => setEditedName(e.target.value)}
+                                            onKeyDown={(e) => {
+                                                if (e.key === 'Enter') {
+                                                    renameDeck(activeDeck.id, editedName);
+                                                    setIsEditingName(false);
+                                                } else if (e.key === 'Escape') {
+                                                    setIsEditingName(false);
+                                                }
+                                            }}
+                                            className="bg-slate-600 text-white px-3 py-1.5 rounded-lg border border-amber-500 focus:outline-none text-sm w-40"
+                                            autoFocus
+                                            maxLength={20}
+                                        />
+                                        <button
+                                            onClick={() => { renameDeck(activeDeck.id, editedName); setIsEditingName(false); }}
+                                            className="p-1.5 bg-green-600 hover:bg-green-500 rounded-lg"
+                                        >
+                                            <Check size={14} className="text-white" />
+                                        </button>
+                                        <button
+                                            onClick={() => setIsEditingName(false)}
+                                            className="p-1.5 bg-slate-600 hover:bg-slate-500 rounded-lg"
+                                        >
+                                            <X size={14} className="text-white" />
+                                        </button>
+                                    </>
+                                ) : (
+                                    <button
+                                        onClick={() => { setEditedName(activeDeck.name); setIsEditingName(true); }}
+                                        className="flex items-center gap-1 px-2 py-1.5 bg-slate-700/50 hover:bg-slate-600 rounded-lg text-xs text-slate-300"
+                                        title="Deck umbenennen"
+                                    >
+                                        <Edit2 size={12} />
+                                        Umbenennen
+                                    </button>
+                                )}
+                            </div>
+                        )}
+
+                        <div className="flex-1" />
+
+                        {/* Save Buttons */}
+                        {activeDeck && (
+                            <button
+                                onClick={() => saveDeck(activeDeck.id)}
+                                disabled={!hasUnsavedChanges}
+                                className="flex items-center gap-1 px-3 py-1.5 bg-green-700 hover:bg-green-600 disabled:bg-slate-700 disabled:text-gray-500 text-white rounded-lg transition-colors text-xs font-medium"
+                            >
+                                <Save size={14} />
+                                Speichern
+                            </button>
+                        )}
+
+                        {/* Save as New Deck */}
+                        <button
+                            onClick={() => saveAsNewDeck()}
+                            disabled={!canCreateNewDeck}
+                            className="flex items-center gap-1 px-3 py-1.5 bg-amber-700 hover:bg-amber-600 disabled:bg-slate-700 disabled:text-gray-500 text-white rounded-lg transition-colors text-xs font-medium"
+                            title={canCreateNewDeck ? 'Als neues Deck speichern' : `Maximum ${savedDecks.length} Decks erreicht`}
+                        >
+                            <Plus size={14} />
+                            Neues Deck ({savedDecks.length}/5)
+                        </button>
+
+                        {/* Delete Deck */}
+                        {activeDeck && (
+                            showDeleteConfirm ? (
+                                <div className="flex items-center gap-1 bg-red-900/50 px-2 py-1 rounded-lg border border-red-600">
+                                    <span className="text-xs text-red-300 mr-1">Löschen?</span>
+                                    <button
+                                        onClick={() => { deleteDeck(activeDeck.id); setShowDeleteConfirm(false); }}
+                                        className="p-1 bg-red-600 hover:bg-red-500 rounded"
+                                    >
+                                        <Check size={12} className="text-white" />
+                                    </button>
+                                    <button
+                                        onClick={() => setShowDeleteConfirm(false)}
+                                        className="p-1 bg-slate-600 hover:bg-slate-500 rounded"
+                                    >
+                                        <X size={12} className="text-white" />
+                                    </button>
+                                </div>
+                            ) : (
+                                <button
+                                    onClick={() => setShowDeleteConfirm(true)}
+                                    className="flex items-center gap-1 px-2 py-1.5 bg-red-900/50 hover:bg-red-800/60 text-red-300 rounded-lg transition-colors text-xs border border-red-700/50"
+                                >
+                                    <Trash2 size={14} />
+                                </button>
+                            )
+                        )}
+                    </div>
                 </div>
 
                 {/* Main Content - Two Equal Columns */}
@@ -662,12 +804,15 @@ export const DeckEditor: React.FC<DeckEditorProps> = ({ isOpen, onClose }) => {
                 >
                     <div className="flex gap-8 items-center" onClick={e => e.stopPropagation()}>
                         {/* Card */}
-                        <div className="transform scale-150 shadow-2xl">
+                        <div style={{ transform: `scale(${PREVIEW_SCALE})` }} className="shadow-2xl">
                             <CardComponent card={previewCard} />
                         </div>
 
-                        {/* Tooltip Panel - Fixed height to match scaled card (200px * 1.5 = 300px) */}
-                        <div className="w-[400px] h-[300px] bg-slate-900/95 border border-slate-600 rounded-xl p-4 text-white shadow-2xl flex flex-col gap-3 overflow-y-auto">
+                        {/* Tooltip Panel - Height matches scaled card */}
+                        <div
+                            className="bg-slate-900/95 border border-slate-600 rounded-xl p-4 text-white shadow-2xl flex flex-col gap-3 overflow-y-auto"
+                            style={{ width: `${TOOLTIP_WIDTH}px`, height: `${CARD_HEIGHT * PREVIEW_SCALE}px` }}
+                        >
                             <h3 className="text-xl font-bold text-amber-400 border-b border-slate-700 pb-2">{previewCard.name}</h3>
 
                             {/* Schools */}

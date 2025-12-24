@@ -1,6 +1,6 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { multiplayer } from '../network/MultiplayerManager';
-import { Copy, Globe, Cpu, QrCode, Share2, BookOpen, User, Settings } from 'lucide-react';
+import { Copy, Globe, Cpu, QrCode, Share2, User, Settings, ChevronDown, Check } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
 import { DeckEditor } from './DeckEditor';
 import { SettingsModal } from './SettingsModal';
@@ -26,11 +26,13 @@ export const Lobby: React.FC<LobbyProps> = ({ onStartGame, isDebugMode, setIsDeb
     const [showDeckEditor, setShowDeckEditor] = useState(false);
     const [showSettings, setShowSettings] = useState(false);
     const [showAvatarSelection, setShowAvatarSelection] = useState(false);
+    const [showDeckDropdown, setShowDeckDropdown] = useState(false);
+    const deckDropdownRef = useRef<HTMLDivElement>(null);
     const [playerName, setPlayerName] = useState(() => {
         return localStorage.getItem('philosophy-ccg-player-name') || 'Spieler';
     });
 
-    const { cardCount, isValid, isCustom, DECK_SIZE, refreshDeck } = useDeck();
+    const { cardCount, isValid, isCustom, DECK_SIZE, refreshDeck, savedDecks, activeDeck, activeDeckId, selectDeck } = useDeck();
     const { settings, saveSettings, resetToDefaults, setAvatarId } = useSettings();
 
     // Sync debug mode from settings
@@ -141,6 +143,19 @@ export const Lobby: React.FC<LobbyProps> = ({ onStartGame, isDebugMode, setIsDeb
             setPeerIdInput(joinCode);
         }
     }, []);
+
+    // Close deck dropdown when clicking outside
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (deckDropdownRef.current && !deckDropdownRef.current.contains(event.target as Node)) {
+                setShowDeckDropdown(false);
+            }
+        };
+        if (showDeckDropdown) {
+            document.addEventListener('mousedown', handleClickOutside);
+            return () => document.removeEventListener('mousedown', handleClickOutside);
+        }
+    }, [showDeckDropdown]);
 
     const handlePlayerNameChange = (name: string) => {
         setPlayerName(name);
@@ -316,43 +331,132 @@ export const Lobby: React.FC<LobbyProps> = ({ onStartGame, isDebugMode, setIsDeb
                             </div>
                         </div>
 
-                        {/* Deck Editor Button */}
-                        <button
-                            onClick={() => setShowDeckEditor(true)}
-                            className={`w-full p-3 rounded-lg border-2 transition-all duration-300 flex items-center justify-between gap-3 ${isCustom && isValid
+                        {/* Deck Editor Button with Dropdown */}
+                        <div className="relative" ref={deckDropdownRef}>
+                            <div className={`w-full rounded-lg border-2 transition-all duration-300 flex items-stretch ${isCustom && isValid
                                 ? 'border-green-600/60 bg-gradient-to-br from-green-900/30 to-slate-900/60'
                                 : isCustom && !isValid
                                     ? 'border-red-600/60 bg-gradient-to-br from-red-900/30 to-slate-900/60'
                                     : 'border-purple-700/40 bg-gradient-to-br from-slate-800/60 to-slate-900/60'
-                                }`}
-                        >
-                            <div className="flex items-center gap-3">
-                                <div className={`w-10 h-10 rounded-full flex items-center justify-center border ${isCustom && isValid
-                                    ? 'bg-gradient-to-br from-green-600/30 to-green-700/30 border-green-600/40'
-                                    : isCustom && !isValid
-                                        ? 'bg-gradient-to-br from-red-600/30 to-red-700/30 border-red-600/40'
-                                        : 'bg-gradient-to-br from-purple-600/30 to-purple-700/30 border-purple-600/40'
-                                    }`}>
-                                    <BookOpen className={isCustom && isValid ? 'text-green-300' : isCustom && !isValid ? 'text-red-300' : 'text-purple-300'} size={20} />
-                                </div>
-                                <div className="text-left">
-                                    <h3 className={`text-base font-bold ${isCustom && isValid ? 'text-green-100' : isCustom && !isValid ? 'text-red-100' : 'text-purple-100'}`}>
-                                        {isCustom ? 'Custom-Deck' : 'Standard-Deck'}
-                                    </h3>
-                                    <p className={`text-xs ${isCustom && isValid ? 'text-green-200/80' : isCustom && !isValid ? 'text-red-200/80' : 'text-purple-200/60'}`}>
-                                        {isCustom ? `${cardCount}/${DECK_SIZE} Karten` : 'Alle Karten'}
-                                    </p>
-                                </div>
-                            </div>
-                            <div className={`px-2 py-1 rounded-full text-xs font-bold ${isCustom && isValid
-                                ? 'bg-green-900/50 text-green-300 border border-green-600'
-                                : isCustom && !isValid
-                                    ? 'bg-red-900/50 text-red-300 border border-red-600'
-                                    : 'bg-slate-700/50 text-slate-300 border border-slate-600'
                                 }`}>
-                                {isCustom && isValid ? '✓' : isCustom && !isValid ? '⚠' : '◆'}
+                                {/* Main Button - Opens Editor */}
+                                <button
+                                    onClick={() => setShowDeckEditor(true)}
+                                    className={`group relative overflow-hidden flex-1 p-3 rounded-l-lg transition-all duration-300 flex items-center gap-3 ${isCustom && isValid
+                                        ? 'hover:bg-green-800/30'
+                                        : isCustom && !isValid
+                                            ? 'hover:bg-red-800/30'
+                                            : 'hover:bg-purple-900/30'
+                                        }`}
+                                >
+                                    {/* Stacked Card Back Icon - Layer Effect */}
+                                    <div className="relative w-12 h-12 flex-shrink-0">
+                                        <div
+                                            className="absolute w-8 h-11 rounded-sm border border-amber-700/50 shadow-md"
+                                            style={{
+                                                backgroundImage: 'url(/images/deck_icon.jpg)',
+                                                backgroundSize: 'cover',
+                                                backgroundPosition: 'center',
+                                                transform: 'rotate(-8deg)',
+                                                left: '0px',
+                                                top: '2px'
+                                            }}
+                                        />
+                                        <div
+                                            className="absolute w-8 h-11 rounded-sm border border-amber-600/60 shadow-md"
+                                            style={{
+                                                backgroundImage: 'url(/images/deck_icon.jpg)',
+                                                backgroundSize: 'cover',
+                                                backgroundPosition: 'center',
+                                                transform: 'rotate(-2deg)',
+                                                left: '6px',
+                                                top: '1px'
+                                            }}
+                                        />
+                                        <div
+                                            className="absolute w-8 h-11 rounded-sm border border-amber-500/70 shadow-lg"
+                                            style={{
+                                                backgroundImage: 'url(/images/deck_icon.jpg)',
+                                                backgroundSize: 'cover',
+                                                backgroundPosition: 'center',
+                                                transform: 'rotate(4deg)',
+                                                left: '12px',
+                                                top: '0px'
+                                            }}
+                                        />
+                                    </div>
+                                    <div className="text-left flex-1">
+                                        <h3 className={`text-base font-bold ${isCustom && isValid ? 'text-green-100' : isCustom && !isValid ? 'text-red-100' : 'text-purple-100'}`}>
+                                            Deck zusammenstellen
+                                        </h3>
+                                        <p className={`text-xs ${isCustom && isValid ? 'text-green-200/70' : isCustom && !isValid ? 'text-red-200/70' : 'text-purple-200/50'}`}>
+                                            Custom-Deck mit 60 Philosophen oder mit allen Karten spielen
+                                        </p>
+                                        <p className={`text-xs mt-1 font-semibold ${isCustom ? (isValid ? 'text-green-300' : 'text-red-300') : 'text-slate-400'}`}>
+                                            Aktuell: {activeDeck ? activeDeck.name : 'Alle Karten'} ({cardCount}/{DECK_SIZE}) {isCustom && (isValid ? '✓' : '⚠')}
+                                        </p>
+                                    </div>
+                                </button>
+
+                                {/* Dropdown Toggle Button */}
+                                <button
+                                    onClick={(e) => { e.stopPropagation(); setShowDeckDropdown(!showDeckDropdown); }}
+                                    className={`px-3 border-l transition-all duration-300 flex items-center justify-center ${isCustom && isValid
+                                        ? 'border-green-600/40 hover:bg-green-800/40'
+                                        : isCustom && !isValid
+                                            ? 'border-red-600/40 hover:bg-red-800/40'
+                                            : 'border-purple-700/30 hover:bg-purple-900/40'
+                                        }`}
+                                >
+                                    <ChevronDown
+                                        size={20}
+                                        className={`transition-transform duration-200 ${showDeckDropdown ? 'rotate-180' : ''} ${isCustom && isValid ? 'text-green-300' : isCustom && !isValid ? 'text-red-300' : 'text-purple-300'}`}
+                                    />
+                                </button>
                             </div>
-                        </button>
+
+                            {/* Dropdown Menu */}
+                            {showDeckDropdown && (
+                                <div className="absolute top-full left-0 right-0 mt-1 z-50 bg-slate-800/95 border border-slate-600 rounded-lg shadow-xl overflow-hidden backdrop-blur-sm">
+                                    {/* Saved Decks */}
+                                    {savedDecks.map(deck => (
+                                        <button
+                                            key={deck.id}
+                                            onClick={() => { selectDeck(deck.id); setShowDeckDropdown(false); }}
+                                            className={`w-full px-4 py-2 text-left flex items-center justify-between hover:bg-slate-700/50 transition-colors ${activeDeckId === deck.id ? 'bg-slate-700/30' : ''}`}
+                                        >
+                                            <div className="flex items-center gap-2">
+                                                {activeDeckId === deck.id && <Check size={14} className="text-green-400" />}
+                                                <span className={`text-sm ${activeDeckId === deck.id ? 'text-white font-semibold' : 'text-slate-300'}`}>
+                                                    {deck.name}
+                                                </span>
+                                            </div>
+                                            <span className={`text-xs ${deck.cardIds.length === DECK_SIZE ? 'text-green-400' : 'text-red-400'}`}>
+                                                {deck.cardIds.length}/{DECK_SIZE}
+                                            </span>
+                                        </button>
+                                    ))}
+
+                                    {/* Divider if there are saved decks */}
+                                    {savedDecks.length > 0 && (
+                                        <div className="border-t border-slate-600 my-1" />
+                                    )}
+
+                                    {/* All Cards Option */}
+                                    <button
+                                        onClick={() => { selectDeck(null); setShowDeckDropdown(false); }}
+                                        className={`w-full px-4 py-2 text-left flex items-center justify-between hover:bg-slate-700/50 transition-colors ${activeDeckId === null ? 'bg-slate-700/30' : ''}`}
+                                    >
+                                        <div className="flex items-center gap-2">
+                                            {activeDeckId === null && <Check size={14} className="text-green-400" />}
+                                            <span className={`text-sm ${activeDeckId === null ? 'text-white font-semibold' : 'text-slate-400'}`}>
+                                                ◆ Alle Karten (Standard)
+                                            </span>
+                                        </div>
+                                    </button>
+                                </div>
+                            )}
+                        </div>
 
                         {/* Profile & Game Mode Row */}
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">

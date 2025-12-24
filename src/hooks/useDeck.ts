@@ -2,211 +2,357 @@ import { useState, useCallback, useEffect } from 'react';
 import { cardDatabase as cards } from '../data/cards';
 import { Card } from '../types';
 
-const STORAGE_KEY = 'philosophy-ccg-deck';
+const STORAGE_KEY = 'philosophy-ccg-decks-v2';
 const DECK_SIZE = 60;
+const MAX_CUSTOM_DECKS = 5;
 
-export interface DeckState {
+// ==================== Types ====================
+
+export interface SavedDeck {
+    id: string;
+    name: string;
     cardIds: string[];
-    isCustom: boolean;
+    createdAt: string;
 }
 
-interface StoredDeck {
+export interface DeckStorage {
     version: number;
-    cardIds: string[];
-    isCustom: boolean;
+    activeDeckId: string | null;  // null = all cards mode
+    decks: SavedDeck[];
 }
 
-// Get all available card IDs (excluding duplicates)
+// ==================== Helpers ====================
+
+const generateDeckId = (): string => {
+    return `deck_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+};
+
+const getNextDeckName = (decks: SavedDeck[]): string => {
+    const existingNumbers = decks
+        .map(d => {
+            const match = d.name.match(/^Custom (\d+)$/);
+            return match ? parseInt(match[1], 10) : 0;
+        })
+        .filter(n => n > 0);
+
+    for (let i = 1; i <= MAX_CUSTOM_DECKS; i++) {
+        if (!existingNumbers.includes(i)) {
+            return `Custom ${i}`;
+        }
+    }
+    return `Custom ${decks.length + 1}`;
+};
+
 const getAllCardIds = (): string[] => {
     return cards.map(c => c.id);
 };
 
-// Default deck: all cards
-const getDefaultDeck = (): DeckState => ({
-    cardIds: getAllCardIds(),
-    isCustom: false
+const getDefaultStorage = (): DeckStorage => ({
+    version: 2,
+    activeDeckId: null,
+    decks: []
 });
 
+// Migrate from old format (v1) to new format (v2)
+const migrateFromV1 = (): DeckStorage | null => {
+    try {
+        const oldStored = localStorage.getItem('philosophy-ccg-deck');
+        if (oldStored) {
+            const parsed = JSON.parse(oldStored);
+            if (parsed.version === 1 && Array.isArray(parsed.cardIds) && parsed.isCustom) {
+                // Valid old format with custom deck
+                const validIds = parsed.cardIds.filter((id: string) =>
+                    cards.some(c => c.id === id)
+                );
+                if (validIds.length > 0) {
+                    const newDeck: SavedDeck = {
+                        id: generateDeckId(),
+                        name: 'Custom 1',
+                        cardIds: validIds,
+                        createdAt: new Date().toISOString()
+                    };
+                    return {
+                        version: 2,
+                        activeDeckId: newDeck.id,
+                        decks: [newDeck]
+                    };
+                }
+            }
+        }
+    } catch (e) {
+        console.error('Failed to migrate from v1:', e);
+    }
+    return null;
+};
+
+// ==================== Hook ====================
+
 export const useDeck = () => {
-    const [deck, setDeck] = useState<DeckState>(getDefaultDeck);
+    const [storage, setStorage] = useState<DeckStorage>(getDefaultStorage);
+    const [workingCardIds, setWorkingCardIds] = useState<string[]>([]);
+    const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
 
     // Load from localStorage on mount
     useEffect(() => {
         try {
             const stored = localStorage.getItem(STORAGE_KEY);
             if (stored) {
-                const parsed: StoredDeck = JSON.parse(stored);
-                if (parsed.version === 1 && Array.isArray(parsed.cardIds)) {
-                    // Validate card IDs exist
-                    const validIds = parsed.cardIds.filter(id =>
-                        cards.some(c => c.id === id)
-                    );
-                    setDeck({
-                        cardIds: validIds,
-                        isCustom: parsed.isCustom ?? true
-                    });
+                const parsed: DeckStorage = JSON.parse(stored);
+                if (parsed.version === 2) {
+                    // Validate all deck card IDs
+                    const validatedDecks = parsed.decks.map(deck => ({
+                        ...deck,
+                        cardIds: deck.cardIds.filter(id => cards.some(c => c.id === id))
+                    }));
+                    const newStorage = { ...parsed, decks: validatedDecks };
+                    setStorage(newStorage);
+
+                    // Load active deck or all cards
+                    if (parsed.activeDeckId) {
+                        const activeDeck = validatedDecks.find(d => d.id === parsed.activeDeckId);
+                        setWorkingCardIds(activeDeck ? activeDeck.cardIds : getAllCardIds());
+                    } else {
+                        setWorkingCardIds(getAllCardIds());
+                    }
+                    return;
                 }
             }
+
+            // Try to migrate from v1
+            const migrated = migrateFromV1();
+            if (migrated) {
+                setStorage(migrated);
+                const activeDeck = migrated.decks.find(d => d.id === migrated.activeDeckId);
+                setWorkingCardIds(activeDeck ? activeDeck.cardIds : getAllCardIds());
+                // Save migrated data
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(migrated));
+                // Clear old storage
+                localStorage.removeItem('philosophy-ccg-deck');
+                return;
+            }
+
+            // Default: all cards mode
+            setWorkingCardIds(getAllCardIds());
         } catch (e) {
-            console.error('Failed to load deck from storage:', e);
+            console.error('Failed to load decks from storage:', e);
+            setWorkingCardIds(getAllCardIds());
         }
     }, []);
 
-    // Save to localStorage
-    const saveDeck = useCallback((newDeck: DeckState) => {
-        setDeck(newDeck);
+    // Save storage to localStorage
+    const saveStorage = useCallback((newStorage: DeckStorage) => {
+        setStorage(newStorage);
         try {
-            const toStore: StoredDeck = {
-                version: 1,
-                cardIds: newDeck.cardIds,
-                isCustom: newDeck.isCustom
-            };
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(toStore));
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(newStorage));
         } catch (e) {
-            console.error('Failed to save deck:', e);
+            console.error('Failed to save decks:', e);
         }
     }, []);
 
-    // Add card to deck
+    // ==================== Deck Selection ====================
+
+    const selectDeck = useCallback((deckId: string | null) => {
+        if (deckId === null) {
+            // All cards mode
+            setWorkingCardIds(getAllCardIds());
+            setHasUnsavedChanges(false);
+            saveStorage({ ...storage, activeDeckId: null });
+        } else {
+            const deck = storage.decks.find(d => d.id === deckId);
+            if (deck) {
+                setWorkingCardIds([...deck.cardIds]);
+                setHasUnsavedChanges(false);
+                saveStorage({ ...storage, activeDeckId: deckId });
+            }
+        }
+    }, [storage, saveStorage]);
+
+    // ==================== Card Operations ====================
+
     const addCard = useCallback((cardId: string) => {
-        setDeck(prev => {
-            if (prev.cardIds.includes(cardId)) return prev; // Already in deck
-            const newDeck = {
-                cardIds: [...prev.cardIds, cardId],
-                isCustom: true
-            };
-            saveDeck(newDeck);
-            return newDeck;
-        });
-    }, [saveDeck]);
+        if (workingCardIds.includes(cardId)) return;
+        setWorkingCardIds(prev => [...prev, cardId]);
+        setHasUnsavedChanges(true);
+    }, [workingCardIds]);
 
-    // Remove card from deck
     const removeCard = useCallback((cardId: string) => {
-        setDeck(prev => {
-            const newDeck = {
-                cardIds: prev.cardIds.filter(id => id !== cardId),
-                isCustom: true
-            };
-            saveDeck(newDeck);
-            return newDeck;
-        });
-    }, [saveDeck]);
+        setWorkingCardIds(prev => prev.filter(id => id !== cardId));
+        setHasUnsavedChanges(true);
+    }, []);
 
-    // Add multiple cards at once (for "add all filtered")
     const addCards = useCallback((cardIds: string[]) => {
-        setDeck(prev => {
-            const newIds = cardIds.filter(id => !prev.cardIds.includes(id));
-            if (newIds.length === 0) return prev;
-            const newDeck = {
-                cardIds: [...prev.cardIds, ...newIds],
-                isCustom: true
-            };
-            saveDeck(newDeck);
-            return newDeck;
-        });
-    }, [saveDeck]);
+        const newIds = cardIds.filter(id => !workingCardIds.includes(id));
+        if (newIds.length === 0) return;
+        setWorkingCardIds(prev => [...prev, ...newIds]);
+        setHasUnsavedChanges(true);
+    }, [workingCardIds]);
 
-    // Clear deck
     const clearDeck = useCallback(() => {
-        const newDeck = { cardIds: [], isCustom: true };
-        saveDeck(newDeck);
-    }, [saveDeck]);
+        setWorkingCardIds([]);
+        setHasUnsavedChanges(true);
+    }, []);
 
-    // Reset to default (all cards)
+    // ==================== Deck Management ====================
+
+    const saveAsNewDeck = useCallback((): SavedDeck | null => {
+        if (storage.decks.length >= MAX_CUSTOM_DECKS) {
+            console.warn('Maximum number of custom decks reached');
+            return null;
+        }
+
+        const newDeck: SavedDeck = {
+            id: generateDeckId(),
+            name: getNextDeckName(storage.decks),
+            cardIds: [...workingCardIds],
+            createdAt: new Date().toISOString()
+        };
+
+        const newStorage: DeckStorage = {
+            ...storage,
+            activeDeckId: newDeck.id,
+            decks: [...storage.decks, newDeck]
+        };
+
+        saveStorage(newStorage);
+        setHasUnsavedChanges(false);
+        return newDeck;
+    }, [storage, workingCardIds, saveStorage]);
+
+    const saveDeck = useCallback((deckId: string) => {
+        const deckIndex = storage.decks.findIndex(d => d.id === deckId);
+        if (deckIndex === -1) return false;
+
+        const updatedDecks = [...storage.decks];
+        updatedDecks[deckIndex] = {
+            ...updatedDecks[deckIndex],
+            cardIds: [...workingCardIds]
+        };
+
+        saveStorage({ ...storage, decks: updatedDecks });
+        setHasUnsavedChanges(false);
+        return true;
+    }, [storage, workingCardIds, saveStorage]);
+
+    const renameDeck = useCallback((deckId: string, newName: string) => {
+        const deckIndex = storage.decks.findIndex(d => d.id === deckId);
+        if (deckIndex === -1) return false;
+
+        const updatedDecks = [...storage.decks];
+        updatedDecks[deckIndex] = {
+            ...updatedDecks[deckIndex],
+            name: newName.trim() || updatedDecks[deckIndex].name
+        };
+
+        saveStorage({ ...storage, decks: updatedDecks });
+        return true;
+    }, [storage, saveStorage]);
+
+    const deleteDeck = useCallback((deckId: string) => {
+        const newDecks = storage.decks.filter(d => d.id !== deckId);
+        const newActiveDeckId = storage.activeDeckId === deckId ? null : storage.activeDeckId;
+
+        saveStorage({
+            ...storage,
+            activeDeckId: newActiveDeckId,
+            decks: newDecks
+        });
+
+        if (storage.activeDeckId === deckId) {
+            setWorkingCardIds(getAllCardIds());
+            setHasUnsavedChanges(false);
+        }
+        return true;
+    }, [storage, saveStorage]);
+
+    // Reset to all cards (no custom deck)
     const resetToDefault = useCallback(() => {
-        saveDeck(getDefaultDeck());
-    }, [saveDeck]);
+        setWorkingCardIds(getAllCardIds());
+        saveStorage({ ...storage, activeDeckId: null });
+        setHasUnsavedChanges(false);
+    }, [storage, saveStorage]);
 
     // Auto-fill deck with balanced mana curve
     const autoFill = useCallback(() => {
-        setDeck(prev => {
-            const currentIds = new Set(prev.cardIds);
-            const available = cards.filter(c => !currentIds.has(c.id));
-            const needed = DECK_SIZE - prev.cardIds.length;
+        const currentIds = new Set(workingCardIds);
+        const available = cards.filter(c => !currentIds.has(c.id));
+        const needed = DECK_SIZE - workingCardIds.length;
 
-            if (needed <= 0 || available.length === 0) return prev;
+        if (needed <= 0 || available.length === 0) return;
 
-            // Group by cost range
-            const lowCost = available.filter(c => c.cost <= 2);
-            const midCost = available.filter(c => c.cost >= 3 && c.cost <= 4);
-            const highCost = available.filter(c => c.cost >= 5 && c.cost <= 6);
-            const veryCost = available.filter(c => c.cost >= 7);
-            const spells = available.filter(c => c.type === 'Zauber' || c.type === 'Werk');
+        // Group by cost range
+        const lowCost = available.filter(c => c.cost <= 2);
+        const midCost = available.filter(c => c.cost >= 3 && c.cost <= 4);
+        const highCost = available.filter(c => c.cost >= 5 && c.cost <= 6);
+        const veryCost = available.filter(c => c.cost >= 7);
+        const spells = available.filter(c => c.type === 'Zauber' || c.type === 'Werk');
 
-            // Prefer schools already in deck for synergies
-            const currentSchools = new Set<string>();
-            prev.cardIds.forEach(id => {
-                const card = cards.find(c => c.id === id);
-                card?.school?.forEach(s => currentSchools.add(s));
-            });
+        // Prefer schools already in deck for synergies
+        const currentSchools = new Set<string>();
+        workingCardIds.forEach(id => {
+            const card = cards.find(c => c.id === id);
+            card?.school?.forEach(s => currentSchools.add(s));
+        });
 
-            const sortBySchoolMatch = (a: Card, b: Card) => {
-                const aMatch = a.school?.some(s => currentSchools.has(s)) ? 1 : 0;
-                const bMatch = b.school?.some(s => currentSchools.has(s)) ? 1 : 0;
-                return bMatch - aMatch;
-            };
+        const sortBySchoolMatch = (a: Card, b: Card) => {
+            const aMatch = a.school?.some(s => currentSchools.has(s)) ? 1 : 0;
+            const bMatch = b.school?.some(s => currentSchools.has(s)) ? 1 : 0;
+            return bMatch - aMatch;
+        };
 
-            // Shuffle within groups, prioritizing school matches
-            const shuffle = (arr: Card[]) => {
-                const sorted = [...arr].sort(sortBySchoolMatch);
-                // Add some randomness within school priority
-                return sorted.sort(() => Math.random() - 0.5);
-            };
+        const shuffle = (arr: Card[]) => {
+            const sorted = [...arr].sort(sortBySchoolMatch);
+            return sorted.sort(() => Math.random() - 0.5);
+        };
 
-            const toAdd: string[] = [];
+        const toAdd: string[] = [];
 
-            // Target distribution (scaled to needed)
-            const targets = {
-                low: Math.ceil(needed * 0.2),      // ~20%
-                mid: Math.ceil(needed * 0.3),      // ~30%
-                high: Math.ceil(needed * 0.25),    // ~25%
-                very: Math.ceil(needed * 0.15),    // ~15%
-                spell: Math.ceil(needed * 0.1)     // ~10%
-            };
+        // Target distribution
+        const targets = {
+            low: Math.ceil(needed * 0.2),
+            mid: Math.ceil(needed * 0.3),
+            high: Math.ceil(needed * 0.25),
+            very: Math.ceil(needed * 0.15),
+            spell: Math.ceil(needed * 0.1)
+        };
 
-            const addFromPool = (pool: Card[], count: number) => {
-                const shuffled = shuffle(pool);
-                for (const card of shuffled) {
-                    if (toAdd.length >= needed) break;
-                    if (!currentIds.has(card.id) && !toAdd.includes(card.id)) {
-                        toAdd.push(card.id);
-                        if (toAdd.filter(id => pool.some(c => c.id === id)).length >= count) break;
-                    }
-                }
-            };
-
-            addFromPool(lowCost, targets.low);
-            addFromPool(midCost, targets.mid);
-            addFromPool(highCost, targets.high);
-            addFromPool(veryCost, targets.very);
-            addFromPool(spells, targets.spell);
-
-            // Fill remaining with any cards
-            if (toAdd.length < needed) {
-                const remaining = shuffle(available.filter(c => !toAdd.includes(c.id)));
-                for (const card of remaining) {
-                    if (toAdd.length >= needed) break;
+        const addFromPool = (pool: Card[], count: number) => {
+            const shuffled = shuffle(pool);
+            for (const card of shuffled) {
+                if (toAdd.length >= needed) break;
+                if (!currentIds.has(card.id) && !toAdd.includes(card.id)) {
                     toAdd.push(card.id);
+                    if (toAdd.filter(id => pool.some(c => c.id === id)).length >= count) break;
                 }
             }
+        };
 
-            const newDeck = {
-                cardIds: [...prev.cardIds, ...toAdd.slice(0, needed)],
-                isCustom: true
-            };
-            saveDeck(newDeck);
-            return newDeck;
-        });
-    }, [saveDeck]);
+        addFromPool(lowCost, targets.low);
+        addFromPool(midCost, targets.mid);
+        addFromPool(highCost, targets.high);
+        addFromPool(veryCost, targets.very);
+        addFromPool(spells, targets.spell);
+
+        // Fill remaining
+        if (toAdd.length < needed) {
+            const remaining = shuffle(available.filter(c => !toAdd.includes(c.id)));
+            for (const card of remaining) {
+                if (toAdd.length >= needed) break;
+                toAdd.push(card.id);
+            }
+        }
+
+        setWorkingCardIds(prev => [...prev, ...toAdd.slice(0, needed)]);
+        setHasUnsavedChanges(true);
+    }, [workingCardIds]);
 
     // Export deck as JSON string
     const exportDeck = useCallback((): string => {
         return JSON.stringify({
             version: 1,
-            cardIds: deck.cardIds,
+            cardIds: workingCardIds,
             exportedAt: new Date().toISOString()
         }, null, 2);
-    }, [deck]);
+    }, [workingCardIds]);
 
     // Import deck from JSON string
     const importDeck = useCallback((jsonString: string): boolean => {
@@ -216,71 +362,101 @@ export const useDeck = () => {
                 throw new Error('Invalid deck format');
             }
 
-            // Validate card IDs
             const validIds = parsed.cardIds.filter((id: string) =>
                 cards.some(c => c.id === id)
             );
 
-            const newDeck = {
-                cardIds: validIds,
-                isCustom: true
-            };
-            saveDeck(newDeck);
+            setWorkingCardIds(validIds);
+            setHasUnsavedChanges(true);
             return true;
         } catch (e) {
             console.error('Failed to import deck:', e);
             return false;
         }
-    }, [saveDeck]);
+    }, []);
 
-    // Validation
-    const isValid = deck.isCustom ? deck.cardIds.length === DECK_SIZE : true;
-    const cardCount = deck.cardIds.length;
-
-    // Get actual Card objects for the deck
-    const deckCards = deck.cardIds
-        .map(id => cards.find(c => c.id === id))
-        .filter((c): c is Card => c !== undefined);
-
-    // Manually refresh from localStorage (e.g., after DeckEditor closes)
+    // Refresh from localStorage
     const refreshDeck = useCallback(() => {
         try {
             const stored = localStorage.getItem(STORAGE_KEY);
             if (stored) {
-                const parsed: StoredDeck = JSON.parse(stored);
-                if (parsed.version === 1 && Array.isArray(parsed.cardIds)) {
-                    const validIds = parsed.cardIds.filter(id =>
-                        cards.some(c => c.id === id)
-                    );
-                    setDeck({
-                        cardIds: validIds,
-                        isCustom: parsed.isCustom ?? true
-                    });
+                const parsed: DeckStorage = JSON.parse(stored);
+                if (parsed.version === 2) {
+                    setStorage(parsed);
+                    if (parsed.activeDeckId) {
+                        const activeDeck = parsed.decks.find(d => d.id === parsed.activeDeckId);
+                        setWorkingCardIds(activeDeck ? activeDeck.cardIds : getAllCardIds());
+                    } else {
+                        setWorkingCardIds(getAllCardIds());
+                    }
+                    setHasUnsavedChanges(false);
                     return;
                 }
             }
-            // If nothing stored or invalid, reset to default
-            setDeck(getDefaultDeck());
+            setWorkingCardIds(getAllCardIds());
         } catch (e) {
             console.error('Failed to refresh deck from storage:', e);
         }
     }, []);
 
+    // ==================== Computed Values ====================
+
+    const activeDeck = storage.activeDeckId
+        ? storage.decks.find(d => d.id === storage.activeDeckId) || null
+        : null;
+
+    const isCustom = storage.activeDeckId !== null;
+    const isValid = isCustom ? workingCardIds.length === DECK_SIZE : true;
+    const cardCount = workingCardIds.length;
+    const canCreateNewDeck = storage.decks.length < MAX_CUSTOM_DECKS;
+
+    // For backwards compatibility
+    const deck = {
+        cardIds: workingCardIds,
+        isCustom
+    };
+
+    const deckCards = workingCardIds
+        .map(id => cards.find(c => c.id === id))
+        .filter((c): c is Card => c !== undefined);
+
     return {
+        // State
         deck,
         deckCards,
         cardCount,
         isValid,
-        isCustom: deck.isCustom,
+        isCustom,
+        hasUnsavedChanges,
+
+        // Multi-deck state
+        savedDecks: storage.decks,
+        activeDeck,
+        activeDeckId: storage.activeDeckId,
+        canCreateNewDeck,
+
+        // Card operations
         addCard,
         removeCard,
         addCards,
         clearDeck,
+
+        // Deck operations
+        selectDeck,
+        saveAsNewDeck,
+        saveDeck,
+        renameDeck,
+        deleteDeck,
         resetToDefault,
+
+        // Utility
         autoFill,
         exportDeck,
         importDeck,
         refreshDeck,
-        DECK_SIZE
+
+        // Constants
+        DECK_SIZE,
+        MAX_CUSTOM_DECKS
     };
 };
