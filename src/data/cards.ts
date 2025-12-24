@@ -1435,6 +1435,7 @@ export function generateDeck(): Card[] {
     // We add a unique instanceId to each card to solve the "same card on both sides" selection bug
     const deckWithIds = cardDatabase
         .filter(c => !c.id.startsWith('debug_')) // Filter out DEBUG cards
+        .filter(c => !c.isTransformation) // Filter out transformation tokens (e.g. Freud's Es, Ich, Über-Ich)
         .map(card => ({
             ...card,
             instanceId: `${card.id}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
