@@ -321,6 +321,78 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
                 }
             }
 
+            // BANALITÄT DES BÖSEN Logic (Lowest cost minion can attack twice this turn)
+            if (card.id === 'banalitaet_des_boesen') {
+                if (updatedPlayer.board.length > 0) {
+                    // Find the philosopher with the lowest cost
+                    const sorted = [...updatedPlayer.board].sort((a, b) => (a.cost || 0) - (b.cost || 0));
+                    const lowestCostMinion = sorted[0];
+
+                    // Reset hasAttacked so it can attack again (or for the first time if it just came down)
+                    updatedPlayer.board = updatedPlayer.board.map(m =>
+                        (m.instanceId || m.id) === (lowestCostMinion.instanceId || lowestCostMinion.id)
+                            ? { ...m, hasAttacked: false, canAttack: true }
+                            : m
+                    );
+
+                    // Add spell to graveyard
+                    updatedPlayer.graveyard = [...updatedPlayer.graveyard, card];
+
+                    newState = {
+                        ...state,
+                        [state.activePlayer]: updatedPlayer,
+                        log: appendLog(state.log, `${activePlayer.name} spielte Banalität des Bösen. ${lowestCostMinion.name} kann zweimal angreifen!`),
+                        lastPlayedCard: card,
+                        lastPlayedCardPlayerId: state.activePlayer
+                    };
+                    break;
+                }
+            }
+
+            // SCHOLASTIK Logic (Draw random Religion or Logik card)
+            if (card.id === 'scholastik') {
+                const matchingCards = updatedPlayer.deck.filter(c =>
+                    c.school && (c.school.includes('Religion') || c.school.includes('Logik'))
+                );
+
+                if (matchingCards.length > 0) {
+                    const randomIndex = Math.floor(Math.random() * matchingCards.length);
+                    const chosenCard = matchingCards[randomIndex];
+
+                    // Remove from deck
+                    updatedPlayer.deck = updatedPlayer.deck.filter(c => c.instanceId !== chosenCard.instanceId);
+
+                    // Add to hand (if space)
+                    if (updatedPlayer.hand.length < 10) {
+                        updatedPlayer.hand = [...updatedPlayer.hand, chosenCard];
+                    } else {
+                        updatedPlayer.graveyard = [...updatedPlayer.graveyard, chosenCard];
+                    }
+
+                    // Add spell to graveyard
+                    updatedPlayer.graveyard = [...updatedPlayer.graveyard, card];
+
+                    newState = {
+                        ...state,
+                        [state.activePlayer]: updatedPlayer,
+                        log: appendLog(state.log, `${activePlayer.name} spielte Scholastik und zog ${chosenCard.name}!`),
+                        lastPlayedCard: card,
+                        lastPlayedCardPlayerId: state.activePlayer
+                    };
+                } else {
+                    // No matching cards - just add spell to graveyard
+                    updatedPlayer.graveyard = [...updatedPlayer.graveyard, card];
+                    newState = {
+                        ...state,
+                        [state.activePlayer]: updatedPlayer,
+                        log: appendLog(state.log, `${activePlayer.name} spielte Scholastik, aber keine passenden Karten im Deck.`),
+                        lastPlayedCard: card,
+                        lastPlayedCardPlayerId: state.activePlayer
+                    };
+                }
+                break;
+            }
+
             // Apply to state
             newState = {
                 ...state,

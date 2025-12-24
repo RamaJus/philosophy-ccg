@@ -1083,6 +1083,28 @@ export const cardDatabase: Card[] = [
         rarity: 'Gewöhnlich',
         image: '/images/cards/philosophenherrschaft.png',
     },
+    {
+        id: 'banalitaet_des_boesen',
+        name: 'Banalität des Bösen',
+        type: 'Zauber',
+        cost: 5,
+        description: 'Das Böse ist banal - es braucht keine Monster, nur gehorsame Beamte.',
+        effect: 'Dein Philosoph mit den niedrigsten Kosten kann in dieser Runde zwei mal angreifen.',
+        rarity: 'Gewöhnlich',
+        image: '/images/cards/banalitaet_des_boesen.png',
+        // Effect handled in reducers.ts - auto-targets lowest cost minion
+    },
+    {
+        id: 'scholastik',
+        name: 'Scholastik',
+        type: 'Zauber',
+        cost: 1,
+        description: 'Die Verbindung von Glaube und Vernunft.',
+        effect: 'Ziehe eine zufällige Karte der Schule Religion oder Logik aus deinem Deck.',
+        rarity: 'Gewöhnlich',
+        image: '/images/cards/scholastik.png',
+        // Effect handled in reducers.ts - draws random Religion/Logik card
+    },
 
     // DEBUG CARDS (excluded from normal decks via generateDeck filter)
     {
