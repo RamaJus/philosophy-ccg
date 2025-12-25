@@ -563,7 +563,7 @@ export const GameArea: React.FC<GameAreaProps> = ({ mode, isDebugMode, customDec
                 }
             }
 
-            // === PHASE 1 AI IMPROVEMENTS ===
+            // === IMPROVED AI DECISION MAKING (Phase 1-3) ===
 
             // Helper: Calculate board strength (sum of attack + health)
             const calcBoardStrength = (board: typeof aiPlayer.board) =>
@@ -573,63 +573,224 @@ export const GameArea: React.FC<GameAreaProps> = ({ mode, isDebugMode, customDec
             const humanBoardStrength = calcBoardStrength(humanPlayer.board);
             const isAheadOnBoard = aiBoardStrength > humanBoardStrength + 5;
 
-            // Helper: Check if a spell is safe to play
+            // Phase 3: Defensive mode check (≤25% health = red indicator)
+            const healthPercent = (aiPlayer.health / aiPlayer.maxHealth) * 100;
+            const isInDanger = healthPercent <= 25;
+
+            // Helper: Check if a spell is safe to play (prevents crashes)
             const isSpellSafeToPlay = (spell: typeof aiPlayer.hand[0]): boolean => {
-                // FIX Bug 1: Don't play Gottesbeweis if no philosophers on board
                 if (spell.id === 'gottesbeweis') {
                     return aiPlayer.board.length > 0 || humanPlayer.board.length > 0;
                 }
-                // Don't play cave_ascent without friendly minions
-                if (spell.id === 'cave_ascent') {
+                if (spell.id === 'aufstieg_aus_der_hoehle') {
                     return aiPlayer.board.length > 0;
                 }
-                // Don't play trolley_problem without own philosopher to sacrifice
                 if (spell.id === 'trolley_problem') {
                     return aiPlayer.board.length > 0 && humanPlayer.board.length > 0;
                 }
-                // Don't play deduktion/induktion without friendly minions
                 if (spell.id === 'deduktion' || spell.id === 'induktion') {
                     return aiPlayer.board.length > 0;
                 }
-                // Don't play arete without any minions
                 if (spell.id === 'arete') {
                     return aiPlayer.board.length > 0 || humanPlayer.board.length > 0;
+                }
+                if (spell.id === 'philosophenherrschaft') {
+                    return aiPlayer.board.some(m => !m.canAttack);
+                }
+                if (spell.id === 'ewige-wiederkunft') {
+                    return aiPlayer.graveyard.some(c => c.type === 'Philosoph');
+                }
+                if (spell.id === 'eros') {
+                    return humanPlayer.board.length > 0;
                 }
                 return true;
             };
 
-            // 1. Play cards - prioritize higher cost cards (stronger)
+            // Phase 1: Spell evaluation function - returns a score (higher = more valuable)
+            const evaluateSpell = (spell: typeof aiPlayer.hand[0]): number => {
+                let score = 0;
+
+                switch (spell.id) {
+                    // === HEALING SPELLS ===
+                    case 'arete': // Full heal one philosopher
+                        const damagedFriendly = aiPlayer.board.find(m => m.health < 5);
+                        if (damagedFriendly) score = 4;
+                        break;
+
+                    case 'idee_des_guten': // Heal all own by 2
+                        const totalDamage = aiPlayer.board.filter(m => m.health <= 3).length;
+                        if (totalDamage >= 2) score = 5;
+                        else if (totalDamage >= 1) score = 2;
+                        break;
+
+                    // === DAMAGE/REMOVAL SPELLS ===
+                    case 'gottesbeweis': // 8 damage or 4 heal
+                        if (humanPlayer.board.some(m => !m.school?.includes('Religion'))) score = 5;
+                        break;
+
+                    case 'trolley_problem': // 4 damage to all enemies
+                        if (humanPlayer.board.length >= 3) score = 8;
+                        else if (humanPlayer.board.length >= 2) score = 5;
+                        else if (humanPlayer.board.length >= 1) score = 2;
+                        break;
+
+                    case 'tabula_rasa': // Board clear
+                        if (humanBoardStrength > aiBoardStrength + 10) score = 10;
+                        else if (humanBoardStrength > aiBoardStrength + 5) score = 6;
+                        break;
+
+                    // === BUFF SPELLS ===
+                    case 'deduktion': // +1/+1 to 3 philosophers
+                        if (aiPlayer.board.length >= 3) score = 6;
+                        else if (aiPlayer.board.length >= 2) score = 4;
+                        else if (aiPlayer.board.length >= 1) score = 2;
+                        break;
+
+                    case 'induktion': // +3/+3 to one philosopher
+                        if (aiPlayer.board.length >= 1) score = 5;
+                        break;
+
+                    case 'philosophenherrschaft': // Give charge
+                        if (aiPlayer.board.some(m => !m.canAttack)) score = 5;
+                        break;
+
+                    case 'aufstieg_aus_der_hoehle': // +2 attack, -2 health temporarily
+                        const strongMinion = aiPlayer.board.find(m => m.health >= 4);
+                        if (strongMinion) score = 3;
+                        break;
+
+                    // === MANA MANIPULATION ===
+                    case 'sophistik': // +1 mana, lock 1 enemy
+                        score = 3; // Always decent early game
+                        break;
+
+                    case 'eristik': // +2 mana, lock 2 enemy
+                        score = 4;
+                        break;
+
+                    // === CARD DRAW/SEARCH ===
+                    case 'hermeneutics': // Search deck
+                        if (aiPlayer.hand.length <= 5) score = 4;
+                        else score = 2;
+                        break;
+
+                    case 'kontemplation': // Draw 2
+                        if (aiPlayer.hand.length <= 4) score = 4;
+                        else score = 1;
+                        break;
+
+                    case 'scholastik': // Draw Religion/Logik
+                        score = 2;
+                        break;
+
+                    case 'epiphanie': // Draw legendary
+                        score = 3;
+                        break;
+
+                    case 'ewige-wiederkunft': // Return from graveyard
+                        if (aiPlayer.graveyard.some(c => c.type === 'Philosoph')) score = 5;
+                        break;
+
+                    // === CONTROL SPELLS ===
+                    case 'skeptischer_zweifel': // Block synergies 1 turn
+                        score = 2;
+                        break;
+
+                    case 'radikale_dekonstruktion': // Block synergies 2 turns
+                        score = 3;
+                        break;
+
+                    case 'eros': // Prevent attack 2 turns
+                        if (humanPlayer.board.some(m => (m.attack || 0) >= 4)) score = 5;
+                        else if (humanPlayer.board.length > 0) score = 2;
+                        break;
+
+                    case 'mesotes': // Balance health
+                        if (humanPlayer.health > aiPlayer.health + 5) score = 6;
+                        break;
+
+                    case 'banalitaet_des_boesen': // Double attack for lowest cost
+                        if (aiPlayer.board.length > 0) score = 4;
+                        break;
+
+                    default:
+                        score = 1; // Unknown spells get low priority
+                }
+
+                return score;
+            };
+
+            // Phase 3: In danger mode, boost defensive spell scores
+            const evaluateSpellWithDefense = (spell: typeof aiPlayer.hand[0]): number => {
+                let score = evaluateSpell(spell);
+
+                if (isInDanger) {
+                    // Boost healing and board clears when in danger
+                    if (['arete', 'idee_des_guten', 'tabula_rasa', 'mesotes'].includes(spell.id)) {
+                        score += 5;
+                    }
+                }
+
+                return score;
+            };
+
+            // Phase 2: Get playable cards and evaluate them
             const playableCards = aiPlayer.hand
                 .filter(c => c.cost <= aiPlayer.mana)
-                .filter(c => c.type !== 'Zauber' || isSpellSafeToPlay(c)) // Filter unsafe spells
-                .sort((a, b) => b.cost - a.cost); // Sort by cost descending
+                .filter(c => c.type !== 'Zauber' || isSpellSafeToPlay(c));
 
             if (playableCards.length > 0 && aiPlayer.board.length < MAX_BOARD_SIZE) {
-                // Prioritize Philosophers over Spells for board presence
                 const philosophers = playableCards.filter(c => c.type === 'Philosoph');
-                const spells = playableCards.filter(c => c.type === 'Zauber' || c.type === 'Werk');
+                const spells = playableCards.filter(c => c.type === 'Zauber');
+                const werke = playableCards.filter(c => c.type === 'Werk');
 
-                // Play a spell if enemy has strong minions (removal value)
-                if (spells.length > 0 && humanPlayer.board.some(m => (m.attack || 0) >= 4)) {
-                    const spell = spells[0];
-                    dispatch({ type: 'PLAY_CARD', cardId: spell.instanceId || spell.id });
+                // Evaluate spells and find the best one
+                const evaluatedSpells = spells
+                    .map(s => ({ spell: s, score: evaluateSpellWithDefense(s) }))
+                    .filter(s => s.score >= 2) // Minimum threshold to play
+                    .sort((a, b) => b.score - a.score);
+
+                const bestSpell = evaluatedSpells.length > 0 ? evaluatedSpells[0] : null;
+
+                // Evaluate philosophers - prefer higher cost (stronger)
+                const bestPhilosopher = philosophers.length > 0
+                    ? philosophers.sort((a, b) => b.cost - a.cost)[0]
+                    : null;
+                const philosopherScore = bestPhilosopher
+                    ? bestPhilosopher.cost + (aiPlayer.board.length < 3 ? 3 : 0) // Bonus if board is thin
+                    : 0;
+
+                // Evaluate werke - lowest priority, play if nothing else is good
+                const bestWerk = werke.length > 0 ? werke[0] : null;
+                const werkScore = bestWerk ? 1 : 0;
+
+                // Decision logic: pick highest value option
+                // In danger mode, prefer spell if it's defensive
+                if (bestSpell && bestSpell.score >= philosopherScore && bestSpell.score > werkScore) {
+                    dispatch({ type: 'PLAY_CARD', cardId: bestSpell.spell.instanceId || bestSpell.spell.id });
                     setTimeout(() => aiTurn(), 800);
                     return;
                 }
 
-                // Otherwise play a philosopher
-                if (philosophers.length > 0) {
-                    const card = philosophers[0]; // Highest cost philosopher
+                if (bestPhilosopher && philosopherScore > werkScore) {
+                    dispatch({ type: 'PLAY_CARD', cardId: bestPhilosopher.instanceId || bestPhilosopher.id });
+                    setTimeout(() => aiTurn(), 800);
+                    return;
+                }
+
+                if (bestWerk) {
+                    dispatch({ type: 'PLAY_CARD', cardId: bestWerk.instanceId || bestWerk.id });
+                    setTimeout(() => aiTurn(), 800);
+                    return;
+                }
+
+                // Fallback: play any playable card
+                if (playableCards.length > 0) {
+                    const card = playableCards[0];
                     dispatch({ type: 'PLAY_CARD', cardId: card.instanceId || card.id });
                     setTimeout(() => aiTurn(), 800);
                     return;
                 }
-
-                // Fallback: play any card
-                const card = playableCards[0];
-                dispatch({ type: 'PLAY_CARD', cardId: card.instanceId || card.id });
-                setTimeout(() => aiTurn(), 800);
-                return;
             }
 
             // 2. Attack phase - FIX: Check silencedUntilTurn to prevent Diotima hang
