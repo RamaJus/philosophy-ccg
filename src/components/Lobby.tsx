@@ -9,9 +9,10 @@ import { useSettings } from '../hooks/useSettings';
 import { cardDatabase } from '../data/cards';
 import { AvatarSelectionModal } from './AvatarSelectionModal';
 import { getAvatarById, DEFAULT_AVATAR_ID } from '../data/avatars';
+import { AI_DECK_IDS } from '../data/aiDeck';
 
 interface LobbyProps {
-    onStartGame: (mode: 'single' | 'multiplayer_host' | 'multiplayer_client') => void;
+    onStartGame: (mode: 'single' | 'multiplayer_host' | 'multiplayer_client', aiDeckIds?: string[]) => void;
     isDebugMode: boolean;
     setIsDebugMode: (value: boolean) => void;
 }
@@ -27,7 +28,10 @@ export const Lobby: React.FC<LobbyProps> = ({ onStartGame, isDebugMode, setIsDeb
     const [showSettings, setShowSettings] = useState(false);
     const [showAvatarSelection, setShowAvatarSelection] = useState(false);
     const [showDeckDropdown, setShowDeckDropdown] = useState(false);
+    const [showAiDeckDropdown, setShowAiDeckDropdown] = useState(false);
+    const [selectedAiDeck, setSelectedAiDeck] = useState<'all' | 'ai_deck'>('all');
     const deckDropdownRef = useRef<HTMLDivElement>(null);
+    const aiDeckDropdownRef = useRef<HTMLDivElement>(null);
     const [playerName, setPlayerName] = useState(() => {
         return localStorage.getItem('philosophy-ccg-player-name') || 'Spieler';
     });
@@ -488,20 +492,64 @@ export const Lobby: React.FC<LobbyProps> = ({ onStartGame, isDebugMode, setIsDeb
                                 </div>
                             </div>
 
-                            {/* Single Player Button */}
-                            <button
-                                onClick={() => onStartGame('single')}
-                                className="group relative overflow-hidden p-3 rounded-lg border-2 border-amber-700/40 hover:border-amber-500/60 transition-all bg-gradient-to-br from-slate-800/60 to-slate-900/60 hover:from-amber-900/30 text-left flex items-center gap-3"
-                            >
-                                <div
-                                    className="w-12 h-12 rounded-lg bg-cover bg-center border border-amber-500/50 shadow-lg flex-shrink-0"
-                                    style={{ backgroundImage: 'url(/images/icon_ki.png)' }}
-                                />
-                                <div>
-                                    <h3 className="text-base font-bold text-amber-100">Gegen KI</h3>
-                                    <p className="text-xs text-amber-200/60">Übe gegen den Computer</p>
+                            {/* Single Player Section with AI Deck Selection */}
+                            <div className="relative" ref={aiDeckDropdownRef}>
+                                <div className="flex rounded-lg border-2 border-amber-700/40 hover:border-amber-500/60 transition-all bg-gradient-to-br from-slate-800/60 to-slate-900/60 overflow-hidden">
+                                    {/* Main Button */}
+                                    <button
+                                        onClick={() => onStartGame('single', selectedAiDeck === 'ai_deck' ? AI_DECK_IDS : undefined)}
+                                        className="group flex-1 p-3 text-left flex items-center gap-3 hover:from-amber-900/30 transition-all"
+                                    >
+                                        <div
+                                            className="w-12 h-12 rounded-lg bg-cover bg-center border border-amber-500/50 shadow-lg flex-shrink-0"
+                                            style={{ backgroundImage: 'url(/images/icon_ki.png)' }}
+                                        />
+                                        <div>
+                                            <h3 className="text-base font-bold text-amber-100">Gegen KI</h3>
+                                            <p className="text-xs text-amber-200/60">
+                                                KI-Deck: {selectedAiDeck === 'ai_deck' ? 'KI-Deck (60)' : 'Alle Karten'}
+                                            </p>
+                                        </div>
+                                    </button>
+
+                                    {/* Dropdown Toggle */}
+                                    <button
+                                        onClick={(e) => { e.stopPropagation(); setShowAiDeckDropdown(!showAiDeckDropdown); }}
+                                        className="px-3 border-l border-amber-600/40 hover:bg-amber-800/40 transition-all flex items-center justify-center"
+                                    >
+                                        <ChevronDown
+                                            size={20}
+                                            className={`transition-transform duration-200 ${showAiDeckDropdown ? 'rotate-180' : ''} text-amber-300`}
+                                        />
+                                    </button>
                                 </div>
-                            </button>
+
+                                {/* AI Deck Dropdown Menu */}
+                                {showAiDeckDropdown && (
+                                    <div className="absolute top-full left-0 right-0 mt-1 z-50 bg-slate-800/95 border border-slate-600 rounded-lg shadow-xl overflow-hidden backdrop-blur-sm">
+                                        <button
+                                            onClick={() => { setSelectedAiDeck('all'); setShowAiDeckDropdown(false); }}
+                                            className={`w-full flex items-center justify-between px-4 py-3 hover:bg-slate-700/50 transition-colors ${selectedAiDeck === 'all' ? 'bg-amber-900/30' : ''}`}
+                                        >
+                                            <div className="flex items-center gap-3">
+                                                <span className="text-amber-100 font-medium">Alle Karten</span>
+                                                <span className="text-xs text-slate-400">KI spielt mit allen Karten</span>
+                                            </div>
+                                            {selectedAiDeck === 'all' && <Check size={16} className="text-amber-400" />}
+                                        </button>
+                                        <button
+                                            onClick={() => { setSelectedAiDeck('ai_deck'); setShowAiDeckDropdown(false); }}
+                                            className={`w-full flex items-center justify-between px-4 py-3 hover:bg-slate-700/50 transition-colors border-t border-slate-700/50 ${selectedAiDeck === 'ai_deck' ? 'bg-amber-900/30' : ''}`}
+                                        >
+                                            <div className="flex items-center gap-3">
+                                                <span className="text-amber-100 font-medium">KI-Deck</span>
+                                                <span className="text-xs text-slate-400">Optimiertes 60-Karten Deck</span>
+                                            </div>
+                                            {selectedAiDeck === 'ai_deck' && <Check size={16} className="text-amber-400" />}
+                                        </button>
+                                    </div>
+                                )}
+                            </div>
                         </div>
 
                         {/* Multiplayer */}

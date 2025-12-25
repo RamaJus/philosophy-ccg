@@ -28,11 +28,13 @@ export const App: React.FC = () => {
     const [gameMode, setGameMode] = useState<'single' | 'multiplayer_host' | 'multiplayer_client' | null>(null);
     const [isDebugMode, setIsDebugMode] = useState(false);
     const [customDeckIds, setCustomDeckIds] = useState<string[] | undefined>(undefined);
+    const [aiDeckIds, setAiDeckIds] = useState<string[] | undefined>(undefined);
 
-    const handleStartGame = (mode: 'single' | 'multiplayer_host' | 'multiplayer_client') => {
+    const handleStartGame = (mode: 'single' | 'multiplayer_host' | 'multiplayer_client', aiDeck?: string[]) => {
         // Read deck at the moment game starts
         const deckIds = getCustomDeckIds();
         setCustomDeckIds(deckIds);
+        setAiDeckIds(aiDeck);
         setGameMode(mode);
     };
 
@@ -52,7 +54,7 @@ export const App: React.FC = () => {
     return (
         <SettingsProvider>
             <BackgroundMusic />
-            <GameArea mode={gameMode} isDebugMode={isDebugMode} customDeckIds={customDeckIds} />
+            <GameArea mode={gameMode} isDebugMode={isDebugMode} customDeckIds={customDeckIds} aiDeckIds={aiDeckIds} />
         </SettingsProvider>
     );
 };

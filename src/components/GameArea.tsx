@@ -22,9 +22,10 @@ interface GameAreaProps {
     mode: 'single' | 'multiplayer_host' | 'multiplayer_client';
     isDebugMode: boolean;
     customDeckIds?: string[];
+    aiDeckIds?: string[];
 }
 
-export const GameArea: React.FC<GameAreaProps> = ({ mode, isDebugMode, customDeckIds }) => {
+export const GameArea: React.FC<GameAreaProps> = ({ mode, isDebugMode, customDeckIds, aiDeckIds }) => {
     const {
         gameState,
         dispatch,
@@ -41,7 +42,8 @@ export const GameArea: React.FC<GameAreaProps> = ({ mode, isDebugMode, customDec
     } = useGameLogic(
         mode === 'multiplayer_host' ? 'host' : mode === 'multiplayer_client' ? 'client' : 'single',
         isDebugMode,
-        customDeckIds
+        customDeckIds,
+        aiDeckIds
     );
     const { player, opponent, activePlayer, selectedCard, selectedMinions, gameOver, winner, log, targetMode, targetModeOwner, foucaultRevealCards, recurrenceCards, discoveryCards } = gameState;
 

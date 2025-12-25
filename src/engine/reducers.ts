@@ -111,7 +111,7 @@ export function createPlayer(name: string, isPlayer: boolean, startingHandSize: 
 }
 
 // Helper: Initial State
-export function createInitialState(isDebugMode: boolean, customDeckIds?: string[]): GameState {
+export function createInitialState(isDebugMode: boolean, customDeckIds?: string[], aiDeckIds?: string[]): GameState {
     // Read player name from localStorage (set in Lobby)
     const playerName = typeof window !== 'undefined'
         ? localStorage.getItem('philosophy-ccg-player-name') || 'Spieler'
@@ -121,14 +121,14 @@ export function createInitialState(isDebugMode: boolean, customDeckIds?: string[
     player.mana = 1;
     player.maxMana = 1;
 
-    // Opponent also gets standard hand size (extra card is given by SET_STARTING_PLAYER based on coin flip)
+    // Opponent uses aiDeckIds if provided, otherwise same as player (all cards or custom)
     return {
         turn: 1,
         activePlayer: 'player',
         player,
-        opponent: createPlayer('Gegner', false, STARTING_HAND_SIZE, isDebugMode),
+        opponent: createPlayer('Gegner', false, STARTING_HAND_SIZE, isDebugMode, aiDeckIds),
         gameOver: false,
-        log: [customDeckIds ? 'Spiel mit Custom-Deck gestartet!' : 'Spiel gestartet! Möge der beste Philosoph gewinnen.'],
+        log: [customDeckIds || aiDeckIds ? 'Spiel mit Custom-Deck gestartet!' : 'Spiel gestartet! Möge der beste Philosoph gewinnen.'],
     };
 }
 
@@ -158,7 +158,7 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
 
     switch (action.type) {
         case 'START_GAME':
-            return createInitialState(action.isDebugMode || false, action.customDeckIds);
+            return createInitialState(action.isDebugMode || false, action.customDeckIds, action.aiDeckIds);
 
         case 'END_TURN': {
             // Logic for ending turn (Switch active player, Draw card, Reset Mana)

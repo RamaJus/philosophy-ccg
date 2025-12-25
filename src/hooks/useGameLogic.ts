@@ -3,26 +3,26 @@ import { GameState, GameAction } from '../types';
 import { gameReducer, createInitialState } from '../engine/reducers';
 import { multiplayer } from '../network/MultiplayerManager';
 
-export const useGameLogic = (gameMode: 'single' | 'host' | 'client', isDebugMode: boolean = false, customDeckIds?: string[]) => {
+export const useGameLogic = (gameMode: 'single' | 'host' | 'client', isDebugMode: boolean = false, customDeckIds?: string[], aiDeckIds?: string[]) => {
     // Track if we've initialized with the correct deck
     const initializedRef = useRef(false);
 
-    console.log('[useGameLogic] Called with customDeckIds:', customDeckIds?.length, 'cards');
+    console.log('[useGameLogic] Called with customDeckIds:', customDeckIds?.length, 'cards, aiDeckIds:', aiDeckIds?.length);
 
     // 1. Initialize Reducer - start with empty state, will dispatch START_GAME with correct deck
-    const [gameState, dispatch] = useReducer(gameReducer, { isDebugMode, customDeckIds }, (args) => {
-        console.log('[useGameLogic] Initializer called with:', args.customDeckIds?.length, 'cards');
-        return createInitialState(args.isDebugMode, args.customDeckIds);
+    const [gameState, dispatch] = useReducer(gameReducer, { isDebugMode, customDeckIds, aiDeckIds }, (args) => {
+        console.log('[useGameLogic] Initializer called with:', args.customDeckIds?.length, 'player cards,', args.aiDeckIds?.length, 'AI cards');
+        return createInitialState(args.isDebugMode, args.customDeckIds, args.aiDeckIds);
     });
 
     // 2. Re-initialize if customDeckIds wasn't available at mount
     useEffect(() => {
-        if (customDeckIds && customDeckIds.length > 0 && !initializedRef.current) {
-            console.log('[useGameLogic] Dispatching START_GAME with custom deck:', customDeckIds.length, 'cards');
-            dispatch({ type: 'START_GAME', isDebugMode, customDeckIds });
+        if ((customDeckIds && customDeckIds.length > 0 || aiDeckIds && aiDeckIds.length > 0) && !initializedRef.current) {
+            console.log('[useGameLogic] Dispatching START_GAME with custom deck:', customDeckIds?.length, 'cards, AI deck:', aiDeckIds?.length);
+            dispatch({ type: 'START_GAME', isDebugMode, customDeckIds, aiDeckIds });
             initializedRef.current = true;
         }
-    }, [customDeckIds, isDebugMode]);
+    }, [customDeckIds, aiDeckIds, isDebugMode]);
 
     // 3. Multiplayer Helpers
     const isHost = gameMode === 'host';
