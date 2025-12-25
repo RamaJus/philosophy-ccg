@@ -508,7 +508,7 @@ export const Lobby: React.FC<LobbyProps> = ({ onStartGame, isDebugMode, setIsDeb
                         <div className="p-4 rounded-lg border-2 border-amber-700/40 bg-gradient-to-br from-slate-800/60 to-slate-900/60 space-y-3">
                             <div className="flex items-center gap-3">
                                 <div
-                                    className="w-10 h-10 rounded-lg bg-cover bg-center border border-emerald-500/50 shadow-lg flex-shrink-0"
+                                    className="w-12 h-12 rounded-lg bg-cover bg-center border border-emerald-500/50 shadow-lg flex-shrink-0"
                                     style={{ backgroundImage: 'url(/images/icon_online.png)' }}
                                 />
                                 <div>
