@@ -630,6 +630,26 @@ export const GameArea: React.FC<GameAreaProps> = ({ mode, isDebugMode, customDec
                         if (humanPlayer.board.some(m => !m.school?.includes('Religion'))) score = 5;
                         break;
 
+                    case 'aporia': // 6 direct damage to opponent
+                        score = 4; // Always useful
+                        if (humanPlayer.health <= 20) score = 6; // Better as finisher
+                        break;
+
+                    case 'wu-wei': // 10 direct damage to opponent
+                        score = 5; // High value
+                        if (humanPlayer.health <= 15) score = 8; // Excellent finisher
+                        break;
+
+                    case 'meditation': // Heal 6
+                        if (aiPlayer.health <= aiPlayer.maxHealth - 6) score = 3;
+                        if (aiPlayer.health <= 30) score = 5;
+                        break;
+
+                    case 'Aufklärung': // Heal 10
+                        if (aiPlayer.health <= aiPlayer.maxHealth - 10) score = 4;
+                        if (aiPlayer.health <= 40) score = 6;
+                        break;
+
                     case 'trolley_problem': // 4 damage to all enemies
                         if (humanPlayer.board.length >= 3) score = 8;
                         else if (humanPlayer.board.length >= 2) score = 5;
@@ -676,9 +696,23 @@ export const GameArea: React.FC<GameAreaProps> = ({ mode, isDebugMode, customDec
                         else score = 2;
                         break;
 
-                    case 'kontemplation': // Draw 2
-                        if (aiPlayer.hand.length <= 4) score = 4;
-                        else score = 1;
+                    case 'kontemplation': // Discover from top 3
+                        if (aiPlayer.hand.length <= 5) score = 4;
+                        else score = 2;
+                        break;
+
+                    case 'dualismus': // Draw 2 cards
+                        if (aiPlayer.hand.length <= 4) score = 5;
+                        else score = 2;
+                        break;
+
+                    case 'axiom': // +1 mana this turn (0 cost)
+                        score = 3; // Free mana is good for tempo
+                        break;
+
+                    case 'cogito': // Draw 1 (0 cost)
+                        if (aiPlayer.hand.length <= 6) score = 4; // Free card draw is great
+                        else score = 2;
                         break;
 
                     case 'scholastik': // Draw Religion/Logik

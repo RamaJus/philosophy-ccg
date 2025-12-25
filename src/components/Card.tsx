@@ -1,8 +1,9 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { createPortal } from 'react-dom';
 import { motion } from 'framer-motion';
 import { Card as CardType, BoardMinion } from '../types';
 import { Swords, Heart, Zap, BookOpen } from 'lucide-react';
+import { cardDatabase } from '../data/cards';
 
 // Card dimension constants - single source of truth
 export const CARD_WIDTH = 140;
@@ -80,6 +81,13 @@ export const Card: React.FC<CardProps> = ({
 
     const [showPreview, setShowPreview] = useState(false);
 
+    // Get original card from database for tooltip display (shows unbuffed/undebuffed values)
+    const originalCard = useMemo(() => {
+        // Find by base id (strip instanceId suffix)
+        const baseId = card.id.split('-')[0];
+        return cardDatabase.find(c => c.id === baseId) || card;
+    }, [card.id]);
+
     useEffect(() => {
         if (currentHealth !== undefined && prevHealth.current !== undefined) {
             if (currentHealth < prevHealth.current) {
@@ -147,11 +155,11 @@ export const Card: React.FC<CardProps> = ({
                             animate={{ scale: PREVIEW_SCALE, opacity: 1 }}
                             className="relative transform shadow-2xl"
                         >
+                            {/* Show original card from database, not the buffed/debuffed version */}
                             <Card
-                                card={card}
+                                card={originalCard}
                                 isPlayable={false}
-                                showHealth={showHealth}
-                                bonusDamage={bonusDamage}
+                                showHealth={false}
                             />
                         </motion.div>
 
@@ -164,13 +172,13 @@ export const Card: React.FC<CardProps> = ({
                                 height: `${CARD_HEIGHT * PREVIEW_SCALE}px`
                             }}
                         >
-                            <h3 className="text-lg font-bold text-amber-400 border-b border-slate-700 pb-2">{card.name}</h3>
+                            <h3 className="text-lg font-bold text-amber-400 border-b border-slate-700 pb-2">{originalCard.name}</h3>
 
-                            {card.school && (
+                            {originalCard.school && (
                                 <div className="space-y-1">
                                     <span className="text-xs text-gray-400 uppercase tracking-wider">Schulen</span>
                                     <div className="flex flex-wrap gap-1">
-                                        {card.school.map(s => (
+                                        {originalCard.school.map(s => (
                                             <span key={s} className="text-xs px-2 py-1 bg-slate-800 rounded-full border border-slate-700 text-blue-300">
                                                 {s}
                                             </span>
@@ -180,34 +188,34 @@ export const Card: React.FC<CardProps> = ({
                             )}
 
                             {/* Show effect/special abilities in tooltip */}
-                            {(card.effect || (card as BoardMinion).specialAbility || card.special || card.workBonus) && (
+                            {(originalCard.effect || originalCard.special || originalCard.workBonus) && (
                                 <div className="space-y-1 bg-purple-900/30 border border-purple-700/50 rounded-lg p-2">
                                     <span className="text-xs text-purple-400 uppercase tracking-wider flex items-center gap-1">
                                         <Zap size={12} /> Effekt
                                     </span>
-                                    {card.effect && (
-                                        <p className="text-sm font-medium text-purple-200">{card.effect}</p>
+                                    {originalCard.effect && (
+                                        <p className="text-sm font-medium text-purple-200">{originalCard.effect}</p>
                                     )}
-                                    {card.special && (
-                                        <p className="text-sm font-medium text-purple-200">{card.special.name}: {card.special.description}</p>
+                                    {originalCard.special && (
+                                        <p className="text-sm font-medium text-purple-200">{originalCard.special.name}: {originalCard.special.description}</p>
                                     )}
-                                    {card.workBonus && (
-                                        <p className="text-sm font-medium text-green-200">Bonus: +{card.workBonus.health} Leben für {card.workBonus.school}</p>
+                                    {originalCard.workBonus && (
+                                        <p className="text-sm font-medium text-green-200">Bonus: +{originalCard.workBonus.health} Leben für {originalCard.workBonus.school}</p>
                                     )}
                                 </div>
                             )}
 
                             {/* Show tooltip for philosophers */}
-                            {card.tooltip && (
+                            {originalCard.tooltip && (
                                 <div className="space-y-1 bg-amber-900/30 border border-amber-700/50 rounded-lg p-2">
                                     <span className="text-xs text-amber-400 uppercase tracking-wider">Hintergrund</span>
-                                    <p className="text-sm text-amber-100 leading-relaxed">{card.tooltip}</p>
+                                    <p className="text-sm text-amber-100 leading-relaxed">{originalCard.tooltip}</p>
                                 </div>
                             )}
 
                             <div className="space-y-1 mt-auto pt-2 border-t border-slate-700">
                                 <span className="text-xs text-gray-400 uppercase tracking-wider">Typ</span>
-                                <p className="text-sm font-medium">{card.type}</p>
+                                <p className="text-sm font-medium">{originalCard.type}</p>
                             </div>
                         </motion.div>
                     </div>
