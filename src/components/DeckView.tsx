@@ -11,6 +11,11 @@ interface DeckViewProps {
 }
 
 export const DeckView: React.FC<DeckViewProps> = ({ deck, isOpen, onClose, onSelectCard, mode }) => {
+    // All hooks must be called before any conditional returns (React Rules of Hooks)
+    const [filterType, setFilterType] = useState<'All' | 'Philosoph' | 'Zauber' | 'Werk'>('All');
+    const [filterSchool, setFilterSchool] = useState<string>('All');
+    const [filterCost, setFilterCost] = useState<number | 'All'>('All');
+
     // ESC key handler
     const handleKeyDown = useCallback((e: KeyboardEvent) => {
         if (e.key === 'Escape') {
@@ -24,14 +29,6 @@ export const DeckView: React.FC<DeckViewProps> = ({ deck, isOpen, onClose, onSel
             return () => document.removeEventListener('keydown', handleKeyDown);
         }
     }, [isOpen, handleKeyDown]);
-
-    if (!isOpen) return null;
-
-    // Sort deck alphabetically by name (hides the actual draw order)
-    // Sort deck alphabetically by name (hides the actual draw order)
-    const [filterType, setFilterType] = useState<'All' | 'Philosoph' | 'Zauber' | 'Werk'>('All');
-    const [filterSchool, setFilterSchool] = useState<string>('All');
-    const [filterCost, setFilterCost] = useState<number | 'All'>('All');
 
     const schools = ['Vorsokratiker', 'Metaphysik', 'Logik', 'Ethik', 'Politik', 'Empirismus', 'Rationalismus', 'Idealismus', 'Existentialismus', 'Religion', 'Skeptizismus'];
 
@@ -48,6 +45,8 @@ export const DeckView: React.FC<DeckViewProps> = ({ deck, isOpen, onClose, onSel
             return true;
         }).sort((a, b) => a.name.localeCompare(b.name, 'de'));
     }, [deck, filterType, filterSchool, filterCost]);
+
+    if (!isOpen) return null;
 
     return (
         <div className="fixed inset-0 bg-black/80 z-50 flex flex-col items-center justify-center p-8" onClick={onClose}>
