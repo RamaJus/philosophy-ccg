@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { multiplayer } from '../network/MultiplayerManager';
-import { Copy, Globe, Cpu, QrCode, Share2, User, Settings, ChevronDown, Check } from 'lucide-react';
+import { Copy, QrCode, Share2, User, Settings, ChevronDown, Check } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
 import { DeckEditor } from './DeckEditor';
 import { SettingsModal } from './SettingsModal';
@@ -493,9 +493,10 @@ export const Lobby: React.FC<LobbyProps> = ({ onStartGame, isDebugMode, setIsDeb
                                 onClick={() => onStartGame('single')}
                                 className="group relative overflow-hidden p-3 rounded-lg border-2 border-amber-700/40 hover:border-amber-500/60 transition-all bg-gradient-to-br from-slate-800/60 to-slate-900/60 hover:from-amber-900/30 text-left flex items-center gap-3"
                             >
-                                <div className="bg-gradient-to-br from-amber-600/30 to-amber-700/30 w-12 h-12 rounded-full flex items-center justify-center border border-amber-600/40 flex-shrink-0">
-                                    <Cpu className="text-amber-300" size={24} />
-                                </div>
+                                <div
+                                    className="w-12 h-12 rounded-lg bg-cover bg-center border border-amber-500/50 shadow-lg flex-shrink-0"
+                                    style={{ backgroundImage: 'url(/images/icon_ki.png)' }}
+                                />
                                 <div>
                                     <h3 className="text-base font-bold text-amber-100">Gegen KI</h3>
                                     <p className="text-xs text-amber-200/60">Übe gegen den Computer</p>
@@ -506,9 +507,10 @@ export const Lobby: React.FC<LobbyProps> = ({ onStartGame, isDebugMode, setIsDeb
                         {/* Multiplayer */}
                         <div className="p-4 rounded-lg border-2 border-amber-700/40 bg-gradient-to-br from-slate-800/60 to-slate-900/60 space-y-3">
                             <div className="flex items-center gap-3">
-                                <div className="bg-gradient-to-br from-emerald-600/30 to-emerald-700/30 w-10 h-10 rounded-full flex items-center justify-center border border-emerald-600/40">
-                                    <Globe className="text-emerald-300" size={20} />
-                                </div>
+                                <div
+                                    className="w-10 h-10 rounded-lg bg-cover bg-center border border-emerald-500/50 shadow-lg flex-shrink-0"
+                                    style={{ backgroundImage: 'url(/images/icon_online.png)' }}
+                                />
                                 <div>
                                     <h3 className="text-lg font-bold text-emerald-100">Online spielen</h3>
                                     <p className="text-xs text-emerald-200/60">Fordere einen Freund heraus</p>
