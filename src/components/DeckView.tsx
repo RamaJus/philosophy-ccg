@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import { Card } from '../types';
 import { Card as CardComponent } from './Card';
 
@@ -11,6 +11,20 @@ interface DeckViewProps {
 }
 
 export const DeckView: React.FC<DeckViewProps> = ({ deck, isOpen, onClose, onSelectCard, mode }) => {
+    // ESC key handler
+    const handleKeyDown = useCallback((e: KeyboardEvent) => {
+        if (e.key === 'Escape') {
+            onClose();
+        }
+    }, [onClose]);
+
+    useEffect(() => {
+        if (isOpen) {
+            document.addEventListener('keydown', handleKeyDown);
+            return () => document.removeEventListener('keydown', handleKeyDown);
+        }
+    }, [isOpen, handleKeyDown]);
+
     if (!isOpen) return null;
 
     // Sort deck alphabetically by name (hides the actual draw order)
@@ -36,8 +50,8 @@ export const DeckView: React.FC<DeckViewProps> = ({ deck, isOpen, onClose, onSel
     }, [deck, filterType, filterSchool, filterCost]);
 
     return (
-        <div className="fixed inset-0 bg-black/80 z-50 flex flex-col items-center justify-center p-8">
-            <div className="bg-slate-900 border-2 border-amber-600 rounded-xl w-full max-w-6xl h-full max-h-[90vh] flex flex-col shadow-2xl shadow-amber-900/20">
+        <div className="fixed inset-0 bg-black/80 z-50 flex flex-col items-center justify-center p-8" onClick={onClose}>
+            <div className="bg-slate-900 border-2 border-amber-600 rounded-xl w-full max-w-6xl h-full max-h-[90vh] flex flex-col shadow-2xl shadow-amber-900/20" onClick={e => e.stopPropagation()}>
                 <div className="p-6 border-b border-amber-600/30 flex justify-between items-center bg-slate-950/50 rounded-t-xl">
                     <div>
                         <h2 className="text-3xl font-serif text-amber-500">

@@ -1,7 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Card as CardType } from '../types';
-import { Skull, X } from 'lucide-react';
-import { Card } from './Card';
+import { Card as CardComponent } from './Card';
 import { cardDatabase } from '../data/cards';
 
 interface GraveyardProps {
@@ -14,7 +13,7 @@ const PILE_WIDTH = 96;  // w-24 = 96px
 const PILE_HEIGHT = 128; // h-32 = 128px
 
 // Helper function to get the original card from database
-// This normalizes transformed cards (Freud Es/Ich/Über-Ich, Sartre entfesselt) back to their originals
+// This normalizes transformed cards (Freud Es/Ich/Über-Ich) back to their originals
 const getOriginalCard = (card: CardType): CardType => {
     // Map transformation IDs to their original card IDs
     const transformationMapping: Record<string, string> = {
@@ -44,6 +43,20 @@ const getOriginalCard = (card: CardType): CardType => {
 export const Graveyard: React.FC<GraveyardProps> = ({ cards, title }) => {
     const [isOpen, setIsOpen] = useState(false);
 
+    // ESC key handler
+    const handleKeyDown = useCallback((e: KeyboardEvent) => {
+        if (e.key === 'Escape' && isOpen) {
+            setIsOpen(false);
+        }
+    }, [isOpen]);
+
+    useEffect(() => {
+        if (isOpen) {
+            document.addEventListener('keydown', handleKeyDown);
+            return () => document.removeEventListener('keydown', handleKeyDown);
+        }
+    }, [isOpen, handleKeyDown]);
+
     // Always render the placeholder to maintain layout position
     // But make it invisible when empty
     if (cards.length === 0) {
@@ -57,6 +70,13 @@ export const Graveyard: React.FC<GraveyardProps> = ({ cards, title }) => {
 
     // Get the last played card (most recent addition to graveyard)
     const lastPlayedCard = cards[cards.length - 1];
+
+    // Sort cards alphabetically for modal display
+    const sortedCards = [...cards].sort((a, b) => {
+        const cardA = getOriginalCard(a);
+        const cardB = getOriginalCard(b);
+        return cardA.name.localeCompare(cardB.name, 'de');
+    });
 
     return (
         <>
@@ -115,7 +135,6 @@ export const Graveyard: React.FC<GraveyardProps> = ({ cards, title }) => {
 
                     {/* Card count badge */}
                     <div className="absolute bottom-1 right-1 bg-black/70 rounded-full px-2 py-0.5 flex items-center gap-1">
-                        <Skull size={12} className="text-gray-400" />
                         <span className="text-xs font-bold text-gray-300">{cards.length}</span>
                     </div>
 
@@ -126,33 +145,54 @@ export const Graveyard: React.FC<GraveyardProps> = ({ cards, title }) => {
                 </div>
             </div>
 
-            {/* Modal - Full graveyard view with original card values */}
+            {/* Modal - Same design as DeckView */}
             {isOpen && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4" onClick={() => setIsOpen(false)}>
-                    <div className="bg-slate-900 border border-gray-700 rounded-xl w-full max-w-4xl max-h-[80vh] flex flex-col" onClick={e => e.stopPropagation()}>
-                        <div className="p-4 border-b border-gray-700 flex justify-between items-center">
-                            <h2 className="text-xl font-bold text-gray-200 flex items-center gap-2">
-                                <Skull size={24} />
-                                {title} ({cards.length})
-                            </h2>
+                <div
+                    className="fixed inset-0 bg-black/80 z-50 flex flex-col items-center justify-center p-8"
+                    onClick={() => setIsOpen(false)}
+                >
+                    <div
+                        className="bg-slate-900 border-2 border-amber-600 rounded-xl w-full max-w-6xl h-full max-h-[90vh] flex flex-col shadow-2xl shadow-amber-900/20"
+                        onClick={e => e.stopPropagation()}
+                    >
+                        <div className="p-6 border-b border-amber-600/30 flex justify-between items-center bg-slate-950/50 rounded-t-xl">
+                            <div>
+                                <h2 className="text-3xl font-serif text-amber-500">
+                                    {title}
+                                </h2>
+                                <p className="text-amber-200/60 mt-1 font-serif italic">
+                                    {cards.length} Karten im Friedhof (alphabetisch sortiert).
+                                </p>
+                            </div>
                             <button
                                 onClick={() => setIsOpen(false)}
-                                className="p-2 hover:bg-gray-800 rounded-full transition-colors"
+                                className="text-amber-500 hover:text-amber-300 transition-colors text-xl font-bold px-4 py-2 border border-amber-600/30 rounded hover:bg-amber-900/20"
                             >
-                                <X size={24} />
+                                Schließen
                             </button>
                         </div>
 
-                        <div className="p-4 overflow-y-auto grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-2">
-                            {cards.map((card, index) => {
-                                // Normalize card to original version with base stats
-                                const normalizedCard = getOriginalCard(card);
-                                return (
-                                    <div key={`${card.instanceId || card.id}-gy-${index}`} className="scale-[0.6] origin-top-left -mr-12 -mb-16">
-                                        <Card card={normalizedCard} />
-                                    </div>
-                                );
-                            })}
+                        <div className="flex-1 overflow-y-auto p-8 custom-scrollbar">
+                            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+                                {sortedCards.map((card, index) => {
+                                    // Normalize card to original version with base stats
+                                    const normalizedCard = getOriginalCard(card);
+                                    return (
+                                        <div
+                                            key={`${card.instanceId || card.id}-gy-${index}`}
+                                            className="transform transition-all duration-300"
+                                        >
+                                            <CardComponent card={normalizedCard} isPlayable={false} />
+                                        </div>
+                                    );
+                                })}
+                            </div>
+
+                            {cards.length === 0 && (
+                                <div className="flex flex-col items-center justify-center h-full text-amber-700/50">
+                                    <p className="text-2xl font-serif italic">Der Friedhof ist leer.</p>
+                                </div>
+                            )}
                         </div>
                     </div>
                 </div>

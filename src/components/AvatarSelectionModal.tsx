@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useCallback } from 'react';
 import { X } from 'lucide-react';
 import { AVATARS } from '../data/avatars';
 
@@ -15,11 +15,25 @@ export const AvatarSelectionModal: React.FC<AvatarSelectionModalProps> = ({
     currentAvatarId,
     onSelectAvatar,
 }) => {
+    // ESC key handler
+    const handleKeyDown = useCallback((e: KeyboardEvent) => {
+        if (e.key === 'Escape') {
+            onClose();
+        }
+    }, [onClose]);
+
+    useEffect(() => {
+        if (isOpen) {
+            document.addEventListener('keydown', handleKeyDown);
+            return () => document.removeEventListener('keydown', handleKeyDown);
+        }
+    }, [isOpen, handleKeyDown]);
+
     if (!isOpen) return null;
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
-            <div className="relative w-full max-w-4xl bg-slate-900 border border-amber-900/50 rounded-xl shadow-2xl p-6 max-h-[90vh] overflow-y-auto">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm" onClick={onClose}>
+            <div className="relative w-full max-w-4xl bg-slate-900 border border-amber-900/50 rounded-xl shadow-2xl p-6 max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
                 {/* Header */}
                 <div className="flex items-center justify-between mb-8 border-b border-amber-900/30 pb-4">
                     <h2 className="text-3xl font-serif text-amber-100/90">Wähle deinen Avatar</h2>

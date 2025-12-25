@@ -13,7 +13,7 @@ interface HandProps {
 
 export const Hand: React.FC<HandProps> = ({ cards, onCardClick, selectedCardId, currentMana, deckPosition }) => {
     return (
-        <div className="group/hand flex flex-col items-center transition-all duration-300 transform translate-y-[60%] hover:translate-y-0">
+        <div className="group/hand flex flex-col items-center transition-all duration-300 transform translate-y-[65%] hover:translate-y-[8px]">
             <div className="flex gap-[-40px] justify-center items-end h-[220px] relative" style={{ perspective: '1000px' }}>
                 <AnimatePresence mode="popLayout">
                     {cards.length === 0 ? (
