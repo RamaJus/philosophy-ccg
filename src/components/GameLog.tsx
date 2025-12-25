@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { ScrollText, X } from 'lucide-react';
 
@@ -32,12 +32,19 @@ export const GameLog: React.FC<GameLogProps> = ({ messages }) => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const modalRef = useRef<HTMLDivElement>(null);
 
-    const recentMessages = messages.slice(-3);
+    const recentMessages = messages.slice(-10);
+
+    // Auto-scroll modal to bottom when opened
+    useEffect(() => {
+        if (isModalOpen && modalRef.current) {
+            modalRef.current.scrollTop = modalRef.current.scrollHeight;
+        }
+    }, [isModalOpen]);
 
     return (
         <>
             {/* Mini-Feed Section - Fixed bottom left */}
-            <div className="fixed bottom-2 left-2 z-30 w-52 bg-slate-900/50 border border-slate-700/30 rounded-lg p-2 space-y-1.5 backdrop-blur-sm">
+            <div className="fixed bottom-2 left-2 z-30 w-52 bg-slate-900/50 border border-slate-700/30 rounded-lg p-2 space-y-1.5 backdrop-blur-sm opacity-60 hover:opacity-100 transition-opacity duration-200">
                 {/* Header with expand button */}
                 <button
                     onClick={() => setIsModalOpen(true)}
