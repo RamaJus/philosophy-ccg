@@ -263,7 +263,14 @@ export const Card: React.FC<CardProps> = ({
                     />
                 )}
 
-                <div className={`px-2 py-1 rounded-t-xl ${card.rarity === 'Legendär' ? 'bg-gradient-to-r from-yellow-700 via-yellow-600 to-yellow-700' : 'bg-gradient-to-r from-slate-800 to-slate-700'}`} style={{ pointerEvents: 'none' }}>
+                <div className={`px-2 py-1 rounded-t-xl ${card.type === 'Philosoph' && card.rarity === 'Legendär'
+                        ? 'bg-gradient-to-r from-yellow-700 via-yellow-600 to-yellow-700'
+                        : card.type === 'Zauber'
+                            ? 'bg-gradient-to-r from-cyan-700 to-blue-700'
+                            : card.type === 'Werk'
+                                ? 'bg-gradient-to-r from-amber-700 to-orange-700'
+                                : 'bg-gradient-to-r from-slate-800 to-slate-700'
+                    }`} style={{ pointerEvents: 'none' }}>
                     <h3 className="font-bold text-xs text-center text-white truncate">
                         {getDisplayName(card)}
                     </h3>
@@ -372,11 +379,15 @@ export const Card: React.FC<CardProps> = ({
                 )}
 
                 {!isMinion && (
-                    <div className="absolute bottom-0 left-0 right-0 flex justify-center items-center py-2 bg-slate-900/90 border-t border-slate-700/50 rounded-b-xl" style={{ pointerEvents: 'none' }}>
-                        <div className={`flex items-center gap-2 ${card.type === 'Werk' ? 'text-amber-400' : 'text-purple-400'}`}>
+                    <div className={`absolute bottom-0 left-0 right-0 flex justify-center items-center py-2 border-t rounded-b-xl ${card.type === 'Werk'
+                            ? 'bg-amber-900/90 border-amber-700/50'
+                            : 'bg-slate-900/90 border-slate-700/50'
+                        }`} style={{ pointerEvents: 'none' }}>
+                        <div className={`flex items-center gap-2 ${card.type === 'Werk' ? 'text-amber-300' : 'text-cyan-400'
+                            }`}>
                             {card.type === 'Werk' ? <BookOpen size={16} /> : <Zap size={16} />}
                             <span className="text-xs font-semibold uppercase">{card.type}</span>
-                            {card.type === 'Werk' ? <BookOpen size={16} /> : <BookOpen size={16} />}
+                            {card.type === 'Werk' ? <BookOpen size={16} /> : <Zap size={16} />}
                         </div>
                     </div>
                 )}
