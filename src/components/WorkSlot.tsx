@@ -11,9 +11,15 @@ const SLOT_WIDTH = 128;  // 120 + 8px buffer
 const SLOT_HEIGHT = 176; // 168 + 8px buffer
 
 export const WorkSlot: React.FC<WorkSlotProps> = ({ card }) => {
-    // Hide completely when no card is present
+    // Always render the placeholder to maintain layout position
+    // But make it invisible when no card is present
     if (!card) {
-        return null;
+        return (
+            <div
+                style={{ width: `${SLOT_WIDTH}px`, height: `${SLOT_HEIGHT}px` }}
+                className="opacity-0 pointer-events-none"
+            />
+        );
     }
 
     return (

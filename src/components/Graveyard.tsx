@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Card as CardType } from '../types';
 import { Skull, X } from 'lucide-react';
 import { Card } from './Card';
+import { cardDatabase } from '../data/cards';
 
 interface GraveyardProps {
     cards: CardType[];
@@ -12,12 +13,46 @@ interface GraveyardProps {
 const PILE_WIDTH = 96;  // w-24 = 96px
 const PILE_HEIGHT = 128; // h-32 = 128px
 
+// Helper function to get the original card from database
+// This normalizes transformed cards (Freud Es/Ich/Über-Ich, Sartre entfesselt) back to their originals
+const getOriginalCard = (card: CardType): CardType => {
+    // Map transformation IDs to their original card IDs
+    const transformationMapping: Record<string, string> = {
+        'freud_es': 'freud',
+        'freud_ich': 'freud',
+        'freud_ueberich': 'freud',
+    };
+
+    // Check if this is a known transformation
+    const originalId = transformationMapping[card.id] || card.id;
+
+    // Look up the original card in the database
+    const originalCard = cardDatabase.find(c => c.id === originalId);
+
+    if (originalCard) {
+        // Return a copy with original stats but keep instanceId for React keys
+        return {
+            ...originalCard,
+            instanceId: card.instanceId,
+        };
+    }
+
+    // If not found in database (shouldn't happen), return the card as-is
+    return card;
+};
+
 export const Graveyard: React.FC<GraveyardProps> = ({ cards, title }) => {
     const [isOpen, setIsOpen] = useState(false);
 
-    // Hide completely when no cards are present
+    // Always render the placeholder to maintain layout position
+    // But make it invisible when empty
     if (cards.length === 0) {
-        return null;
+        return (
+            <div
+                style={{ width: `${PILE_WIDTH}px`, height: `${PILE_HEIGHT}px` }}
+                className="opacity-0 pointer-events-none"
+            />
+        );
     }
 
     // Get the last played card (most recent addition to graveyard)
@@ -91,7 +126,7 @@ export const Graveyard: React.FC<GraveyardProps> = ({ cards, title }) => {
                 </div>
             </div>
 
-            {/* Modal - Full graveyard view */}
+            {/* Modal - Full graveyard view with original card values */}
             {isOpen && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4" onClick={() => setIsOpen(false)}>
                     <div className="bg-slate-900 border border-gray-700 rounded-xl w-full max-w-4xl max-h-[80vh] flex flex-col" onClick={e => e.stopPropagation()}>
@@ -108,12 +143,16 @@ export const Graveyard: React.FC<GraveyardProps> = ({ cards, title }) => {
                             </button>
                         </div>
 
-                        <div className="p-6 overflow-y-auto grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-                            {cards.map((card, index) => (
-                                <div key={`${card.id}-gy-${index}`} className="scale-75 origin-top-left">
-                                    <Card card={card} />
-                                </div>
-                            ))}
+                        <div className="p-4 overflow-y-auto grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-2">
+                            {cards.map((card, index) => {
+                                // Normalize card to original version with base stats
+                                const normalizedCard = getOriginalCard(card);
+                                return (
+                                    <div key={`${card.instanceId || card.id}-gy-${index}`} className="scale-[0.6] origin-top-left -mr-12 -mb-16">
+                                        <Card card={normalizedCard} />
+                                    </div>
+                                );
+                            })}
                         </div>
                     </div>
                 </div>
