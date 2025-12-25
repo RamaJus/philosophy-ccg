@@ -81,6 +81,10 @@ export const AI_DECK_IDS: string[] = [
 
     // === 1 Werk (Passive Bonus) ===
     'zarathustra',   // 5 cost - +1 health for Existentialism
+
+    // === Additional cards to reach 60 ===
+    'augustinus',    // 5 cost - 4/4, Religion
+    'bentham',       // 4 cost - 3/4, Utilitarism
 ];
 
 // Validate that we have exactly 60 cards
