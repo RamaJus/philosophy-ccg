@@ -46,6 +46,7 @@ interface CardProps {
     bonusDamage?: number;
     bonusHealth?: number;
     isAttacking?: boolean;
+    canAttack?: boolean; // True if minion is on board and ready to attack
 }
 
 
@@ -60,7 +61,8 @@ export const Card: React.FC<CardProps> = ({
     className = '',
     bonusDamage = 0,
     bonusHealth = 0,
-    isAttacking = false
+    isAttacking = false,
+    canAttack = false
 }) => {
     const isMinion = card.type === 'Philosoph';
     const boardMinion = showHealth ? (card as BoardMinion) : null;
@@ -130,9 +132,37 @@ export const Card: React.FC<CardProps> = ({
         }
     }, [showPreview]);
 
+    // Determine border color based on card type and state
+    const getBorderColor = () => {
+        // Attack-ready minions on board get green border
+        if (isMinion && showHealth && canAttack) {
+            return '#22c55e'; // emerald-500
+        }
+        // Legendary philosophers get gold border
+        if (isMinion && card.rarity === 'Legendär') {
+            return '#f59e0b'; // amber-500
+        }
+        // Normal philosophers get gray border
+        if (isMinion) {
+            return '#64748b'; // slate-500
+        }
+        // Spells get cyan border
+        if (card.type === 'Zauber') {
+            return '#06b6d4'; // cyan-500
+        }
+        // Works get amber border
+        if (card.type === 'Werk') {
+            return '#d97706'; // amber-600
+        }
+        return '#64748b'; // default gray
+    };
+
+    const isLegendaryPhilosopher = isMinion && card.rarity === 'Legendär';
+
     // Base classes that don't conflict with motion
     const baseClasses = `
         ${isMinion ? 'card-minion' : 'card-spell'}
+        ${isLegendaryPhilosopher ? 'legendary-glow' : ''}
         ${isSelected ? 'ring-4 ring-yellow-400 z-20' : ''}
         ${isPlayable ? 'cursor-pointer' : ''}
         relative group
@@ -226,7 +256,14 @@ export const Card: React.FC<CardProps> = ({
             <motion.div
                 className={`${baseClasses} ${isAttacking ? 'animate-attack-swing' : ''}`}
                 onContextMenu={handleContextMenu}
-                style={{ width: `${CARD_WIDTH}px`, height: `${CARD_HEIGHT}px`, backgroundColor: '#fef3c7' }}
+                style={{
+                    width: `${CARD_WIDTH}px`,
+                    height: `${CARD_HEIGHT}px`,
+                    backgroundColor: '#fef3c7',
+                    borderColor: getBorderColor(),
+                    borderWidth: '2px',
+                    borderStyle: 'solid'
+                }}
                 initial={false}
                 animate={{
                     scale: isSelected ? 1.1 : 1,
@@ -264,12 +301,12 @@ export const Card: React.FC<CardProps> = ({
                 )}
 
                 <div className={`px-2 py-1 rounded-t-xl ${card.type === 'Philosoph' && card.rarity === 'Legendär'
-                        ? 'bg-gradient-to-r from-yellow-700 via-yellow-600 to-yellow-700'
-                        : card.type === 'Zauber'
-                            ? 'bg-gradient-to-r from-cyan-700 to-blue-700'
-                            : card.type === 'Werk'
-                                ? 'bg-gradient-to-r from-amber-700 to-orange-700'
-                                : 'bg-gradient-to-r from-slate-800 to-slate-700'
+                    ? 'bg-gradient-to-r from-yellow-700 via-yellow-600 to-yellow-700'
+                    : card.type === 'Zauber'
+                        ? 'bg-gradient-to-r from-cyan-700 to-blue-700'
+                        : card.type === 'Werk'
+                            ? 'bg-gradient-to-r from-amber-700 to-orange-700'
+                            : 'bg-gradient-to-r from-slate-800 to-slate-700'
                     }`} style={{ pointerEvents: 'none' }}>
                     <h3 className="font-bold text-xs text-center text-white truncate">
                         {getDisplayName(card)}
@@ -341,14 +378,10 @@ export const Card: React.FC<CardProps> = ({
                 {/* Hover Overlay - Description Text (and effect for spells) */}
                 <div className="absolute top-8 left-0 right-0 bottom-0 bg-black/90 backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center p-3" style={{ pointerEvents: 'none' }}>
                     <div className="text-center">
-                        <p className="text-[11px] text-amber-100 italic leading-tight font-semibold">
+                        <p className={`text-[11px] italic leading-tight font-semibold ${!isMinion ? 'text-purple-300' : 'text-amber-100'
+                            }`}>
                             {card.description}
                         </p>
-                        {card.type === 'Zauber' && card.effect && (
-                            <p className="text-[10px] text-purple-300 mt-2 font-medium">
-                                {card.effect}
-                            </p>
-                        )}
                     </div>
                 </div>
 
@@ -380,8 +413,8 @@ export const Card: React.FC<CardProps> = ({
 
                 {!isMinion && (
                     <div className={`absolute bottom-0 left-0 right-0 flex justify-center items-center py-2 border-t rounded-b-xl ${card.type === 'Werk'
-                            ? 'bg-amber-900/90 border-amber-700/50'
-                            : 'bg-slate-900/90 border-slate-700/50'
+                        ? 'bg-amber-900/90 border-amber-700/50'
+                        : 'bg-slate-900/90 border-slate-700/50'
                         }`} style={{ pointerEvents: 'none' }}>
                         <div className={`flex items-center gap-2 ${card.type === 'Werk' ? 'text-amber-300' : 'text-cyan-400'
                             }`}>
