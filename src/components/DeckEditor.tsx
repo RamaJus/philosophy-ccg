@@ -306,493 +306,531 @@ export const DeckEditor: React.FC<DeckEditorProps> = ({ isOpen, onClose }) => {
     return (
         <div className="fixed inset-0 bg-black/85 flex items-center justify-center z-50 p-4">
             <div className="bg-gradient-to-br from-slate-800 to-slate-900 rounded-xl border-2 border-amber-600/40 w-full max-w-7xl max-h-[92vh] flex flex-col shadow-2xl">
-                {/* Header */}
-                <div className="flex flex-col border-b border-slate-700 bg-slate-900/50">
-                    {/* Top Row - Title and Close */}
-                    <div className="flex items-center justify-between p-4 pb-2">
-                        <div className="flex items-center gap-4">
-                            <div className="flex items-center gap-2">
-                                <Sparkles className="text-amber-400" size={24} />
-                                <h2 className="text-2xl font-bold text-amber-400">Deck Editor</h2>
-                            </div>
-                            <div className={`px-3 py-1.5 rounded-full text-sm font-bold ${isValid
-                                ? 'bg-green-900/60 text-green-300 border-2 border-green-500'
-                                : 'bg-red-900/60 text-red-300 border-2 border-red-500'
-                                }`}>
-                                {cardCount}/{DECK_SIZE}
-                            </div>
-                            {hasUnsavedChanges && activeDeck && (
-                                <span className="text-xs text-amber-400 animate-pulse">● Ungespeicherte Änderungen</span>
-                            )}
-                        </div>
-                        <button onClick={onClose} className="p-2 hover:bg-slate-700 rounded-lg transition-colors">
-                            <X size={24} className="text-gray-400" />
-                        </button>
+                {/* Simple Header - Just Title and Close */}
+                <div className="flex items-center justify-between p-4 border-b border-slate-700 bg-slate-900/50">
+                    <div className="flex items-center gap-3">
+                        <Sparkles className="text-amber-400" size={24} />
+                        <h2 className="text-2xl font-bold text-amber-400">Deck Editor</h2>
                     </div>
-
-                    {/* Second Row - Deck Management */}
-                    <div className="flex items-center gap-3 px-4 pb-3 flex-wrap">
-                        {/* Deck Selector Dropdown */}
-                        <div className="relative">
-                            <select
-                                value={activeDeckId || 'all'}
-                                onChange={(e) => selectDeck(e.target.value === 'all' ? null : e.target.value)}
-                                className="appearance-none bg-slate-700 text-white px-4 py-2 pr-10 rounded-lg border border-slate-500 focus:border-amber-500 focus:outline-none text-sm font-medium min-w-[180px]"
-                            >
-                                <option value="all">◆ Alle Karten</option>
-                                {savedDecks.map(deck => (
-                                    <option key={deck.id} value={deck.id}>
-                                        {deck.name} ({deck.cardIds.length}/{DECK_SIZE})
-                                    </option>
-                                ))}
-                            </select>
-                            <ChevronDown size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
-                        </div>
-
-                        {/* Deck Name Editor (only for custom decks) */}
-                        {activeDeck && (
-                            <div className="flex items-center gap-2">
-                                {isEditingName ? (
-                                    <>
-                                        <input
-                                            type="text"
-                                            value={editedName}
-                                            onChange={(e) => setEditedName(e.target.value)}
-                                            onKeyDown={(e) => {
-                                                if (e.key === 'Enter') {
-                                                    renameDeck(activeDeck.id, editedName);
-                                                    setIsEditingName(false);
-                                                } else if (e.key === 'Escape') {
-                                                    setIsEditingName(false);
-                                                }
-                                            }}
-                                            className="bg-slate-600 text-white px-3 py-1.5 rounded-lg border border-amber-500 focus:outline-none text-sm w-40"
-                                            autoFocus
-                                            maxLength={20}
-                                        />
-                                        <button
-                                            onClick={() => { renameDeck(activeDeck.id, editedName); setIsEditingName(false); }}
-                                            className="p-1.5 bg-green-600 hover:bg-green-500 rounded-lg"
-                                        >
-                                            <Check size={14} className="text-white" />
-                                        </button>
-                                        <button
-                                            onClick={() => setIsEditingName(false)}
-                                            className="p-1.5 bg-slate-600 hover:bg-slate-500 rounded-lg"
-                                        >
-                                            <X size={14} className="text-white" />
-                                        </button>
-                                    </>
-                                ) : (
-                                    <button
-                                        onClick={() => { setEditedName(activeDeck.name); setIsEditingName(true); }}
-                                        className="flex items-center gap-1 px-2 py-1.5 bg-slate-700/50 hover:bg-slate-600 rounded-lg text-xs text-slate-300"
-                                        title="Deck umbenennen"
-                                    >
-                                        <Edit2 size={12} />
-                                        Umbenennen
-                                    </button>
-                                )}
-                            </div>
-                        )}
-
-                        <div className="flex-1" />
-
-                        {/* Save Buttons */}
-                        {activeDeck && (
-                            <button
-                                onClick={() => saveDeck(activeDeck.id)}
-                                disabled={!hasUnsavedChanges}
-                                className="flex items-center gap-1 px-3 py-1.5 bg-green-700 hover:bg-green-600 disabled:bg-slate-700 disabled:text-gray-500 text-white rounded-lg transition-colors text-xs font-medium"
-                            >
-                                <Save size={14} />
-                                Speichern
-                            </button>
-                        )}
-
-                        {/* Save as New Deck */}
-                        <button
-                            onClick={() => saveAsNewDeck()}
-                            disabled={!canCreateNewDeck}
-                            className="flex items-center gap-1 px-3 py-1.5 bg-amber-700 hover:bg-amber-600 disabled:bg-slate-700 disabled:text-gray-500 text-white rounded-lg transition-colors text-xs font-medium"
-                            title={canCreateNewDeck ? 'Als neues Deck speichern' : `Maximum ${savedDecks.length} Decks erreicht`}
-                        >
-                            <Plus size={14} />
-                            Neues Deck ({savedDecks.length}/5)
-                        </button>
-
-                        {/* Delete Deck */}
-                        {activeDeck && (
-                            showDeleteConfirm ? (
-                                <div className="flex items-center gap-1 bg-red-900/50 px-2 py-1 rounded-lg border border-red-600">
-                                    <span className="text-xs text-red-300 mr-1">Löschen?</span>
-                                    <button
-                                        onClick={() => { deleteDeck(activeDeck.id); setShowDeleteConfirm(false); }}
-                                        className="p-1 bg-red-600 hover:bg-red-500 rounded"
-                                    >
-                                        <Check size={12} className="text-white" />
-                                    </button>
-                                    <button
-                                        onClick={() => setShowDeleteConfirm(false)}
-                                        className="p-1 bg-slate-600 hover:bg-slate-500 rounded"
-                                    >
-                                        <X size={12} className="text-white" />
-                                    </button>
-                                </div>
-                            ) : (
-                                <button
-                                    onClick={() => setShowDeleteConfirm(true)}
-                                    className="flex items-center gap-1 px-2 py-1.5 bg-red-900/50 hover:bg-red-800/60 text-red-300 rounded-lg transition-colors text-xs border border-red-700/50"
-                                >
-                                    <Trash2 size={14} />
-                                </button>
-                            )
-                        )}
-                    </div>
+                    <button onClick={onClose} className="p-2 hover:bg-slate-700 rounded-lg transition-colors">
+                        <X size={24} className="text-gray-400" />
+                    </button>
                 </div>
 
-                {/* Main Content - Two Equal Columns */}
+                {/* Main Content - Sidebar + Two Card Panels */}
                 <div className="flex flex-1 overflow-hidden">
-                    {/* Left Panel - Available Cards */}
-                    <div className="flex-1 flex flex-col border-r-2 border-slate-600">
-                        {/* Panel Header */}
-                        <div className="p-3 bg-slate-800/80 border-b border-slate-700">
-                            <div className="flex items-center justify-between mb-3">
-                                <div className="flex items-center gap-2">
-                                    <BookOpen className="text-slate-300" size={18} />
-                                    <h3 className="text-lg font-bold text-white">Verfügbare Karten</h3>
-                                    <span className="text-slate-400 text-sm">({availableCards.length})</span>
-                                </div>
-                            </div>
 
-                            {/* Filters Row 1 */}
-                            <div className="flex gap-2 flex-wrap mb-2">
-                                <FilterSelect
-                                    value={schoolFilter}
-                                    onChange={setSchoolFilter}
-                                    options={[{ value: 'all', label: 'Alle Schulen' }, ...allSchools.map(s => ({ value: s, label: s }))]}
-                                />
-                                <FilterSelect
-                                    value={typeFilter}
-                                    onChange={setTypeFilter}
-                                    options={[
-                                        { value: 'all', label: 'Alle Typen' },
-                                        { value: 'Philosoph', label: '👤 Philosoph' },
-                                        { value: 'Zauber', label: '✨ Zauber' },
-                                        { value: 'Werk', label: '📚 Werk' }
-                                    ]}
-                                />
-                                <FilterSelect
-                                    value={costFilter}
-                                    onChange={setCostFilter}
-                                    options={[
-                                        { value: 'all', label: 'Kosten' },
-                                        { value: '0-2', label: '0-2' },
-                                        { value: '3-4', label: '3-4' },
-                                        { value: '5-6', label: '5-6' },
-                                        { value: '7+', label: '7+' }
-                                    ]}
-                                />
-                                <FilterSelect
-                                    value={sortBy}
-                                    onChange={(v) => setSortBy(v as SortOption)}
-                                    options={[
-                                        { value: 'cost-asc', label: '↑ Kosten' },
-                                        { value: 'cost-desc', label: '↓ Kosten' },
-                                        { value: 'name-asc', label: 'A-Z' },
-                                        { value: 'name-desc', label: 'Z-A' },
-                                        { value: 'type', label: 'Typ' }
-                                    ]}
-                                />
-                            </div>
-
-                            {/* Search + Add All */}
-                            <div className="flex gap-2">
-                                <input
-                                    type="text"
-                                    placeholder="🔍 Suchen..."
-                                    value={searchText}
-                                    onChange={(e) => setSearchText(e.target.value)}
-                                    className="flex-1 bg-slate-700 text-white px-3 py-2 rounded-lg border border-slate-500 focus:border-amber-500 focus:outline-none text-sm"
-                                />
-                                {availableCards.length > 0 && (
-                                    <button
-                                        onClick={handleAddAllFiltered}
-                                        className="flex items-center gap-1 px-3 py-2 bg-green-700 hover:bg-green-600 text-white rounded-lg transition-colors font-medium text-sm"
-                                    >
-                                        <Plus size={16} />
-                                        Alle ({availableCards.length})
-                                    </button>
-                                )}
-                            </div>
+                    {/* LEFT SIDEBAR - Deck Management */}
+                    <div className="w-56 flex flex-col border-r-2 border-slate-600 bg-slate-900/60">
+                        {/* Sidebar Header */}
+                        <div className="p-3 border-b border-slate-700">
+                            <h3 className="text-sm font-bold text-slate-300 uppercase tracking-wider">Meine Decks</h3>
                         </div>
 
-                        {/* Available Cards List */}
-                        <div className="flex-1 overflow-y-auto p-3 space-y-1">
-                            {availableCards.map(card => (
-                                <CardRow key={card.id} card={card} isInDeck={false} onClick={() => addCard(card.id)} />
-                            ))}
-                        </div>
-                    </div>
-
-                    {/* Right Panel - Your Deck */}
-                    <div className="flex-1 flex flex-col bg-green-950/20">
-                        {/* Panel Header */}
-                        <div className="p-3 bg-green-900/30 border-b border-green-700/40">
-                            <div className="flex items-center justify-between mb-3">
-                                <div className="flex items-center gap-2">
-                                    <Sparkles className={isValid ? 'text-green-400' : 'text-red-400'} size={18} />
-                                    <h3 className="text-lg font-bold text-green-100">Dein Deck</h3>
-                                    <span className={`text-sm ${isValid ? 'text-green-400' : 'text-red-400'}`}>
-                                        ({cardCount}/{DECK_SIZE})
-                                    </span>
-                                </div>
-                            </div>
-
-                            {/* Deck Filters */}
-                            <div className="flex gap-2 flex-wrap mb-2">
-                                <FilterSelect
-                                    value={deckSchoolFilter}
-                                    onChange={setDeckSchoolFilter}
-                                    options={[{ value: 'all', label: 'Alle Schulen' }, ...allSchools.map(s => ({ value: s, label: s }))]}
-                                />
-                                <FilterSelect
-                                    value={deckTypeFilter}
-                                    onChange={setDeckTypeFilter}
-                                    options={[
-                                        { value: 'all', label: 'Alle Typen' },
-                                        { value: 'Philosoph', label: '👤 Philosoph' },
-                                        { value: 'Zauber', label: '✨ Zauber' },
-                                        { value: 'Werk', label: '📚 Werk' }
-                                    ]}
-                                />
-                                <FilterSelect
-                                    value={deckSortBy}
-                                    onChange={(v) => setDeckSortBy(v as SortOption)}
-                                    options={[
-                                        { value: 'cost-asc', label: '↑ Kosten' },
-                                        { value: 'cost-desc', label: '↓ Kosten' },
-                                        { value: 'name-asc', label: 'A-Z' },
-                                        { value: 'name-desc', label: 'Z-A' },
-                                        { value: 'type', label: 'Typ' }
-                                    ]}
-                                />
-                            </div>
-
-                            {/* Deck Actions */}
-                            <div className="flex gap-2 flex-wrap">
-                                <button
-                                    onClick={autoFill}
-                                    disabled={cardCount >= DECK_SIZE}
-                                    className="flex items-center gap-1 px-2 py-1.5 bg-purple-700 hover:bg-purple-600 disabled:bg-slate-700 disabled:text-gray-500 text-white rounded-lg transition-colors text-xs font-medium"
-                                >
-                                    <Wand2 size={14} />
-                                    Auto
-                                </button>
-                                <button
-                                    onClick={clearDeck}
-                                    className="flex items-center gap-1 px-2 py-1.5 bg-red-700 hover:bg-red-600 text-white rounded-lg transition-colors text-xs"
-                                >
-                                    <Trash2 size={14} />
-                                </button>
-                                <button
-                                    onClick={handleExport}
-                                    className="flex items-center gap-1 px-2 py-1.5 bg-slate-700 hover:bg-slate-600 text-white rounded-lg transition-colors text-xs"
-                                >
-                                    <Download size={14} />
-                                    Deck exportieren
-                                </button>
-                                <button
-                                    onClick={handleImport}
-                                    className="flex items-center gap-1 px-2 py-1.5 bg-slate-700 hover:bg-slate-600 text-white rounded-lg transition-colors text-xs"
-                                >
-                                    <Upload size={14} />
-                                    Deck importieren
-                                </button>
-                                <button
-                                    onClick={resetToDefault}
-                                    className="px-2 py-1.5 bg-slate-800 hover:bg-slate-700 text-gray-300 rounded-lg transition-colors text-xs border border-slate-600"
-                                >
-                                    Reset
-                                </button>
-                            </div>
-
-                            {/* Statistics Toggle Button */}
+                        {/* Deck List */}
+                        <div className="flex-1 overflow-y-auto p-2 space-y-1">
+                            {/* "All Cards" Option */}
                             <button
-                                onClick={() => setShowStats(!showStats)}
-                                className="w-full flex items-center justify-between px-3 py-2 bg-slate-700/50 hover:bg-slate-600/50 rounded-lg transition-colors mt-2"
+                                onClick={() => selectDeck(null)}
+                                className={`w-full text-left p-2 rounded-lg transition-all ${!activeDeckId
+                                    ? 'bg-amber-600/30 border border-amber-500 text-amber-200'
+                                    : 'bg-slate-800/50 hover:bg-slate-700/50 text-slate-300 border border-transparent'
+                                    }`}
                             >
                                 <div className="flex items-center gap-2">
-                                    <BarChart3 size={16} className="text-amber-400" />
-                                    <span className="text-sm font-medium text-white">Deck-Statistiken</span>
+                                    <span className="text-lg">◆</span>
+                                    <div className="flex-1 min-w-0">
+                                        <div className="font-medium text-sm truncate">Alle Karten</div>
+                                        <div className="text-xs text-slate-500">Standard</div>
+                                    </div>
                                 </div>
-                                {showStats ? <ChevronUp size={16} className="text-gray-400" /> : <ChevronDown size={16} className="text-gray-400" />}
                             </button>
 
-                            {/* Collapsible Statistics Panel */}
-                            {showStats && cardCount > 0 && (() => {
-                                // Calculate statistics from deck cards
-                                const allDeckCards = deck.cardIds.map(id => cards.find(c => c.id === id)).filter((c): c is Card => c !== undefined);
-
-                                // Type counts
-                                const philosophCount = allDeckCards.filter(c => c.type === 'Philosoph').length;
-                                const spellCount = allDeckCards.filter(c => c.type === 'Zauber').length;
-                                const workCount = allDeckCards.filter(c => c.type === 'Werk').length;
-
-                                // School distribution
-                                const schoolCounts: Record<string, number> = {};
-                                allDeckCards.forEach(c => {
-                                    c.school?.forEach(s => {
-                                        if (VALID_SCHOOLS.includes(s)) {
-                                            schoolCounts[s] = (schoolCounts[s] || 0) + 1;
-                                        }
-                                    });
-                                });
-                                const sortedSchools = Object.entries(schoolCounts).sort((a, b) => b[1] - a[1]);
-
-                                // Mana curve (how many cards at each cost)
-                                const manaCurve: Record<number, number> = {};
-                                allDeckCards.forEach(c => {
-                                    const cost = Math.min(c.cost, 10); // Cap display at 10+
-                                    manaCurve[cost] = (manaCurve[cost] || 0) + 1;
-                                });
-                                const maxManaCount = Math.max(...Object.values(manaCurve), 1);
-
-                                // Average cost
-                                const avgCost = allDeckCards.reduce((sum, c) => sum + c.cost, 0) / allDeckCards.length;
-
-                                // Rarity distribution (only 2 categories now)
-                                const rarityCount = {
-                                    'Gewöhnlich': allDeckCards.filter(c => c.rarity === 'Gewöhnlich').length,
-                                    'Legendär': allDeckCards.filter(c => c.rarity === 'Legendär').length,
-                                };
-
-                                // Get max school count for bar chart scaling
-                                const maxSchoolCount = sortedSchools.length > 0 ? Math.max(...sortedSchools.map(([, count]) => count)) : 1;
-
+                            {/* Saved Decks */}
+                            {savedDecks.map(deckItem => {
+                                const isActive = activeDeckId === deckItem.id;
+                                const deckValid = deckItem.cardIds.length === DECK_SIZE;
                                 return (
-                                    <div className="mt-2 bg-slate-800/60 rounded-lg p-3 space-y-4 border border-slate-600/50 max-h-80 overflow-y-auto">
-                                        {/* Card Type Distribution */}
-                                        <div>
-                                            <h4 className="text-xs text-gray-400 uppercase tracking-wider mb-2">Karten nach Typ</h4>
-                                            <div className="flex gap-3">
-                                                <div className="flex items-center gap-1">
-                                                    <span className="text-amber-400">👤</span>
-                                                    <span className="text-white font-bold">{philosophCount}</span>
-                                                    <span className="text-gray-400 text-xs">Philosophen</span>
-                                                </div>
-                                                <div className="flex items-center gap-1">
-                                                    <span className="text-purple-400">✨</span>
-                                                    <span className="text-white font-bold">{spellCount}</span>
-                                                    <span className="text-gray-400 text-xs">Zauber</span>
-                                                </div>
-                                                <div className="flex items-center gap-1">
-                                                    <span className="text-blue-400">📚</span>
-                                                    <span className="text-white font-bold">{workCount}</span>
-                                                    <span className="text-gray-400 text-xs">Werke</span>
+                                    <button
+                                        key={deckItem.id}
+                                        onClick={() => selectDeck(deckItem.id)}
+                                        className={`w-full text-left p-2 rounded-lg transition-all ${isActive
+                                            ? 'bg-green-900/40 border border-green-600 text-green-200'
+                                            : 'bg-slate-800/50 hover:bg-slate-700/50 text-slate-300 border border-transparent'
+                                            }`}
+                                    >
+                                        <div className="flex items-center gap-2">
+                                            <span className={`text-lg ${deckValid ? 'text-green-400' : 'text-amber-400'}`}>
+                                                {deckValid ? '✓' : '○'}
+                                            </span>
+                                            <div className="flex-1 min-w-0">
+                                                <div className="font-medium text-sm truncate">{deckItem.name}</div>
+                                                <div className={`text-xs ${deckValid ? 'text-green-500' : 'text-amber-500'}`}>
+                                                    {deckItem.cardIds.length}/{DECK_SIZE} Karten
                                                 </div>
                                             </div>
                                         </div>
+                                    </button>
+                                );
+                            })}
+                        </div>
 
-                                        {/* Rarity Distribution */}
-                                        <div>
-                                            <h4 className="text-xs text-gray-400 uppercase tracking-wider mb-2">Seltenheit</h4>
-                                            <div className="flex gap-3">
-                                                <div className="flex items-center gap-1">
-                                                    <span className="text-gray-300 font-bold">{rarityCount['Gewöhnlich']}</span>
-                                                    <span className="text-gray-400 text-xs">Gewöhnlich</span>
+                        {/* Create New Deck Button */}
+                        <div className="p-2 border-t border-slate-700">
+                            <button
+                                onClick={() => saveAsNewDeck()}
+                                disabled={!canCreateNewDeck}
+                                className="w-full flex items-center justify-center gap-2 px-3 py-2 bg-amber-700 hover:bg-amber-600 disabled:bg-slate-700 disabled:text-slate-500 text-white rounded-lg transition-colors text-sm font-medium"
+                                title={canCreateNewDeck ? 'Neues Deck erstellen' : `Maximum ${savedDecks.length} Decks erreicht`}
+                            >
+                                <Plus size={16} />
+                                Neues Deck ({savedDecks.length}/5)
+                            </button>
+                        </div>
+
+                        {/* Active Deck Actions (only when a custom deck is selected) */}
+                        {activeDeck && (
+                            <div className="p-2 border-t border-slate-700 space-y-2">
+                                <div className="text-xs text-slate-400 uppercase tracking-wider px-1">Aktives Deck</div>
+
+                                {/* Deck Name Display/Edit */}
+                                <div className="bg-slate-800/60 rounded-lg p-2">
+                                    {isEditingName ? (
+                                        <div className="flex gap-1">
+                                            <input
+                                                type="text"
+                                                value={editedName}
+                                                onChange={(e) => setEditedName(e.target.value)}
+                                                onKeyDown={(e) => {
+                                                    if (e.key === 'Enter') {
+                                                        renameDeck(activeDeck.id, editedName);
+                                                        setIsEditingName(false);
+                                                    } else if (e.key === 'Escape') {
+                                                        setIsEditingName(false);
+                                                    }
+                                                }}
+                                                className="flex-1 bg-slate-700 text-white px-2 py-1 rounded border border-amber-500 focus:outline-none text-sm min-w-0"
+                                                autoFocus
+                                                maxLength={20}
+                                            />
+                                            <button
+                                                onClick={() => { renameDeck(activeDeck.id, editedName); setIsEditingName(false); }}
+                                                className="p-1 bg-green-600 hover:bg-green-500 rounded"
+                                            >
+                                                <Check size={14} className="text-white" />
+                                            </button>
+                                            <button
+                                                onClick={() => setIsEditingName(false)}
+                                                className="p-1 bg-slate-600 hover:bg-slate-500 rounded"
+                                            >
+                                                <X size={14} className="text-white" />
+                                            </button>
+                                        </div>
+                                    ) : (
+                                        <div
+                                            onClick={() => { setEditedName(activeDeck.name); setIsEditingName(true); }}
+                                            className="flex items-center gap-2 cursor-pointer hover:bg-slate-700/50 rounded px-1 py-0.5 -mx-1"
+                                            title="Klicken zum Umbenennen"
+                                        >
+                                            <span className="font-medium text-sm text-white truncate flex-1">{activeDeck.name}</span>
+                                            <Edit2 size={12} className="text-slate-400 flex-shrink-0" />
+                                        </div>
+                                    )}
+
+                                    {/* Deck Card Count */}
+                                    <div className={`text-xs mt-1 ${isValid ? 'text-green-400' : 'text-amber-400'}`}>
+                                        {cardCount}/{DECK_SIZE} Karten {isValid && '✓'}
+                                        {hasUnsavedChanges && <span className="text-amber-400 ml-1">●</span>}
+                                    </div>
+                                </div>
+
+                                {/* Action Buttons */}
+                                <div className="flex gap-1">
+                                    <button
+                                        onClick={() => saveDeck(activeDeck.id)}
+                                        disabled={!hasUnsavedChanges}
+                                        className="flex-1 flex items-center justify-center gap-1 px-2 py-1.5 bg-green-700 hover:bg-green-600 disabled:bg-slate-700 disabled:text-slate-500 text-white rounded-lg transition-colors text-xs font-medium"
+                                        title="Änderungen speichern"
+                                    >
+                                        <Save size={12} />
+                                        Speichern
+                                    </button>
+
+                                    {showDeleteConfirm ? (
+                                        <div className="flex items-center gap-1 bg-red-900/50 px-2 py-1 rounded-lg border border-red-600">
+                                            <button
+                                                onClick={() => { deleteDeck(activeDeck.id); setShowDeleteConfirm(false); }}
+                                                className="p-1 bg-red-600 hover:bg-red-500 rounded"
+                                                title="Bestätigen"
+                                            >
+                                                <Check size={12} className="text-white" />
+                                            </button>
+                                            <button
+                                                onClick={() => setShowDeleteConfirm(false)}
+                                                className="p-1 bg-slate-600 hover:bg-slate-500 rounded"
+                                                title="Abbrechen"
+                                            >
+                                                <X size={12} className="text-white" />
+                                            </button>
+                                        </div>
+                                    ) : (
+                                        <button
+                                            onClick={() => setShowDeleteConfirm(true)}
+                                            className="p-1.5 bg-red-900/50 hover:bg-red-800/60 text-red-300 rounded-lg transition-colors border border-red-700/50"
+                                            title="Deck löschen"
+                                        >
+                                            <Trash2 size={14} />
+                                        </button>
+                                    )}
+                                </div>
+                            </div>
+                        )}
+                    </div>
+
+                    {/* MAIN CONTENT - Two Card Panels */}
+                    <div className="flex flex-1 overflow-hidden">
+                        {/* Left Panel - Available Cards */}
+                        <div className="flex-1 flex flex-col border-r-2 border-slate-600">
+                            {/* Panel Header */}
+                            <div className="p-3 bg-slate-800/80 border-b border-slate-700">
+                                <div className="flex items-center justify-between mb-3">
+                                    <div className="flex items-center gap-2">
+                                        <BookOpen className="text-slate-300" size={18} />
+                                        <h3 className="text-lg font-bold text-white">Verfügbare Karten</h3>
+                                        <span className="text-slate-400 text-sm">({availableCards.length})</span>
+                                    </div>
+                                </div>
+
+                                {/* Filters Row 1 */}
+                                <div className="flex gap-2 flex-wrap mb-2">
+                                    <FilterSelect
+                                        value={schoolFilter}
+                                        onChange={setSchoolFilter}
+                                        options={[{ value: 'all', label: 'Alle Schulen' }, ...allSchools.map(s => ({ value: s, label: s }))]}
+                                    />
+                                    <FilterSelect
+                                        value={typeFilter}
+                                        onChange={setTypeFilter}
+                                        options={[
+                                            { value: 'all', label: 'Alle Typen' },
+                                            { value: 'Philosoph', label: '👤 Philosoph' },
+                                            { value: 'Zauber', label: '✨ Zauber' },
+                                            { value: 'Werk', label: '📚 Werk' }
+                                        ]}
+                                    />
+                                    <FilterSelect
+                                        value={costFilter}
+                                        onChange={setCostFilter}
+                                        options={[
+                                            { value: 'all', label: 'Kosten' },
+                                            { value: '0-2', label: '0-2' },
+                                            { value: '3-4', label: '3-4' },
+                                            { value: '5-6', label: '5-6' },
+                                            { value: '7+', label: '7+' }
+                                        ]}
+                                    />
+                                    <FilterSelect
+                                        value={sortBy}
+                                        onChange={(v) => setSortBy(v as SortOption)}
+                                        options={[
+                                            { value: 'cost-asc', label: '↑ Kosten' },
+                                            { value: 'cost-desc', label: '↓ Kosten' },
+                                            { value: 'name-asc', label: 'A-Z' },
+                                            { value: 'name-desc', label: 'Z-A' },
+                                            { value: 'type', label: 'Typ' }
+                                        ]}
+                                    />
+                                </div>
+
+                                {/* Search + Add All */}
+                                <div className="flex gap-2">
+                                    <input
+                                        type="text"
+                                        placeholder="🔍 Suchen..."
+                                        value={searchText}
+                                        onChange={(e) => setSearchText(e.target.value)}
+                                        className="flex-1 bg-slate-700 text-white px-3 py-2 rounded-lg border border-slate-500 focus:border-amber-500 focus:outline-none text-sm"
+                                    />
+                                    {availableCards.length > 0 && (
+                                        <button
+                                            onClick={handleAddAllFiltered}
+                                            className="flex items-center gap-1 px-3 py-2 bg-green-700 hover:bg-green-600 text-white rounded-lg transition-colors font-medium text-sm"
+                                        >
+                                            <Plus size={16} />
+                                            Alle ({availableCards.length})
+                                        </button>
+                                    )}
+                                </div>
+                            </div>
+
+                            {/* Available Cards List */}
+                            <div className="flex-1 overflow-y-auto p-3 space-y-1">
+                                {availableCards.map(card => (
+                                    <CardRow key={card.id} card={card} isInDeck={false} onClick={() => addCard(card.id)} />
+                                ))}
+                            </div>
+                        </div>
+
+                        {/* Right Panel - Your Deck */}
+                        <div className="flex-1 flex flex-col bg-green-950/20">
+                            {/* Panel Header */}
+                            <div className="p-3 bg-green-900/30 border-b border-green-700/40">
+                                <div className="flex items-center justify-between mb-3">
+                                    <div className="flex items-center gap-2">
+                                        <Sparkles className={isValid ? 'text-green-400' : 'text-red-400'} size={18} />
+                                        <h3 className="text-lg font-bold text-green-100">Dein Deck</h3>
+                                        <span className={`text-sm ${isValid ? 'text-green-400' : 'text-red-400'}`}>
+                                            ({cardCount}/{DECK_SIZE})
+                                        </span>
+                                    </div>
+                                </div>
+
+                                {/* Deck Filters */}
+                                <div className="flex gap-2 flex-wrap mb-2">
+                                    <FilterSelect
+                                        value={deckSchoolFilter}
+                                        onChange={setDeckSchoolFilter}
+                                        options={[{ value: 'all', label: 'Alle Schulen' }, ...allSchools.map(s => ({ value: s, label: s }))]}
+                                    />
+                                    <FilterSelect
+                                        value={deckTypeFilter}
+                                        onChange={setDeckTypeFilter}
+                                        options={[
+                                            { value: 'all', label: 'Alle Typen' },
+                                            { value: 'Philosoph', label: '👤 Philosoph' },
+                                            { value: 'Zauber', label: '✨ Zauber' },
+                                            { value: 'Werk', label: '📚 Werk' }
+                                        ]}
+                                    />
+                                    <FilterSelect
+                                        value={deckSortBy}
+                                        onChange={(v) => setDeckSortBy(v as SortOption)}
+                                        options={[
+                                            { value: 'cost-asc', label: '↑ Kosten' },
+                                            { value: 'cost-desc', label: '↓ Kosten' },
+                                            { value: 'name-asc', label: 'A-Z' },
+                                            { value: 'name-desc', label: 'Z-A' },
+                                            { value: 'type', label: 'Typ' }
+                                        ]}
+                                    />
+                                </div>
+
+                                {/* Deck Actions */}
+                                <div className="flex gap-2 flex-wrap">
+                                    <button
+                                        onClick={autoFill}
+                                        disabled={cardCount >= DECK_SIZE}
+                                        className="flex items-center gap-1 px-2 py-1.5 bg-purple-700 hover:bg-purple-600 disabled:bg-slate-700 disabled:text-gray-500 text-white rounded-lg transition-colors text-xs font-medium"
+                                    >
+                                        <Wand2 size={14} />
+                                        Auto
+                                    </button>
+                                    <button
+                                        onClick={clearDeck}
+                                        className="flex items-center gap-1 px-2 py-1.5 bg-red-700 hover:bg-red-600 text-white rounded-lg transition-colors text-xs"
+                                    >
+                                        <Trash2 size={14} />
+                                    </button>
+                                    <button
+                                        onClick={handleExport}
+                                        className="flex items-center gap-1 px-2 py-1.5 bg-slate-700 hover:bg-slate-600 text-white rounded-lg transition-colors text-xs"
+                                    >
+                                        <Download size={14} />
+                                        Deck exportieren
+                                    </button>
+                                    <button
+                                        onClick={handleImport}
+                                        className="flex items-center gap-1 px-2 py-1.5 bg-slate-700 hover:bg-slate-600 text-white rounded-lg transition-colors text-xs"
+                                    >
+                                        <Upload size={14} />
+                                        Deck importieren
+                                    </button>
+                                    <button
+                                        onClick={resetToDefault}
+                                        className="px-2 py-1.5 bg-slate-800 hover:bg-slate-700 text-gray-300 rounded-lg transition-colors text-xs border border-slate-600"
+                                    >
+                                        Reset
+                                    </button>
+                                </div>
+
+                                {/* Statistics Toggle Button */}
+                                <button
+                                    onClick={() => setShowStats(!showStats)}
+                                    className="w-full flex items-center justify-between px-3 py-2 bg-slate-700/50 hover:bg-slate-600/50 rounded-lg transition-colors mt-2"
+                                >
+                                    <div className="flex items-center gap-2">
+                                        <BarChart3 size={16} className="text-amber-400" />
+                                        <span className="text-sm font-medium text-white">Deck-Statistiken</span>
+                                    </div>
+                                    {showStats ? <ChevronUp size={16} className="text-gray-400" /> : <ChevronDown size={16} className="text-gray-400" />}
+                                </button>
+
+                                {/* Collapsible Statistics Panel */}
+                                {showStats && cardCount > 0 && (() => {
+                                    // Calculate statistics from deck cards
+                                    const allDeckCards = deck.cardIds.map(id => cards.find(c => c.id === id)).filter((c): c is Card => c !== undefined);
+
+                                    // Type counts
+                                    const philosophCount = allDeckCards.filter(c => c.type === 'Philosoph').length;
+                                    const spellCount = allDeckCards.filter(c => c.type === 'Zauber').length;
+                                    const workCount = allDeckCards.filter(c => c.type === 'Werk').length;
+
+                                    // School distribution
+                                    const schoolCounts: Record<string, number> = {};
+                                    allDeckCards.forEach(c => {
+                                        c.school?.forEach(s => {
+                                            if (VALID_SCHOOLS.includes(s)) {
+                                                schoolCounts[s] = (schoolCounts[s] || 0) + 1;
+                                            }
+                                        });
+                                    });
+                                    const sortedSchools = Object.entries(schoolCounts).sort((a, b) => b[1] - a[1]);
+
+                                    // Mana curve (how many cards at each cost)
+                                    const manaCurve: Record<number, number> = {};
+                                    allDeckCards.forEach(c => {
+                                        const cost = Math.min(c.cost, 10); // Cap display at 10+
+                                        manaCurve[cost] = (manaCurve[cost] || 0) + 1;
+                                    });
+                                    const maxManaCount = Math.max(...Object.values(manaCurve), 1);
+
+                                    // Average cost
+                                    const avgCost = allDeckCards.reduce((sum, c) => sum + c.cost, 0) / allDeckCards.length;
+
+                                    // Rarity distribution (only 2 categories now)
+                                    const rarityCount = {
+                                        'Gewöhnlich': allDeckCards.filter(c => c.rarity === 'Gewöhnlich').length,
+                                        'Legendär': allDeckCards.filter(c => c.rarity === 'Legendär').length,
+                                    };
+
+                                    // Get max school count for bar chart scaling
+                                    const maxSchoolCount = sortedSchools.length > 0 ? Math.max(...sortedSchools.map(([, count]) => count)) : 1;
+
+                                    return (
+                                        <div className="mt-2 bg-slate-800/60 rounded-lg p-3 space-y-4 border border-slate-600/50 max-h-80 overflow-y-auto">
+                                            {/* Card Type Distribution */}
+                                            <div>
+                                                <h4 className="text-xs text-gray-400 uppercase tracking-wider mb-2">Karten nach Typ</h4>
+                                                <div className="flex gap-3">
+                                                    <div className="flex items-center gap-1">
+                                                        <span className="text-amber-400">👤</span>
+                                                        <span className="text-white font-bold">{philosophCount}</span>
+                                                        <span className="text-gray-400 text-xs">Philosophen</span>
+                                                    </div>
+                                                    <div className="flex items-center gap-1">
+                                                        <span className="text-purple-400">✨</span>
+                                                        <span className="text-white font-bold">{spellCount}</span>
+                                                        <span className="text-gray-400 text-xs">Zauber</span>
+                                                    </div>
+                                                    <div className="flex items-center gap-1">
+                                                        <span className="text-blue-400">📚</span>
+                                                        <span className="text-white font-bold">{workCount}</span>
+                                                        <span className="text-gray-400 text-xs">Werke</span>
+                                                    </div>
                                                 </div>
-                                                <div className="flex items-center gap-1">
-                                                    <span className="text-yellow-400 font-bold">{rarityCount['Legendär']}</span>
-                                                    <span className="text-gray-400 text-xs">Legendär</span>
+                                            </div>
+
+                                            {/* Rarity Distribution */}
+                                            <div>
+                                                <h4 className="text-xs text-gray-400 uppercase tracking-wider mb-2">Seltenheit</h4>
+                                                <div className="flex gap-3">
+                                                    <div className="flex items-center gap-1">
+                                                        <span className="text-gray-300 font-bold">{rarityCount['Gewöhnlich']}</span>
+                                                        <span className="text-gray-400 text-xs">Gewöhnlich</span>
+                                                    </div>
+                                                    <div className="flex items-center gap-1">
+                                                        <span className="text-yellow-400 font-bold">{rarityCount['Legendär']}</span>
+                                                        <span className="text-gray-400 text-xs">Legendär</span>
+                                                    </div>
                                                 </div>
                                             </div>
-                                        </div>
 
-                                        {/* Average Cost */}
-                                        <div>
-                                            <h4 className="text-xs text-gray-400 uppercase tracking-wider mb-1">Durchschnittliche Kosten</h4>
-                                            <div className="flex items-center gap-2">
-                                                <span className="text-2xl font-bold text-blue-400">{avgCost.toFixed(1)}</span>
-                                                <span className="text-gray-400 text-xs">Dialektik</span>
+                                            {/* Average Cost */}
+                                            <div>
+                                                <h4 className="text-xs text-gray-400 uppercase tracking-wider mb-1">Durchschnittliche Kosten</h4>
+                                                <div className="flex items-center gap-2">
+                                                    <span className="text-2xl font-bold text-blue-400">{avgCost.toFixed(1)}</span>
+                                                    <span className="text-gray-400 text-xs">Dialektik</span>
+                                                </div>
                                             </div>
-                                        </div>
 
-                                        {/* Mana Curve - Fixed with explicit pixel heights */}
-                                        <div>
-                                            <h4 className="text-xs text-gray-400 uppercase tracking-wider mb-2">Dialektik-Kurve</h4>
-                                            <div className="flex items-end gap-1" style={{ height: '64px' }}>
-                                                {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(cost => {
-                                                    const count = manaCurve[cost] || 0;
-                                                    const heightPx = count > 0 ? Math.max((count / maxManaCount) * 48, 4) : 0;
-                                                    return (
-                                                        <div key={cost} className="flex flex-col items-center flex-1">
-                                                            <div
-                                                                className="w-full bg-blue-500 rounded-t"
-                                                                style={{ height: `${heightPx}px`, minWidth: '8px' }}
-                                                                title={`${count} Karte(n) mit Kosten ${cost}${cost === 10 ? '+' : ''}`}
-                                                            />
-                                                            <span className="text-[10px] text-gray-500 mt-1">{cost}{cost === 10 ? '+' : ''}</span>
-                                                        </div>
-                                                    );
-                                                })}
-                                            </div>
-                                        </div>
-
-                                        {/* School Distribution - Bar Chart */}
-                                        <div>
-                                            <h4 className="text-xs text-gray-400 uppercase tracking-wider mb-2">Schulen</h4>
-                                            {sortedSchools.length > 0 ? (
-                                                <div className="space-y-1">
-                                                    {sortedSchools.map(([school, count]) => {
-                                                        const widthPercent = (count / maxSchoolCount) * 100;
+                                            {/* Mana Curve - Fixed with explicit pixel heights */}
+                                            <div>
+                                                <h4 className="text-xs text-gray-400 uppercase tracking-wider mb-2">Dialektik-Kurve</h4>
+                                                <div className="flex items-end gap-1" style={{ height: '64px' }}>
+                                                    {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(cost => {
+                                                        const count = manaCurve[cost] || 0;
+                                                        const heightPx = count > 0 ? Math.max((count / maxManaCount) * 48, 4) : 0;
                                                         return (
-                                                            <div key={school} className="flex items-center gap-2">
-                                                                <span className="text-xs text-gray-300 w-24 truncate">{school}</span>
-                                                                <div className="flex-1 bg-slate-700 rounded h-4 overflow-hidden">
-                                                                    <div
-                                                                        className={`h-full ${getSchoolColor(school)} transition-all`}
-                                                                        style={{ width: `${widthPercent}%` }}
-                                                                    />
-                                                                </div>
-                                                                <span className="text-xs text-white font-bold w-6 text-right">{count}</span>
+                                                            <div key={cost} className="flex flex-col items-center flex-1">
+                                                                <div
+                                                                    className="w-full bg-blue-500 rounded-t"
+                                                                    style={{ height: `${heightPx}px`, minWidth: '8px' }}
+                                                                    title={`${count} Karte(n) mit Kosten ${cost}${cost === 10 ? '+' : ''}`}
+                                                                />
+                                                                <span className="text-[10px] text-gray-500 mt-1">{cost}{cost === 10 ? '+' : ''}</span>
                                                             </div>
                                                         );
                                                     })}
                                                 </div>
-                                            ) : (
-                                                <span className="text-gray-500 text-xs italic">Keine Schulen im Deck</span>
-                                            )}
-                                        </div>
-                                    </div>
-                                );
-                            })()}
-                        </div>
+                                            </div>
 
-                        {/* Deck Cards List */}
-                        <div className="flex-1 overflow-y-auto p-3 space-y-1">
-                            {deckCards.length === 0 ? (
-                                <div className="text-center py-8 text-slate-500">
-                                    <BookOpen size={36} className="mx-auto mb-3 opacity-50" />
-                                    <p className="text-base">Deck ist leer</p>
-                                    <p className="text-xs">Klicke links auf Karten</p>
+                                            {/* School Distribution - Bar Chart */}
+                                            <div>
+                                                <h4 className="text-xs text-gray-400 uppercase tracking-wider mb-2">Schulen</h4>
+                                                {sortedSchools.length > 0 ? (
+                                                    <div className="space-y-1">
+                                                        {sortedSchools.map(([school, count]) => {
+                                                            const widthPercent = (count / maxSchoolCount) * 100;
+                                                            return (
+                                                                <div key={school} className="flex items-center gap-2">
+                                                                    <span className="text-xs text-gray-300 w-24 truncate">{school}</span>
+                                                                    <div className="flex-1 bg-slate-700 rounded h-4 overflow-hidden">
+                                                                        <div
+                                                                            className={`h-full ${getSchoolColor(school)} transition-all`}
+                                                                            style={{ width: `${widthPercent}%` }}
+                                                                        />
+                                                                    </div>
+                                                                    <span className="text-xs text-white font-bold w-6 text-right">{count}</span>
+                                                                </div>
+                                                            );
+                                                        })}
+                                                    </div>
+                                                ) : (
+                                                    <span className="text-gray-500 text-xs italic">Keine Schulen im Deck</span>
+                                                )}
+                                            </div>
+                                        </div>
+                                    );
+                                })()}
+                            </div>
+
+                            {/* Deck Cards List */}
+                            <div className="flex-1 overflow-y-auto p-3 space-y-1">
+                                {deckCards.length === 0 ? (
+                                    <div className="text-center py-8 text-slate-500">
+                                        <BookOpen size={36} className="mx-auto mb-3 opacity-50" />
+                                        <p className="text-base">Deck ist leer</p>
+                                        <p className="text-xs">Klicke links auf Karten</p>
+                                    </div>
+                                ) : (
+                                    deckCards.map(card => (
+                                        <CardRow key={card.id} card={card} isInDeck={true} onClick={() => removeCard(card.id)} />
+                                    ))
+                                )}
+                            </div>
+
+                            {/* Validation Message */}
+                            {isCustom && !isValid && (
+                                <div className="p-3 border-t-2 border-red-600 bg-red-900/30">
+                                    <p className="text-red-300 text-sm text-center font-medium">
+                                        ⚠️ Noch {DECK_SIZE - cardCount} Karten benötigt
+                                    </p>
                                 </div>
-                            ) : (
-                                deckCards.map(card => (
-                                    <CardRow key={card.id} card={card} isInDeck={true} onClick={() => removeCard(card.id)} />
-                                ))
                             )}
                         </div>
-
-                        {/* Validation Message */}
-                        {isCustom && !isValid && (
-                            <div className="p-3 border-t-2 border-red-600 bg-red-900/30">
-                                <p className="text-red-300 text-sm text-center font-medium">
-                                    ⚠️ Noch {DECK_SIZE - cardCount} Karten benötigt
-                                </p>
-                            </div>
-                        )}
                     </div>
+                    {/* End MAIN CONTENT - Two Card Panels */}
                 </div>
             </div>
 
