@@ -232,7 +232,7 @@ export const cardDatabase: Card[] = [
     },
     {
         id: 'diogenes',
-        name: 'Diogenes von Sinope',
+        name: 'Diogenes',
         type: 'Philosoph',
         cost: 1,
         attack: 2,
@@ -251,7 +251,7 @@ export const cardDatabase: Card[] = [
     },
     {
         id: 'pyrrhon',
-        name: 'Pyrrhon von Elis',
+        name: 'Pyrrhon',
         type: 'Philosoph',
         cost: 1,
         attack: 1,
@@ -736,7 +736,7 @@ export const cardDatabase: Card[] = [
 
     {
         id: 'thales',
-        name: 'Thales von Milet',
+        name: 'Thales',
         type: 'Philosoph',
         cost: 4,
         attack: 5,

@@ -1252,11 +1252,11 @@ export const GameArea: React.FC<GameAreaProps> = ({ mode, isDebugMode, customDec
                         </div>
                     </div>
 
-                    {/* Right Side: Player Stats & Deck (2 cols) */}
+                    {/* Right Side: Player Stats & Deck (2 cols) - Mirrored from opponent */}
                     <div className="col-span-2 flex flex-col gap-2 h-full overflow-y-auto">
-                        <PlayerStats player={viewPlayer} />
-                        <div className="ml-auto"><WorkSlot card={viewPlayer.activeWork} /></div>
                         <div className="ml-auto"><Graveyard cards={viewPlayer.graveyard} title="Dein Friedhof" /></div>
+                        <div className="ml-auto"><WorkSlot card={viewPlayer.activeWork} /></div>
+                        <PlayerStats player={viewPlayer} />
                     </div>
                 </div>
 
