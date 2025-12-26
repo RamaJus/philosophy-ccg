@@ -228,10 +228,10 @@ export const DeckEditor: React.FC<DeckEditorProps> = ({ isOpen, onClose }) => {
 
         return (
             <div
-                className={`flex items - center gap - 2 p - 2.5 rounded - lg cursor - pointer transition - all group ${isInDeck
+                className={`flex items-center gap-2 p-2.5 rounded-lg cursor-pointer transition-all group ${isInDeck
                     ? 'bg-green-900/30 hover:bg-red-900/40 border border-green-700/50'
                     : 'bg-slate-700/40 hover:bg-green-900/30 border border-slate-600/30'
-                    } `}
+                    }`}
             >
                 {/* Cost */}
                 <div className="w-8 h-8 flex items-center justify-center bg-blue-900 text-blue-200 rounded-lg text-sm font-bold shadow-md flex-shrink-0">
@@ -239,7 +239,7 @@ export const DeckEditor: React.FC<DeckEditorProps> = ({ isOpen, onClose }) => {
                 </div>
 
                 {/* Type Badge */}
-                <div className={`w - 7 h - 7 flex items - center justify - center ${typeBadge.bg} rounded - md flex - shrink - 0`}>
+                <div className={`w-7 h-7 flex items-center justify-center ${typeBadge.bg} rounded-md flex-shrink-0`}>
                     <span className="text-sm">{typeBadge.emoji}</span>
                 </div>
 
@@ -251,7 +251,7 @@ export const DeckEditor: React.FC<DeckEditorProps> = ({ isOpen, onClose }) => {
                             {displaySchools.slice(0, 2).map(school => (
                                 <span
                                     key={school}
-                                    className={`${getSchoolColor(school)} text - white text - [10px] px - 1.5 py - 0.5 rounded - full font - medium`}
+                                    className={`${getSchoolColor(school)} text-white text-[10px] px-1.5 py-0.5 rounded-full font-medium`}
                                 >
                                     {school.slice(0, 4)}
                                 </span>
@@ -275,10 +275,10 @@ export const DeckEditor: React.FC<DeckEditorProps> = ({ isOpen, onClose }) => {
                 {/* Add/Remove Icon */}
                 <div
                     onClick={onClick}
-                    className={`w - 6 h - 6 flex items - center justify - center rounded - full transition - all flex - shrink - 0 ${isInDeck
+                    className={`w-6 h-6 flex items-center justify-center rounded-full transition-all flex-shrink-0 ${isInDeck
                         ? 'bg-red-700/50 group-hover:bg-red-600'
                         : 'bg-green-700/50 opacity-0 group-hover:opacity-100'
-                        } `}
+                        }`}
                 >
                     {isInDeck ? <Minus size={14} className="text-white" /> : <Plus size={14} className="text-white" />}
                 </div>
@@ -332,10 +332,10 @@ export const DeckEditor: React.FC<DeckEditorProps> = ({ isOpen, onClose }) => {
                             {/* "All Cards" Option */}
                             <button
                                 onClick={() => selectDeck(null)}
-                                className={`w - full text - left p - 2 rounded - lg transition - all ${!activeDeckId
+                                className={`w-full text-left p-2 rounded-lg transition-all ${!activeDeckId
                                     ? 'bg-amber-600/30 border border-amber-500 text-amber-200'
                                     : 'bg-slate-800/50 hover:bg-slate-700/50 text-slate-300 border border-transparent'
-                                    } `}
+                                    }`}
                             >
                                 <div className="flex items-center gap-2">
                                     <span className="text-lg">◆</span>
@@ -354,18 +354,18 @@ export const DeckEditor: React.FC<DeckEditorProps> = ({ isOpen, onClose }) => {
                                     <button
                                         key={deckItem.id}
                                         onClick={() => selectDeck(deckItem.id)}
-                                        className={`w - full text - left p - 2 rounded - lg transition - all ${isActive
+                                        className={`w-full text-left p-2 rounded-lg transition-all ${isActive
                                             ? 'bg-green-900/40 border border-green-600 text-green-200'
                                             : 'bg-slate-800/50 hover:bg-slate-700/50 text-slate-300 border border-transparent'
-                                            } `}
+                                            }`}
                                     >
                                         <div className="flex items-center gap-2">
-                                            <span className={`text - lg ${deckValid ? 'text-green-400' : 'text-amber-400'} `}>
+                                            <span className={`text-lg ${deckValid ? 'text-green-400' : 'text-amber-400'}`}>
                                                 {deckValid ? '✓' : '○'}
                                             </span>
                                             <div className="flex-1 min-w-0">
                                                 <div className="font-medium text-sm truncate">{deckItem.name}</div>
-                                                <div className={`text - xs ${deckValid ? 'text-green-500' : 'text-amber-500'} `}>
+                                                <div className={`text-xs ${deckValid ? 'text-green-500' : 'text-amber-500'}`}>
                                                     {deckItem.cardIds.length}/{DECK_SIZE} Karten
                                                 </div>
                                             </div>
@@ -438,7 +438,7 @@ export const DeckEditor: React.FC<DeckEditorProps> = ({ isOpen, onClose }) => {
                                     )}
 
                                     {/* Deck Card Count */}
-                                    <div className={`text - xs mt - 1 ${isValid ? 'text-green-400' : 'text-amber-400'} `}>
+                                    <div className={`text-xs mt-1 ${isValid ? 'text-green-400' : 'text-amber-400'}`}>
                                         {cardCount}/{DECK_SIZE} Karten {isValid && '✓'}
                                         {hasUnsavedChanges && <span className="text-amber-400 ml-1">●</span>}
                                     </div>
@@ -579,7 +579,7 @@ export const DeckEditor: React.FC<DeckEditorProps> = ({ isOpen, onClose }) => {
                                     <div className="flex items-center gap-2">
                                         <Sparkles className={isValid ? 'text-green-400' : 'text-red-400'} size={18} />
                                         <h3 className="text-lg font-bold text-green-100">Dein Deck</h3>
-                                        <span className={`text - sm ${isValid ? 'text-green-400' : 'text-red-400'} `}>
+                                        <span className={`text-sm ${isValid ? 'text-green-400' : 'text-red-400'}`}>
                                             ({cardCount}/{DECK_SIZE})
                                         </span>
                                     </div>
@@ -765,8 +765,8 @@ export const DeckEditor: React.FC<DeckEditorProps> = ({ isOpen, onClose }) => {
                                                             <div key={cost} className="flex flex-col items-center flex-1">
                                                                 <div
                                                                     className="w-full bg-blue-500 rounded-t"
-                                                                    style={{ height: `${heightPx} px`, minWidth: '8px' }}
-                                                                    title={`${count} Karte(n) mit Kosten ${cost}${cost === 10 ? '+' : ''} `}
+                                                                    style={{ height: `${heightPx}px`, minWidth: '8px' }}
+                                                                    title={`${count} Karte(n) mit Kosten ${cost}${cost === 10 ? '+' : ''}`}
                                                                 />
                                                                 <span className="text-[10px] text-gray-500 mt-1">{cost}{cost === 10 ? '+' : ''}</span>
                                                             </div>
@@ -787,8 +787,8 @@ export const DeckEditor: React.FC<DeckEditorProps> = ({ isOpen, onClose }) => {
                                                                     <span className="text-xs text-gray-300 w-24 truncate">{school}</span>
                                                                     <div className="flex-1 bg-slate-700 rounded h-4 overflow-hidden">
                                                                         <div
-                                                                            className={`h - full ${getSchoolColor(school)} transition - all`}
-                                                                            style={{ width: `${widthPercent}% ` }}
+                                                                            className={`h-full ${getSchoolColor(school)} transition-all`}
+                                                                            style={{ width: `${widthPercent}%` }}
                                                                         />
                                                                     </div>
                                                                     <span className="text-xs text-white font-bold w-6 text-right">{count}</span>
@@ -849,7 +849,7 @@ export const DeckEditor: React.FC<DeckEditorProps> = ({ isOpen, onClose }) => {
                         {/* Tooltip Panel - Height matches scaled card */}
                         <div
                             className="bg-slate-900/95 border border-slate-600 rounded-xl p-4 text-white shadow-2xl flex flex-col gap-3 overflow-y-auto"
-                            style={{ width: `${TOOLTIP_WIDTH} px`, height: `${CARD_HEIGHT * PREVIEW_SCALE} px` }}
+                            style={{ width: `${TOOLTIP_WIDTH}px`, height: `${CARD_HEIGHT * PREVIEW_SCALE}px` }}
                         >
                             <h3 className="text-xl font-bold text-amber-400 border-b border-slate-700 pb-2">{previewCard.name}</h3>
 
@@ -859,7 +859,7 @@ export const DeckEditor: React.FC<DeckEditorProps> = ({ isOpen, onClose }) => {
                                     <span className="text-xs text-gray-400 uppercase tracking-wider">Schulen</span>
                                     <div className="flex flex-wrap gap-1">
                                         {previewCard.school.map(s => (
-                                            <span key={s} className={`text - xs px - 2 py - 1 ${getSchoolColor(s)} rounded - full text - white font - medium`}>
+                                            <span key={s} className={`text-xs px-2 py-1 ${getSchoolColor(s)} rounded-full text-white font-medium`}>
                                                 {s}
                                             </span>
                                         ))}
