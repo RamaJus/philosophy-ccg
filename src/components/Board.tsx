@@ -17,6 +17,7 @@ interface BoardProps {
     currentTurn?: number;
     isMyTurn?: boolean;
     attackingMinionIds?: string[];
+    ueberichBonus?: boolean;
 }
 
 export const Board: React.FC<BoardProps> = ({
@@ -31,7 +32,8 @@ export const Board: React.FC<BoardProps> = ({
     attacksBlocked = false,
     currentTurn = 0,
     isMyTurn = false,
-    attackingMinionIds = []
+    attackingMinionIds = [],
+    ueberichBonus = false
 }) => {
     const [startIndex, setStartIndex] = useState(0);
     const VISIBLE_COUNT = 6;
@@ -119,6 +121,7 @@ export const Board: React.FC<BoardProps> = ({
                                                 isSelected={selectedMinionIds.includes(minion.instanceId || minion.id)}
                                                 isPlayable={(canAttack && !isSilenced) || isTargetable}
                                                 showHealth={true}
+                                                bonusDamage={ueberichBonus ? 1 : 0}
                                                 bonusHealth={bonusHealth}
                                                 isAttacking={attackingMinionIds.includes(minion.instanceId || minion.id)}
                                                 canAttack={canAttack && !isSilenced}

@@ -1238,7 +1238,7 @@ export const GameArea: React.FC<GameAreaProps> = ({ mode, isDebugMode, customDec
                                     return false;
                                 })()}
                                 synergiesBlocked={(viewOpponent.synergyBlockTurns || 0) > 0}
-                                attacksBlocked={isClient ? (gameState.player.minionAttackBlockTurns || 0) > 0 : (gameState.opponent.minionAttackBlockTurns || 0) > 0}
+                                attacksBlocked={isClient ? (gameState.opponent.minionAttackBlockTurns || 0) > 0 : (gameState.player.minionAttackBlockTurns || 0) > 0}
                                 currentTurn={gameState.turn}
                             />
                         </div>
@@ -1470,10 +1470,11 @@ export const GameArea: React.FC<GameAreaProps> = ({ mode, isDebugMode, customDec
                                 canTarget={(targetMode === 'gottesbeweis_target' || targetMode === 'trolley_sacrifice' || targetMode === 'arete_target' || targetMode === 'cave_ascent_target' || targetMode === 'deduktion_target' || targetMode === 'induktion_target' || targetMode === 'philosophenherrschaft_target') && !!isMyTargetMode}
                                 isSpecialTargeting={(targetMode === 'gottesbeweis_target' || targetMode === 'trolley_sacrifice' || targetMode === 'arete_target' || targetMode === 'cave_ascent_target' || targetMode === 'deduktion_target' || targetMode === 'induktion_target' || targetMode === 'philosophenherrschaft_target') && !!isMyTargetMode}
                                 synergiesBlocked={(viewPlayer.synergyBlockTurns || 0) > 0}
-                                attacksBlocked={isClient ? (gameState.opponent.minionAttackBlockTurns || 0) > 0 : (gameState.player.minionAttackBlockTurns || 0) > 0}
+                                attacksBlocked={isClient ? (gameState.player.minionAttackBlockTurns || 0) > 0 : (gameState.opponent.minionAttackBlockTurns || 0) > 0}
                                 currentTurn={gameState.turn}
                                 isMyTurn={viewIsPlayerTurn}
                                 attackingMinionIds={attackingMinionIds}
+                                ueberichBonus={viewPlayer.ueberichBonusTurn === gameState.turn}
                             />
                         </div>
                     </div>
