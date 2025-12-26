@@ -1245,7 +1245,7 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
         }
 
         case 'CAVE_ASCENT_TARGET': {
-            // Aufstieg aus der Höhle: +2 Attack, -2 Health (permanent)
+            // Aufstieg aus der Höhle: +2 Attack, -2 Health (permanent). Dies if health < 3
             const { minionId } = action;
             const activePlayer = state.activePlayer === 'player' ? state.player : state.opponent;
 
@@ -1255,31 +1255,54 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
 
             let log = state.log;
 
-            // Apply +2 attack, -2 health permanently
-            const transformedMinion: BoardMinion = {
-                ...targetMinion,
-                attack: targetMinion.attack + 2,
-                health: Math.max(1, targetMinion.health - 2), // Cannot go below 1
-                maxHealth: Math.max(1, targetMinion.maxHealth - 2)
-            };
+            // Check if minion will die (health < 3 means after -2 it would be < 1)
+            if (targetMinion.health < 3) {
+                log = appendLog(log, `${targetMinion.name} konnte das Licht nicht ertragen und starb!`);
 
-            log = appendLog(log, `${targetMinion.name} stieg aus der Höhle auf! (+2 Angriff, -2 Leben)`);
+                const updatedBoard = activePlayer.board.filter(m => (m.instanceId || m.id) !== minionId);
+                const updatedGraveyard = [...activePlayer.graveyard, targetMinion];
 
-            const updatedBoard = activePlayer.board.map(m => (m.instanceId || m.id) === minionId ? transformedMinion : m);
-            let updatedActive = { ...activePlayer, board: updatedBoard };
+                let updatedActive = { ...activePlayer, board: updatedBoard, graveyard: updatedGraveyard };
 
-            // Add spell to graveyard
-            if (state.pendingPlayedCard) {
-                updatedActive.graveyard = [...updatedActive.graveyard, state.pendingPlayedCard];
+                // Add spell to graveyard
+                if (state.pendingPlayedCard) {
+                    updatedActive.graveyard = [...updatedActive.graveyard, state.pendingPlayedCard];
+                }
+
+                newState = {
+                    ...state,
+                    [state.activePlayer]: updatedActive,
+                    log,
+                    targetMode: undefined,
+                    pendingPlayedCard: undefined
+                };
+            } else {
+                // Apply +2 attack, -2 health permanently (no revert)
+                const transformedMinion: BoardMinion = {
+                    ...targetMinion,
+                    attack: targetMinion.attack + 2,
+                    health: targetMinion.health - 2,
+                    maxHealth: targetMinion.maxHealth - 2
+                };
+
+                log = appendLog(log, `${targetMinion.name} stieg aus der Höhle auf! (+2 Angriff, -2 Leben)`);
+
+                const updatedBoard = activePlayer.board.map(m => (m.instanceId || m.id) === minionId ? transformedMinion : m);
+                let updatedActive = { ...activePlayer, board: updatedBoard };
+
+                // Add spell to graveyard
+                if (state.pendingPlayedCard) {
+                    updatedActive.graveyard = [...updatedActive.graveyard, state.pendingPlayedCard];
+                }
+
+                newState = {
+                    ...state,
+                    [state.activePlayer]: updatedActive,
+                    log,
+                    targetMode: undefined,
+                    pendingPlayedCard: undefined
+                };
             }
-
-            newState = {
-                ...state,
-                [state.activePlayer]: updatedActive,
-                log,
-                targetMode: undefined,
-                pendingPlayedCard: undefined
-            };
             break;
         }
 
