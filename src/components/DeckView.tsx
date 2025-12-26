@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import { Card } from '../types';
-import { Card as CardComponent } from './Card';
+import { Card as CardComponent, getDisplayName } from './Card';
 
 interface DeckViewProps {
     deck: Card[];
@@ -43,7 +43,7 @@ export const DeckView: React.FC<DeckViewProps> = ({ deck, isOpen, onClose, onSel
                 return false;
             }
             return true;
-        }).sort((a, b) => a.name.localeCompare(b.name, 'de'));
+        }).sort((a, b) => getDisplayName(a).localeCompare(getDisplayName(b), 'de'));
     }, [deck, filterType, filterSchool, filterCost]);
 
     if (!isOpen) return null;
