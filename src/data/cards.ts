@@ -1395,13 +1395,16 @@ export const cardDatabase: Card[] = [
         attack: 7,
         health: 5,
         description: 'Philosoph der Ethik. Schützt eigene Philosophen für 1 gegnerische Runde.',
-        tooltip: '„Handle so, dass die Wirkungen deiner Handlung verträglich sind mit der Permanenz echten menschlichen Lebens auf Erden." Technischer Fortschritt erfordert neue Ethik. Er schwor sich im Krieg, nie wieder deutschen Boden zu betreten, brach diesen Schwur aber später.',
+        tooltip: '„Handle so, dass die Wirkungen deiner Handlung verträglich sind mit der Permanenz echten menschlichen Lebens auf Erden." Technischer Fortschritt erfordert neue Ethik. Er schwor sich im Krieg, nie wieder deutschen Boden zu betreten, brach diesen Schwur aber später. EFFEKT: Eigene Philosophen können in der nächsten gegnerischen Runde nicht unter 1 Leben fallen.',
         rarity: 'Legendär',
         school: ['Moralphilosophie'],
         gender: 'male',
         image: '/images/cards/hans_jonas.png',
         effects: [{ type: 'JONAS_PROTECTION', target: 'SELF' }],
-        // Effect is automatic: Own minions cannot go below 1 health for 1 enemy turn
+        special: {
+            name: 'Ökologischer Imperativ',
+            description: 'Eigene Philosophen können in der nächsten gegnerischen Runde nicht unter 1 Leben fallen.'
+        }
     },
     {
         id: 'habermas',
@@ -1430,7 +1433,11 @@ export const cardDatabase: Card[] = [
         school: ['Politik', 'Existentialismus'],
         gender: 'male',
         image: '/images/cards/slavoj_zizek.png',
-        // Effect is automatic: When placed, player chooses a school. All minions NOT of that school get -2/-2
+        specialAbility: 'ideology',
+        special: {
+            name: 'Herrschende Ideologie',
+            description: 'Wähle eine Schule. Alle Philosophen, die NICHT dieser Schule angehören, erhalten -2/-2.'
+        }
     },
     {
         id: 'pascal',
