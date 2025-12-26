@@ -3,7 +3,6 @@ import { X, Download, Upload, Trash2, Wand2, Plus, Minus, ChevronDown, ChevronUp
 import { cardDatabase as cards } from '../data/cards';
 import { Card } from '../types';
 import { useDeck } from '../hooks/useDeck';
-import { AI_DECK_IDS } from '../data/aiDeck';
 import { Card as CardComponent, CARD_HEIGHT, PREVIEW_SCALE, TOOLTIP_WIDTH, getDisplayName } from './Card';
 
 // Valid schools in the game (only these should be shown)
@@ -230,8 +229,8 @@ export const DeckEditor: React.FC<DeckEditorProps> = ({ isOpen, onClose }) => {
         return (
             <div
                 className={`flex items - center gap - 2 p - 2.5 rounded - lg cursor - pointer transition - all group ${isInDeck
-                        ? 'bg-green-900/30 hover:bg-red-900/40 border border-green-700/50'
-                        : 'bg-slate-700/40 hover:bg-green-900/30 border border-slate-600/30'
+                    ? 'bg-green-900/30 hover:bg-red-900/40 border border-green-700/50'
+                    : 'bg-slate-700/40 hover:bg-green-900/30 border border-slate-600/30'
                     } `}
             >
                 {/* Cost */}
@@ -277,8 +276,8 @@ export const DeckEditor: React.FC<DeckEditorProps> = ({ isOpen, onClose }) => {
                 <div
                     onClick={onClick}
                     className={`w - 6 h - 6 flex items - center justify - center rounded - full transition - all flex - shrink - 0 ${isInDeck
-                            ? 'bg-red-700/50 group-hover:bg-red-600'
-                            : 'bg-green-700/50 opacity-0 group-hover:opacity-100'
+                        ? 'bg-red-700/50 group-hover:bg-red-600'
+                        : 'bg-green-700/50 opacity-0 group-hover:opacity-100'
                         } `}
                 >
                     {isInDeck ? <Minus size={14} className="text-white" /> : <Plus size={14} className="text-white" />}
@@ -334,8 +333,8 @@ export const DeckEditor: React.FC<DeckEditorProps> = ({ isOpen, onClose }) => {
                             <button
                                 onClick={() => selectDeck(null)}
                                 className={`w - full text - left p - 2 rounded - lg transition - all ${!activeDeckId
-                                        ? 'bg-amber-600/30 border border-amber-500 text-amber-200'
-                                        : 'bg-slate-800/50 hover:bg-slate-700/50 text-slate-300 border border-transparent'
+                                    ? 'bg-amber-600/30 border border-amber-500 text-amber-200'
+                                    : 'bg-slate-800/50 hover:bg-slate-700/50 text-slate-300 border border-transparent'
                                     } `}
                             >
                                 <div className="flex items-center gap-2">
@@ -347,28 +346,6 @@ export const DeckEditor: React.FC<DeckEditorProps> = ({ isOpen, onClose }) => {
                                 </div>
                             </button>
 
-                            {/* AI Deck Preset */}
-                            <div className="my-2 border-t border-slate-600 pt-2">
-                                <div className="text-xs text-slate-400 uppercase tracking-wider px-1 mb-1">Vorlagen</div>
-                                <button
-                                    onClick={() => {
-                                        // Clear current deck and add AI deck cards
-                                        clearDeck();
-                                        addCards(AI_DECK_IDS);
-                                    }}
-                                    className="w-full text-left p-2 rounded-lg transition-all bg-purple-900/30 hover:bg-purple-800/40 text-purple-200 border border-purple-600/50"
-                                    title="Lade das optimierte KI-Deck als Vorlage"
-                                >
-                                    <div className="flex items-center gap-2">
-                                        <span className="text-lg">🤖</span>
-                                        <div className="flex-1 min-w-0">
-                                            <div className="font-medium text-sm truncate">KI-Deck laden</div>
-                                            <div className="text-xs text-purple-400">60 Karten Vorlage</div>
-                                        </div>
-                                    </div>
-                                </button>
-                            </div>
-
                             {/* Saved Decks */}
                             {savedDecks.map(deckItem => {
                                 const isActive = activeDeckId === deckItem.id;
@@ -378,8 +355,8 @@ export const DeckEditor: React.FC<DeckEditorProps> = ({ isOpen, onClose }) => {
                                         key={deckItem.id}
                                         onClick={() => selectDeck(deckItem.id)}
                                         className={`w - full text - left p - 2 rounded - lg transition - all ${isActive
-                                                ? 'bg-green-900/40 border border-green-600 text-green-200'
-                                                : 'bg-slate-800/50 hover:bg-slate-700/50 text-slate-300 border border-transparent'
+                                            ? 'bg-green-900/40 border border-green-600 text-green-200'
+                                            : 'bg-slate-800/50 hover:bg-slate-700/50 text-slate-300 border border-transparent'
                                             } `}
                                     >
                                         <div className="flex items-center gap-2">

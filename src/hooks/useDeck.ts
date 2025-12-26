@@ -1,6 +1,7 @@
 import { useState, useCallback, useEffect } from 'react';
 import { cardDatabase as cards } from '../data/cards';
 import { Card } from '../types';
+import { AI_DECK_IDS } from '../data/aiDeck';
 
 const STORAGE_KEY = 'philosophy-ccg-decks-v2';
 const DECK_SIZE = 60;
@@ -53,6 +54,25 @@ const getDefaultStorage = (): DeckStorage => ({
     decks: []
 });
 
+// AI Deck preset - always available as a built-in deck
+const AI_DECK_ID = 'preset_ai_deck';
+const getAIDeckPreset = (): SavedDeck => ({
+    id: AI_DECK_ID,
+    name: 'KI-Deck',
+    cardIds: AI_DECK_IDS,
+    createdAt: '2024-01-01T00:00:00.000Z' // Fixed date for preset
+});
+
+// Ensure AI deck preset exists in decks array
+const ensureAIDeckExists = (decks: SavedDeck[]): SavedDeck[] => {
+    const hasAIDeck = decks.some(d => d.id === AI_DECK_ID);
+    if (!hasAIDeck) {
+        return [getAIDeckPreset(), ...decks];
+    }
+    // Update AI deck if it exists (in case cards changed)
+    return decks.map(d => d.id === AI_DECK_ID ? getAIDeckPreset() : d);
+};
+
 // Migrate from old format (v1) to new format (v2)
 const migrateFromV1 = (): DeckStorage | null => {
     try {
@@ -100,10 +120,12 @@ export const useDeck = () => {
                 const parsed: DeckStorage = JSON.parse(stored);
                 if (parsed.version === 2) {
                     // Validate all deck card IDs
-                    const validatedDecks = parsed.decks.map(deck => ({
+                    let validatedDecks = parsed.decks.map(deck => ({
                         ...deck,
                         cardIds: deck.cardIds.filter(id => cards.some(c => c.id === id))
                     }));
+                    // Ensure AI deck preset exists
+                    validatedDecks = ensureAIDeckExists(validatedDecks);
                     const newStorage = { ...parsed, decks: validatedDecks };
                     setStorage(newStorage);
 
@@ -131,7 +153,10 @@ export const useDeck = () => {
                 return;
             }
 
-            // Default: all cards mode
+            // Default: all cards mode with AI deck preset
+            const defaultStorage = getDefaultStorage();
+            defaultStorage.decks = ensureAIDeckExists([]);
+            setStorage(defaultStorage);
             setWorkingCardIds(getAllCardIds());
         } catch (e) {
             console.error('Failed to load decks from storage:', e);
