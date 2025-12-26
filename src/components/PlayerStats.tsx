@@ -58,14 +58,25 @@ export const PlayerStats: React.FC<PlayerStatsProps> = ({ player, isOpponent = f
 
                 {/* Opponent Deck Count - Top Right Corner */}
                 {isOpponent && (
-                    <div className="absolute top-1 right-2 flex items-center gap-1 opacity-80" title={`${player.deck.length} Karten im Deck`}>
-                        <svg className="w-3.5 h-3.5 text-purple-400" viewBox="0 0 24 24" fill="currentColor">
-                            <path d="M4 6H2v14c0 1.1.9 2 2 2h14v-2H4V6z" />
-                            <path d="M20 2H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H8V4h12v12z" />
-                        </svg>
-                        <span className="text-xs font-bold tabular-nums text-purple-300">
-                            {player.deck.length}
-                        </span>
+                    <div className="absolute top-1 right-2 flex flex-col items-end gap-0.5 opacity-80">
+                        <div className="flex items-center gap-1" title={`${player.deck.length} Karten im Deck`}>
+                            <svg className="w-3.5 h-3.5 text-purple-400" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M4 6H2v14c0 1.1.9 2 2 2h14v-2H4V6z" />
+                                <path d="M20 2H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H8V4h12v12z" />
+                            </svg>
+                            <span className="text-xs font-bold tabular-nums text-purple-300">
+                                {player.deck.length}
+                            </span>
+                        </div>
+                        <div className="flex items-center gap-1" title={`${player.hand.length} Karten in der Hand`}>
+                            <svg className="w-3.5 h-3.5 text-amber-400" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M18 12H6c-1.1 0-2 .9-2 2v6c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2v-6c0-1.1-.9-2-2-2zm0 8H6v-6h12v6z" />
+                                <path d="M12 2C6.48 2 2 6.48 2 12c0 1.33.26 2.61.74 3.77L4 14.5c-.32-.79-.5-1.64-.5-2.5 0-4.69 3.81-8.5 8.5-8.5s8.5 3.81 8.5 8.5c0 .86-.18 1.71-.5 2.5l1.26 1.27c.48-1.16.74-2.44.74-3.77 0-5.52-4.48-10-10-10z" opacity="0.6" />
+                            </svg>
+                            <span className="text-xs font-bold tabular-nums text-amber-300">
+                                {player.hand.length}
+                            </span>
+                        </div>
                     </div>
                 )}
 

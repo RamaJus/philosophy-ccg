@@ -856,8 +856,9 @@ export const GameArea: React.FC<GameAreaProps> = ({ mode, isDebugMode, customDec
                     return;
                 }
 
-                // Look for efficient trades on enemy board
-                if (humanPlayer.board.length > 0) {
+                // Look for efficient trades on enemy board - BUT skip if Kant blocks minion attacks
+                const canAttackMinions = (aiPlayer.minionAttackBlockTurns || 0) === 0;
+                if (humanPlayer.board.length > 0 && canAttackMinions) {
                     // Sort enemy minions by threat (attack power)
                     const enemyMinions = [...humanPlayer.board].sort((a, b) => (b.attack || 0) - (a.attack || 0));
 
