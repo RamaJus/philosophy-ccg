@@ -42,13 +42,16 @@
 
   /* Legendary card pulsing glow animation */
   .legendary-glow {
-    animation: legendaryPulse 2s ease-in-out infinite;
+    animation: legendaryPulse 4s ease-in-out infinite;
   }
 
   @keyframes legendaryPulse {
-    0%, 100% {
+
+    0%,
+    100% {
       box-shadow: 0 0 8px rgba(251, 191, 36, 0.4), 0 0 16px rgba(251, 191, 36, 0.2);
     }
+
     50% {
       box-shadow: 0 0 16px rgba(251, 191, 36, 0.6), 0 0 32px rgba(251, 191, 36, 0.3);
     }

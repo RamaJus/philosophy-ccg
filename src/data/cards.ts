@@ -1178,6 +1178,39 @@ export const cardDatabase: Card[] = [
         image: '/images/cards/scholastik.png',
         // Effect handled in reducers.ts - draws random Religion/Logik card
     },
+    {
+        id: 'blinder_wille',
+        name: 'Blinder Wille',
+        type: 'Zauber',
+        cost: 0,
+        description: 'Ziehe eine zufällige Karte.',
+        tooltip: 'Schopenhauers Kerngedanke: Der Wille ist das Ding an sich, ein blinder, vernunftloser Drang, der allem zugrunde liegt. Der Intellekt ist nur sein Werkzeug. Schopenhauer nannte den Willen "den blinden Drang zum Dasein".',
+        effects: [{ type: 'DRAW_RANDOM', target: 'SELF', value: 1 }],
+        rarity: 'Gewöhnlich',
+        image: '/images/cards/blinder_wille.png',
+    },
+    {
+        id: 'logos',
+        name: 'Logos',
+        type: 'Zauber',
+        cost: 8,
+        description: 'Ziehe die nächsten 3 Karten.',
+        tooltip: 'Das griechische Wort für Vernunft, Wort und kosmische Ordnung. Für Heraklit das göttliche Gesetz, das allem zugrunde liegt. Im Johannesevangelium wurde es zum "Wort", das bei Gott war und Gott war.',
+        effects: [{ type: 'DRAW', target: 'SELF', value: 3 }],
+        rarity: 'Gewöhnlich',
+        image: '/images/cards/logos.png',
+    },
+    {
+        id: 'panta_rhei',
+        name: 'Panta Rhei',
+        type: 'Zauber',
+        cost: 9,
+        description: 'Sieh die Hand des Gegners. Wähle 1 Karte zum Abwerfen.',
+        tooltip: '"Alles fließt" - Heraklits berühmte Formel. Man kann nicht zweimal in denselben Fluss steigen, denn alles ist in ständigem Wandel. Der Spruch ist so berühmt, dass er angeblich gar nicht von Heraklit stammt, sondern von Platon ihm zugeschrieben wurde.',
+        effects: [{ type: 'VIEW_HAND_AND_DISCARD', target: 'ENEMY' }],
+        rarity: 'Gewöhnlich',
+        image: '/images/cards/panta_rhei.png',
+    },
 
     // DEBUG CARDS (excluded from normal decks via generateDeck filter)
     {

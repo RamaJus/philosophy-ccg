@@ -1328,6 +1328,34 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
             break;
         }
 
+        case 'PANTA_RHEI_SELECT': {
+            // Panta Rhei: Force enemy to discard selected card
+            const activePlayer = state.activePlayer === 'player' ? state.player : state.opponent;
+            const enemyPlayer = state.activePlayer === 'player' ? state.opponent : state.player;
+            const card = state.pantaRheiCards?.find(c => c.instanceId === action.cardId || c.id === action.cardId);
+
+            if (!card) return state;
+
+            // Remove card from enemy hand
+            const newEnemyHand = enemyPlayer.hand.filter(c => (c.instanceId || c.id) !== (card.instanceId || card.id));
+            // Add card to enemy graveyard
+            const newEnemyGraveyard = [...enemyPlayer.graveyard, card];
+
+            const updatedEnemy = { ...enemyPlayer, hand: newEnemyHand, graveyard: newEnemyGraveyard };
+
+            newState = {
+                ...state,
+                player: state.activePlayer === 'player' ? activePlayer : updatedEnemy,
+                opponent: state.activePlayer === 'player' ? updatedEnemy : activePlayer,
+                pantaRheiCards: undefined,
+                targetMode: undefined,
+                log: appendLog(state.log, `${card.name} wurde vom Gegner abgeworfen!`),
+                lastPlayedCard: undefined,
+                lastPlayedCardPlayerId: undefined
+            };
+            break;
+        }
+
         case 'SET_OPPONENT_DECK': {
             const { deckIds, playerName, avatarId } = action;
 

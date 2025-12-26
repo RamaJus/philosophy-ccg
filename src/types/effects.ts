@@ -20,7 +20,9 @@ export type EffectType =
     | 'HEAL_ALL_MINIONS' // Idee des Guten
     | 'RANDOMIZE_NEXT_MINION' // Non Sequitur
     | 'BALANCE_HEALTH' // Mesotes
-    | 'JONAS_PROTECTION'; // Hans Jonas: protect own minions for 1 enemy turn
+    | 'JONAS_PROTECTION' // Hans Jonas: protect own minions for 1 enemy turn
+    | 'DRAW_RANDOM' // Blinder Wille: draw a random card
+    | 'VIEW_HAND_AND_DISCARD'; // Panta Rhei: view enemy hand, force discard
 
 export interface Effect {
     type: EffectType;

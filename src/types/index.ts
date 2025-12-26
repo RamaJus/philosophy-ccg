@@ -85,11 +85,12 @@ export interface GameState {
     selectedCard?: string; // Card instanceId in hand
     pendingPlayedCard?: Card; // Card currently being cast (for cancellation refund checks)
     selectedMinions?: string[]; // Minion instanceIds on board for attacking (multi-select)
-    targetMode?: 'attack' | 'spell' | 'search' | 'transform' | 'friendly_minion_transform' | 'trolley_sacrifice' | 'special' | 'foucault_reveal' | 'gottesbeweis_target' | 'nietzsche_target' | 'van_inwagen_target' | 'arete_target' | 'cave_ascent_target' | 'recurrence_select' | 'discover' | 'eros_target' | 'discard' | 'deduktion_target' | 'induktion_target' | 'philosophenherrschaft_target' | 'freud_choice' | 'zizek_ideology'; // What we're targeting for
+    targetMode?: 'attack' | 'spell' | 'search' | 'transform' | 'friendly_minion_transform' | 'trolley_sacrifice' | 'special' | 'foucault_reveal' | 'gottesbeweis_target' | 'nietzsche_target' | 'van_inwagen_target' | 'arete_target' | 'cave_ascent_target' | 'recurrence_select' | 'discover' | 'eros_target' | 'discard' | 'deduktion_target' | 'induktion_target' | 'philosophenherrschaft_target' | 'freud_choice' | 'zizek_ideology' | 'panta_rhei_select'; // What we're targeting for
     targetModeOwner?: 'player' | 'opponent'; // Who initiated the targetMode (for multiplayer modal visibility)
     discoveryCards?: Card[]; // Generic storage for DISCOVER/Search effects
     recurrenceCards?: Card[]; // Cards in graveyard available for 'Ewige Wiederkunft'
     foucaultRevealCards?: Card[]; // Top 3 opponent cards for Foucault reveal
+    pantaRheiCards?: Card[]; // Enemy hand cards for Panta Rhei discard selection
     log: string[]; // Game log messages
     lastPlayedCard?: Card; // For visual flash effect of performed spells
     lastPlayedCardPlayerId?: 'player' | 'opponent'; // Who played the spell
@@ -126,4 +127,5 @@ export type GameAction =
     | { type: 'CONFIRM_DEDUKTION' } // Confirm Deduktion with less than 3 targets
     | { type: 'FREUD_CHOICE'; choice: 'es' | 'ich' | 'ueberich' }
     | { type: 'ZIZEK_IDEOLOGY'; school: string }
-    | { type: 'SET_STARTING_PLAYER'; startingPlayer: 'player' | 'opponent' };
+    | { type: 'SET_STARTING_PLAYER'; startingPlayer: 'player' | 'opponent' }
+    | { type: 'PANTA_RHEI_SELECT'; cardId: string }; // Select enemy card to discard

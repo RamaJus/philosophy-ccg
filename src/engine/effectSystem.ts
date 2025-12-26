@@ -320,6 +320,40 @@ export const processEffect = (
             }
             break;
         }
+        case 'DRAW_RANDOM': {
+            // Blinder Wille: Draw a random card from deck
+            const count = effect.value || 1;
+            if (effect.target === 'SELF' && newActivePlayer.deck.length > 0) {
+                for (let i = 0; i < count && newActivePlayer.deck.length > 0; i++) {
+                    const randomIndex = Math.floor(Math.random() * newActivePlayer.deck.length);
+                    const randomCard = newActivePlayer.deck[randomIndex];
+                    if (newActivePlayer.hand.length < 10) {
+                        newActivePlayer.hand = [...newActivePlayer.hand, randomCard];
+                    } else {
+                        newActivePlayer.graveyard = [...newActivePlayer.graveyard, randomCard];
+                    }
+                    newActivePlayer.deck = newActivePlayer.deck.filter((_, idx) => idx !== randomIndex);
+                }
+                logUpdates.push(`${activePlayer.name} zog ${count} zufällige Karte(n).`);
+            }
+            break;
+        }
+        case 'VIEW_HAND_AND_DISCARD': {
+            // Panta Rhei: View enemy hand and select one card to discard
+            if (effect.target === 'ENEMY' && newEnemyPlayer.hand.length > 0) {
+                return {
+                    player: state.activePlayer === 'player' ? newActivePlayer : newEnemyPlayer,
+                    opponent: state.activePlayer === 'player' ? newEnemyPlayer : newActivePlayer,
+                    log: [...state.log, ...logUpdates, `${activePlayer.name} sieht die Hand des Gegners.`],
+                    pantaRheiCards: [...newEnemyPlayer.hand],
+                    targetMode: 'panta_rhei_select',
+                    targetModeOwner: state.activePlayer
+                };
+            } else {
+                logUpdates.push(`${enemyPlayer.name} hat keine Karten auf der Hand.`);
+            }
+            break;
+        }
     }
     // Check for death
     let gameOver = false;
