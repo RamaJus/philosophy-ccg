@@ -1051,7 +1051,7 @@ export const cardDatabase: Card[] = [
         name: 'Aufstieg aus der Höhle',
         type: 'Zauber',
         cost: 4,
-        description: '+2 Angriff, -2 Leben für 1 Runde. Stirbt bei <3 Leben.',
+        description: '+2 Angriff, -2 Leben (dauerhaft).',
         tooltip: 'Platons Höhlengleichnis: Die Befreiung aus der Welt der Schatten in das Licht der Wahrheit. Der Aufstieg ist schmerzhaft - die Sonne blendet zunächst. Wer zurückkehrt, um die anderen zu befreien, dem wird oft nicht geglaubt.',
         effects: [{ type: 'TARGET_MODE', target: 'SELF', mode: 'cave_ascent_target' }],
         rarity: 'Gewöhnlich',
@@ -1437,11 +1437,7 @@ export const cardDatabase: Card[] = [
         school: ['Politik', 'Existentialismus'],
         gender: 'male',
         image: '/images/cards/slavoj_zizek.png',
-        specialAbility: 'ideology',
-        special: {
-            name: 'Herrschende Ideologie',
-            description: 'Wähle eine Schule. Alle Philosophen, die NICHT dieser Schule angehören, erhalten -2/-2.'
-        }
+        // Effect is automatic: When placed, player chooses a school. All minions NOT of that school get -2/-2
     },
     {
         id: 'pascal',

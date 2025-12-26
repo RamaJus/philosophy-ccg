@@ -39,13 +39,14 @@ export const GameArea: React.FC<GameAreaProps> = ({ mode, isDebugMode, customDec
         resolveDiscovery,
         resolveRecurrence: resolveRecurrenceMultiplayer,
         resolveFoucault,
+        resolvePantaRhei,
     } = useGameLogic(
         mode === 'multiplayer_host' ? 'host' : mode === 'multiplayer_client' ? 'client' : 'single',
         isDebugMode,
         customDeckIds,
         aiDeckIds
     );
-    const { player, opponent, activePlayer, selectedCard, selectedMinions, gameOver, winner, log, targetMode, targetModeOwner, foucaultRevealCards, recurrenceCards, discoveryCards } = gameState;
+    const { player, opponent, activePlayer, selectedCard, selectedMinions, gameOver, winner, log, targetMode, targetModeOwner, foucaultRevealCards, recurrenceCards, discoveryCards, pantaRheiCards } = gameState;
 
     // Use ref to always have the latest state in AI callbacks
     const gameStateRef = useRef(gameState);
@@ -427,6 +428,10 @@ export const GameArea: React.FC<GameAreaProps> = ({ mode, isDebugMode, customDec
 
     const handleZizekIdeology = (school: string) => {
         resolveZizekIdeology(school);
+    };
+
+    const handlePantaRheiSelect = (cardId: string) => {
+        resolvePantaRhei(cardId);
     };
 
     const aiTurn = () => {
@@ -1104,6 +1109,29 @@ export const GameArea: React.FC<GameAreaProps> = ({ mode, isDebugMode, customDec
                     </div>
                 )}
 
+                {/* Panta Rhei Modal - View enemy hand and select card to discard */}
+                {targetMode === 'panta_rhei_select' && isMyTargetMode && pantaRheiCards && pantaRheiCards.length > 0 && (
+                    <div className="fixed inset-0 bg-black/80 z-50 flex flex-col items-center justify-center p-8 backdrop-blur-sm">
+                        <div className="bg-slate-900 border-2 border-blue-600 rounded-xl p-8 shadow-2xl shadow-blue-900/20 max-w-4xl max-h-[80vh] overflow-auto">
+                            <h2 className="text-3xl font-serif text-blue-400 mb-2 text-center">Panta Rhei</h2>
+                            <p className="text-blue-200/60 mb-6 font-serif italic text-center">
+                                Wähle eine Karte, die der Gegner abwerfen muss.
+                            </p>
+                            <div className="flex flex-wrap gap-6 justify-center">
+                                {pantaRheiCards.map((card) => (
+                                    <div
+                                        key={card.instanceId || card.id}
+                                        className="transform transition-all duration-300 hover:scale-105 hover:shadow-xl hover:shadow-blue-500/20 cursor-pointer"
+                                        onClick={() => handlePantaRheiSelect(card.instanceId || card.id)}
+                                    >
+                                        <CardComponent card={card} isPlayable={true} />
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    </div>
+                )}
+
                 {/* Freud Choice Modal (Es, Ich, Über-Ich) */}
                 {targetMode === 'freud_choice' && isMyTargetMode && (
                     <div className="fixed inset-0 bg-black/80 z-50 flex flex-col items-center justify-center p-8 backdrop-blur-sm">
@@ -1504,6 +1532,7 @@ export const GameArea: React.FC<GameAreaProps> = ({ mode, isDebugMode, customDec
                         selectedCardId={selectedCard}
                         currentMana={viewPlayer.mana}
                         deckPosition={deckPosition}
+                        isDiscardMode={targetMode === 'discard' && isMyTargetMode}
                     />
                 </div>
             </div>

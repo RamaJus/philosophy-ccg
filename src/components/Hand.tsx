@@ -9,9 +9,10 @@ interface HandProps {
     selectedCardId?: string;
     currentMana: number;
     deckPosition?: { x: number, y: number } | null;
+    isDiscardMode?: boolean; // When true, all cards are clickable for discard
 }
 
-export const Hand: React.FC<HandProps> = ({ cards, onCardClick, selectedCardId, currentMana, deckPosition }) => {
+export const Hand: React.FC<HandProps> = ({ cards, onCardClick, selectedCardId, currentMana, deckPosition, isDiscardMode = false }) => {
     return (
         <div className="group/hand flex flex-col items-center transition-all duration-300 transform translate-y-[65%] hover:translate-y-[8px]">
             <div className="flex gap-[-40px] justify-center items-end h-[220px] relative" style={{ perspective: '1000px' }}>
@@ -130,7 +131,7 @@ export const Hand: React.FC<HandProps> = ({ cards, onCardClick, selectedCardId, 
                                             card={card}
                                             onClick={() => onCardClick(card.instanceId || card.id)}
                                             isSelected={selectedCardId === (card.instanceId || card.id)}
-                                            isPlayable={card.cost <= currentMana}
+                                            isPlayable={isDiscardMode || card.cost <= currentMana}
                                         />
                                     </div>
 

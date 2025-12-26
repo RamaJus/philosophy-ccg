@@ -218,6 +218,12 @@ export const useGameLogic = (gameMode: 'single' | 'host' | 'client', isDebugMode
         else dispatch(action);
     }, [isClient]);
 
+    const resolvePantaRhei = useCallback((cardId: string) => {
+        const action: GameAction = { type: 'PANTA_RHEI_SELECT', cardId };
+        if (isClient) multiplayer.sendAction(action);
+        else dispatch(action);
+    }, [isClient]);
+
     const resolveFreudChoice = useCallback((choice: 'es' | 'ich' | 'ueberich') => {
         const action: GameAction = { type: 'FREUD_CHOICE', choice };
         if (isClient) multiplayer.sendAction(action);
@@ -291,6 +297,7 @@ export const useGameLogic = (gameMode: 'single' | 'host' | 'client', isDebugMode
         resolveArete,
         resolveCaveAscent,
         resolveRecurrence,
+        resolvePantaRhei,
         resolveFreudChoice,
         resolveZizekIdeology,
         resolveEros,
