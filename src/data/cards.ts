@@ -611,17 +611,13 @@ export const cardDatabase: Card[] = [
         cost: 4,
         attack: 1,
         health: 1,
-        description: 'Existentialist. Der Mensch ist zur Freiheit verurteilt und entwirft sich selbst.',
+        description: 'Existentialist. Startet schwach, wird nach einer Runde zu 8/6.',
         tooltip: '„Die Existenz geht der Essenz voraus." Es gibt keinen vorgegebenen Sinn; der Mensch muss sich durch seine Handlungen selbst entwerfen. Er lehnte 1964 den Literaturnobelpreis ab, weil er sich nicht institutionalisieren lassen wollte.',
         rarity: 'Legendär',
         school: ['Existentialismus', 'Politik'],
         gender: 'male',
         image: '/images/cards/sartre.png',
-        pendingTransformation: { turnTrigger: 1000 /* Dummy, logic uses turnPlayed */, newStats: { attack: 8, health: 6 } },
-        special: {
-            name: 'Existenz vor Essenz',
-            description: 'Startet als 1/1 und wird in der nächsten eigenen Angriffsrunde zu einem mächtigen 8/6 Philosophen.'
-        }
+        pendingTransformation: { turnTrigger: 1000, newStats: { attack: 8, health: 6 } },
     },
     {
         id: 'heidegger',
@@ -1398,17 +1394,14 @@ export const cardDatabase: Card[] = [
         cost: 8,
         attack: 7,
         health: 5,
-        description: 'Philosoph der Ethik. Prinzip Verantwortung für technologische Zivilisation.',
+        description: 'Philosoph der Ethik. Schützt eigene Philosophen für 1 gegnerische Runde.',
         tooltip: '„Handle so, dass die Wirkungen deiner Handlung verträglich sind mit der Permanenz echten menschlichen Lebens auf Erden." Technischer Fortschritt erfordert neue Ethik. Er schwor sich im Krieg, nie wieder deutschen Boden zu betreten, brach diesen Schwur aber später.',
         rarity: 'Legendär',
         school: ['Moralphilosophie'],
         gender: 'male',
         image: '/images/cards/hans_jonas.png',
         effects: [{ type: 'JONAS_PROTECTION', target: 'SELF' }],
-        special: {
-            name: 'Ökologischer Imperativ',
-            description: 'Eigene Philosophen können in der nächsten gegnerischen Runde nicht unter 1 Leben fallen.'
-        }
+        // Effect is automatic: Own minions cannot go below 1 health for 1 enemy turn
     },
     {
         id: 'habermas',
@@ -1431,8 +1424,8 @@ export const cardDatabase: Card[] = [
         cost: 9,
         attack: 7,
         health: 9,
-        description: 'Slowenischer Kulturphilosoph. Verknüpft Marxismus, Psychoanalyse und Popkultur.',
-        tooltip: 'Verbindet Hegel, Marx und Lacan um Popkultur und Politik zu analysieren. Ideologie ist heute zynisch: Wir wissen, dass es falsch ist, tun es aber trotzdem. Er ist bekannt für seine nervösen Tics und ständiges Zupfen am T-Shirt während Vorträgen.',
+        description: 'Kulturphilosoph. Wähle eine Schule: Andere Schulen erhalten -2/-2.',
+        tooltip: 'Verbindet Hegel, Marx und Lacan um Popkultur und Politik zu analysieren. Ideologie ist heute zynisch: Wir wissen, dass es falsch ist, tun es aber trotzdem. Er ist bekannt für seine nervösen Tics und ständiges Zupfen am T-Shirt während Vorträgen. EFFEKT: Wähle eine Schule. Alle Philosophen OHNE diese Schule erhalten -2/-2.',
         rarity: 'Legendär',
         school: ['Politik', 'Existentialismus'],
         gender: 'male',

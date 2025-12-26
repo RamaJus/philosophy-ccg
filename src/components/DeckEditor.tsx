@@ -124,9 +124,9 @@ export const DeckEditor: React.FC<DeckEditorProps> = ({ isOpen, onClose }) => {
             switch (sort) {
                 case 'cost-asc': return a.cost - b.cost;
                 case 'cost-desc': return b.cost - a.cost;
-                case 'name-asc': return getDisplayName(a).localeCompare(getDisplayName(b));
-                case 'name-desc': return getDisplayName(b).localeCompare(getDisplayName(a));
-                case 'type': return a.type.localeCompare(b.type);
+                case 'name-asc': return getDisplayName(a).localeCompare(getDisplayName(b), 'de');
+                case 'name-desc': return getDisplayName(b).localeCompare(getDisplayName(a), 'de');
+                case 'type': return a.type.localeCompare(b.type, 'de');
                 default: return 0;
             }
         });

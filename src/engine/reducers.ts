@@ -226,13 +226,8 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
                             ...m,
                             ...m.pendingTransformation.newStats,
                             maxHealth: m.pendingTransformation.newStats.health,
-                            // Keep name/image or update? Sartre card text says "Verwandelt sich in... version seiner selbst". 
-                            // Usually implies name change or just stats. "8/6 Version".
-                            // Let's keep it simple stat change unless we want visual flair.
-                            // We can clear pendingTransformation.
-                            pendingTransformation: undefined,
-                            name: m.name + ' (Entfesselt)',
-                            description: 'Die Essenz wurde durch Existenz bestimmt.'
+                            // Keep original name and image - transformation is just a stat buff
+                            pendingTransformation: undefined
                         };
                     }
                 }
