@@ -7,13 +7,29 @@ import { SettingsProvider } from './hooks/useSettings';
 // Read custom deck from localStorage
 const getCustomDeckIds = (): string[] | undefined => {
     try {
-        const stored = localStorage.getItem('philosophy-ccg-deck');
-        console.log('[App] Reading deck from localStorage:', stored);
-        if (stored) {
-            const parsed = JSON.parse(stored);
-            console.log('[App] Parsed deck:', parsed);
+        // Try new v2 format first (multi-deck storage)
+        const storedV2 = localStorage.getItem('philosophy-ccg-decks-v2');
+        console.log('[App] Reading deck from localStorage (v2):', storedV2 ? 'found' : 'not found');
+        if (storedV2) {
+            const parsed = JSON.parse(storedV2);
+            console.log('[App] Parsed v2 deck storage:', { version: parsed.version, activeDeckId: parsed.activeDeckId, deckCount: parsed.decks?.length });
+            if (parsed.version === 2 && parsed.activeDeckId) {
+                // Find the active deck
+                const activeDeck = parsed.decks?.find((d: any) => d.id === parsed.activeDeckId);
+                if (activeDeck && Array.isArray(activeDeck.cardIds) && activeDeck.cardIds.length > 0) {
+                    console.log('[App] Using custom deck v2:', activeDeck.name, 'with', activeDeck.cardIds.length, 'cards');
+                    return activeDeck.cardIds;
+                }
+            }
+        }
+
+        // Fallback to old v1 format for backwards compatibility
+        const storedV1 = localStorage.getItem('philosophy-ccg-deck');
+        if (storedV1) {
+            const parsed = JSON.parse(storedV1);
+            console.log('[App] Parsed v1 deck:', parsed);
             if (parsed.isCustom && Array.isArray(parsed.cardIds) && parsed.cardIds.length > 0) {
-                console.log('[App] Using custom deck with', parsed.cardIds.length, 'cards');
+                console.log('[App] Using custom deck v1 with', parsed.cardIds.length, 'cards');
                 return parsed.cardIds;
             }
         }

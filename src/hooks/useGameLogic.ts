@@ -75,9 +75,30 @@ export const useGameLogic = (gameMode: 'single' | 'host' | 'client', isDebugMode
                     const playerName = localStorage.getItem('philosophy-ccg-player-name') || 'Spieler';
                     const settingsStr = localStorage.getItem('philosophy-ccg-settings');
                     const avatarId = settingsStr ? JSON.parse(settingsStr).avatarId : 'novice';
-                    const deckStr = localStorage.getItem('philosophy-ccg-deck');
-                    const deckIds = deckStr ? JSON.parse(deckStr).cardIds : undefined;
-                    console.log('[useGameLogic] Host sending handshake response:', { playerName, avatarId });
+
+                    // Read deck from new v2 format first, then fallback to v1
+                    let deckIds: string[] | undefined = undefined;
+                    const storedV2 = localStorage.getItem('philosophy-ccg-decks-v2');
+                    if (storedV2) {
+                        const parsedV2 = JSON.parse(storedV2);
+                        if (parsedV2.version === 2 && parsedV2.activeDeckId) {
+                            const activeDeck = parsedV2.decks?.find((d: any) => d.id === parsedV2.activeDeckId);
+                            if (activeDeck?.cardIds?.length > 0) {
+                                deckIds = activeDeck.cardIds;
+                            }
+                        }
+                    }
+                    if (!deckIds) {
+                        const deckStrV1 = localStorage.getItem('philosophy-ccg-deck');
+                        if (deckStrV1) {
+                            const parsedV1 = JSON.parse(deckStrV1);
+                            if (parsedV1.isCustom && parsedV1.cardIds?.length > 0) {
+                                deckIds = parsedV1.cardIds;
+                            }
+                        }
+                    }
+
+                    console.log('[useGameLogic] Host sending handshake response:', { playerName, avatarId, deckCount: deckIds?.length });
                     multiplayer.sendHandshake(deckIds, playerName, avatarId);
                 }
             }

@@ -222,10 +222,33 @@ export const Lobby: React.FC<LobbyProps> = ({ onStartGame, isDebugMode, setIsDeb
             () => { },
             () => {
                 clearTimeout(timeoutId);
-                // Always send handshake with player name, and deck IDs if custom
-                const deckIds = (isCustom && isValid)
-                    ? JSON.parse(localStorage.getItem('philosophy-ccg-deck') || '{}').cardIds
-                    : undefined;
+                // Read deck from new v2 format first, then fallback to v1
+                let deckIds: string[] | undefined = undefined;
+                if (isCustom && isValid) {
+                    const storedV2 = localStorage.getItem('philosophy-ccg-decks-v2');
+                    if (storedV2) {
+                        try {
+                            const parsedV2 = JSON.parse(storedV2);
+                            if (parsedV2.version === 2 && parsedV2.activeDeckId) {
+                                const activeDeck = parsedV2.decks?.find((d: any) => d.id === parsedV2.activeDeckId);
+                                if (activeDeck?.cardIds?.length > 0) {
+                                    deckIds = activeDeck.cardIds;
+                                }
+                            }
+                        } catch (e) { /* ignore */ }
+                    }
+                    if (!deckIds) {
+                        const deckStrV1 = localStorage.getItem('philosophy-ccg-deck');
+                        if (deckStrV1) {
+                            try {
+                                const parsedV1 = JSON.parse(deckStrV1);
+                                if (parsedV1.isCustom && parsedV1.cardIds?.length > 0) {
+                                    deckIds = parsedV1.cardIds;
+                                }
+                            } catch (e) { /* ignore */ }
+                        }
+                    }
+                }
                 multiplayer.sendHandshake(deckIds, playerName, settings.avatarId);
                 onStartGame('multiplayer_client');
             }
