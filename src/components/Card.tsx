@@ -18,6 +18,18 @@ export const getDisplayName = (card: CardType | BoardMinion): string => {
         return card.name;
     }
 
+    // Special cases that should keep their full name or specific format
+    const specialNames: Record<string, string> = {
+        'Der letzte Mensch': 'Letzter Mensch',
+        'Zenon von Kition': 'Zenon',
+        'Anselm v. Canterbury': 'Anselm',
+        'Thomas v. Aquin': 'Aquin',
+    };
+
+    if (specialNames[card.name]) {
+        return specialNames[card.name];
+    }
+
     const parts = card.name.trim().split(' ');
 
     // Single name (e.g., "Diogenes", "Sokrates", "Platon")
@@ -25,12 +37,13 @@ export const getDisplayName = (card: CardType | BoardMinion): string => {
         return parts[0];
     }
 
-    // Handle nobility prefixes: "von", "de", "van" should be included with last name
+    // Handle nobility prefixes: "von", "de", "van", "v." - just return last name only
     const lastPart = parts[parts.length - 1];
     const secondLastPart = parts.length > 1 ? parts[parts.length - 2].toLowerCase() : '';
 
-    if (['von', 'de', 'van'].includes(secondLastPart)) {
-        return `${parts[parts.length - 2]} ${lastPart}`;
+    // If second last part is a nobility prefix, skip it and just return last name
+    if (['von', 'de', 'van', 'v.'].includes(secondLastPart)) {
+        return lastPart;
     }
 
     return lastPart;

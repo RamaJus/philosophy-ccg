@@ -89,7 +89,8 @@ export const GameArea: React.FC<GameAreaProps> = ({ mode, isDebugMode, customDec
 
     // Determine coin flip winner once at game start
     useEffect(() => {
-        if (gameState.turn === 1 && !oracleComplete && !gameOver) {
+        // Only trigger if not already shown and not complete
+        if (gameState.turn === 1 && !oracleComplete && !gameOver && !showOracle) {
             // Host determines the winner randomly and sends to client
             if (mode !== 'multiplayer_client') {
                 const winner = Math.random() < 0.5 ? 'player' : 'opponent';
@@ -101,7 +102,7 @@ export const GameArea: React.FC<GameAreaProps> = ({ mode, isDebugMode, customDec
             }
             setShowOracle(true);
         }
-    }, [gameState.turn, oracleComplete, gameOver, mode]);
+    }, [gameState.turn, oracleComplete, gameOver, mode, showOracle]);
 
     const handleOracleComplete = () => {
         setShowOracle(false);
@@ -1239,6 +1240,7 @@ export const GameArea: React.FC<GameAreaProps> = ({ mode, isDebugMode, customDec
                                 })()}
                                 synergiesBlocked={(viewOpponent.synergyBlockTurns || 0) > 0}
                                 attacksBlocked={isClient ? (gameState.opponent.minionAttackBlockTurns || 0) > 0 : (gameState.player.minionAttackBlockTurns || 0) > 0}
+                                jonasProtection={(viewOpponent.jonasProtectionTurns || 0) > 0}
                                 currentTurn={gameState.turn}
                             />
                         </div>
@@ -1471,6 +1473,7 @@ export const GameArea: React.FC<GameAreaProps> = ({ mode, isDebugMode, customDec
                                 isSpecialTargeting={(targetMode === 'gottesbeweis_target' || targetMode === 'trolley_sacrifice' || targetMode === 'arete_target' || targetMode === 'cave_ascent_target' || targetMode === 'deduktion_target' || targetMode === 'induktion_target' || targetMode === 'philosophenherrschaft_target') && !!isMyTargetMode}
                                 synergiesBlocked={(viewPlayer.synergyBlockTurns || 0) > 0}
                                 attacksBlocked={isClient ? (gameState.player.minionAttackBlockTurns || 0) > 0 : (gameState.opponent.minionAttackBlockTurns || 0) > 0}
+                                jonasProtection={(viewPlayer.jonasProtectionTurns || 0) > 0}
                                 currentTurn={gameState.turn}
                                 isMyTurn={viewIsPlayerTurn}
                                 attackingMinionIds={attackingMinionIds}

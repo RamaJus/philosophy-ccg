@@ -14,6 +14,7 @@ interface BoardProps {
     isSpecialTargeting?: boolean;
     synergiesBlocked?: boolean;
     attacksBlocked?: boolean;
+    jonasProtection?: boolean;
     currentTurn?: number;
     isMyTurn?: boolean;
     attackingMinionIds?: string[];
@@ -30,6 +31,7 @@ export const Board: React.FC<BoardProps> = ({
     isSpecialTargeting = false,
     synergiesBlocked = false,
     attacksBlocked = false,
+    jonasProtection = false,
     currentTurn = 0,
     isMyTurn = false,
     attackingMinionIds = [],
@@ -51,10 +53,11 @@ export const Board: React.FC<BoardProps> = ({
     return (
         <div className={`glass-panel p-4 min-h-[300px] transition-all duration-500 ${isPlayerBoard ? 'bg-blue-500/5' : 'bg-red-500/5'} ${isSpecialTargeting ? 'cursor-magic ring-2 ring-purple-500/50' : ''} ${isPlayerBoard && isMyTurn ? 'ring-2 ring-emerald-500/50 shadow-lg shadow-emerald-500/20' : ''}`}>
             {/* Status warnings */}
-            {(synergiesBlocked || attacksBlocked) && (
+            {(synergiesBlocked || attacksBlocked || jonasProtection) && (
                 <div className="text-center mb-2">
                     {synergiesBlocked && <span className="block text-xs text-red-400 font-bold animate-pulse">⚠ SCHUL-SYNERGIEN BLOCKIERT</span>}
                     {attacksBlocked && <span className="block text-xs text-red-400 font-bold animate-pulse">⚠ ANGRIFFE AUF PHILOSOPHEN BLOCKIERT (KANT)</span>}
+                    {jonasProtection && <span className="block text-xs text-green-400 font-bold animate-pulse">🛡 ÖKOLOGISCHER IMPERATIV AKTIV (JONAS)</span>}
                 </div>
             )}
 
