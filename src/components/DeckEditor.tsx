@@ -17,6 +17,7 @@ const VALID_SCHOOLS = [
     'Rationalismus',
     'Religion',
     'Skeptizismus',
+    'Stoizismus',
     'Vorsokratiker'
 ];
 
@@ -42,6 +43,7 @@ const getSchoolColor = (school: string): string => {
         'Rationalismus': 'bg-amber-500',
         'Religion': 'bg-purple-600',
         'Skeptizismus': 'bg-slate-500',
+        'Stoizismus': 'bg-stone-500',
         'Vorsokratiker': 'bg-teal-500',
     };
     return colors[school] || 'bg-gray-500';
