@@ -7,6 +7,27 @@ import { calculateSynergies } from './synergies';
 const STARTING_HAND_SIZE = 4;
 const MAX_HAND_SIZE = 10;
 
+// Helper: Get original card for graveyard (reset stats but keep instanceId)
+const getOriginalCardForGraveyard = (minion: BoardMinion): BoardMinion => {
+    // Find the original card in the database
+    const originalCard = cardDatabase.find(c => c.id === minion.id);
+    if (!originalCard) {
+        // If not found (e.g., transformation cards), return as-is but with restored health
+        return { ...minion, health: minion.maxHealth || minion.health };
+    }
+    // Return original card stats with the instance ID preserved
+    return {
+        ...originalCard,
+        instanceId: minion.instanceId || minion.id,
+        health: originalCard.health,
+        attack: originalCard.attack,
+        maxHealth: originalCard.health,
+        canAttack: false,
+        hasAttacked: false,
+        hasUsedSpecial: false,
+    } as BoardMinion;
+};
+
 // Helper: Create Player
 export function createPlayer(name: string, isPlayer: boolean, startingHandSize: number = STARTING_HAND_SIZE, isDebugMode: boolean = false, customDeckIds?: string[]): Player {
     // Generate deck from custom IDs if provided, otherwise use all cards
@@ -627,13 +648,13 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
                     }
                 });
 
-                // Remove dead minions
+                // Remove dead minions - add to graveyard with ORIGINAL stats
                 updatedActivePlayer.board = attackersUpdated.filter(m => m.health > 0);
-                updatedActivePlayer.graveyard = [...updatedActivePlayer.graveyard, ...attackersUpdated.filter(m => m.health <= 0)];
+                updatedActivePlayer.graveyard = [...updatedActivePlayer.graveyard, ...attackersUpdated.filter(m => m.health <= 0).map(getOriginalCardForGraveyard)];
 
                 if (targetHealth <= 0) {
                     updatedEnemyPlayer.board = updatedEnemyPlayer.board.filter((_, i) => i !== targetIndex);
-                    updatedEnemyPlayer.graveyard = [...updatedEnemyPlayer.graveyard, target];
+                    updatedEnemyPlayer.graveyard = [...updatedEnemyPlayer.graveyard, getOriginalCardForGraveyard(target)];
                     currentLog = appendLog(currentLog, `${attackerNamesStr} zerstörte ${target.name}!`);
                 } else {
                     updatedEnemyPlayer.board[targetIndex] = { ...target, health: targetHealth };
@@ -953,15 +974,15 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
 
             const sacrificedMinion = activePlayer.board[sacrificeIndex];
 
-            // Sacrafice
+            // Sacrafice - add to graveyard with original stats
             const updatedActiveBoard = activePlayer.board.filter((_, i) => i !== sacrificeIndex);
-            const updatedActiveGraveyard = [...activePlayer.graveyard, sacrificedMinion];
+            const updatedActiveGraveyard = [...activePlayer.graveyard, getOriginalCardForGraveyard(sacrificedMinion)];
 
             // Damage Enemy Board (4 damage AoE)
             let updatedEnemyBoard = enemyPlayer.board.map(m => ({ ...m, health: m.health - 4 }));
             const deadMinions = updatedEnemyBoard.filter(m => m.health <= 0);
             updatedEnemyBoard = updatedEnemyBoard.filter(m => m.health > 0);
-            const updatedEnemyGraveyard = [...enemyPlayer.graveyard, ...deadMinions];
+            const updatedEnemyGraveyard = [...enemyPlayer.graveyard, ...deadMinions.map(getOriginalCardForGraveyard)];
 
             log = appendLog(log, `${activePlayer.name} opferte ${sacrificedMinion.name} und fügte allen gegnerischen Philosophen 4 Schaden zu!`);
 
@@ -1057,11 +1078,11 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
             const updatedActive = isOnActive ? { ...activePlayer, board: updateBoard(activePlayer.board) } : activePlayer;
             const updatedEnemy = !isOnActive ? { ...enemyPlayer, board: updateBoard(enemyPlayer.board) } : enemyPlayer;
 
-            // Graveyard handle
+            // Graveyard handle - add with original stats
             if (updatedMinion.health <= 0) {
                 const gy = isOnActive ? updatedActive.graveyard : updatedEnemy.graveyard;
-                if (isOnActive) updatedActive.graveyard = [...gy, targetMinion];
-                else updatedEnemy.graveyard = [...gy, targetMinion];
+                if (isOnActive) updatedActive.graveyard = [...gy, getOriginalCardForGraveyard(targetMinion)];
+                else updatedEnemy.graveyard = [...gy, getOriginalCardForGraveyard(targetMinion)];
                 log = appendLog(log, `${targetMinion.name} wurde besiegt!`);
             }
 
@@ -1255,7 +1276,7 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
                 log = appendLog(log, `${targetMinion.name} konnte das Licht nicht ertragen und starb!`);
 
                 const updatedBoard = activePlayer.board.filter(m => (m.instanceId || m.id) !== minionId);
-                const updatedGraveyard = [...activePlayer.graveyard, targetMinion];
+                const updatedGraveyard = [...activePlayer.graveyard, getOriginalCardForGraveyard(targetMinion)];
 
                 let updatedActive = { ...activePlayer, board: updatedBoard, graveyard: updatedGraveyard };
 
@@ -1332,8 +1353,8 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
 
             // Remove card from enemy hand
             const newEnemyHand = enemyPlayer.hand.filter(c => (c.instanceId || c.id) !== (card.instanceId || card.id));
-            // Add card to enemy graveyard
-            const newEnemyGraveyard = [...enemyPlayer.graveyard, card];
+            // Add card to enemy graveyard - use original stats for consistency
+            const newEnemyGraveyard = [...enemyPlayer.graveyard, getOriginalCardForGraveyard(card as BoardMinion)];
 
             const updatedEnemy = { ...enemyPlayer, hand: newEnemyHand, graveyard: newEnemyGraveyard };
 
