@@ -462,7 +462,7 @@ export const GameArea: React.FC<GameAreaProps> = ({ mode, isDebugMode, customDec
             // Handle zizek_ideology (Slavoj Žižek: choose school for ideology debuff)
             if (currentState.targetMode === 'zizek_ideology') {
                 // AI picks a school that benefits them most (matches own minions, doesn't match enemy)
-                const schools = ['Rationalismus', 'Empirismus', 'Idealismus', 'Existentialismus', 'Moralphilosophie', 'Politik', 'Skeptizismus', 'Religion', 'Metaphysik', 'Logik', 'Ästhetik'];
+                const schools = ['Rationalismus', 'Empirismus', 'Idealismus', 'Existentialismus', 'Moralphilosophie', 'Politik', 'Skeptizismus', 'Religion', 'Metaphysik', 'Logik', 'Ästhetik', 'Stoizismus', 'Vorsokratiker'];
                 // Simple: pick a random school or the most common among own minions
                 const ownSchools: Record<string, number> = {};
                 aiPlayer.board.forEach(m => m.school?.forEach(s => { ownSchools[s] = (ownSchools[s] || 0) + 1; }));
@@ -1181,7 +1181,7 @@ export const GameArea: React.FC<GameAreaProps> = ({ mode, isDebugMode, customDec
                                 Wähle eine Schule. Alle Philosophen, die NICHT dieser Schule angehören, erhalten -2/-2.
                             </p>
                             <div className="grid grid-cols-4 gap-3">
-                                {['Rationalismus', 'Empirismus', 'Idealismus', 'Existentialismus', 'Moralphilosophie', 'Politik', 'Skeptizismus', 'Religion', 'Metaphysik', 'Logik', 'Ästhetik'].map(school => (
+                                {['Rationalismus', 'Empirismus', 'Idealismus', 'Existentialismus', 'Moralphilosophie', 'Politik', 'Skeptizismus', 'Religion', 'Metaphysik', 'Logik', 'Ästhetik', 'Stoizismus', 'Vorsokratiker'].map(school => (
                                     <div
                                         key={school}
                                         className="bg-slate-800/50 border border-red-500/30 rounded-lg p-3 cursor-pointer hover:bg-red-900/30 hover:border-red-500 hover:scale-105 transition-all text-center"
