@@ -1650,6 +1650,7 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
                     canAttack: false,
                     hasAttacked: false,
                     hasUsedSpecial: false,
+                    specialAbility: undefined, // No effect button (passive stats)
                     turnPlayed: state.turn,
                 };
                 updatedPlayer.board = [...updatedPlayer.board, minion];
