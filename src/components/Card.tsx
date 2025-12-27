@@ -22,7 +22,7 @@ export const getDisplayName = (card: CardType | BoardMinion): string => {
     const specialNames: Record<string, string> = {
         'Der letzte Mensch': 'Letzter Mensch',
         'Zenon von Kition': 'Zenon',
-        'Anselm v. Canterbury': 'Anselm',
+        'Anselm v. Canterbury': 'Canterbury',
         'Thomas v. Aquin': 'Aquin',
     };
 
