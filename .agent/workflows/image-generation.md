@@ -4,15 +4,15 @@ description: Image generation guidelines for Philosophy CCG cards
 
 ## Critical Image Prompt Requirements
 
-When generating images for card art, ALWAYS include these phrases in the prompt:
+When generating images for card art, YOU MUST ALWAYS include these specific phrases in every single prompt without exception:
 
-1. **"full screen view, no frame"** - Prevents the AI from generating framed paintings hanging on walls
+1. **"full screen view, no frame, no border"** - Prevents the AI from generating framed paintings or borders
 2. **"no text, no symbols, no writing, no letters"** - Keeps the image clean for card overlay
 
 ## Standard Card Art Prompt Template
 
 ```
-[Subject description], oil painting in Dutch Golden Age style, [mood/atmosphere], rich warm colors with deep shadows, full screen view, no frame, no text, no symbols, no writing, no letters, painterly brushwork, museum quality fine art
+[Subject description], oil painting in Dutch Golden Age style, [mood/atmosphere], rich warm colors with deep shadows, full screen view, no frame, no border, no text, no symbols, no writing, no letters, painterly brushwork, museum quality fine art
 ```
 
 ## Example Prompts

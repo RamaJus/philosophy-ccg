@@ -605,17 +605,33 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
                 const targetDamage = target.attack;
 
                 // Combat Logic
-                // 1. Attackers hit Target
-                let targetHealth = target.health - totalDamage;
+                // Calculate Work Bonus for defender (target)
+                const defendingPlayer = state.activePlayer === 'player' ? state.opponent : state.player;
+                let defenderWorkBonus = 0;
+                if (defendingPlayer.activeWork?.workBonus && target.school?.includes(defendingPlayer.activeWork.workBonus.school)) {
+                    defenderWorkBonus = defendingPlayer.activeWork.workBonus.health;
+                }
+
+                // Calculate Work Bonus for attacker
+                let attackerWorkBonus = 0;
+                if (activePlayer.activeWork?.workBonus) {
+                    const attackerSchool = activePlayer.activeWork.workBonus.school;
+                    // First attacker gets the bonus when receiving counter-damage
+                    if (attackers[0].school?.includes(attackerSchool)) {
+                        attackerWorkBonus = activePlayer.activeWork.workBonus.health;
+                    }
+                }
+
+                // 1. Attackers hit Target (with defender's Work Bonus)
+                let targetHealth = (target.health + defenderWorkBonus) - totalDamage;
 
                 // Jonas Protection Check: If defending player has protection, minion can't go below 1 health
-                const defendingPlayer = state.activePlayer === 'player' ? state.opponent : state.player;
                 if ((defendingPlayer.jonasProtectionTurns || 0) > 0 && targetHealth < 1) {
                     targetHealth = 1;
                     currentLog = appendLog(currentLog, `Ökologischer Imperativ schützt ${target.name}!`);
                 }
 
-                // 2. Target hits FIRST attacker back
+                // 2. Target hits FIRST attacker back (with attacker's Work Bonus)
                 let attackersUpdated = [...activePlayer.board];
                 const firstAttackerIndex = attackersUpdated.findIndex(m => (m.instanceId || m.id) === attackers[0].instanceId || (m.id === attackers[0].id));
 
@@ -627,9 +643,13 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
                         : 0;
                     const newHasAttacked = (firstMinion.extraAttacksRemaining || 0) > 0 ? firstMinion.hasAttacked : true;
 
+                    // Attacker receives counter-damage (with Work Bonus protection)
+                    const attackerEffectiveHealth = firstMinion.health + attackerWorkBonus;
+                    const newHealth = attackerEffectiveHealth - targetDamage;
+
                     attackersUpdated[firstAttackerIndex] = {
                         ...firstMinion,
-                        health: firstMinion.health - targetDamage,
+                        health: newHealth,
                         hasAttacked: newHasAttacked,
                         extraAttacksRemaining: newExtraAttacks
                     };
@@ -1323,20 +1343,24 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
         }
 
         case 'RECURRENCE_SELECT': {
-            const activePlayer = state.activePlayer === 'player' ? state.player : state.opponent;
+            // Use targetModeOwner to ensure we use the player who cast Ewige Wiederkunft
+            // This prevents the bug where Host could steal from Guest's graveyard in multiplayer
+            const ownerId = state.targetModeOwner || state.activePlayer;
+            const ownerPlayer = ownerId === 'player' ? state.player : state.opponent;
             const card = state.recurrenceCards?.find(c => c.instanceId === action.cardId || c.id === action.cardId);
 
             if (!card) return state;
 
-            const newHand = [...activePlayer.hand, card];
-            const newGraveyard = activePlayer.graveyard.filter(c => c.instanceId !== action.cardId);
+            const newHand = [...ownerPlayer.hand, card];
+            const newGraveyard = ownerPlayer.graveyard.filter(c => c.instanceId !== action.cardId);
 
             newState = {
                 ...state,
-                [state.activePlayer]: { ...activePlayer, hand: newHand, graveyard: newGraveyard },
+                [ownerId]: { ...ownerPlayer, hand: newHand, graveyard: newGraveyard },
                 recurrenceCards: undefined,
                 targetMode: undefined,
-                log: appendLog(state.log, `${activePlayer.name} holte eine Karte vom Friedhof zurück.`),
+                targetModeOwner: undefined,
+                log: appendLog(state.log, `${ownerPlayer.name} holte eine Karte vom Friedhof zurück.`),
                 lastPlayedCard: undefined,
                 lastPlayedCardPlayerId: undefined
             };
