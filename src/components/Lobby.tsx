@@ -5,6 +5,7 @@ import { QRCodeSVG } from 'qrcode.react';
 import { DeckEditor } from './DeckEditor';
 import { SettingsModal } from './SettingsModal';
 import { TutorialModal } from './TutorialModal';
+import { WelcomeModal } from './WelcomeModal';
 import { useDeck } from '../hooks/useDeck';
 import { useSettings } from '../hooks/useSettings';
 import { cardDatabase } from '../data/cards';
@@ -22,6 +23,10 @@ export const Lobby: React.FC<LobbyProps> = ({ onStartGame, isDebugMode, setIsDeb
     const [myId, setMyId] = useState<string>('');
     const [peerIdInput, setPeerIdInput] = useState('');
     const [showTutorial, setShowTutorial] = useState(false);
+    const [showWelcome, setShowWelcome] = useState(() => {
+        // Check if user has played before
+        return !localStorage.getItem('philosophy-ccg-has-played');
+    });
     const [status, setStatus] = useState<'idle' | 'connecting' | 'waiting'>('idle');
     const [copySuccess, setCopySuccess] = useState(false);
     const [showQR, setShowQR] = useState(false);
@@ -518,8 +523,8 @@ export const Lobby: React.FC<LobbyProps> = ({ onStartGame, isDebugMode, setIsDeb
                             </div>
 
                             {/* Single Player Section with AI Deck Selection */}
-                            <div className="relative" ref={aiDeckDropdownRef}>
-                                <div className="flex rounded-lg border-2 border-amber-700/40 hover:border-amber-500/60 transition-all bg-gradient-to-br from-slate-800/60 to-slate-900/60 overflow-hidden min-h-[76px]">
+                            <div className="relative h-full" ref={aiDeckDropdownRef}>
+                                <div className="flex rounded-lg border-2 border-amber-700/40 hover:border-amber-500/60 transition-all bg-gradient-to-br from-slate-800/60 to-slate-900/60 overflow-hidden h-full">
                                     {/* Main Button */}
                                     <button
                                         onClick={() => onStartGame('single', selectedAiDeck === 'ai_deck' ? AI_DECK_IDS : undefined)}
@@ -710,6 +715,20 @@ export const Lobby: React.FC<LobbyProps> = ({ onStartGame, isDebugMode, setIsDeb
             <TutorialModal
                 isOpen={showTutorial}
                 onClose={() => setShowTutorial(false)}
+            />
+
+            {/* Welcome Modal for first-time players */}
+            <WelcomeModal
+                isOpen={showWelcome}
+                onClose={() => {
+                    setShowWelcome(false);
+                    localStorage.setItem('philosophy-ccg-has-played', 'true');
+                }}
+                onOpenTutorial={() => {
+                    setShowWelcome(false);
+                    localStorage.setItem('philosophy-ccg-has-played', 'true');
+                    setShowTutorial(true);
+                }}
             />
         </>
     );
