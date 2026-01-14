@@ -393,8 +393,22 @@ export const GameArea: React.FC<GameAreaProps> = ({ mode, isDebugMode, customDec
         endTurnMultiplayer(); // Use multiplayer-aware function
 
         if (mode === 'single') {
+            // Increment turn ID to cancel any previous AI turn timeouts
+            aiTurnIdRef.current += 1;
+            const turnId = aiTurnIdRef.current;
+
+            // Set up safety timeout (15 seconds)
+            const safetyTimeout = setTimeout(() => {
+                if (aiTurnIdRef.current === turnId) {
+                    console.warn('[AI Safety] Turn timeout reached (15s), forcing turn end');
+                    dispatch({ type: 'CANCEL_CAST' });
+                    dispatch({ type: 'END_TURN' });
+                }
+            }, AI_TURN_TIMEOUT_MS);
+
             setTimeout(() => {
-                aiTurn();
+                aiTurn(0);
+                // Clear the timeout when AI turn starts (it will be handled by iteration counter now)
             }, 1500);
         }
     };
@@ -435,10 +449,32 @@ export const GameArea: React.FC<GameAreaProps> = ({ mode, isDebugMode, customDec
         resolvePantaRhei(cardId);
     };
 
-    const aiTurn = () => {
+    // AI Turn safety: track iteration count and turn timeout
+    const aiTurnIdRef = useRef(0);
+    const AI_MAX_ITERATIONS = 20;
+    const AI_TURN_TIMEOUT_MS = 15000;
+
+    const aiTurn = (iterationCount: number = 0) => {
         if (mode !== 'single') return; // No AI in multiplayer
 
+        // Safety: Track this AI turn's ID for timeout cancellation
+        const currentTurnId = aiTurnIdRef.current;
+
+        // Safety check: If we've exceeded max iterations, force end turn
+        if (iterationCount >= AI_MAX_ITERATIONS) {
+            console.warn('[AI Safety] Max iterations reached (' + AI_MAX_ITERATIONS + '), forcing turn end');
+            dispatch({ type: 'CANCEL_CAST' }); // Clear any pending targetMode
+            dispatch({ type: 'END_TURN' });
+            return;
+        }
+
         setTimeout(() => {
+            // Safety: Check if this turn was superseded by a new turn
+            if (currentTurnId !== aiTurnIdRef.current) {
+                console.log('[AI Safety] Turn superseded, aborting');
+                return;
+            }
+
             const currentState = gameStateRef.current;
             const aiPlayer = currentState.opponent;
             const humanPlayer = currentState.player;
@@ -455,7 +491,7 @@ export const GameArea: React.FC<GameAreaProps> = ({ mode, isDebugMode, customDec
                 // AI picks based on board state: 'ueberich' if has minions, else 'ich' or 'es'
                 const choice: 'es' | 'ich' | 'ueberich' = aiPlayer.board.length > 2 ? 'ueberich' : (Math.random() > 0.5 ? 'ich' : 'es');
                 dispatch({ type: 'FREUD_CHOICE', choice });
-                setTimeout(() => aiTurn(), 800);
+                setTimeout(() => aiTurn(iterationCount + 1), 800);
                 return;
             }
 
@@ -468,7 +504,7 @@ export const GameArea: React.FC<GameAreaProps> = ({ mode, isDebugMode, customDec
                 aiPlayer.board.forEach(m => m.school?.forEach(s => { ownSchools[s] = (ownSchools[s] || 0) + 1; }));
                 const bestSchool = Object.entries(ownSchools).sort((a, b) => b[1] - a[1])[0]?.[0] || schools[Math.floor(Math.random() * schools.length)];
                 dispatch({ type: 'ZIZEK_IDEOLOGY', school: bestSchool });
-                setTimeout(() => aiTurn(), 800);
+                setTimeout(() => aiTurn(iterationCount + 1), 800);
                 return;
             }
 
@@ -477,11 +513,11 @@ export const GameArea: React.FC<GameAreaProps> = ({ mode, isDebugMode, customDec
                 if (targetPool.length > 0) {
                     const randomTarget = targetPool[Math.floor(Math.random() * targetPool.length)];
                     dispatch({ type: 'GOTTESBEWEIS_TARGET', minionId: randomTarget.instanceId || randomTarget.id });
-                    setTimeout(() => aiTurn(), 800);
+                    setTimeout(() => aiTurn(iterationCount + 1), 800);
                     return;
                 } else {
                     dispatch({ type: 'CANCEL_CAST' });
-                    setTimeout(() => aiTurn(), 800);
+                    setTimeout(() => aiTurn(iterationCount + 1), 800);
                     return;
                 }
             }
@@ -492,11 +528,11 @@ export const GameArea: React.FC<GameAreaProps> = ({ mode, isDebugMode, customDec
                     // Pick a random friendly philosopher
                     const randomMinion = aiPlayer.board[Math.floor(Math.random() * aiPlayer.board.length)];
                     dispatch({ type: 'CAVE_ASCENT_TARGET', minionId: randomMinion.instanceId || randomMinion.id });
-                    setTimeout(() => aiTurn(), 800);
+                    setTimeout(() => aiTurn(iterationCount + 1), 800);
                     return;
                 } else {
                     dispatch({ type: 'CANCEL_CAST' });
-                    setTimeout(() => aiTurn(), 800);
+                    setTimeout(() => aiTurn(iterationCount + 1), 800);
                     return;
                 }
             }
@@ -511,11 +547,11 @@ export const GameArea: React.FC<GameAreaProps> = ({ mode, isDebugMode, customDec
                         ? aiPlayer.board.reduce((a, b) => (a.health < b.health ? a : b))
                         : allMinions[0];
                     dispatch({ type: 'ARETE_TARGET', minionId: target.instanceId || target.id });
-                    setTimeout(() => aiTurn(), 800);
+                    setTimeout(() => aiTurn(iterationCount + 1), 800);
                     return;
                 } else {
                     dispatch({ type: 'CANCEL_CAST' });
-                    setTimeout(() => aiTurn(), 800);
+                    setTimeout(() => aiTurn(iterationCount + 1), 800);
                     return;
                 }
             }
@@ -532,11 +568,11 @@ export const GameArea: React.FC<GameAreaProps> = ({ mode, isDebugMode, customDec
                     if (targets.length < 3) {
                         dispatch({ type: 'CONFIRM_DEDUKTION' });
                     }
-                    setTimeout(() => aiTurn(), 800);
+                    setTimeout(() => aiTurn(iterationCount + 1), 800);
                     return;
                 } else {
                     dispatch({ type: 'CANCEL_CAST' });
-                    setTimeout(() => aiTurn(), 800);
+                    setTimeout(() => aiTurn(iterationCount + 1), 800);
                     return;
                 }
             }
@@ -547,11 +583,11 @@ export const GameArea: React.FC<GameAreaProps> = ({ mode, isDebugMode, customDec
                     // Pick the strongest friendly philosopher
                     const target = aiPlayer.board.reduce((a, b) => ((a.attack || 0) > (b.attack || 0) ? a : b));
                     dispatch({ type: 'SELECT_MINION', minionId: target.instanceId || target.id, toggle: true });
-                    setTimeout(() => aiTurn(), 800);
+                    setTimeout(() => aiTurn(iterationCount + 1), 800);
                     return;
                 } else {
                     dispatch({ type: 'CANCEL_CAST' });
-                    setTimeout(() => aiTurn(), 800);
+                    setTimeout(() => aiTurn(iterationCount + 1), 800);
                     return;
                 }
             }
@@ -562,16 +598,176 @@ export const GameArea: React.FC<GameAreaProps> = ({ mode, isDebugMode, customDec
                     // Sacrifice weakest minion
                     const weakest = aiPlayer.board.reduce((a, b) => ((a.attack || 0) + (a.health || 0) < (b.attack || 0) + (b.health || 0) ? a : b));
                     dispatch({ type: 'TROLLEY_SACRIFICE', minionId: weakest.instanceId || weakest.id });
-                    setTimeout(() => aiTurn(), 800);
+                    setTimeout(() => aiTurn(iterationCount + 1), 800);
                     return;
                 } else {
                     dispatch({ type: 'CANCEL_CAST' });
-                    setTimeout(() => aiTurn(), 800);
+                    setTimeout(() => aiTurn(iterationCount + 1), 800);
                     return;
                 }
             }
 
-            // === IMPROVED AI DECISION MAKING (Phase 1-3) ===
+            // Handle nietzsche_target (target enemy with highest attack for -3/-3 or transform)
+            if (currentState.targetMode === 'nietzsche_target') {
+                if (humanPlayer.board.length > 0) {
+                    // Target the strongest enemy philosopher
+                    const target = humanPlayer.board.reduce((a, b) => ((a.attack || 0) > (b.attack || 0) ? a : b));
+                    dispatch({ type: 'NIETZSCHE_TARGET', minionId: target.instanceId || target.id });
+                    setTimeout(() => aiTurn(iterationCount + 1), 800);
+                    return;
+                } else {
+                    dispatch({ type: 'CANCEL_CAST' });
+                    setTimeout(() => aiTurn(iterationCount + 1), 800);
+                    return;
+                }
+            }
+
+            // Handle van_inwagen_target (transform strongest enemy into 0/1 chair)
+            if (currentState.targetMode === 'van_inwagen_target') {
+                if (humanPlayer.board.length > 0) {
+                    // Target the strongest enemy (highest attack + health)
+                    const target = humanPlayer.board.reduce((a, b) =>
+                        ((a.attack || 0) + (a.health || 0) > (b.attack || 0) + (b.health || 0) ? a : b));
+                    dispatch({ type: 'VAN_INWAGEN_TARGET', minionId: target.instanceId || target.id });
+                    setTimeout(() => aiTurn(iterationCount + 1), 800);
+                    return;
+                } else {
+                    dispatch({ type: 'CANCEL_CAST' });
+                    setTimeout(() => aiTurn(iterationCount + 1), 800);
+                    return;
+                }
+            }
+
+            // Handle friendly_minion_transform (Sartre - cancel, he transforms automatically)
+            if (currentState.targetMode === 'friendly_minion_transform') {
+                dispatch({ type: 'CANCEL_CAST' });
+                setTimeout(() => aiTurn(iterationCount + 1), 800);
+                return;
+            }
+
+            // Handle foucault_reveal (just close the modal)
+            if (currentState.targetMode === 'foucault_reveal') {
+                dispatch({ type: 'FOUCAULT_CLOSE' });
+                setTimeout(() => aiTurn(iterationCount + 1), 800);
+                return;
+            }
+
+            // Handle recurrence_select (Ewige Wiederkunft - pick highest cost philosopher from graveyard)
+            if (currentState.targetMode === 'recurrence_select') {
+                const philosophers = currentState.recurrenceCards || [];
+                if (philosophers.length > 0) {
+                    const best = philosophers.reduce((a, b) => ((a.cost || 0) > (b.cost || 0) ? a : b));
+                    dispatch({ type: 'RECURRENCE_SELECT', cardId: best.instanceId || best.id });
+                    setTimeout(() => aiTurn(iterationCount + 1), 800);
+                    return;
+                } else {
+                    dispatch({ type: 'CANCEL_CAST' });
+                    setTimeout(() => aiTurn(iterationCount + 1), 800);
+                    return;
+                }
+            }
+
+            // Handle discover (Kontemplation - pick first/random card)
+            if (currentState.targetMode === 'discover') {
+                const cards = currentState.discoveryCards || [];
+                if (cards.length > 0) {
+                    // Pick the highest cost card (usually strongest)
+                    const best = cards.reduce((a, b) => ((a.cost || 0) > (b.cost || 0) ? a : b));
+                    dispatch({ type: 'SELECT_DISCOVERY', cardId: best.instanceId || best.id });
+                    setTimeout(() => aiTurn(iterationCount + 1), 800);
+                    return;
+                } else {
+                    dispatch({ type: 'CANCEL_CAST' });
+                    setTimeout(() => aiTurn(iterationCount + 1), 800);
+                    return;
+                }
+            }
+
+            // Handle search (Hermeneutik - pick random card from deck)
+            if (currentState.targetMode === 'search') {
+                if (aiPlayer.deck.length > 0) {
+                    // Pick a high-cost philosopher if available
+                    const philosophers = aiPlayer.deck.filter(c => c.type === 'Philosoph');
+                    const target = philosophers.length > 0
+                        ? philosophers.reduce((a, b) => ((a.cost || 0) > (b.cost || 0) ? a : b))
+                        : aiPlayer.deck[0];
+                    dispatch({ type: 'SEARCH_DECK', cardId: target.instanceId || target.id });
+                    setTimeout(() => aiTurn(iterationCount + 1), 800);
+                    return;
+                } else {
+                    dispatch({ type: 'CANCEL_CAST' });
+                    setTimeout(() => aiTurn(iterationCount + 1), 800);
+                    return;
+                }
+            }
+
+            // Handle eros_target (prevent strongest enemy from attacking)
+            if (currentState.targetMode === 'eros_target') {
+                if (humanPlayer.board.length > 0) {
+                    const target = humanPlayer.board.reduce((a, b) => ((a.attack || 0) > (b.attack || 0) ? a : b));
+                    dispatch({ type: 'EROS_TARGET', minionId: target.instanceId || target.id });
+                    setTimeout(() => aiTurn(iterationCount + 1), 800);
+                    return;
+                } else {
+                    dispatch({ type: 'CANCEL_CAST' });
+                    setTimeout(() => aiTurn(iterationCount + 1), 800);
+                    return;
+                }
+            }
+
+            // Handle panta_rhei_select (force enemy to discard their highest cost card)
+            if (currentState.targetMode === 'panta_rhei_select') {
+                const cards = currentState.pantaRheiCards || [];
+                if (cards.length > 0) {
+                    const best = cards.reduce((a, b) => ((a.cost || 0) > (b.cost || 0) ? a : b));
+                    dispatch({ type: 'PANTA_RHEI_SELECT', cardId: best.instanceId || best.id });
+                    setTimeout(() => aiTurn(iterationCount + 1), 800);
+                    return;
+                } else {
+                    dispatch({ type: 'CANCEL_CAST' });
+                    setTimeout(() => aiTurn(iterationCount + 1), 800);
+                    return;
+                }
+            }
+
+            // Handle philosophenherrschaft_target (give charge to a fresh minion)
+            if (currentState.targetMode === 'philosophenherrschaft_target') {
+                const freshMinions = aiPlayer.board.filter(m => !m.canAttack && !m.hasAttacked);
+                if (freshMinions.length > 0) {
+                    // Pick the one with highest attack
+                    const target = freshMinions.reduce((a, b) => ((a.attack || 0) > (b.attack || 0) ? a : b));
+                    dispatch({ type: 'SELECT_MINION', minionId: target.instanceId || target.id, toggle: true });
+                    setTimeout(() => aiTurn(iterationCount + 1), 800);
+                    return;
+                } else {
+                    dispatch({ type: 'CANCEL_CAST' });
+                    setTimeout(() => aiTurn(iterationCount + 1), 800);
+                    return;
+                }
+            }
+
+            // Handle discard (full hand - discard lowest cost card)
+            if (currentState.targetMode === 'discard') {
+                if (aiPlayer.hand.length > 0) {
+                    const cheapest = aiPlayer.hand.reduce((a, b) => ((a.cost || 0) < (b.cost || 0) ? a : b));
+                    dispatch({ type: 'DISCARD_CARD', cardId: cheapest.instanceId || cheapest.id });
+                    setTimeout(() => aiTurn(iterationCount + 1), 800);
+                    return;
+                } else {
+                    dispatch({ type: 'CANCEL_CAST' });
+                    setTimeout(() => aiTurn(iterationCount + 1), 800);
+                    return;
+                }
+            }
+
+            // FALLBACK: If there's any unhandled targetMode, cancel it to prevent hang
+            if (currentState.targetMode) {
+                console.warn('[AI] Unhandled targetMode:', currentState.targetMode, '- canceling to prevent hang');
+                dispatch({ type: 'CANCEL_CAST' });
+                setTimeout(() => aiTurn(iterationCount + 1), 800);
+                return;
+            }
+
 
             // Helper: Calculate board strength (sum of attack + health)
             const calcBoardStrength = (board: typeof aiPlayer.board) =>
@@ -610,6 +806,16 @@ export const GameArea: React.FC<GameAreaProps> = ({ mode, isDebugMode, customDec
                 }
                 if (spell.id === 'eros') {
                     return humanPlayer.board.length > 0;
+                }
+                // NEW: Additional safety checks for spells that require deck/hand
+                if (spell.id === 'kontemplation' || spell.id === 'hermeneutik') {
+                    return aiPlayer.deck.length > 0;
+                }
+                if (spell.id === 'foucault') {
+                    return humanPlayer.deck.length > 0;
+                }
+                if (spell.id === 'panta_rhei') {
+                    return humanPlayer.hand.length > 0;
                 }
                 return true;
             };
@@ -810,19 +1016,19 @@ export const GameArea: React.FC<GameAreaProps> = ({ mode, isDebugMode, customDec
                 // In danger mode, prefer spell if it's defensive
                 if (bestSpell && bestSpell.score >= philosopherScore && bestSpell.score > werkScore) {
                     dispatch({ type: 'PLAY_CARD', cardId: bestSpell.spell.instanceId || bestSpell.spell.id });
-                    setTimeout(() => aiTurn(), 800);
+                    setTimeout(() => aiTurn(iterationCount + 1), 800);
                     return;
                 }
 
                 if (bestPhilosopher && philosopherScore > werkScore) {
                     dispatch({ type: 'PLAY_CARD', cardId: bestPhilosopher.instanceId || bestPhilosopher.id });
-                    setTimeout(() => aiTurn(), 800);
+                    setTimeout(() => aiTurn(iterationCount + 1), 800);
                     return;
                 }
 
                 if (bestWerk) {
                     dispatch({ type: 'PLAY_CARD', cardId: bestWerk.instanceId || bestWerk.id });
-                    setTimeout(() => aiTurn(), 800);
+                    setTimeout(() => aiTurn(iterationCount + 1), 800);
                     return;
                 }
 
@@ -830,7 +1036,7 @@ export const GameArea: React.FC<GameAreaProps> = ({ mode, isDebugMode, customDec
                 if (playableCards.length > 0) {
                     const card = playableCards[0];
                     dispatch({ type: 'PLAY_CARD', cardId: card.instanceId || card.id });
-                    setTimeout(() => aiTurn(), 800);
+                    setTimeout(() => aiTurn(iterationCount + 1), 800);
                     return;
                 }
             }
@@ -853,7 +1059,7 @@ export const GameArea: React.FC<GameAreaProps> = ({ mode, isDebugMode, customDec
                 // If ahead on board, go face more often
                 if (isAheadOnBoard && Math.random() > 0.3) {
                     dispatch({ type: 'ATTACK', attackerIds: [attacker.instanceId || attacker.id] });
-                    setTimeout(() => aiTurn(), 800);
+                    setTimeout(() => aiTurn(iterationCount + 1), 800);
                     return;
                 }
 
@@ -897,14 +1103,14 @@ export const GameArea: React.FC<GameAreaProps> = ({ mode, isDebugMode, customDec
                             attackerIds: [attacker.instanceId || attacker.id],
                             targetId: bestTarget.instanceId || bestTarget.id
                         });
-                        setTimeout(() => aiTurn(), 800);
+                        setTimeout(() => aiTurn(iterationCount + 1), 800);
                         return;
                     }
                 }
 
                 // No good trades - go face
                 dispatch({ type: 'ATTACK', attackerIds: [attacker.instanceId || attacker.id] });
-                setTimeout(() => aiTurn(), 800);
+                setTimeout(() => aiTurn(iterationCount + 1), 800);
                 return;
             }
 

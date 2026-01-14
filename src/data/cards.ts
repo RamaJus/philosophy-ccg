@@ -10,7 +10,7 @@ export const cardDatabase: Card[] = [
         attack: 2,
         health: 5,
         description: 'Urvater der abendländischen Philosophie. Entwickelte die Kunst des kritischen Fragens.',
-        tooltip: '„Ich weiß, dass ich nichts weiß." Philosophierte nicht durch Lehren, sondern durch kritisches Hinterfragen (Mäeutik), um Scheinwissen zu entlarven. Wurde zum Tode verurteilt, weil er angeblich die Jugend verdarb und neue Götter einführte.',
+        tooltip: '„Ich weiß, dass ich nicht weiß." Philosophierte nicht durch Lehren, sondern durch kritisches Hinterfragen (Mäeutik), um Scheinwissen zu entlarven. Wurde zum Tode verurteilt, weil er angeblich die Jugend verdarb und neue Götter einführte.',
         rarity: 'Gewöhnlich',
         school: ['Moralphilosophie', 'Skeptizismus'],
         gender: 'male',

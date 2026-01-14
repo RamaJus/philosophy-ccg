@@ -3,6 +3,7 @@ import { GameArea } from './components/GameArea';
 import { Lobby } from './components/Lobby';
 import { BackgroundMusic } from './components/BackgroundMusic';
 import { SettingsProvider } from './hooks/useSettings';
+import { IntroTrailer } from './components/IntroTrailer';
 
 // Read custom deck from localStorage
 const getCustomDeckIds = (): string[] | undefined => {
@@ -45,14 +46,38 @@ export const App: React.FC = () => {
     const [isDebugMode, setIsDebugMode] = useState(false);
     const [customDeckIds, setCustomDeckIds] = useState<string[] | undefined>(undefined);
     const [aiDeckIds, setAiDeckIds] = useState<string[] | undefined>(undefined);
+    const [showIntro, setShowIntro] = useState(false);
+    const [pendingAiDeck, setPendingAiDeck] = useState<string[] | undefined>(undefined);
 
     const handleStartGame = (mode: 'single' | 'multiplayer_host' | 'multiplayer_client', aiDeck?: string[]) => {
         // Read deck at the moment game starts
         const deckIds = getCustomDeckIds();
         setCustomDeckIds(deckIds);
         setAiDeckIds(aiDeck);
-        setGameMode(mode);
+
+        // For single player mode, show intro trailer first
+        if (mode === 'single') {
+            setPendingAiDeck(aiDeck);
+            setShowIntro(true);
+        } else {
+            setGameMode(mode);
+        }
     };
+
+    const handleIntroComplete = () => {
+        setShowIntro(false);
+        setAiDeckIds(pendingAiDeck);
+        setGameMode('single');
+    };
+
+    // Show intro trailer for AI mode
+    if (showIntro) {
+        return (
+            <SettingsProvider>
+                <IntroTrailer onComplete={handleIntroComplete} />
+            </SettingsProvider>
+        );
+    }
 
     if (!gameMode) {
         return (
