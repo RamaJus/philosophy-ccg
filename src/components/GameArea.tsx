@@ -1209,7 +1209,10 @@ export const GameArea: React.FC<GameAreaProps> = ({ mode, isDebugMode, customDec
 
                                 <div className="border-t border-b border-white/10 py-6 my-6 bg-black/20 backdrop-blur-sm rounded-lg px-6">
                                     <p className="text-amber-100/90 italic text-lg leading-relaxed font-serif">
-                                        "{philosophicalQuote}"
+                                        "{philosophicalQuote.split(' — ')[0]}"
+                                    </p>
+                                    <p className="text-amber-400/60 text-sm mt-3 text-right font-semibold tracking-wider uppercase">
+                                        — {philosophicalQuote.split(' — ')[1]}
                                     </p>
                                 </div>
 

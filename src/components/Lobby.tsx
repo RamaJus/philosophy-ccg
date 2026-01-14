@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { multiplayer } from '../network/MultiplayerManager';
-import { Copy, QrCode, Share2, User, Settings, ChevronDown, Check } from 'lucide-react';
+import { Copy, QrCode, Share2, User, Settings, ChevronDown, Check, BookOpen } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
 import { DeckEditor } from './DeckEditor';
 import { SettingsModal } from './SettingsModal';
+import { TutorialModal } from './TutorialModal';
 import { useDeck } from '../hooks/useDeck';
 import { useSettings } from '../hooks/useSettings';
 import { cardDatabase } from '../data/cards';
@@ -20,6 +21,7 @@ interface LobbyProps {
 export const Lobby: React.FC<LobbyProps> = ({ onStartGame, isDebugMode, setIsDebugMode }) => {
     const [myId, setMyId] = useState<string>('');
     const [peerIdInput, setPeerIdInput] = useState('');
+    const [showTutorial, setShowTutorial] = useState(false);
     const [status, setStatus] = useState<'idle' | 'connecting' | 'waiting'>('idle');
     const [copySuccess, setCopySuccess] = useState(false);
     const [showQR, setShowQR] = useState(false);
@@ -679,20 +681,35 @@ export const Lobby: React.FC<LobbyProps> = ({ onStartGame, isDebugMode, setIsDeb
                 onReset={resetToDefaults}
             />
 
-            {/* Settings Button - Fixed at bottom */}
-            <button
-                onClick={() => setShowSettings(true)}
-                className="fixed bottom-4 left-1/2 -translate-x-1/2 flex items-center gap-2 px-4 py-2 bg-slate-800/90 hover:bg-slate-700 border border-slate-600 rounded-lg text-gray-300 hover:text-white transition-all shadow-lg z-40"
-            >
-                <Settings size={18} />
-                Einstellungen
-            </button>
+            {/* Fixed Bottom Buttons */}
+            <div className="fixed bottom-4 left-1/2 -translate-x-1/2 flex items-center gap-3 z-40">
+                <button
+                    onClick={() => setShowTutorial(true)}
+                    className="flex items-center gap-2 px-4 py-2 bg-emerald-900/90 hover:bg-emerald-800 border border-emerald-700/50 rounded-lg text-emerald-100 transition-all shadow-lg"
+                >
+                    <BookOpen size={18} />
+                    Anleitung
+                </button>
+                <button
+                    onClick={() => setShowSettings(true)}
+                    className="flex items-center gap-2 px-4 py-2 bg-slate-800/90 hover:bg-slate-700 border border-slate-600 rounded-lg text-gray-300 hover:text-white transition-all shadow-lg"
+                >
+                    <Settings size={18} />
+                    Einstellungen
+                </button>
+            </div>
             {/* Avatars Modal */}
             <AvatarSelectionModal
                 isOpen={showAvatarSelection}
                 onClose={() => setShowAvatarSelection(false)}
                 currentAvatarId={settings.avatarId}
                 onSelectAvatar={setAvatarId}
+            />
+
+            {/* Tutorial Modal */}
+            <TutorialModal
+                isOpen={showTutorial}
+                onClose={() => setShowTutorial(false)}
             />
         </>
     );
