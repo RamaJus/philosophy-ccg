@@ -1,5 +1,5 @@
 import React, { useEffect, useCallback } from 'react';
-import { X, BookOpen, MousePointer2, Sword, PlayCircle } from 'lucide-react';
+import { X, BookOpen, MousePointer2 } from 'lucide-react';
 
 interface TutorialModalProps {
     isOpen: boolean;
