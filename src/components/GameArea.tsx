@@ -398,7 +398,7 @@ export const GameArea: React.FC<GameAreaProps> = ({ mode, isDebugMode, customDec
             const turnId = aiTurnIdRef.current;
 
             // Set up safety timeout (15 seconds)
-            const safetyTimeout = setTimeout(() => {
+            setTimeout(() => {
                 if (aiTurnIdRef.current === turnId) {
                     console.warn('[AI Safety] Turn timeout reached (15s), forcing turn end');
                     dispatch({ type: 'CANCEL_CAST' });
