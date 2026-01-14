@@ -8,10 +8,10 @@ export const IntroTrailer: React.FC<IntroTrailerProps> = ({ onComplete }) => {
     const videoRef = useRef<HTMLVideoElement>(null);
 
     const handleVideoEnd = () => {
-        // Stay on last frame for 2 seconds, then start game
+        // Stay on last frame for 1 second, then start game
         setTimeout(() => {
             onComplete();
-        }, 2000);
+        }, 1000);
     };
 
     return (
