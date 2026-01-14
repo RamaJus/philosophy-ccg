@@ -1634,6 +1634,7 @@ export const cardDatabase: Card[] = [
         health: 1,
         description: 'Das moralische Gewissen. Verinnerlichte Normen und Ideale.',
         tooltip: 'Die verinnerlichten moralischen Normen, Werte und Verbote der Gesellschaft und der Eltern. Es fungiert als moralische Instanz und Quelle von Schuldgefühlen oder Stolz.',
+        effect: 'Verleiht beim Ausspielen allen eigenen Philosophen +1 Angriff für diese Runde.',
         rarity: 'Legendär',
         school: ['Metaphysik'],
         gender: 'male',

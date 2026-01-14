@@ -517,7 +517,7 @@ export const Lobby: React.FC<LobbyProps> = ({ onStartGame, isDebugMode, setIsDeb
 
                             {/* Single Player Section with AI Deck Selection */}
                             <div className="relative" ref={aiDeckDropdownRef}>
-                                <div className="flex rounded-lg border-2 border-amber-700/40 hover:border-amber-500/60 transition-all bg-gradient-to-br from-slate-800/60 to-slate-900/60 overflow-hidden">
+                                <div className="flex rounded-lg border-2 border-amber-700/40 hover:border-amber-500/60 transition-all bg-gradient-to-br from-slate-800/60 to-slate-900/60 overflow-hidden min-h-[76px]">
                                     {/* Main Button */}
                                     <button
                                         onClick={() => onStartGame('single', selectedAiDeck === 'ai_deck' ? AI_DECK_IDS : undefined)}

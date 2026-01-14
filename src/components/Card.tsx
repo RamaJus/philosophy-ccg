@@ -26,8 +26,15 @@ export const getDisplayName = (card: CardType | BoardMinion): string => {
         'Thomas v. Aquin': 'Aquin',
     };
 
+    // Check for exact match first
     if (specialNames[card.name]) {
         return specialNames[card.name];
+    }
+
+    // Check if name contains "letzte" or "Mensch" - always show full "Letzter Mensch"
+    if (card.name.toLowerCase().includes('letzte') ||
+        (card.name.toLowerCase().includes('mensch') && !card.name.toLowerCase().includes('über'))) {
+        return 'Letzter Mensch';
     }
 
     const parts = card.name.trim().split(' ');
