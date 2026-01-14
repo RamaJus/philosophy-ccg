@@ -18,11 +18,15 @@ export const IntroTrailer: React.FC<IntroTrailerProps> = ({ onComplete }) => {
             <div className="relative w-full h-full flex items-center justify-center">
                 <video
                     ref={videoRef}
-                    src="/intro/intro.mp4"
+                    src="/intro/Intro.mp4"
                     className="max-w-full max-h-full object-contain"
                     autoPlay
                     playsInline
                     onEnded={handleVideoEnd}
+                    onError={(e) => {
+                        console.error('Video load error:', e);
+                        setVideoEnded(true);
+                    }}
                 />
             </div>
 
