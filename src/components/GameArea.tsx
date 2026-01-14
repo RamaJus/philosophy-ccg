@@ -451,7 +451,7 @@ export const GameArea: React.FC<GameAreaProps> = ({ mode, isDebugMode, customDec
 
     // AI Turn safety: track iteration count and turn timeout
     const aiTurnIdRef = useRef(0);
-    const AI_MAX_ITERATIONS = 20;
+    const AI_MAX_ITERATIONS = 10;
     const AI_TURN_TIMEOUT_MS = 15000;
 
     const aiTurn = (iterationCount: number = 0) => {
@@ -1066,8 +1066,10 @@ export const GameArea: React.FC<GameAreaProps> = ({ mode, isDebugMode, customDec
                 // Look for efficient trades on enemy board - BUT skip if Kant blocks minion attacks
                 const canAttackMinions = (aiPlayer.minionAttackBlockTurns || 0) === 0;
                 if (humanPlayer.board.length > 0 && canAttackMinions) {
-                    // Sort enemy minions by threat (attack power)
-                    const enemyMinions = [...humanPlayer.board].sort((a, b) => (b.attack || 0) - (a.attack || 0));
+                    // Sort enemy minions by threat (attack power) - FILTER out untargetable (Diogenes)
+                    const enemyMinions = [...humanPlayer.board]
+                        .filter(m => !(m.untargetableUntilTurn && m.untargetableUntilTurn > currentState.turn))
+                        .sort((a, b) => (b.attack || 0) - (a.attack || 0));
 
                     // Find a good trade: can kill without dying, or at least trade evenly
                     let bestTarget = null;
