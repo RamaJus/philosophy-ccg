@@ -21,7 +21,7 @@ export const IntroTrailer: React.FC<IntroTrailerProps> = ({ onComplete }) => {
                 <video
                     ref={videoRef}
                     src="/intro/Intro.mp4"
-                    className="max-w-full max-h-full object-contain"
+                    className="w-full h-full object-cover"
                     autoPlay
                     playsInline
                     onEnded={handleVideoEnd}
