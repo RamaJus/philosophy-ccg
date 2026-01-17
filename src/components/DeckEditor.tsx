@@ -138,7 +138,7 @@ export const DeckEditor: React.FC<DeckEditorProps> = ({ isOpen, onClose }) => {
     const filteredCards = useMemo(() => {
         let result = cards.filter(card => {
             // Hide transformation cards (created dynamically in-game, not for deck building)
-            if (card.isTransformation) return false;
+            if (card.isTransformation || card.id.startsWith('freud_') || card.id.startsWith('debug_')) return false;
             if (schoolFilter !== 'all' && !card.school?.includes(schoolFilter)) return false;
             if (typeFilter !== 'all' && card.type !== typeFilter) return false;
             if (costFilter !== 'all') {

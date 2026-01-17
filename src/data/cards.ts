@@ -1590,7 +1590,7 @@ export const cardDatabase: Card[] = [
         specialAbility: 'freud_choice',
         special: {
             name: 'Es, Ich, Über-Ich',
-            description: 'Wähle: Es (8/1 mit Ansturm), Ich (6/6), oder Über-Ich (+1 Angriff für alle eigenen Philosophen).'
+            description: 'Wähle: Es (8/1 mit Ansturm), Ich (6/6), oder Über-Ich (+1/+1 für alle eigenen Philosophen für einen Zug).'
         }
     },
     // Freud Transformations (not in deck, created by choice)
@@ -1631,10 +1631,11 @@ export const cardDatabase: Card[] = [
         type: 'Philosoph',
         cost: 8,
         attack: 0,
-        health: 1,
-        description: 'Das moralische Gewissen. Verinnerlichte Normen und Ideale.',
+        health: 2,
+        maxHealth: 2,
+        description: 'Das Über-Ich ist der moralische Richter. Verleiht allen eigenen Philosophen +1/+1.',
         tooltip: 'Die verinnerlichten moralischen Normen, Werte und Verbote der Gesellschaft und der Eltern. Es fungiert als moralische Instanz und Quelle von Schuldgefühlen oder Stolz.',
-        effect: 'Verleiht beim Ausspielen allen eigenen Philosophen +1 Angriff für diese Runde.',
+        effect: 'Verleiht beim Ausspielen allen eigenen Philosophen +1/+1 für diese Runde.',
         rarity: 'Legendär',
         school: ['Metaphysik'],
         gender: 'male',
@@ -1660,7 +1661,7 @@ export function generateDeck(): Card[] {
     // We add a unique instanceId to each card to solve the "same card on both sides" selection bug
     const deckWithIds = cardDatabase
         .filter(c => !c.id.startsWith('debug_')) // Filter out DEBUG cards
-        .filter(c => !c.isTransformation) // Filter out transformation tokens (e.g. Freud's Es, Ich, Über-Ich)
+        .filter(c => !c.id.startsWith('freud_') && !c.isTransformation) // Filter out transformation tokens (e.g. Freud's Es, Ich, Über-Ich)
         .map(card => ({
             ...card,
             instanceId: `${card.id}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`

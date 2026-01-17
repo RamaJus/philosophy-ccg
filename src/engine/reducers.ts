@@ -622,8 +622,9 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
                     }
                 }
 
-                // 1. Attackers hit Target (with defender's Work Bonus)
-                let targetHealth = (target.health + defenderWorkBonus) - totalDamage;
+                // 1. Attackers hit Target (with defender's Work Bonus AND Über-Ich bonus)
+                const targetUeberichBonus = (defendingPlayer.ueberichBonusTurn === state.turn ? 1 : 0);
+                let targetHealth = (target.health + defenderWorkBonus + targetUeberichBonus) - totalDamage;
 
                 // Jonas Protection Check: If defending player has protection, minion can't go below 1 health
                 if ((defendingPlayer.jonasProtectionTurns || 0) > 0 && targetHealth < 1) {
@@ -643,8 +644,9 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
                         : 0;
                     const newHasAttacked = (firstMinion.extraAttacksRemaining || 0) > 0 ? firstMinion.hasAttacked : true;
 
-                    // Attacker receives counter-damage (with Work Bonus protection)
-                    const attackerEffectiveHealth = firstMinion.health + attackerWorkBonus;
+                    // Attacker receives counter-damage (with Work Bonus AND Über-Ich protection)
+                    const attackerUeberichBonus = (activePlayer.ueberichBonusTurn === state.turn ? 1 : 0);
+                    const attackerEffectiveHealth = firstMinion.health + attackerWorkBonus + attackerUeberichBonus;
                     const newHealth = attackerEffectiveHealth - targetDamage;
 
                     attackersUpdated[firstAttackerIndex] = {
@@ -1709,7 +1711,7 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
                     attack: 2,
                     health: 2,
                     maxHealth: 2,
-                    description: 'Das Über-Ich ist der moralische Richter.',
+                    description: 'Das Über-Ich ist der moralische Richter. Verleiht allen eigenen Philosophen +1/+1.',
                     image: '/images/cards/freud_ueberich.png',
                     type: 'Philosoph',
                     canAttack: false,
@@ -1720,7 +1722,7 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
                 };
                 updatedPlayer.board = [...updatedPlayer.board, minion];
                 updatedPlayer.ueberichBonusTurn = state.turn;
-                logMessage = `${activePlayer.name} wählte das Über-Ich! Alle Philosophen erhalten +1 Angriff diese Runde.`;
+                logMessage = `${activePlayer.name} wählte das Über-Ich! Alle Philosophen erhalten +1/+1 diese Runde.`;
             }
 
             newState = {

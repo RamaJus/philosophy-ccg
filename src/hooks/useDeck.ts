@@ -44,7 +44,9 @@ const getNextDeckName = (decks: SavedDeck[]): string => {
 };
 
 const getAllCardIds = (): string[] => {
-    return cards.map(c => c.id);
+    return cards
+        .filter(c => !c.id.startsWith('debug_') && !c.isTransformation && !c.id.startsWith('freud_'))
+        .map(c => c.id);
 };
 
 const getDefaultStorage = (): DeckStorage => ({
@@ -274,7 +276,12 @@ export const useDeck = () => {
     // Auto-fill deck with balanced mana curve
     const autoFill = useCallback(() => {
         const currentIds = new Set(workingCardIds);
-        const available = cards.filter(c => !currentIds.has(c.id));
+        const available = cards.filter(c =>
+            !currentIds.has(c.id) &&
+            !c.id.startsWith('debug_') &&
+            !c.isTransformation &&
+            !c.id.startsWith('freud_')
+        );
         const needed = DECK_SIZE - workingCardIds.length;
 
         if (needed <= 0 || available.length === 0) return;
