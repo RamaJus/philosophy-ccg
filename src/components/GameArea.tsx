@@ -149,9 +149,9 @@ export const GameArea: React.FC<GameAreaProps> = ({ mode, isDebugMode, customDec
     // Mulligan: AI auto-keeps in single player mode
     useEffect(() => {
         if (mode === 'single' && gameState.mulliganPhase && oracleComplete && !gameState.opponentMulliganDone) {
-            // AI always keeps their hand
+            // AI always keeps their hand - use playerId to ensure correct attribution
             setTimeout(() => {
-                dispatch({ type: 'MULLIGAN_KEEP' });
+                dispatch({ type: 'MULLIGAN_KEEP', playerId: 'opponent' });
             }, 300);
         }
     }, [mode, gameState.mulliganPhase, gameState.opponentMulliganDone, oracleComplete, dispatch]);

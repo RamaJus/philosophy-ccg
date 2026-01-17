@@ -1819,22 +1819,24 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
 
         case 'MULLIGAN_KEEP': {
             // Player keeps their current hand
-            // Actually we need to know WHO sent this action - in multiplayer context
-            // For now, we'll use a simple approach: check who hasn't decided yet
-            // The action sender is determined by the game logic layer (useGameLogic)
-
-            // Check which player is making this decision based on current state
-            // In single player: player decides, then AI auto-keeps
-            // In multiplayer: each player sends their own action
-
             let updatedState = { ...state };
 
-            // Mark the appropriate player as done (based on who's calling)
-            // We'll use activePlayer context OR check who hasn't decided
-            if (!state.playerMulliganDone) {
+            // Determine which player is making this decision
+            // If playerId is provided (e.g., AI auto-keep), use it directly
+            // Otherwise, fallback to checking who hasn't decided yet
+            const { playerId } = action as { type: 'MULLIGAN_KEEP'; playerId?: 'player' | 'opponent' };
+
+            if (playerId === 'player') {
                 updatedState.playerMulliganDone = true;
-            } else if (!state.opponentMulliganDone) {
+            } else if (playerId === 'opponent') {
                 updatedState.opponentMulliganDone = true;
+            } else {
+                // Fallback for multiplayer: check who hasn't decided yet
+                if (!state.playerMulliganDone) {
+                    updatedState.playerMulliganDone = true;
+                } else if (!state.opponentMulliganDone) {
+                    updatedState.opponentMulliganDone = true;
+                }
             }
 
             // Check if both are done
@@ -1851,8 +1853,9 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
             let updatedState = { ...state };
 
             // Determine which player is redrawing
-            const isPlayerRedrawing = !state.playerMulliganDone;
-            const targetPlayerId = isPlayerRedrawing ? 'player' : 'opponent';
+            // If playerId is provided, use it directly; otherwise fallback
+            const { playerId } = action as { type: 'MULLIGAN_REDRAW'; playerId?: 'player' | 'opponent' };
+            const targetPlayerId = playerId ?? (!state.playerMulliganDone ? 'player' : 'opponent');
             const targetPlayer = state[targetPlayerId];
 
             // Put hand back into deck
@@ -1924,7 +1927,7 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
             };
 
             // Mark as done
-            if (isPlayerRedrawing) {
+            if (targetPlayerId === 'player') {
                 updatedState.playerMulliganDone = true;
             } else {
                 updatedState.opponentMulliganDone = true;

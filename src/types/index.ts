@@ -134,5 +134,5 @@ export type GameAction =
     | { type: 'SET_STARTING_PLAYER'; startingPlayer: 'player' | 'opponent' }
     | { type: 'PANTA_RHEI_SELECT'; cardId: string } // Select enemy card to discard
     // Mulligan Actions
-    | { type: 'MULLIGAN_KEEP' } // Keep current hand
-    | { type: 'MULLIGAN_REDRAW' }; // Redraw entire hand
+    | { type: 'MULLIGAN_KEEP'; playerId?: 'player' | 'opponent' } // Keep current hand
+    | { type: 'MULLIGAN_REDRAW'; playerId?: 'player' | 'opponent' }; // Redraw entire hand
