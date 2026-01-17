@@ -150,6 +150,10 @@ export function createInitialState(isDebugMode: boolean, customDeckIds?: string[
         opponent: createPlayer('Gegner', false, STARTING_HAND_SIZE, isDebugMode, aiDeckIds),
         gameOver: false,
         log: [customDeckIds || aiDeckIds ? 'Spiel mit Custom-Deck gestartet!' : 'Spiel gestartet! Möge der beste Philosoph gewinnen.'],
+        // Mulligan phase starts after oracle coin flip
+        mulliganPhase: true,
+        playerMulliganDone: false,
+        opponentMulliganDone: false,
     };
 }
 
@@ -1635,26 +1639,13 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
             let updatedOpponent = { ...state.opponent };
 
             if (startingPlayer === 'opponent') {
-                // Opponent starts: they get 1 mana, player gets 0 mana but extra card
+                // Opponent starts: they get 1 mana, player gets 0 mana
                 updatedOpponent.mana = 1;
                 updatedOpponent.maxMana = 1;
                 updatedPlayer.mana = 0;
                 updatedPlayer.maxMana = 0;
-                // Player (goes second) draws extra card
-                if (updatedPlayer.deck.length > 0) {
-                    const drawnCard = updatedPlayer.deck[0];
-                    updatedPlayer.hand = [...updatedPlayer.hand, drawnCard];
-                    updatedPlayer.deck = updatedPlayer.deck.slice(1);
-                }
-            } else {
-                // Player starts: player has 1 mana (already set), opponent gets extra card
-                // Opponent (goes second) draws extra card
-                if (updatedOpponent.deck.length > 0) {
-                    const drawnCard = updatedOpponent.deck[0];
-                    updatedOpponent.hand = [...updatedOpponent.hand, drawnCard];
-                    updatedOpponent.deck = updatedOpponent.deck.slice(1);
-                }
             }
+            // If player starts, mana is already set correctly (1/1 for player, 0/0 for opponent)
 
             newState = {
                 ...state,
@@ -1823,6 +1814,128 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
                 pendingPlayedCard: undefined,
                 log: appendLog(state.log, logMessage)
             };
+            break;
+        }
+
+        case 'MULLIGAN_KEEP': {
+            // Player keeps their current hand
+            // Actually we need to know WHO sent this action - in multiplayer context
+            // For now, we'll use a simple approach: check who hasn't decided yet
+            // The action sender is determined by the game logic layer (useGameLogic)
+
+            // Check which player is making this decision based on current state
+            // In single player: player decides, then AI auto-keeps
+            // In multiplayer: each player sends their own action
+
+            let updatedState = { ...state };
+
+            // Mark the appropriate player as done (based on who's calling)
+            // We'll use activePlayer context OR check who hasn't decided
+            if (!state.playerMulliganDone) {
+                updatedState.playerMulliganDone = true;
+            } else if (!state.opponentMulliganDone) {
+                updatedState.opponentMulliganDone = true;
+            }
+
+            // Check if both are done
+            if (updatedState.playerMulliganDone && updatedState.opponentMulliganDone) {
+                updatedState.mulliganPhase = false;
+            }
+
+            newState = updatedState;
+            break;
+        }
+
+        case 'MULLIGAN_REDRAW': {
+            // Player redraws their entire hand
+            let updatedState = { ...state };
+
+            // Determine which player is redrawing
+            const isPlayerRedrawing = !state.playerMulliganDone;
+            const targetPlayerId = isPlayerRedrawing ? 'player' : 'opponent';
+            const targetPlayer = state[targetPlayerId];
+
+            // Put hand back into deck
+            const handCards = targetPlayer.hand;
+            let newDeck = [...targetPlayer.deck, ...handCards];
+
+            // Shuffle deck
+            newDeck = newDeck.sort(() => Math.random() - 0.5);
+
+            // Draw new hand with cost guarantee (same logic as createPlayer)
+            let newHand = newDeck.slice(0, STARTING_HAND_SIZE);
+            let remainingDeck = newDeck.slice(STARTING_HAND_SIZE);
+
+            // Apply cost guarantees (same as createPlayer)
+            const findPhilosopherByCost = (cards: typeof newDeck, costs: number[]) => {
+                for (const cost of costs) {
+                    const index = cards.findIndex(c => c.type === 'Philosoph' && c.cost === cost);
+                    if (index !== -1) return index;
+                }
+                return -1;
+            };
+
+            const swapCardIntoHand = (targetCosts: number[], avoidInstanceIds: string[]) => {
+                const hasTarget = newHand.some(c =>
+                    c.type === 'Philosoph' &&
+                    targetCosts.includes(c.cost) &&
+                    !avoidInstanceIds.includes(c.instanceId || c.id)
+                );
+
+                if (!hasTarget) {
+                    const deckIndex = findPhilosopherByCost(remainingDeck, targetCosts);
+                    if (deckIndex !== -1) {
+                        const swapIndex = newHand.findIndex(c =>
+                            !avoidInstanceIds.includes(c.instanceId || c.id)
+                        );
+                        if (swapIndex !== -1) {
+                            const cardToSwap = newHand[swapIndex];
+                            const cardToAdd = remainingDeck[deckIndex];
+                            newHand[swapIndex] = cardToAdd;
+                            remainingDeck[deckIndex] = cardToSwap;
+                            return cardToAdd.instanceId || cardToAdd.id;
+                        }
+                    }
+                } else {
+                    const existing = newHand.find(c =>
+                        c.type === 'Philosoph' &&
+                        targetCosts.includes(c.cost) &&
+                        !avoidInstanceIds.includes(c.instanceId || c.id)
+                    );
+                    return existing?.instanceId || existing?.id || '';
+                }
+                return '';
+            };
+
+            // Guarantee 1-cost (fallback 2-cost)
+            const keptId1 = swapCardIntoHand([1, 2], []);
+            // Guarantee 2-cost (fallback 3-cost)
+            swapCardIntoHand([2, 3], keptId1 ? [keptId1] : []);
+
+            const updatedPlayer = {
+                ...targetPlayer,
+                hand: newHand,
+                deck: remainingDeck
+            };
+
+            updatedState = {
+                ...updatedState,
+                [targetPlayerId]: updatedPlayer
+            };
+
+            // Mark as done
+            if (isPlayerRedrawing) {
+                updatedState.playerMulliganDone = true;
+            } else {
+                updatedState.opponentMulliganDone = true;
+            }
+
+            // Check if both are done
+            if (updatedState.playerMulliganDone && updatedState.opponentMulliganDone) {
+                updatedState.mulliganPhase = false;
+            }
+
+            newState = updatedState;
             break;
         }
 

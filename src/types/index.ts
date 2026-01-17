@@ -95,6 +95,10 @@ export interface GameState {
     lastPlayedCard?: Card; // For visual flash effect of performed spells
     lastPlayedCardPlayerId?: 'player' | 'opponent'; // Who played the spell
     pendingVoiceline?: string; // Voiceline ID to play (synced to client)
+    // Mulligan Phase
+    mulliganPhase?: boolean; // True during mulligan phase
+    playerMulliganDone?: boolean; // Player has decided
+    opponentMulliganDone?: boolean; // Opponent has decided
 }
 
 export type GameAction =
@@ -128,4 +132,7 @@ export type GameAction =
     | { type: 'FREUD_CHOICE'; choice: 'es' | 'ich' | 'ueberich' }
     | { type: 'ZIZEK_IDEOLOGY'; school: string }
     | { type: 'SET_STARTING_PLAYER'; startingPlayer: 'player' | 'opponent' }
-    | { type: 'PANTA_RHEI_SELECT'; cardId: string }; // Select enemy card to discard
+    | { type: 'PANTA_RHEI_SELECT'; cardId: string } // Select enemy card to discard
+    // Mulligan Actions
+    | { type: 'MULLIGAN_KEEP' } // Keep current hand
+    | { type: 'MULLIGAN_REDRAW' }; // Redraw entire hand

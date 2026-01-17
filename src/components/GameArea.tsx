@@ -13,6 +13,7 @@ import { WorkSlot } from './WorkSlot';
 import { Swords, SkipForward, RotateCcw, Trophy, Zap } from 'lucide-react';
 import { getRandomQuote } from '../data/quotes';
 import { OracleCoinFlip } from './OracleCoinFlip';
+import { MulliganModal } from './MulliganModal';
 import { multiplayer } from '../network/MultiplayerManager';
 import { playVoiceline } from '../audio/voicelines';
 
@@ -40,6 +41,8 @@ export const GameArea: React.FC<GameAreaProps> = ({ mode, isDebugMode, customDec
         resolveRecurrence: resolveRecurrenceMultiplayer,
         resolveFoucault,
         resolvePantaRhei,
+        mulliganKeep,
+        mulliganRedraw,
     } = useGameLogic(
         mode === 'multiplayer_host' ? 'host' : mode === 'multiplayer_client' ? 'client' : 'single',
         isDebugMode,
@@ -109,16 +112,10 @@ export const GameArea: React.FC<GameAreaProps> = ({ mode, isDebugMode, customDec
         setOracleComplete(true);
 
         // Dispatch action to set who starts (only host does this, client gets it via sync)
+        // Note: AI turn is NOT triggered here anymore - it waits for mulligan phase to complete
         if (mode !== 'multiplayer_client') {
             const action: import('../types').GameAction = { type: 'SET_STARTING_PLAYER', startingPlayer: oracleWinner };
             dispatch(action);
-
-            // If AI wins coin flip in single player mode, trigger AI turn
-            if (mode === 'single' && oracleWinner === 'opponent') {
-                setTimeout(() => {
-                    aiTurn();
-                }, 500);
-            }
         }
     };
 
@@ -148,6 +145,26 @@ export const GameArea: React.FC<GameAreaProps> = ({ mode, isDebugMode, customDec
             setPhilosophicalQuote(getRandomQuote(winner === 'player'));
         }
     }, [gameOver, winner]);
+
+    // Mulligan: AI auto-keeps in single player mode
+    useEffect(() => {
+        if (mode === 'single' && gameState.mulliganPhase && oracleComplete && !gameState.opponentMulliganDone) {
+            // AI always keeps their hand
+            setTimeout(() => {
+                dispatch({ type: 'MULLIGAN_KEEP' });
+            }, 300);
+        }
+    }, [mode, gameState.mulliganPhase, gameState.opponentMulliganDone, oracleComplete, dispatch]);
+
+    // Mulligan: When mulligan phase ends and AI starts, trigger AI turn
+    useEffect(() => {
+        if (mode === 'single' && !gameState.mulliganPhase && oracleComplete && gameState.activePlayer === 'opponent') {
+            // Mulligan phase just ended and AI starts - trigger AI turn
+            setTimeout(() => {
+                aiTurn();
+            }, 500);
+        }
+    }, [mode, gameState.mulliganPhase, gameState.activePlayer, oracleComplete]);
 
     // Auto-open deck view when in search mode (only for the owner)
     // isClient is now provided by useGameLogic hook
@@ -1137,6 +1154,16 @@ export const GameArea: React.FC<GameAreaProps> = ({ mode, isDebugMode, customDec
                     opponentName={viewOpponent.name}
                     winnerId={oracleWinner}
                     onComplete={handleOracleComplete}
+                />
+            )}
+
+            {/* Mulligan Modal - Show after oracle, during mulligan phase */}
+            {!showOracle && oracleComplete && gameState.mulliganPhase && (
+                <MulliganModal
+                    hand={viewPlayer.hand}
+                    onKeep={mulliganKeep}
+                    onRedraw={mulliganRedraw}
+                    isWaiting={isClient ? (gameState.opponentMulliganDone ?? false) : (gameState.playerMulliganDone ?? false)}
                 />
             )}
             {/* Background */}

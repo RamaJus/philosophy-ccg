@@ -294,6 +294,19 @@ export const useGameLogic = (gameMode: 'single' | 'host' | 'client', isDebugMode
         dispatch({ type: 'AUTO_SEARCH_DECK', filter, amount });
     }, []);
 
+    // Mulligan functions
+    const mulliganKeep = useCallback(() => {
+        const action: GameAction = { type: 'MULLIGAN_KEEP' };
+        if (isClient) multiplayer.sendAction(action);
+        else dispatch(action);
+    }, [isClient]);
+
+    const mulliganRedraw = useCallback(() => {
+        const action: GameAction = { type: 'MULLIGAN_REDRAW' };
+        if (isClient) multiplayer.sendAction(action);
+        else dispatch(action);
+    }, [isClient]);
+
 
 
     return {
@@ -326,6 +339,9 @@ export const useGameLogic = (gameMode: 'single' | 'host' | 'client', isDebugMode
         discardCard,
         setDiscardMode,
         confirmDeduktion,
-        searchDeck
+        searchDeck,
+        // Mulligan
+        mulliganKeep,
+        mulliganRedraw
     };
 };
