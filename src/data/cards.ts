@@ -1353,7 +1353,7 @@ export const cardDatabase: Card[] = [
         name: 'Eros',
         type: 'Zauber',
         cost: 6,
-        description: 'Gegner kann 2 Runden nicht angreifen.',
+        description: 'Ein gewählter gegnerischer Philosoph wird betört und kann zwei Runden lang nicht angreifen.',
         tooltip: 'In Platons "Symposion" die Kraft, die den Menschen zur Schönheit und zum Guten treibt. Beginnt mit körperlicher Anziehung und führt zur Liebe der Ideen. Diotima lehrte Sokrates, dass Eros ein Daimon ist, ein Mittler zwischen Sterblichen und Göttern.',
         effects: [{ type: 'TARGET_MODE', target: 'SELF', mode: 'eros_target' }],
         rarity: 'Gewöhnlich',

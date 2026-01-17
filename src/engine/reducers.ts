@@ -602,7 +602,6 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
                     return { ...state, log: currentLog, pendingVoiceline: 'diogenes' };
                 }
 
-                const targetDamage = target.attack;
 
                 // Combat Logic
                 // Calculate Work Bonus for defender (target)
@@ -612,15 +611,7 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
                     defenderWorkBonus = defendingPlayer.activeWork.workBonus.health;
                 }
 
-                // Calculate Work Bonus for attacker
-                let attackerWorkBonus = 0;
-                if (activePlayer.activeWork?.workBonus) {
-                    const attackerSchool = activePlayer.activeWork.workBonus.school;
-                    // First attacker gets the bonus when receiving counter-damage
-                    if (attackers[0].school?.includes(attackerSchool)) {
-                        attackerWorkBonus = activePlayer.activeWork.workBonus.health;
-                    }
-                }
+                // (Work Bonus logic for counter-damage now handled in board mapping below)
 
                 // 1. Attackers hit Target (with defender's Work Bonus AND Über-Ich bonus for DEATH CHECK ONLY)
                 const targetUeberichBonus = (defendingPlayer.ueberichBonusTurn === state.turn ? 1 : 0);
@@ -647,11 +638,9 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
                         : 0;
                     const newHasAttacked = (firstMinion.extraAttacksRemaining || 0) > 0 ? firstMinion.hasAttacked : true;
 
-                    // Attacker receives counter-damage (with Work Bonus AND Über-Ich protection for DEATH CHECK ONLY)
-                    const attackerUeberichBonus = (activePlayer.ueberichBonusTurn === state.turn ? 1 : 0);
-                    const attackerEffectiveHealth = firstMinion.health + attackerWorkBonus + attackerUeberichBonus;
-                    const attackerHealthAfterDamage = firstMinion.health - targetDamage; // Actual stored health (no bonus)
-                    // Death check uses effective health, stored value is base health minus damage
+                    // Attacker receives counter-damage (Actual stored health minus damage)
+                    // Death check uses effective health (recalculated below), stored value is base health minus damage
+                    const attackerHealthAfterDamage = firstMinion.health - target.attack;
 
                     attackersUpdated[firstAttackerIndex] = {
                         ...firstMinion,
@@ -1549,7 +1538,7 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
                 [enemyPlayerId]: updatedEnemy,
                 targetMode: undefined,
                 pendingPlayedCard: undefined,
-                log: appendLog(state.log, `Eros! ${targetMinion.name} ist verliebt und kann 2 Runden nicht angreifen.`),
+                log: appendLog(state.log, `Eros! ${targetMinion.name} wurde betört und kann 2 Runden nicht angreifen.`),
                 lastPlayedCard: undefined,
                 lastPlayedCardPlayerId: undefined
             };
