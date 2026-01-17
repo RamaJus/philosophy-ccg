@@ -622,13 +622,16 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
                     }
                 }
 
-                // 1. Attackers hit Target (with defender's Work Bonus AND Über-Ich bonus)
+                // 1. Attackers hit Target (with defender's Work Bonus AND Über-Ich bonus for DEATH CHECK ONLY)
                 const targetUeberichBonus = (defendingPlayer.ueberichBonusTurn === state.turn ? 1 : 0);
-                let targetHealth = (target.health + defenderWorkBonus + targetUeberichBonus) - totalDamage;
+                const targetEffectiveHealth = target.health + defenderWorkBonus + targetUeberichBonus;
+                const targetHealthAfterDamage = target.health - totalDamage; // Actual stored health (no bonus)
+                const targetSurvives = targetEffectiveHealth - totalDamage > 0; // Death check uses effective health
 
                 // Jonas Protection Check: If defending player has protection, minion can't go below 1 health
-                if ((defendingPlayer.jonasProtectionTurns || 0) > 0 && targetHealth < 1) {
-                    targetHealth = 1;
+                let finalTargetHealth = targetHealthAfterDamage;
+                if ((defendingPlayer.jonasProtectionTurns || 0) > 0 && !targetSurvives) {
+                    finalTargetHealth = 1; // Keep alive at 1 HP
                     currentLog = appendLog(currentLog, `Ökologischer Imperativ schützt ${target.name}!`);
                 }
 
@@ -644,14 +647,15 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
                         : 0;
                     const newHasAttacked = (firstMinion.extraAttacksRemaining || 0) > 0 ? firstMinion.hasAttacked : true;
 
-                    // Attacker receives counter-damage (with Work Bonus AND Über-Ich protection)
+                    // Attacker receives counter-damage (with Work Bonus AND Über-Ich protection for DEATH CHECK ONLY)
                     const attackerUeberichBonus = (activePlayer.ueberichBonusTurn === state.turn ? 1 : 0);
                     const attackerEffectiveHealth = firstMinion.health + attackerWorkBonus + attackerUeberichBonus;
-                    const newHealth = attackerEffectiveHealth - targetDamage;
+                    const attackerHealthAfterDamage = firstMinion.health - targetDamage; // Actual stored health (no bonus)
+                    // Death check uses effective health, stored value is base health minus damage
 
                     attackersUpdated[firstAttackerIndex] = {
                         ...firstMinion,
-                        health: newHealth,
+                        health: attackerHealthAfterDamage, // Store actual health, not effective health
                         hasAttacked: newHasAttacked,
                         extraAttacksRemaining: newExtraAttacks
                     };
@@ -671,15 +675,38 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
                 });
 
                 // Remove dead minions - add to graveyard with ORIGINAL stats
-                updatedActivePlayer.board = attackersUpdated.filter(m => m.health > 0);
-                updatedActivePlayer.graveyard = [...updatedActivePlayer.graveyard, ...attackersUpdated.filter(m => m.health <= 0).map(getOriginalCardForGraveyard)];
+                // Death check: effective health (with bonus) must be <= 0
+                updatedActivePlayer.board = attackersUpdated.map(m => {
+                    // Calculate effective health for this minion
+                    let minionWorkBonus = 0;
+                    if (activePlayer.activeWork?.workBonus && m.school?.includes(activePlayer.activeWork.workBonus.school)) {
+                        minionWorkBonus = activePlayer.activeWork.workBonus.health;
+                    }
+                    const minionUeberichBonus = (activePlayer.ueberichBonusTurn === state.turn ? 1 : 0);
+                    const effectiveHealth = m.health + minionWorkBonus + minionUeberichBonus;
+                    return { ...m, _effectiveHealth: effectiveHealth };
+                }).filter(m => (m as any)._effectiveHealth > 0).map(m => {
+                    const { _effectiveHealth, ...rest } = m as any;
+                    return rest;
+                });
+                updatedActivePlayer.graveyard = [...updatedActivePlayer.graveyard, ...attackersUpdated.filter(m => {
+                    let minionWorkBonus = 0;
+                    if (activePlayer.activeWork?.workBonus && m.school?.includes(activePlayer.activeWork.workBonus.school)) {
+                        minionWorkBonus = activePlayer.activeWork.workBonus.health;
+                    }
+                    const minionUeberichBonus = (activePlayer.ueberichBonusTurn === state.turn ? 1 : 0);
+                    const effectiveHealth = m.health + minionWorkBonus + minionUeberichBonus;
+                    return effectiveHealth <= 0;
+                }).map(getOriginalCardForGraveyard)];
 
-                if (targetHealth <= 0) {
+                // Check if target survives (using effective health with bonuses)
+                const targetSurvivesWithJonas = (defendingPlayer.jonasProtectionTurns || 0) > 0 || targetSurvives;
+                if (!targetSurvivesWithJonas) {
                     updatedEnemyPlayer.board = updatedEnemyPlayer.board.filter((_, i) => i !== targetIndex);
                     updatedEnemyPlayer.graveyard = [...updatedEnemyPlayer.graveyard, getOriginalCardForGraveyard(target)];
                     currentLog = appendLog(currentLog, `${attackerNamesStr} zerstörte ${target.name}!`);
                 } else {
-                    updatedEnemyPlayer.board[targetIndex] = { ...target, health: targetHealth };
+                    updatedEnemyPlayer.board[targetIndex] = { ...target, health: finalTargetHealth };
                     currentLog = appendLog(currentLog, `${attackerNamesStr} griff ${target.name} an.`);
                 }
             }
