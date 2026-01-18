@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { multiplayer } from '../network/MultiplayerManager';
-import { Copy, QrCode, Share2, User, Settings, ChevronDown, Check, BookOpen } from 'lucide-react';
+import { Copy, QrCode, Share2, User, Settings, ChevronDown, Check, BookOpen, Clock } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
 import { DeckEditor } from './DeckEditor';
 import { SettingsModal } from './SettingsModal';
@@ -12,6 +12,7 @@ import { cardDatabase } from '../data/cards';
 import { AvatarSelectionModal } from './AvatarSelectionModal';
 import { getAvatarById, DEFAULT_AVATAR_ID } from '../data/avatars';
 import { AI_DECK_IDS } from '../data/aiDeck';
+import { ChangelogModal, hasNewVersion } from './ChangelogModal';
 
 interface LobbyProps {
     onStartGame: (mode: 'single' | 'multiplayer_host' | 'multiplayer_client', aiDeckIds?: string[]) => void;
@@ -36,6 +37,8 @@ export const Lobby: React.FC<LobbyProps> = ({ onStartGame, isDebugMode, setIsDeb
     const [showAvatarSelection, setShowAvatarSelection] = useState(false);
     const [showDeckDropdown, setShowDeckDropdown] = useState(false);
     const [showAiDeckDropdown, setShowAiDeckDropdown] = useState(false);
+    const [showChangelog, setShowChangelog] = useState(false);
+    const [hasNewUpdate, setHasNewUpdate] = useState(hasNewVersion());
     const [selectedAiDeck, setSelectedAiDeck] = useState<'all' | 'ai_deck'>('all');
     const deckDropdownRef = useRef<HTMLDivElement>(null);
     const aiDeckDropdownRef = useRef<HTMLDivElement>(null);
@@ -696,6 +699,16 @@ export const Lobby: React.FC<LobbyProps> = ({ onStartGame, isDebugMode, setIsDeb
                     Anleitung
                 </button>
                 <button
+                    onClick={() => { setShowChangelog(true); setHasNewUpdate(false); }}
+                    className="relative flex items-center gap-2 px-4 py-2 bg-amber-900/90 hover:bg-amber-800 border border-amber-700/50 rounded-lg text-amber-100 transition-all shadow-lg"
+                >
+                    <Clock size={18} />
+                    Changelog
+                    {hasNewUpdate && (
+                        <span className="absolute -top-1 -right-1 w-3 h-3 bg-emerald-500 rounded-full animate-pulse" />
+                    )}
+                </button>
+                <button
                     onClick={() => setShowSettings(true)}
                     className="flex items-center gap-2 px-4 py-2 bg-slate-800/90 hover:bg-slate-700 border border-slate-600 rounded-lg text-gray-300 hover:text-white transition-all shadow-lg"
                 >
@@ -715,6 +728,12 @@ export const Lobby: React.FC<LobbyProps> = ({ onStartGame, isDebugMode, setIsDeb
             <TutorialModal
                 isOpen={showTutorial}
                 onClose={() => setShowTutorial(false)}
+            />
+
+            {/* Changelog Modal */}
+            <ChangelogModal
+                isOpen={showChangelog}
+                onClose={() => setShowChangelog(false)}
             />
 
             {/* Welcome Modal for first-time players */}
