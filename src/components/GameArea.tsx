@@ -64,6 +64,7 @@ export const GameArea: React.FC<GameAreaProps> = ({ mode, isDebugMode, customDec
     const [attackingMinionIds, setAttackingMinionIds] = useState<string[]>([]);
     const [deckPosition, setDeckPosition] = useState<{ x: number, y: number } | null>(null);
     const deckRef = useRef<HTMLDivElement>(null);
+    const initialAiTurnTriggeredRef = useRef(false);
 
     // Oracle coin flip state
     const [showOracle, setShowOracle] = useState(false);
@@ -156,13 +157,16 @@ export const GameArea: React.FC<GameAreaProps> = ({ mode, isDebugMode, customDec
         }
     }, [mode, gameState.mulliganPhase, gameState.opponentMulliganDone, oracleComplete, dispatch]);
 
-    // Mulligan: When mulligan phase ends and AI starts, trigger AI turn
+    // Mulligan: When mulligan phase ends and AI starts, trigger AI turn (only once)
     useEffect(() => {
         if (mode === 'single' && !gameState.mulliganPhase && oracleComplete && gameState.activePlayer === 'opponent') {
-            // Mulligan phase just ended and AI starts - trigger AI turn
-            setTimeout(() => {
-                aiTurn();
-            }, 500);
+            // Only trigger ONCE after mulligan phase ends
+            if (!initialAiTurnTriggeredRef.current) {
+                initialAiTurnTriggeredRef.current = true;
+                setTimeout(() => {
+                    aiTurn();
+                }, 500);
+            }
         }
     }, [mode, gameState.mulliganPhase, gameState.activePlayer, oracleComplete]);
 

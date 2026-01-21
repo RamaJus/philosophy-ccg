@@ -296,13 +296,17 @@ export const useGameLogic = (gameMode: 'single' | 'host' | 'client', isDebugMode
 
     // Mulligan functions
     const mulliganKeep = useCallback(() => {
-        const action: GameAction = { type: 'MULLIGAN_KEEP' };
+        // In multiplayer, client's action is processed on host where client = opponent
+        const playerId = isClient ? 'opponent' : 'player';
+        const action: GameAction = { type: 'MULLIGAN_KEEP', playerId };
         if (isClient) multiplayer.sendAction(action);
         else dispatch(action);
     }, [isClient]);
 
     const mulliganRedraw = useCallback(() => {
-        const action: GameAction = { type: 'MULLIGAN_REDRAW' };
+        // In multiplayer, client's action is processed on host where client = opponent
+        const playerId = isClient ? 'opponent' : 'player';
+        const action: GameAction = { type: 'MULLIGAN_REDRAW', playerId };
         if (isClient) multiplayer.sendAction(action);
         else dispatch(action);
     }, [isClient]);

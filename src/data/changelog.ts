@@ -22,6 +22,16 @@ export interface ChangelogEntry {
 
 export const changelog: ChangelogEntry[] = [
     {
+        version: '1.2.0',
+        date: '2026-01-21',
+        categories: {
+            fixes: [
+                'Kritischer Bug behoben: Spielerzug wurde im KI-Modus manchmal automatisch beendet.',
+                'Multiplayer-Mulligan repariert: Beide Spieler können nun korrekt ihre Starthand wählen.',
+            ],
+        },
+    },
+    {
         version: '1.1.0',
         date: '2026-01-18',
         categories: {
@@ -39,6 +49,7 @@ export const changelog: ChangelogEntry[] = [
         },
     },
 ];
+
 
 // Get the latest version for badge comparison
 export const getLatestVersion = (): string => {
