@@ -1146,7 +1146,22 @@ export const GameArea: React.FC<GameAreaProps> = ({ mode, isDebugMode, customDec
     };
 
     const handleNewGame = () => {
-        dispatch({ type: 'START_GAME', isDebugMode, customDeckIds });
+        // Reset all local states for clean rematch
+        setShowOracle(false);
+        setOracleComplete(false);
+        setOracleWinner('player');
+        setFlashCard(null);
+        setPhilosophicalQuote('');
+        setIsDeckViewOpen(false);
+        setAttackingMinionIds([]);
+
+        // Reset refs
+        initialAiTurnTriggeredRef.current = false;
+        aiTurnIdRef.current = 0;
+        seenFlashIds.current = new Set();
+
+        // Start new game
+        dispatch({ type: 'START_GAME', isDebugMode, customDeckIds, aiDeckIds });
     };
 
     return (

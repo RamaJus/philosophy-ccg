@@ -22,6 +22,17 @@ export interface ChangelogEntry {
 
 export const changelog: ChangelogEntry[] = [
     {
+        version: '1.3.0',
+        date: '2026-01-23',
+        categories: {
+            fixes: [
+                'Revanche-Modus: Alle Spielzustände werden nun korrekt zurückgesetzt.',
+                'Custom-Decks werden bei Revanche wieder korrekt geladen.',
+                'Oracle-Münzwurf wird bei Revanche erneut angezeigt.',
+            ],
+        },
+    },
+    {
         version: '1.2.0',
         date: '2026-01-21',
         categories: {
@@ -32,6 +43,7 @@ export const changelog: ChangelogEntry[] = [
         },
     },
     {
+
         version: '1.1.0',
         date: '2026-01-18',
         categories: {
